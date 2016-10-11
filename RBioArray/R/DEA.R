@@ -3,9 +3,9 @@
   return(TRUE)
 }
 
-#' @title rbioArray_DEtable
+#' @title rbioSeq_DEtable
 #'
-#' @description The function below is an all-in-one solution to get DGE list and itrequires limma and edgeR packages.
+#' @description The function below is an all-in-one solution to get DGE list and itrequires limma and edgeR packages for RNA-seq dataset.
 #' @param AnnCountDfm Input data frame with annoatation merged.
 #' @param DEGNum Number of targets to display. Default is \code{Inf}.
 #' @param adjMethod P value correct methods. values: \code{"holm"}, \code{"hochberg"}, \code{"hommel"}, \code{"bonferroni"}, \code{"BH"}, \code{"BY"}, \code{"fdr"}, \code{"none"}.
@@ -17,7 +17,7 @@
 #' DE_dataframe <- rbioArray_DE(dataframe)
 #' }
 #' @export
-rbioArray_DE <- function(AnnCountDfm, DEGNum = Inf, adjMethod = "fdr"){
+rbioSeq_DE <- function(AnnCountDfm, DEGNum = Inf, adjMethod = "fdr"){
   # create the design matrix for Voom normalization
   Exp <- factor(SampleIndex$Conditions, levels= c("Pre", "Post"))
   design <- model.matrix( ~ Exp)
