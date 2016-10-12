@@ -28,7 +28,7 @@ The function is based on piano package. It runs "fisher", "stouffer", "reporter"
 \dontrun{
 GOterm_bp <- loadGSC(file = "c5.bp.v5.0.entrez.gmt", type = "gmt") # load GO term biological process set
 
-pc_Kegg <- rbioArray_allGSA(GS_Kegg, pVar = pcGSdfm$p_value, logFCVar = pcGSdfm$logFC, tVar = pcGSdfm$t_value)
+pc_Kegg <- rbioArray_allGSA(GOterm_bp, pVar = pcGSdfm$p_value, logFCVar = pcGSdfm$logFC, tVar = pcGSdfm$t_value)
 
 }
 }
