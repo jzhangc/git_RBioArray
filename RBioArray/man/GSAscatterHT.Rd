@@ -31,9 +31,9 @@ The function is based on piano package.
 }
 \examples{
 \dontrun{
-pcGObp_Htmap <- consensusHeatmap(pc_GObp, cutoff = 15,method="median",
- colorkey = TRUE, colorgrad = c("blue","white"),
- cellnote = "none")
+
+rbioArray_allGSscatter(GS_Pos, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+
 }
 }
 

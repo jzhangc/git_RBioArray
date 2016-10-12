@@ -154,9 +154,9 @@ rbioArray_allGSbox <- function(GSrank, GS = "OTHER", fileName,
 #' @import ggplot2
 #' @examples
 #' \dontrun{
-#' pcGObp_Htmap <- consensusHeatmap(pc_GObp, cutoff = 15,method="median",
-#'  colorkey = TRUE, colorgrad = c("blue","white"),
-#'  cellnote = "none")
+#'
+#' rbioArray_allGSscatter(GS_Pos, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+#'
 #' }
 #' @export
 GSAscatterHT<-function(GSAList, rankCutoff, pCutoff,
@@ -232,3 +232,34 @@ GSAscatterHT<-function(GSAList, rankCutoff, pCutoff,
   # return the plot dataframe
   return(dfm4plot)
 }
+
+#' @title rbioArray_kegg
+#'
+#' @description Download and generate DE results masked kegg pathway figures
+#' @param dfm GS dataframe with \code{ENTREZID} and \code{logFC} variables.
+#' @param keggID Make sure to have quotation marks around the ID number.
+#' @param suffix Output file name suffix. Make sure to put it in quotation marks.
+#' @param species Set the species. Default is \code{"hsa"}. Visit kegg website for details.
+#' @details GSrank takes the resulted object generated from the piano function consensusScores().
+#' @return Outputs a \code{list} kegg object, as well as masked figure files in \code{pdf} format.
+#' @details Visit website \url{http://www.genome.jp/kegg/pathway.html} for kegg IDs.
+#' @importFrom pathview pathview
+#' @examples
+#' \dontrun{
+#'
+#'  rbioArray_kegg(all_DE4GSA_flt, keggID = "04060") # Cytokine-cytokine receptor interaction, disdn + mixdn + nd
+#'
+#' }
+#' @export
+keggFigures <- function(dfm, keggID, suffix, species = "hsa"){
+  logFC <- dfm$logFC
+  names(logFC) <- dfm$ENTREZID
+
+  KEGG <- pathview(gene.data = logFC, pathway.id = keggID, species = species,
+                   out.suffix = suffix, keys.align = "y", kegg.native = TRUE, match.data = FALSE,
+                   key.pos = "topright")
+
+  # set the .GlobalEnv to the envir argument so that the assign function will assign the value to a global object, aka outside the function
+  return(assign(paste("kegg_", keggID, "_" , deparse(substitute(dfm)), sep = "") ,KEGG, envir = .GlobalEnv))
+}
+
