@@ -1,4 +1,4 @@
-#' @title rbioArray_entrez2gene
+#' @title rbioGS_entrez2gene
 #'
 #' @description Add Human entrez ID to the DE dataframe
 #' @param DEGdfm Input DE data frame.
@@ -10,10 +10,10 @@
 #' @import org.Hs.eg.db
 #' @examples
 #' \dontrun{
-#' DE_dataframe <- rbio_entrez2gene(dataframe)
+#' DE_dataframe <- rbioGS_entrez2gene(dataframe)
 #' }
 #' @export
-rbio_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg = "org.Hs.eg.db"){
+rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg = "org.Hs.eg.db"){
   EnsemblVector <- DEGdfm$gene_name # create a vector conatining all the log-fold changes
   names(EnsemblVector) <- DEGdfm$gene_name # add names to each data point in the vector
   RNA_id <- id2eg(ids = names(EnsemblVector), category = cat, org = species, pkg.name = pkg)
@@ -26,7 +26,7 @@ rbio_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg = 
 
 
 
-#' @title rbioArray_allGSA
+#' @title rbioGS_all
 #'
 #' @description Add Human entrez ID to the DE dataframe
 #' @param MyGS Pre-loaded gene set objects.
@@ -38,13 +38,13 @@ rbio_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg = 
 #' @importFrom piano runGSA
 #' @examples
 #' \dontrun{
-#' GOterm_bp <- loadGSC(file = "c5.bp.v5.0.entrez.gmt", type = "gmt") # load GO term biological process set
+#' GOterm_bp <- piano::loadGSC(file = "c5.bp.v5.0.entrez.gmt", type = "gmt") # load GO term biological process set
 #'
-#' pc_Kegg <- rbioArray_allGSA(GOterm_bp, pVar = pcGSdfm$p_value, logFCVar = pcGSdfm$logFC, tVar = pcGSdfm$t_value)
+#' pc_Kegg <- rbioGS_all(GOterm_bp, pVar = pcGSdfm$p_value, logFCVar = pcGSdfm$logFC, tVar = pcGSdfm$t_value)
 #'
 #' }
 #' @export
-rbioArray_allGSA <- function(MyGS, pVar, logFCVar, tVar){
+rbioGS_all <- function(MyGS, pVar, logFCVar, tVar){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
@@ -75,7 +75,7 @@ rbioArray_allGSA <- function(MyGS, pVar, logFCVar, tVar){
 }
 
 
-#' @title rbioArray_allGSbox
+#' @title rbioGS_boxplot
 #'
 #' @description Generate boxplot from piano GS rank object,
 #' @param GSrank piano GS rank object.
@@ -90,15 +90,15 @@ rbioArray_allGSA <- function(MyGS, pVar, logFCVar, tVar){
 #' @import ggplot2
 #' @examples
 #' \dontrun{
-#' pcPos_rank_mxdn <- consensusScores(pc_Pos, class = "mixed", direction="down",n = 15, adjusted = TRUE,
+#' pcPos_rank_mxdn <- piano::consensusScores(pc_Pos, class = "mixed", direction="down",n = 15, adjusted = TRUE,
 #'                                    method = "median", plot = TRUE, showLegend = F,
 #'                                    rowNames = "names")
 #'
-#' rbioArray_allGSbox(pcPos_rank_mxdn, fileName = "pcPos_rank_mxdn", plotWidth = 260, plotHeight = 240)
+#' rbioGS_boxplot(pcPos_rank_mxdn, fileName = "pcPos_rank_mxdn", plotWidth = 260, plotHeight = 240)
 #'
 #' }
 #' @export
-rbioArray_allGSbox <- function(GSrank, GS = "OTHER", fileName,
+rbioGS_boxplot <- function(GSrank, GS = "OTHER", fileName,
                       plotWidth = 170, plotHeight = 150){
   # prepare the dataframe for ggplot2
   DFM <- data.frame(GSrank$rankMat)
@@ -137,7 +137,7 @@ rbioArray_allGSbox <- function(GSrank, GS = "OTHER", fileName,
 }
 
 
-#' @title rbioArray_allGSscatter
+#' @title rbioGS_scatter
 #'
 #' @description Generate scatter plot for piano GS rank heatmap obejct.
 #' @param GSAList GSA list generated from \code{\link{rbioArray_allGSA}}.
@@ -155,11 +155,11 @@ rbioArray_allGSbox <- function(GSrank, GS = "OTHER", fileName,
 #' @examples
 #' \dontrun{
 #'
-#' rbioArray_allGSscatter(GS_Pos, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+#' rbioGS_scatter(GS_Pos, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
 #'
 #' }
 #' @export
-GSAscatterHT<-function(GSAList, rankCutoff, pCutoff,
+rbioGS_scatter<-function(GSAList, rankCutoff, pCutoff,
                        fileName, plotWidth = 170, plotHeight = 150){
   HTmap <-consensusHeatmap(GSAList, cutoff = 15, method = "median",
                              colorkey = TRUE, colorgrad = c("blue","white"),
@@ -233,7 +233,7 @@ GSAscatterHT<-function(GSAList, rankCutoff, pCutoff,
   return(dfm4plot)
 }
 
-#' @title rbioArray_kegg
+#' @title rbioGS_kegg
 #'
 #' @description Download and generate DE results masked kegg pathway figures
 #' @param dfm GS dataframe with \code{ENTREZID} and \code{logFC} variables.
@@ -247,11 +247,11 @@ GSAscatterHT<-function(GSAList, rankCutoff, pCutoff,
 #' @examples
 #' \dontrun{
 #'
-#'  rbioArray_kegg(all_DE4GSA_flt, keggID = "04060") # Cytokine-cytokine receptor interaction, disdn + mixdn + nd
+#'  rbioGS_kegg(all_DE4GSA_flt, keggID = "04060") # Cytokine-cytokine receptor interaction, disdn + mixdn + nd
 #'
 #' }
 #' @export
-keggFigures <- function(dfm, keggID, suffix, species = "hsa"){
+rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
   logFC <- dfm$logFC
   names(logFC) <- dfm$ENTREZID
 
