@@ -2,7 +2,7 @@
 % Please edit documentation in R/DEA.R
 \name{rbioSeq_DE}
 \alias{rbioSeq_DE}
-\title{rbioSeq_DEtable}
+\title{rbioSeq_DE}
 \usage{
 rbioSeq_DE(AnnCountDfm, DEGNum = Inf, adjMethod = "fdr")
 }
