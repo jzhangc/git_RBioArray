@@ -7,7 +7,6 @@
 #' @param pkg Name for the annotation package. The current package includes the human version.
 #' @return Outputs a \code{dataframe} object with Entrez ID.
 #' @importFrom pathview id2eg
-#' @import org.Hs.eg.db
 #' @examples
 #' \dontrun{
 #' DE_dataframe <- rbioGS_entrez2gene(dataframe)

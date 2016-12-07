@@ -1,9 +1,10 @@
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage("Written by Jing Zhang, Ph.D. Please direct questions to jzhangcad@gmail.com.")
+  suppressPackageStartupMessages(require(pathview))
   return(TRUE)
 }
 
-#' @title rbioSeq_DE
+#' @title rbioseq_DE
 #'
 #' @description The function below is an all-in-one solution to get DGE list and itrequires limma and edgeR packages for RNA-seq dataset.
 #' @param AnnCountDfm Input data frame with annoatation merged.
@@ -17,7 +18,7 @@
 #' DE_dataframe <- rbioArray_DE(dataframe)
 #' }
 #' @export
-rbioSeq_DE <- function(AnnCountDfm, DEGNum = Inf, adjMethod = "fdr"){
+rbioseq_DE <- function(AnnCountDfm, DEGNum = Inf, adjMethod = "fdr"){
   # create the design matrix for Voom normalization
   Exp <- factor(SampleIndex$Conditions, levels= c("Pre", "Post"))
   design <- model.matrix( ~ Exp)
@@ -43,7 +44,7 @@ rbioSeq_DE <- function(AnnCountDfm, DEGNum = Inf, adjMethod = "fdr"){
   return(DEGs_RNA)
 }
 
-#' @title rbioHtmap_unsuperv
+#' @title rbioseq_Htmap_unsuperv
 #'
 #' @description unsupvised heatmap: with or without voom normalization
 #' @param AnnCountDfm Input data frame with annoatation merged.
