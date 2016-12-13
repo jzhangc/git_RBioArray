@@ -37,7 +37,8 @@ rbioarray_PreProc <- function(RawData, bgMethod = "auto", normMethod = "quantile
 #' @param normlst Normalized data, either a list, \code{EList} or \code{MAList} object.
 #' @param percentile The percentile cutoff, only used when muliptle negative control probes are detected. Default is \code{0.95}.
 #' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
-#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.#' @examples
+#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
+#' @examples
 #' \dontrun{
 #' fltdata <- rbioarray_flt(normdata)
 #' }
@@ -100,4 +101,104 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
   print(table(isexpr)) # output the isexpr summary
 
   return(avgProbesLE)
+}
+
+
+#' @title rbioarray_DE
+#'
+#' @description DE analysis function.
+#' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
+#' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object.
+#' @param design Design matrix.
+#' @param anno Annotation object, usually a \code{dataframe}.
+#' @param multicore If to use parallel computing. Default is \code{FALSE}.
+#' @param ... arguments for \code{topTable()} from \code{limma} package.
+#' @return The function outputs a \code{list} object with DE results, merged with annotation.
+#' @importFrom limma lmFit eBayes topTable
+#' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
+#' @examples
+#' \dontrun{
+#' rbiorrary_DE(objTitle = "data", fltdata, design, anno = Anno)
+#' }
+#' @export
+rbioarray_DE <- function(objTitle = "data_filtered", fltdata, design, anno, multicore = FALSE, ...){
+
+  if(!multicore){
+    ## DE
+    coef <- colnames(design) # extract coefficient
+
+    if (class(fltdata) == "list"){
+
+      fit <- lmFit(fltdata$E, design)
+      fit <- eBayes(fit)
+
+      outlist <- lapply(coef, function(i){
+        tmp <- topTable(fit, coef = i, number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        return(tmp)
+      })
+
+      names(outlist) <- coef
+
+    } else {
+
+      fit <- lmFit(fltdata, design)
+      fit <- eBayes(fit)
+
+      outlist <- lapply(coef, function(i){
+        tmp <- topTable(fit, coef = i, number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        return(tmp)
+      })
+
+      names(outlist) <- coef
+
+    }
+
+  } else {
+
+    ## parallel computing
+    # set up cpu cluster
+    n_cores <- detectCores() - 1
+    cl <- makeCluster(n_cores)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    ## DE
+    coef <- colnames(design) # extract coefficient
+
+    if (class(fltdata) == "list"){
+
+      fit <- lmFit(fltdata$E, design)
+      fit <- eBayes(fit)
+
+      outlist <- parLapply(cl, coef, fun = function(i, anno){
+        tmp <- limma::topTable(fit, coef = i, number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        return(tmp)
+      }, anno)
+
+      names(outlist) <- coef
+
+    } else {
+
+      fit <- lmFit(fltdata, design)
+      fit <- eBayes(fit)
+
+      outlist <- parLapply(cl, coef, fun = function(i, anno){
+        tmp <- limma::topTable(fit, coef = i, number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        return(tmp)
+      }, anno)
+
+      names(outlist) <- coef
+
+    }
+
+  }
+
+  assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
 }

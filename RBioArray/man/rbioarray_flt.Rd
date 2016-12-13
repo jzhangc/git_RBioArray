@@ -14,12 +14,14 @@ rbioarray_flt(normlst, percentile = 0.95)
 \item{...}{arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.}
 }
 \value{
-Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.#' @examples
-\dontrun{
-fltdata <- rbioarray_flt(normdata)
-}
+Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
 }
 \description{
 data filter function based on spike-in negative control.
+}
+\examples{
+\dontrun{
+fltdata <- rbioarray_flt(normdata)
+}
 }
 
