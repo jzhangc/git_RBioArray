@@ -17,8 +17,9 @@ rbioarray_PreProc <- function(RawData, bgMethod = "auto", normMethod = "quantile
   if (class(RawData) == "list"){
     BgC <- backgroundCorrect.matrix(RawData$E, method = bgMethod, ...) #background correction
     Norm <- normalizeBetweenArrays(BgC, normMethod) # quantile normalization
+    Wgt <- arrayWeights(Norm) # array weight
 
-    output <- list(E = Norm, genes = RawData$gene, target = RawData$target)
+    output <- list(E = Norm, genes = RawData$gene, target = RawData$target, ArrayWeight = Wgt)
   } else {
     BgC <- backgroundCorrect(RawData, method = bgMethod, ...) #background correction
     Norm <- normalizeBetweenArrays(BgC, method = normMethod) # quantile normalization
@@ -26,9 +27,9 @@ rbioarray_PreProc <- function(RawData, bgMethod = "auto", normMethod = "quantile
     output <- Norm
   }
 
-
   return(output)
 }
+
 
 
 #' @title rbioarray_flt
@@ -49,7 +50,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
   if (class(normlst$E[normlst$genes$ControlType == -1, ]) == "numeric"){
     ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
     ## extract the 95% quanitle of the negative control signals
-    neg <- normlst$E[normlst$genes$ControlType == -1, ] # no 95% quantile as only one entry
+    neg <- normlst$E[normlst$genes$ControlType == -1, ] # no 95% percentile as only one entry
   } else {
     ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
     ## extract the 95% quanitle of the negative control signals
@@ -75,7 +76,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
     flt_E_avg <- avereps(fltlst$E, ID = fltlst$genes$ProbeName)
 
     avgProbesLE <- list(E = flt_E_avg, genes = unique(fltlst$genes[fltlst$genes$ProbeName %in% rownames(flt_E_avg), ]),
-                        target = normlst$target)
+                        target = normlst$target, ArrayWeight = normlst$ArrayWeight)
 
   } else {
 
@@ -109,11 +110,12 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @description DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
 #' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object.
-#' @param design Design matrix.
 #' @param anno Annotation object, usually a \code{dataframe}.
+#' @param design Design matrix.
+#' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
 #' @param multicore If to use parallel computing. Default is \code{FALSE}.
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
-#' @return The function outputs a \code{list} object with DE results, merged with annotation.
+#' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @importFrom limma lmFit eBayes topTable
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
 #' @examples
@@ -121,7 +123,8 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' rbiorrary_DE(objTitle = "data", fltdata, design, anno = Anno)
 #' }
 #' @export
-rbioarray_DE <- function(objTitle = "data_filtered", fltdata, design, anno, multicore = FALSE, ...){
+rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
+                         design, weights = NULL, multicore = FALSE, ...){
 
   if(!multicore){
     ## DE
@@ -129,7 +132,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, design, anno, mult
 
     if (class(fltdata) == "list"){
 
-      fit <- lmFit(fltdata$E, design)
+      fit <- lmFit(fltdata$E, design, weights = weights)
       fit <- eBayes(fit)
 
       outlist <- lapply(coef, function(i){
@@ -143,7 +146,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, design, anno, mult
 
     } else {
 
-      fit <- lmFit(fltdata, design)
+      fit <- lmFit(fltdata, design, weights = weights)
       fit <- eBayes(fit)
 
       outlist <- lapply(coef, function(i){
@@ -156,6 +159,11 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, design, anno, mult
       names(outlist) <- coef
 
     }
+
+    ## write DE results into files
+    lapply(1:length(coef), function(j){
+      write.csv(outlist[[j]], file = paste(coef[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+    })
 
   } else {
 
@@ -163,6 +171,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, design, anno, mult
     # set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores)
+    clusterExport(cl, varlist = c("fltdata", "design", "anno"), envir = environment())
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     ## DE
@@ -170,35 +179,41 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, design, anno, mult
 
     if (class(fltdata) == "list"){
 
-      fit <- lmFit(fltdata$E, design)
+      fit <- lmFit(fltdata$E, design, weights = weights)
       fit <- eBayes(fit)
 
-      outlist <- parLapply(cl, coef, fun = function(i, anno){
+      outlist <- parLapply(cl, coef, fun = function(i){
         tmp <- limma::topTable(fit, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
         tmp <- merge(tmp, anno, by.x = "ProbeName")
         return(tmp)
-      }, anno)
+      })
 
       names(outlist) <- coef
 
     } else {
 
-      fit <- lmFit(fltdata, design)
+      fit <- lmFit(fltdata, design, weights = weights)
       fit <- eBayes(fit)
 
-      outlist <- parLapply(cl, coef, fun = function(i, anno){
+      outlist <- parLapply(cl, coef, fun = function(i){
         tmp <- limma::topTable(fit, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
         tmp <- merge(tmp, anno, by.x = "ProbeName")
         return(tmp)
-      }, anno)
+      })
 
       names(outlist) <- coef
 
     }
 
+    ## write DE results into files
+    parLapply(cl, 1:length(coef), fun = function(j){
+      write.csv(outlist[[j]], file = paste(coef[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
+    })
+
   }
 
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
+
 }

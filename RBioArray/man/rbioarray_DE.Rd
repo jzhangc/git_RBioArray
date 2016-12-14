@@ -4,24 +4,26 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered", fltdata, design, anno,
-  multicore = FALSE, ...)
+rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design,
+  weights = NULL, multicore = FALSE, ...)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
 
 \item{fltdata}{filtered data, either a list, \code{EList} or \code{MAList} object.}
 
+\item{anno}{Annotation object, usually a \code{dataframe}.}
+
 \item{design}{Design matrix.}
 
-\item{anno}{Annotation object, usually a \code{dataframe}.}
+\item{weights}{Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.}
 
 \item{multicore}{If to use parallel computing. Default is \code{FALSE}.}
 
 \item{...}{arguments for \code{topTable()} from \code{limma} package.}
 }
 \value{
-The function outputs a \code{list} object with DE results, merged with annotation.
+The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 }
 \description{
 DE analysis function.
