@@ -5,7 +5,8 @@
 \title{rbioarray_DE}
 \usage{
 rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design,
-  weights = NULL, multicore = FALSE, ...)
+  weights = NULL, DEmethod = "fdr", pvalue = 0.05, multicore = FALSE,
+  ...)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
@@ -21,6 +22,8 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design,
 \item{multicore}{If to use parallel computing. Default is \code{FALSE}.}
 
 \item{...}{arguments for \code{topTable()} from \code{limma} package.}
+
+\item{DE}{DE methods set for p value thresholding.}
 }
 \value{
 The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.

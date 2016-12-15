@@ -115,6 +115,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
 #' @param multicore If to use parallel computing. Default is \code{FALSE}.
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
+#' @param DE DE methods set for p value thresholding.
 #' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @importFrom limma lmFit eBayes topTable
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
@@ -124,21 +125,29 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' }
 #' @export
 rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
-                         design, weights = NULL, multicore = FALSE, ...){
+                         design, weights = NULL,
+                         multicore = FALSE, ...,
+                         pvalue = 0.05, DE = "fdr"){
+
+  ## extract coefficients
+  coef <- colnames(design) # extract coefficient
 
   if(!multicore){
-    ## DE
-    coef <- colnames(design) # extract coefficient
 
+    ## prepare input data object according to the DE method, "fdr" or "spikein".
     if (class(fltdata) == "list"){
 
+      ## DE
       fit <- lmFit(fltdata$E, design, weights = weights)
       fit <- eBayes(fit)
+      fit$genes <- fltdata$genes # add genes matrix to the DE results
+
+      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
       outlist <- lapply(coef, function(i){
-        tmp <- topTable(fit, coef = i, number = Inf, ...)
+        tmp <- topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
@@ -146,13 +155,16 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
     } else {
 
+      ## DE
       fit <- lmFit(fltdata, design, weights = weights)
       fit <- eBayes(fit)
 
+      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
+
       outlist <- lapply(coef, function(i){
-        tmp <- topTable(fit, coef = i, number = Inf, ...)
+        tmp <- topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
@@ -175,17 +187,20 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     ## DE
-    coef <- colnames(design) # extract coefficient
 
     if (class(fltdata) == "list"){
 
       fit <- lmFit(fltdata$E, design, weights = weights)
       fit <- eBayes(fit)
+      fit$genes <- fltdata$genes # add genes matrix to the DE results
+
+
+      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
       outlist <- parLapply(cl, coef, fun = function(i){
-        tmp <- limma::topTable(fit, coef = i, number = Inf, ...)
+        tmp <- limma::topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
@@ -196,10 +211,12 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
       fit <- lmFit(fltdata, design, weights = weights)
       fit <- eBayes(fit)
 
+      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
+
       outlist <- parLapply(cl, coef, fun = function(i){
-        tmp <- limma::topTable(fit, coef = i, number = Inf, ...)
+        tmp <- limma::topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by.x = "ProbeName")
+        tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
@@ -214,6 +231,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
   }
 
+
+  # output the DE object to the environment
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
 
 }
