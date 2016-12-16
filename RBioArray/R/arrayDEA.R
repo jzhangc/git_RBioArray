@@ -7,7 +7,7 @@
 #' @param NormMtd Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
 #' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
 #' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values.
-#' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix
+#' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
 #' @examples
 #' \dontrun{
 #' normdata <- rbioarray_PreProc(mydata)
@@ -116,10 +116,24 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
 #' @param multicore If to use parallel computing. Default is \code{FALSE}.
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
-#' @param DE DE methods set for p value thresholding.
+#' @param plot If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.
+#' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
+#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
+#' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
+#' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
+#' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
+#' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
+#' @param symbolSize Size of the symbol. Default is \code{2}.
+#' @param xTxtSize Font size for the x-axis text. Default is \code{10}.
+#' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
+#' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
+#' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
+#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}.
 #' @importFrom limma lmFit eBayes topTable
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @examples
 #' \dontrun{
 #' rbiorrary_DE(objTitle = "data", fltdata, design, anno = Anno)
@@ -128,7 +142,11 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
                          design, contra, weights = NULL,
                          multicore = FALSE, ...,
-                         pvalue = 0.05, DE = "fdr"){
+                         plot = TRUE,
+                         FC = 1.5, DE = "fdr", q.value = 0.05,
+                         Title = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
+                         symbolSize = 2, xTxtSize = 10, yTxtSize =10,
+                         plotWidth = 170, plotHeight = 150){
 
   ## extract coefficients
   coef <- colnames(contra) # extract coefficient
@@ -235,8 +253,120 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
   }
 
+  ## volcano plot
+  if (plot){
 
-  # output the DE object to the environment
+
+
+    if (DE == "fdr"){
+
+      lapply(1: length(coef), function(j){
+        loclEnv <- environment()
+
+        # set the cutoff
+        cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$adj.P.Val <= q.value)
+
+        # plot
+        plt <- ggplot(outlist[[j]], aes(x = logFC, y = -log10(adj.P.Val), colour = cutoff), environment = loclEnv) +
+          geom_point(alpha = 0.4, size = symbolSize) +
+          ggtitle(Title) +
+          scale_y_continuous(expand = c(0.02, 0)) +
+          xlab(xLabel) +
+          ylab(yLabel) +
+          geom_vline(xintercept = log2(FC), linetype = "dashed") +
+          geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+          geom_hline(yintercept = -log10(q.value), linetype = "dashed") +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(hjust = 0.5),
+                legend.position = "bottom",
+                legend.title = element_blank(),
+                axis.text.x = element_text(size = xTxtSize),
+                axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+
+
+        grid.newpage()
+
+        # extract gtable
+        pltgtb <- ggplot_gtable(ggplot_build(plt))
+
+        # add the right side y axis
+        Aa <- which(pltgtb$layout$name == "axis-l")
+        pltgtb_a <- pltgtb$grobs[[Aa]]
+        axs <- pltgtb_a$children[[2]]
+        axs$widths <- rev(axs$widths)
+        axs$grobs <- rev(axs$grobs)
+        axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+        Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+        pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+        pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+
+        # export the file and draw a preview
+        ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+               width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
+        grid.draw(pltgtb) # preview
+      })
+
+    } else if (DE == "spikein"){
+
+
+      PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
+
+      lapply(1: length(coef), function(j){
+
+        loclEnv <- environment()
+
+        # set cutoff
+        ifelse(min(PCntl$p.value[, coef[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, coef[j]]))
+
+        cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
+
+        # plot
+        plt <- ggplot(outlist[[j]], aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
+          geom_point(alpha = 0.4, size = symbolSize) +
+          ggtitle(Title) +
+          scale_y_continuous(expand = c(0.02, 0)) +
+          xlab(xLabel) +
+          ylab(yLabel) +
+          geom_vline(xintercept = log2(FC), linetype = "dashed") +
+          geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+          geom_hline(yintercept = -log10(pcutoff), linetype = "dashed") +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(hjust = 0.5),
+                legend.position = "bottom",
+                legend.title = element_blank(),
+                axis.text.x = element_text(size = xTxtSize),
+                axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+
+
+        grid.newpage()
+
+        # extract gtable
+        pltgtb <- ggplot_gtable(ggplot_build(plt))
+
+        # add the right side y axis
+        Aa <- which(pltgtb$layout$name == "axis-l")
+        pltgtb_a <- pltgtb$grobs[[Aa]]
+        axs <- pltgtb_a$children[[2]]
+        axs$widths <- rev(axs$widths)
+        axs$grobs <- rev(axs$grobs)
+        axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+        Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+        pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+        pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+
+        # export the file and draw a preview
+        ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+               width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
+        grid.draw(pltgtb) # preview
+      })
+
+    } else {stop("Please choose a proper DE method for p value thresholding")}
+
+  }
+
+  ## output the DE object to the environment
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
 
 }

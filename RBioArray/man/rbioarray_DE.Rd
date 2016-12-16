@@ -5,7 +5,11 @@
 \title{rbioarray_DE}
 \usage{
 rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
-  weights = NULL, multicore = FALSE, ..., pvalue = 0.05, DE = "fdr")
+  weights = NULL, multicore = FALSE, ..., plot = TRUE, FC = 1.5,
+  DE = "fdr", q.value = 0.05, Title = NULL,
+  xLabel = "log2(fold change)", yLabel = "-log10(p value)",
+  symbolSize = 2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
+  plotHeight = 150)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
@@ -24,13 +28,38 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
 
 \item{...}{arguments for \code{topTable()} from \code{limma} package.}
 
-\item{DE}{DE methods set for p value thresholding.}
+\item{plot}{If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.}
+
+\item{FC}{Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.}
+
+\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.}
+
+\item{q.value}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
+
+\item{Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+
+\item{symbolSize}{Size of the symbol. Default is \code{2}.}
+
+\item{xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+
+\item{yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+
+\item{plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
+
+\item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 }
 \value{
 The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 }
 \description{
 DE analysis function.
+}
+\details{
+When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}.
 }
 \examples{
 \dontrun{
