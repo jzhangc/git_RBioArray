@@ -112,6 +112,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object.
 #' @param anno Annotation object, usually a \code{dataframe}.
 #' @param design Design matrix.
+#' @param contra Contrast matrix.
 #' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
 #' @param multicore If to use parallel computing. Default is \code{FALSE}.
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
@@ -125,12 +126,12 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' }
 #' @export
 rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
-                         design, weights = NULL,
+                         design, contra, weights = NULL,
                          multicore = FALSE, ...,
                          pvalue = 0.05, DE = "fdr"){
 
   ## extract coefficients
-  coef <- colnames(design) # extract coefficient
+  coef <- colnames(contra) # extract coefficient
 
   if(!multicore){
 
@@ -139,6 +140,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
       ## DE
       fit <- lmFit(fltdata$E, design, weights = weights)
+      fit <- contrasts.fit(fit, contrasts = contra)
       fit <- eBayes(fit)
       fit$genes <- fltdata$genes # add genes matrix to the DE results
 
@@ -157,6 +159,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
       ## DE
       fit <- lmFit(fltdata, design, weights = weights)
+      fit <- contrasts.fit(fit, contrasts = contra)
       fit <- eBayes(fit)
 
       out <- fit[fit$genes$ControlType == 0, ] # remove control probes
@@ -191,9 +194,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
     if (class(fltdata) == "list"){
 
       fit <- lmFit(fltdata$E, design, weights = weights)
+      fit <- contrasts.fit(fit, contrasts = contra)
       fit <- eBayes(fit)
       fit$genes <- fltdata$genes # add genes matrix to the DE results
-
 
       out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
@@ -209,6 +212,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
     } else {
 
       fit <- lmFit(fltdata, design, weights = weights)
+      fit <- contrasts.fit(fit, contrasts = contra)
       fit <- eBayes(fit)
 
       out <- fit[fit$genes$ControlType == 0, ] # remove control probes

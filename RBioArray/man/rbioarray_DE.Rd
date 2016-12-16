@@ -4,9 +4,8 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design,
-  weights = NULL, DEmethod = "fdr", pvalue = 0.05, multicore = FALSE,
-  ...)
+rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
+  weights = NULL, multicore = FALSE, ..., pvalue = 0.05, DE = "fdr")
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
@@ -16,6 +15,8 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design,
 \item{anno}{Annotation object, usually a \code{dataframe}.}
 
 \item{design}{Design matrix.}
+
+\item{contra}{Contrast matrix.}
 
 \item{weights}{Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.}
 
