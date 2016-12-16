@@ -130,6 +130,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}.
+#' @import ggplot2
 #' @importFrom limma lmFit eBayes topTable
 #' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
 #' @importFrom grid grid.newpage grid.draw
@@ -279,7 +280,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
                 panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
                 plot.title = element_text(hjust = 0.5),
-                legend.position = "bottom",
+                legend.position = "none",
                 legend.title = element_blank(),
                 axis.text.x = element_text(size = xTxtSize),
                 axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
@@ -334,7 +335,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
                 panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
                 plot.title = element_text(hjust = 0.5),
-                legend.position = "bottom",
+                legend.position = "none",
                 legend.title = element_blank(),
                 axis.text.x = element_text(size = xTxtSize),
                 axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
