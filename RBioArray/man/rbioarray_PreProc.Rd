@@ -4,21 +4,29 @@
 \alias{rbioarray_PreProc}
 \title{rbioarray_PreProc}
 \usage{
-rbioarray_PreProc(RawData, bgMethod = "auto", normMethod = "quantile", ...)
+rbioarray_PreProc(rawlist, logTrans = FALSE, logTransMethod = "log2",
+  logTransObjT = "data", logTransMulticore = FALSE, bgMethod = "auto",
+  normMethod = "quantile", ...)
 }
 \arguments{
-\item{RawData}{Input data, either a list, \code{EList} or \code{MAList} object.}
+\item{rawlist}{Input data, either a list, \code{EList} or \code{MAList} object.}
+
+\item{logTrans}{If to perfom a log transformation on the data or not. Default is \code{FALSE}.}
+
+\item{logTransMethod}{If \code{logTrans = TRUE}, set which method to use for the transformation, \code{"log2"} or \code{"log10"}. Default is \code{"log2"}.}
+
+\item{logTransObjT}{If \code{logTrans = TRUE}, set the file name for the output \code{csv} file containing the log transformed data.}
+
+\item{logTransMulticore}{If \code{logTrans = TRUE}, set if to use parallel computing for the transformation or not. Default is \code{FALSE}.}
+
+\item{bgMethod}{Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.}
+
+\item{normMethod}{Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.}
 
 \item{...}{arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.}
-
-\item{BgMtd}{Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.}
-
-\item{BgOffst}{The offset to add to the background corrected values, as a base line. Default is \code{"50"}.}
-
-\item{NormMtd}{Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.}
 }
 \value{
-Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values.
+Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values. If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
 }
 \description{
 Data pre-processing function for the

@@ -1,27 +1,71 @@
 #' @title rbioarray_PreProc
 #'
 #' @description Data pre-processing function for the
-#' @param RawData Input data, either a list, \code{EList} or \code{MAList} object.
-#' @param BgMtd Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
-#' @param BgOffst The offset to add to the background corrected values, as a base line. Default is \code{"50"}.
-#' @param NormMtd Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
+#' @param rawlist Input data, either a list, \code{EList} or \code{MAList} object.
+#' @param logTrans If to perfom a log transformation on the data or not. Default is \code{FALSE}.
+#' @param logTransMethod If \code{logTrans = TRUE}, set which method to use for the transformation, \code{"log2"} or \code{"log10"}. Default is \code{"log2"}.
+#' @param logTransObjT If \code{logTrans = TRUE}, set the file name for the output \code{csv} file containing the log transformed data.
+#' @param logTransMulticore If \code{logTrans = TRUE}, set if to use parallel computing for the transformation or not. Default is \code{FALSE}.
+#' @param bgMethod Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
+#' @param normMethod Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
 #' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
-#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values.
+#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values. If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
 #' @examples
 #' \dontrun{
 #' normdata <- rbioarray_PreProc(mydata)
 #' }
 #' @export
-rbioarray_PreProc <- function(RawData, bgMethod = "auto", normMethod = "quantile", ...){
-  if (class(RawData) == "list"){
-    BgC <- backgroundCorrect.matrix(RawData$E, method = bgMethod, ...) #background correction
+rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2", logTransObjT = "data", logTransMulticore = FALSE,
+                              bgMethod = "auto", normMethod = "quantile", ...){
+
+  if (class(rawlist) == "list"){
+
+    ## log transform  or not
+    if (logTrans){
+
+      if (!logTransMulticore){
+
+        # log transform
+        mtx <- apply(rawlist$E, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
+
+      } else {
+
+        # parallel computing
+        # set up cpu cluster
+        n_cores <- detectCores() - 1
+        cl <- makeCluster(n_cores)
+        clusterExport(cl, varlist = "rawlist", envir = environment())
+        on.exit(stopCluster(cl)) # close connect when exiting the function
+
+        # log transform
+        mtx <- parApply(cl, rawlist$E, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
+
+      }
+
+      tmpdata <- list(E = mtx, genes = rawlist$genes, target = rawlist$target)
+
+      # store and export log transformed data into a csv file
+      logTransOut <- data.frame(rawlist$genes, mtx)
+      write.csv(logTransOut, file = paste(logTransObjT, "_log_transformed.csv", sep = ""), row.names = FALSE)
+
+    } else {
+
+      tmpdata <- rawlist
+
+    }
+
+    ## normalization
+    BgC <- backgroundCorrect.matrix(tmpdata$E, method = bgMethod, ...) #background correction
     Norm <- normalizeBetweenArrays(BgC, normMethod) # quantile normalization
     Wgt <- arrayWeights(Norm) # array weight
 
-    output <- list(E = Norm, genes = RawData$gene, target = RawData$target, ArrayWeight = Wgt)
+    output <- list(E = Norm, genes = rawlist$genes, target = rawlist$target, ArrayWeight = Wgt)
+
   } else {
-    BgC <- backgroundCorrect(RawData, method = bgMethod, ...) #background correction
+
+    ## normalization
+    BgC <- backgroundCorrect(rawlist, method = bgMethod, ...) #background correction
     Norm <- normalizeBetweenArrays(BgC, method = normMethod) # quantile normalization
 
     output <- Norm
