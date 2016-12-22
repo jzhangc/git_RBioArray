@@ -194,7 +194,12 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
                          plotWidth = 170, plotHeight = 150){
 
   ## extract coefficients
-  coef <- colnames(contra) # extract coefficient
+  cf <- colnames(contra) # extract coefficient
+
+  # set an empty matrix for exporting the threolding summery
+  threshold_summary <- matrix(nrow = length(cf), ncol = 5)
+  colnames(threshold_summary) <- c("coeffcient", "p.value.threshold", "fold.change.threshold", "True", "False")
+  threshold_summary <- as.matrix(threshold_summary)
 
   if(!multicore){
 
@@ -209,14 +214,14 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
       out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
-      outlist <- lapply(coef, function(i){
+      outlist <- lapply(cf, function(i){
         tmp <- topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
         tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
-      names(outlist) <- coef
+      names(outlist) <- cf
 
     } else {
 
@@ -227,34 +232,36 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
       out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
-      outlist <- lapply(coef, function(i){
+      outlist <- lapply(cf, function(i){
         tmp <- topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
         tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
-      names(outlist) <- coef
+      names(outlist) <- cf
 
     }
 
     ## write DE results into files
-    lapply(1:length(coef), function(j){
-      write.csv(outlist[[j]], file = paste(coef[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+    lapply(1:length(cf), function(j){
+      write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
     })
 
     ## volcano plot
+    # plot
     if (plot){
 
       if (DE == "fdr"){
+        n_probe <- length(rownames(topTable(out, n = Inf))) #extract the total probe number
 
-        lapply(1: length(coef), function(j){
-          loclEnv <- environment()
+        threshold_summary[] <- t(sapply(1: length(cf), function(j){
 
           # set the cutoff
-          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / length(rownames(topTable(out, n = Inf)))) # divide by the probe number
+          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / n_probe) # divide by the probe number
 
           # plot
+          loclEnv <- environment()
           plt <- ggplot(outlist[[j]], aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
             geom_point(alpha = 0.4, size = symbolSize) +
             ggtitle(Title) +
@@ -290,26 +297,43 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
           pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
           # export the file and draw a preview
-          ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+          ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
                  width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
           grid.draw(pltgtb) # preview
-        })
+
+          # dump the info to the threshold dataframe
+          if (length(levels(cutoff)) == 1){
+
+            if (levels(cutoff) == "TRUE"){
+
+              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+
+            } else {
+              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
+            }
+
+          } else {
+            tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+          }
+
+        }))
+
+
 
       } else if (DE == "spikein"){
 
 
         PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
 
-        lapply(1: length(coef), function(j){
-
-          loclEnv <- environment()
+        threshold_summary[] <- t(sapply(1: length(cf), function(j){
 
           # set cutoff
-          ifelse(min(PCntl$p.value[, coef[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, coef[j]]))
+          ifelse(min(PCntl$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, cf[j]]))
 
           cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
 
           # plot
+          loclEnv <- environment()
           plt <- ggplot(outlist[[j]], aes(x = logFC, y = - log10(P.Value), colour = cutoff), environment = loclEnv) +
             geom_point(alpha = 0.4, size = symbolSize) +
             ggtitle(Title) +
@@ -345,10 +369,27 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
           pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
           # export the file and draw a preview
-          ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+          ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
                  width = plotWidth, height = plotHeight, units = "mm", dpi = 600) # deparse(substitute(x)) converts object name into a character string
           grid.draw(pltgtb) # preview
-        })
+
+
+          # dump the info to the threshold dataframe
+          if (length(levels(cutoff)) == 1){
+
+            if (levels(cutoff) == "TRUE"){
+
+              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+
+            } else {
+              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
+            }
+
+          } else {
+            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+          }
+
+        }))
 
       } else {stop("Please choose a proper DE method for p value thresholding")}
 
@@ -374,14 +415,14 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
       out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
-      outlist <- parLapply(cl, coef, fun = function(i){
+      outlist <- parLapply(cl, cf, fun = function(i){
         tmp <- limma::topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
         tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
-      names(outlist) <- coef
+      names(outlist) <- cf
 
     } else {
 
@@ -391,20 +432,20 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
       out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
-      outlist <- parLapply(cl, coef, fun = function(i){
+      outlist <- parLapply(cl, cf, fun = function(i){
         tmp <- limma::topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
         tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
       })
 
-      names(outlist) <- coef
+      names(outlist) <- cf
 
     }
 
     ## write DE results into files
-    parLapply(cl, 1:length(coef), fun = function(j){
-      write.csv(outlist[[j]], file = paste(coef[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
+    parLapply(cl, 1:length(cf), fun = function(j){
+      write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
     })
 
     ## volcano plot
@@ -412,13 +453,15 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
       if (DE == "fdr"){
 
-        parLapply(cl, 1: length(coef), fun = function(j){
-          loclEnv <- environment()
+        n_probe <- length(rownames(topTable(out, n = Inf))) #extract the total probe number
+
+        threshold_summary[] <- t(parSapply(cl, 1: length(cf), FUN = function(j){
 
           # set the cutoff
-          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / length(rownames(limma::topTable(out, n = Inf)))) # divide by the probe number
+          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / n_probe) # divide by the probe number
 
           # plot
+          loclEnv <- environment()
           plt <- ggplot2::ggplot(outlist[[j]], ggplot2::aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
             ggplot2::geom_point(alpha = 0.4, size = symbolSize) +
             ggplot2::ggtitle(Title) +
@@ -454,26 +497,40 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
           pltgtb <- gtable::gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
           # export the file and draw a preview
-          ggplot2::ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+          ggplot2::ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
                           width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
           grid::grid.draw(pltgtb) # preview
-        })
+
+          # dump the info to the threshold dataframe
+          if (length(levels(cutoff)) == 1){
+
+            if (levels(cutoff) == "TRUE"){
+
+              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+
+            } else {
+              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
+            }
+
+          } else {
+            tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+          }
+        }))
 
       } else if (DE == "spikein"){
 
 
         PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
 
-        parLapply(cl, 1: length(coef), fun = function(j){
-
-          loclEnv <- environment()
+        threshold_summary[] <- t(parSapply(cl, 1: length(cf), FUN = function(j){
 
           # set cutoff
-          ifelse(min(PCntl$p.value[, coef[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, coef[j]]))
+          ifelse(min(PCntl$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, cf[j]]))
 
           cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
 
           # plot
+          loclEnv <- environment()
           plt <- ggplot2::ggplot(outlist[[j]], ggplot2::aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
             ggplot2::geom_point(alpha = 0.4, size = symbolSize) +
             ggplot2::ggtitle(Title) +
@@ -509,10 +566,26 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
           pltgtb <- gtable::gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
           # export the file and draw a preview
-          ggplot2::ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+          ggplot2::ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
                           width = plotWidth, height = plotHeight, units = "mm", dpi = 600) # deparse(substitute(x)) converts object name into a character string
           grid::grid.draw(pltgtb) # preview
-        })
+
+          # dump the info to the threshold dataframe
+          if (length(levels(cutoff)) == 1){
+
+            if (levels(cutoff) == "TRUE"){
+
+              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+
+            } else {
+              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
+            }
+
+          } else {
+            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+          }
+
+        }))
 
       } else {stop("Please choose a proper DE method for p value thresholding")}
 
@@ -522,5 +595,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
 
   ## output the DE object to the environment
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
+  write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
 
 }
