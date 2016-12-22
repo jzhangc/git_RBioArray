@@ -243,6 +243,117 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
       write.csv(outlist[[j]], file = paste(coef[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
     })
 
+    ## volcano plot
+    if (plot){
+
+      if (DE == "fdr"){
+
+        lapply(1: length(coef), function(j){
+          loclEnv <- environment()
+
+          # set the cutoff
+          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / length(rownames(topTable(out, n = Inf)))) # divide by the probe number
+
+          # plot
+          plt <- ggplot(outlist[[j]], aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
+            geom_point(alpha = 0.4, size = symbolSize) +
+            ggtitle(Title) +
+            scale_y_continuous(expand = c(0.02, 0)) +
+            xlab(xLabel) +
+            ylab(yLabel) +
+            geom_vline(xintercept = log2(FC), linetype = "dashed") +
+            geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+            geom_hline(yintercept = - log10(q.value / length(rownames(topTable(out, n = Inf)))), linetype = "dashed") +
+            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                  panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                  plot.title = element_text(hjust = 0.5),
+                  legend.position = "none",
+                  legend.title = element_blank(),
+                  axis.text.x = element_text(size = xTxtSize),
+                  axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+
+
+          grid.newpage()
+
+          # extract gtable
+          pltgtb <- ggplot_gtable(ggplot_build(plt))
+
+          # add the right side y axis
+          Aa <- which(pltgtb$layout$name == "axis-l")
+          pltgtb_a <- pltgtb$grobs[[Aa]]
+          axs <- pltgtb_a$children[[2]]
+          axs$widths <- rev(axs$widths)
+          axs$grobs <- rev(axs$grobs)
+          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+          pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+          pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+
+          # export the file and draw a preview
+          ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+                 width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
+          grid.draw(pltgtb) # preview
+        })
+
+      } else if (DE == "spikein"){
+
+
+        PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
+
+        lapply(1: length(coef), function(j){
+
+          loclEnv <- environment()
+
+          # set cutoff
+          ifelse(min(PCntl$p.value[, coef[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, coef[j]]))
+
+          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
+
+          # plot
+          plt <- ggplot(outlist[[j]], aes(x = logFC, y = - log10(P.Value), colour = cutoff), environment = loclEnv) +
+            geom_point(alpha = 0.4, size = symbolSize) +
+            ggtitle(Title) +
+            scale_y_continuous(expand = c(0.02, 0)) +
+            xlab(xLabel) +
+            ylab(yLabel) +
+            geom_vline(xintercept = log2(FC), linetype = "dashed") +
+            geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+            geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
+            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                  panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                  plot.title = element_text(hjust = 0.5),
+                  legend.position = "none",
+                  legend.title = element_blank(),
+                  axis.text.x = element_text(size = xTxtSize),
+                  axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+
+
+          grid.newpage()
+
+          # extract gtable
+          pltgtb <- ggplot_gtable(ggplot_build(plt))
+
+          # add the right side y axis
+          Aa <- which(pltgtb$layout$name == "axis-l")
+          pltgtb_a <- pltgtb$grobs[[Aa]]
+          axs <- pltgtb_a$children[[2]]
+          axs$widths <- rev(axs$widths)
+          axs$grobs <- rev(axs$grobs)
+          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+          pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+          pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+
+          # export the file and draw a preview
+          ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+                 width = plotWidth, height = plotHeight, units = "mm", dpi = 600) # deparse(substitute(x)) converts object name into a character string
+          grid.draw(pltgtb) # preview
+        })
+
+      } else {stop("Please choose a proper DE method for p value thresholding")}
+
+    }
+
   } else {
 
     ## parallel computing
@@ -296,118 +407,116 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
       write.csv(outlist[[j]], file = paste(coef[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
     })
 
-  }
+    ## volcano plot
+    if (plot){
 
-  ## volcano plot
-  if (plot){
+      if (DE == "fdr"){
 
+        parLapply(cl, 1: length(coef), fun = function(j){
+          loclEnv <- environment()
 
+          # set the cutoff
+          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / length(rownames(limma::topTable(out, n = Inf)))) # divide by the probe number
 
-    if (DE == "fdr"){
-
-      lapply(1: length(coef), function(j){
-        loclEnv <- environment()
-
-        # set the cutoff
-        cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$adj.P.Val <= q.value)
-
-        # plot
-        plt <- ggplot(outlist[[j]], aes(x = logFC, y = -log10(adj.P.Val), colour = cutoff), environment = loclEnv) +
-          geom_point(alpha = 0.4, size = symbolSize) +
-          ggtitle(Title) +
-          scale_y_continuous(expand = c(0.02, 0)) +
-          xlab(xLabel) +
-          ylab(yLabel) +
-          geom_vline(xintercept = log2(FC), linetype = "dashed") +
-          geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-          geom_hline(yintercept = -log10(q.value), linetype = "dashed") +
-          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-                plot.title = element_text(hjust = 0.5),
-                legend.position = "none",
-                legend.title = element_blank(),
-                axis.text.x = element_text(size = xTxtSize),
-                axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+          # plot
+          plt <- ggplot2::ggplot(outlist[[j]], ggplot2::aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
+            ggplot2::geom_point(alpha = 0.4, size = symbolSize) +
+            ggplot2::ggtitle(Title) +
+            ggplot2::scale_y_continuous(expand = c(0.02, 0)) +
+            ggplot2::xlab(xLabel) +
+            ggplot2::ylab(yLabel) +
+            ggplot2::geom_vline(xintercept = log2(FC), linetype = "dashed") +
+            ggplot2::geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+            ggplot2::geom_hline(yintercept = - log10(q.value / length(rownames(limma::topTable(out, n = Inf)))), linetype = "dashed") +
+            ggplot2::theme(panel.background = ggplot2::element_rect(fill = 'white', colour = 'black'),
+                           panel.border = ggplot2::element_rect(colour = "black", fill = NA, size = 0.5),
+                           plot.title = ggplot2::element_text(hjust = 0.5),
+                           legend.position = "none",
+                           legend.title = ggplot2::element_blank(),
+                           axis.text.x = ggplot2::element_text(size = xTxtSize),
+                           axis.text.y = ggplot2::element_text(size = yTxtSize, hjust = 0.5))
 
 
-        grid.newpage()
+          grid::grid.newpage()
 
-        # extract gtable
-        pltgtb <- ggplot_gtable(ggplot_build(plt))
+          # extract gtable
+          pltgtb <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(plt))
 
-        # add the right side y axis
-        Aa <- which(pltgtb$layout$name == "axis-l")
-        pltgtb_a <- pltgtb$grobs[[Aa]]
-        axs <- pltgtb_a$children[[2]]
-        axs$widths <- rev(axs$widths)
-        axs$grobs <- rev(axs$grobs)
-        axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-        Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-        pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-        pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+          # add the right side y axis
+          Aa <- which(pltgtb$layout$name == "axis-l")
+          pltgtb_a <- pltgtb$grobs[[Aa]]
+          axs <- pltgtb_a$children[[2]]
+          axs$widths <- rev(axs$widths)
+          axs$grobs <- rev(axs$grobs)
+          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - ggplot2::unit(1, "npc") + ggplot2::unit(0.08, "cm")
+          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+          pltgtb <- gtable::gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+          pltgtb <- gtable::gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
-        # export the file and draw a preview
-        ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-               width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
-        grid.draw(pltgtb) # preview
-      })
+          # export the file and draw a preview
+          ggplot2::ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+                          width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
+          grid::grid.draw(pltgtb) # preview
+        })
 
-    } else if (DE == "spikein"){
-
-
-      PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
-
-      lapply(1: length(coef), function(j){
-
-        loclEnv <- environment()
-
-        # set cutoff
-        ifelse(min(PCntl$p.value[, coef[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, coef[j]]))
-
-        cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
-
-        # plot
-        plt <- ggplot(outlist[[j]], aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
-          geom_point(alpha = 0.4, size = symbolSize) +
-          ggtitle(Title) +
-          scale_y_continuous(expand = c(0.02, 0)) +
-          xlab(xLabel) +
-          ylab(yLabel) +
-          geom_vline(xintercept = log2(FC), linetype = "dashed") +
-          geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-          geom_hline(yintercept = -log10(pcutoff), linetype = "dashed") +
-          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-                plot.title = element_text(hjust = 0.5),
-                legend.position = "none",
-                legend.title = element_blank(),
-                axis.text.x = element_text(size = xTxtSize),
-                axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+      } else if (DE == "spikein"){
 
 
-        grid.newpage()
+        PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
 
-        # extract gtable
-        pltgtb <- ggplot_gtable(ggplot_build(plt))
+        parLapply(cl, 1: length(coef), fun = function(j){
 
-        # add the right side y axis
-        Aa <- which(pltgtb$layout$name == "axis-l")
-        pltgtb_a <- pltgtb$grobs[[Aa]]
-        axs <- pltgtb_a$children[[2]]
-        axs$widths <- rev(axs$widths)
-        axs$grobs <- rev(axs$grobs)
-        axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-        Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-        pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-        pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+          loclEnv <- environment()
 
-        # export the file and draw a preview
-        ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-               width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
-        grid.draw(pltgtb) # preview
-      })
+          # set cutoff
+          ifelse(min(PCntl$p.value[, coef[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, coef[j]]))
 
-    } else {stop("Please choose a proper DE method for p value thresholding")}
+          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
+
+          # plot
+          plt <- ggplot2::ggplot(outlist[[j]], ggplot2::aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
+            ggplot2::geom_point(alpha = 0.4, size = symbolSize) +
+            ggplot2::ggtitle(Title) +
+            ggplot2::scale_y_continuous(expand = c(0.02, 0)) +
+            ggplot2::xlab(xLabel) +
+            ggplot2::ylab(yLabel) +
+            ggplot2::geom_vline(xintercept = log2(FC), linetype = "dashed") +
+            ggplot2::geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+            ggplot2::geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
+            ggplot2::theme(panel.background = ggplot2::element_rect(fill = 'white', colour = 'black'),
+                           panel.border = ggplot2::element_rect(colour = "black", fill = NA, size = 0.5),
+                           plot.title = ggplot2::element_text(hjust = 0.5),
+                           legend.position = "none",
+                           legend.title = ggplot2::element_blank(),
+                           axis.text.x = ggplot2::element_text(size = xTxtSize),
+                           axis.text.y = ggplot2::element_text(size = yTxtSize, hjust = 0.5))
+
+
+          grid::grid.newpage()
+
+          # extract gtable
+          pltgtb <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(plt))
+
+          # add the right side y axis
+          Aa <- which(pltgtb$layout$name == "axis-l")
+          pltgtb_a <- pltgtb$grobs[[Aa]]
+          axs <- pltgtb_a$children[[2]]
+          axs$widths <- rev(axs$widths)
+          axs$grobs <- rev(axs$grobs)
+          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - ggplot2::unit(1, "npc") + ggplot2::unit(0.08, "cm")
+          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+          pltgtb <- gtable::gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+          pltgtb <- gtable::gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+
+          # export the file and draw a preview
+          ggplot2::ggsave(filename = paste(coef[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+                          width = plotWidth, height = plotHeight, units = "mm", dpi = 600) # deparse(substitute(x)) converts object name into a character string
+          grid::grid.draw(pltgtb) # preview
+        })
+
+      } else {stop("Please choose a proper DE method for p value thresholding")}
+
+    }
 
   }
 
