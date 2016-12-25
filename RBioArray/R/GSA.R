@@ -24,49 +24,100 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 }
 
 
-
 #' @title rbioGS_all
 #'
 #' @description Add Human entrez ID to the DE dataframe
-#' @param MyGS Pre-loaded gene set objects.
-#' @param pVar Gene level p values. Could be, but not exclusive to, a variable of a dataframe.
-#' @param logFCVar Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe.
-#' @param tVar Gene leve t values. Could be, but not exclusive to, a variable of a dataframe.#'
+#' @param GS Pre-loaded gene set objects.
+#' @param pVar Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.
+#' @param logFCVar Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.
+#' @param tVar Gene leve t values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}.
+#' @param idVar Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.
+#' @param multicore If to use parallel computing or not. Default is \code{FALSE}
+#' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details The function is based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
 #' @return Outputs a \code{list} object with GSA results, both for p value based and t value based.
 #' @importFrom piano runGSA
+#' @importFrom foreach foreach
+#' @importFrom doParallel registerDoParallel
+#' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
-#' GOterm_bp <- piano::loadGSC(file = "c5.bp.v5.0.entrez.gmt", type = "gmt") # load GO term biological process set
+#' gsoutpu <- rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 #'
-#' pc_Kegg <- rbioGS_all(GOterm_bp, pVar = pcGSdfm$p_value, logFCVar = pcGSdfm$logFC, tVar = pcGSdfm$t_value)
 #'
 #' }
 #' @export
-rbioGS_all <- function(MyGS, pVar, logFCVar, tVar){
+rbioGS_all <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
                  t_value = tVar)
-  gStats <- lapply(gStats, function(x){names(x) <- get(paste(RNAtype, "_DE4GSA_flt", sep=""))$ENTREZID; x})
+  gStats <- lapply(gStats, function(x){names(x) <- idVar})
 
-  GS_list_p <- list()
   GSigM_p <- c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")
-  for (i in 1:length(GSigM_p)){
-    GS_S.i <- runGSA(gStats$p_value, gStats$logFC, geneSetStat = GSigM_p[i], signifMethod="geneSampling",
-                     adjMethod= "fdr", gsc = MyGS, nPerm = 1000)
-    GS_list_p[[i]] <- GS_S.i
-  }
-  names(GS_list_p) <- c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")
-
-  GS_list_t <- list()
   GSigM_t <- c("page", "gsea", "maxmean")
-  for (j in 1:length(GSigM_t)){
-    GS_S.j <- runGSA(gStats$t_value, geneSetStat = GSigM_t[j], signifMethod = "geneSampling",
-                     adjMethod = "fdr", gsc = MyGS, nPerm = 1000)
-    GS_list_t[[j]] <- GS_S.j
+
+  ## make empty output lists
+  GS_list_p <- vector(mode = "list", length = length(GSigM_p))
+  names(GS_list_p) <- GSigM_p
+
+  GS_list_t <- vector(mode = "list", length = length(GSigM_t))
+  names(GS_list_t) <- GSigM_t
+
+  fullGS_list <- vector(mode = "list", length = 2)
+  names(fullGS_list) <- c("GS_analysis_p", "GS_analysis_t")
+
+  ## make tmp GS functions for parallel computing, as well as the
+  tmpfunc_p <- function(i, GSmethod_p, ...){
+    p <- gStats$p_value
+    logfc <- gStats$logFC
+    GS_S.i <- runGSA(p, logfc, geneSetStat = GSmethod_p[i], ...)
   }
-  names(GS_list_t)<-c("page","gsea","maxmean")
+
+  tmpfunc_t <- function(i, GSmethod_t, ...){
+    t <- gStats$t_value
+    GS_S.i <- runGSA(t, geneSetStat = GSmethod_t[i], ...)
+  }
+
+  if (!multicore){
+
+    for (m in 1:length(GSigM_p)){
+      GS_list_p[[m]] <- tmpfunc_p(m, GSmethod_p = GSigM_p, gsc = GS, ...)
+    }
+
+    for (n in 1:length(GSigM_t)){
+      GS_list_t[[n]] <- tmpfunc_t(n, GSmethod_t = GSigM_t, gsc = GS, ...)
+    }
+
+  } else {
+
+    ## parallel computing
+    # set up cpu cluster
+    n_cores <- detectCores() - 1
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl) # part of doParallel package
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # parallel computing
+    if (clusterType == "FORK"){ # mac and linux only
+
+      GS_list_p[] <- mclapply(1: length(GSigM_p), FUN = tmpfunc_p, GSmethod_p = GSigM_p, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
+      GS_list_t[] <- mclapply(1: length(GSigM_t), FUN = tmpfunc_t, GSmethod_t = GSigM_t, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
+
+    } else { # windows etc
+
+      GS_list_p[] <- foreach(i = 1: length(GSigM_p), .packages = "piano") %dopar% {
+        out <- tmpfunc_p(i, GSmethod_p = GSigM_p, gsc = GS, ...)
+      }
+
+      GS_list_t[] <- foreach(i = 1: length(GSigM_t), .packages = "piano") %dopar% {
+        out <- tmpfunc_t(i, GSmethod_t =  GSigM_t, gsc = GS, ...)
+      }
+
+    }
+
+  }
+
 
   fullGS_list <- c(GS_list_p, GS_list_t)
 

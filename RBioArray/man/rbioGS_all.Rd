@@ -4,16 +4,23 @@
 \alias{rbioGS_all}
 \title{rbioGS_all}
 \usage{
-rbioGS_all(MyGS, pVar, logFCVar, tVar)
+rbioGS_all(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE,
+  clusterType = "PSOCK", ...)
 }
 \arguments{
-\item{MyGS}{Pre-loaded gene set objects.}
+\item{GS}{Pre-loaded gene set objects.}
 
-\item{pVar}{Gene level p values. Could be, but not exclusive to, a variable of a dataframe.}
+\item{pVar}{Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.}
 
-\item{logFCVar}{Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe.}
+\item{logFCVar}{Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.}
 
-\item{tVar}{Gene leve t values. Could be, but not exclusive to, a variable of a dataframe.#'}
+\item{tVar}{Gene leve t values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}.}
+
+\item{idVar}{Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.}
+
+\item{multicore}{If to use parallel computing or not. Default is \code{FALSE}}
+
+\item{clusterType}{Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 Outputs a \code{list} object with GSA results, both for p value based and t value based.
@@ -26,9 +33,8 @@ The function is based on piano package. It runs "fisher", "stouffer", "reporter"
 }
 \examples{
 \dontrun{
-GOterm_bp <- piano::loadGSC(file = "c5.bp.v5.0.entrez.gmt", type = "gmt") # load GO term biological process set
+gsoutpu <- rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 
-pc_Kegg <- rbioGS_all(GOterm_bp, pVar = pcGSdfm$p_value, logFCVar = pcGSdfm$logFC, tVar = pcGSdfm$t_value)
 
 }
 }
