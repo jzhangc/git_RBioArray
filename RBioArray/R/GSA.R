@@ -52,7 +52,7 @@ rbioGS_all <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clust
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
                  t_value = tVar)
-  gStats <- lapply(gStats, function(x){names(x) <- idVar})
+  gStats <- lapply(gStats, function(x){names(x) <- idVar; x})
 
   GSigM_p <- c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")
   GSigM_t <- c("page", "gsea", "maxmean")
