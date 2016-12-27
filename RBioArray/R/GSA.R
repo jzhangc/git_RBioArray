@@ -404,11 +404,11 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
 
       if (plot){
         foreach(x = GSlst, .packages = c("RBioArray", "piano")) %dopar% {
-          out <- rbioGS_boxplot(x, mc.cores = n_core, mc.preschedule = FALSE)
+          out <- rbioGS_boxplot(x)
         }
 
         foreach(x = GSlst, .packages = c("RBioArray", "piano")) %dopar% {
-          out <- rbioGS_scatter(x, mc.cores = n_core, mc.preschedule = FALSE)
+          out <- rbioGS_scatter(x)
         }
 
       }
