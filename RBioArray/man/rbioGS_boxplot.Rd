@@ -5,7 +5,8 @@
 \title{rbioGS_boxplot}
 \usage{
 rbioGS_boxplot(GS_list, ..., GS = "OTHER", fileName = "GS_list",
-  plotWidth = 170, plotHeight = 150)
+  plotTitle = NULL, xLabel = "rank", yLabel = NULL, plotWidth = 170,
+  plotHeight = 150)
 }
 \arguments{
 \item{GS_list}{piano GS results object.}
@@ -15,6 +16,12 @@ rbioGS_boxplot(GS_list, ..., GS = "OTHER", fileName = "GS_list",
 \item{GS}{if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.}
 
 \item{fileName}{Output file name. Default is \code{"GS_list"}.}
+
+\item{plotTitle}{Title of the plot. Default is \code{NULL}.}
+
+\item{xLabel}{X-axis label. Default is \code{"rank"}.}
+
+\item{yLabel}{Y-axis label. Default is \code{NULL}.}
 
 \item{plotWidth}{Set the width of the plot. Default is \code{170}.}
 
@@ -32,7 +39,7 @@ The function is a wrapper that takes resulted object from \code{runGSA} function
 \examples{
 \dontrun{
 
-rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", plot = TRUE, rowNames = "names", plotWidth = 260, plotHeight = 240)
+rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", rowNames = "names", plotWidth = 260, plotHeight = 240)
 
 }
 }

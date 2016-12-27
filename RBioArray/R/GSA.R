@@ -137,6 +137,9 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
 #' @param ... Arguments passing to \code{consensusScores} function from \code{piano} package. See the corresponding \code{piano} package help page for details.
 #' @param GS if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.
 #' @param fileName Output file name. Default is \code{"GS_list"}.
+#' @param plotTitle Title of the plot. Default is \code{NULL}.
+#' @param xLabel X-axis label. Default is \code{"rank"}.
+#' @param yLabel Y-axis label. Default is \code{NULL}.
 #' @param plotWidth Set the width of the plot. Default is \code{170}.
 #' @param plotHeight Set the height of the plot. Default is \code{150}.
 #' @details The function is a wrapper that takes resulted object from \code{runGSA} function from \code{piano} package.
@@ -148,12 +151,12 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", plot = TRUE, rowNames = "names", plotWidth = 260, plotHeight = 240)
+#' rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", rowNames = "names", plotWidth = 260, plotHeight = 240)
 #'
 #' }
 #' @export
 rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
-                           plotWidth = 170, plotHeight = 150){
+                           plotTitle = NULL, xLabel = "rank", yLabel = NULL, plotWidth = 170, plotHeight = 150){
 
   # prepare consensus score list
   GSrank <- consensusScores(resList = GS_list, plot = FALSE, ...)
@@ -181,8 +184,9 @@ rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
   grid.newpage()
   plt <- ggplot(DFM_mlt, aes(x = variable, y = value)) + geom_boxplot() +
     guides(fill = FALSE) + scale_x_discrete(limits = with(DFM_mlt, rev(levels(variable)))) +
-    ylab("rank") +
-    xlab(NULL) +
+    ggtitle(plotTitle) +
+    xlab(xLabel) +
+    ylab(yLabel) +
     coord_flip() + # flip the axes
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
