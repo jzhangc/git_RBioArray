@@ -89,11 +89,8 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterTy
   } else {
 
     ## parallel computing
-    # set up cpu cluster
+    # set up cpu core number
     n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, type = clusterType)
-    registerDoParallel(cl) # part of doParallel package
-    on.exit(stopCluster(cl)) # close connect when exiting the function
 
     # parallel computing
     if (clusterType == "FORK"){ # mac and linux only
@@ -103,6 +100,12 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterTy
 
     } else { # windows etc
 
+      # set up cpu cluster for PSOCK
+      cl <- makeCluster(n_cores, type = clusterType)
+      registerDoParallel(cl) # part of doParallel package
+      on.exit(stopCluster(cl)) # close connect when exiting the function
+
+      # run functioins
       GS_list_p[] <- foreach(i = 1: length(GSigM_p), .packages = "piano") %dopar% {
         out <- tmpfunc_p(i, GSmethod_p = GSigM_p, gsc = GS, ...)
       }
@@ -365,27 +368,31 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
 
   } else { # parallel computing
 
-    # set up clusters
+    # set up cpu cores
     n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, type = clusterType)
-    registerDoParallel(cl) # part of doParallel package
-    on.exit(stopCluster(cl)) # close connect when exiting the function
 
     # parallel computing
     if (clusterType == "FORK"){ # mac and linux only
       # remove the rows with NA in the Entrez ID variable
-      DELst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_core, mc.preschedule = FALSE)
+      DELst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
       GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                                                              tVar = i$t, idVar = i[, entrezVar]), mc.cores = n_core, mc.preschedule = FALSE)
+                                                              tVar = i$t, idVar = i[, entrezVar]), mc.cores = n_cores, mc.preschedule = FALSE)
 
       if (plot){
-        mclapply(GSlst, RBioArray::rbioGS_boxplot, mc.cores = n_core, mc.preschedule = FALSE)
+        mclapply(GSlst, RBioArray::rbioGS_boxplot, mc.cores = n_cores, mc.preschedule = FALSE)
         mclapply(GSlst, RBioArray::rbioGS_scatter, mc.cores = n_cores, mc.preschedule = FALSE)
       }
 
     } else { # windows etc
+
+      # set up clusters for PSOCK
+      cl <- makeCluster(n_cores, type = clusterType)
+      registerDoParallel(cl) # part of doParallel package
+      on.exit(stopCluster(cl)) # close connect when exiting the function
+
+
       GS_list_p[] <- foreach(x = input) %dopar% {
         out <- function(x)x[complete.cases(x[, entrezVar]), ]
       }
