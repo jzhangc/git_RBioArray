@@ -4,8 +4,9 @@
 \alias{rbioGS}
 \title{rbioGS}
 \usage{
-rbioGS(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE,
-  clusterType = "PSOCK", ...)
+rbioGS(GS, pVar, logFCVar, tVar, idVar, method_p = c("fisher", "stouffer",
+  "reporter", "tailStrength", "wilcoxon"), method_t = c("page", "gsea",
+  "maxmean"), multicore = FALSE, clusterType = "PSOCK", ...)
 }
 \arguments{
 \item{GS}{Pre-loaded gene set objects.}
@@ -17,6 +18,10 @@ rbioGS(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE,
 \item{tVar}{Gene leve t values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}.}
 
 \item{idVar}{Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.}
+
+\item{method_p}{Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.}
+
+\item{method_t}{Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.}
 
 \item{multicore}{If to use parallel computing or not. Default is \code{FALSE}}
 

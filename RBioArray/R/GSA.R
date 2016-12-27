@@ -32,6 +32,8 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @param logFCVar Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.
 #' @param tVar Gene leve t values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}.
 #' @param idVar Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.
+#' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.
+#' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.
 #' @param multicore If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details The function is based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
@@ -47,15 +49,18 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #'
 #' }
 #' @export
-rbioGS <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
+rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
+                   method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
+                   method_t = c("page", "gsea", "maxmean"),
+                   multicore = FALSE, clusterType = "PSOCK", ...){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
                  t_value = tVar)
   gStats <- lapply(gStats, function(x){names(x) <- idVar; x})
 
-  GSigM_p <- c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")
-  GSigM_t <- c("page", "gsea", "maxmean")
+  GSigM_p <- method_p
+  GSigM_t <- method_t
 
   ## make empty output lists
   GS_list_p <- vector(mode = "list", length = length(GSigM_p))
