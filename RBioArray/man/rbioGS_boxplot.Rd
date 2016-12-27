@@ -4,15 +4,17 @@
 \alias{rbioGS_boxplot}
 \title{rbioGS_boxplot}
 \usage{
-rbioGS_boxplot(GSrank, GS = "OTHER", fileName, plotWidth = 170,
-  plotHeight = 150)
+rbioGS_boxplot(GS_list, ..., GS = "OTHER", fileName = "GS_list",
+  plotWidth = 170, plotHeight = 150)
 }
 \arguments{
-\item{GSrank}{piano GS rank object.}
+\item{GS_list}{piano GS results object.}
+
+\item{...}{Arguments passing to \code{consensusScores} function from \code{piano} package. See the corresponding \code{piano} package help page for details.}
 
 \item{GS}{if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.}
 
-\item{fileName}{Output file name.}
+\item{fileName}{Output file name. Default is \code{"GS_list"}.}
 
 \item{plotWidth}{Set the width of the plot. Default is \code{170}.}
 
@@ -25,15 +27,12 @@ Outputs a \code{pdf} boxplot figure file with allGSA results.
 Generate boxplot from piano GS rank object,
 }
 \details{
-GSrank takes the resulted object generated from the piano function consensusScores().
+The function is a wrapper that takes resulted object from \code{runGSA} function from \code{piano} package.
 }
 \examples{
 \dontrun{
-pcPos_rank_mxdn <- piano::consensusScores(pc_Pos, class = "mixed", direction="down",n = 15, adjusted = TRUE,
-                                   method = "median", plot = TRUE, showLegend = F,
-                                   rowNames = "names")
 
-rbioGS_boxplot(pcPos_rank_mxdn, fileName = "pcPos_rank_mxdn", plotWidth = 260, plotHeight = 240)
+rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", plot = TRUE, rowNames = "names", plotWidth = 260, plotHeight = 240)
 
 }
 }

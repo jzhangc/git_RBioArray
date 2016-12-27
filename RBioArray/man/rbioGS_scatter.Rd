@@ -4,11 +4,11 @@
 \alias{rbioGS_scatter}
 \title{rbioGS_scatter}
 \usage{
-rbioGS_scatter(GSAList, rankCutoff, pCutoff, fileName, plotWidth = 170,
+rbioGS_scatter(GSAList, ..., rankCutoff, pCutoff, fileName, plotWidth = 170,
   plotHeight = 150)
 }
 \arguments{
-\item{GSAList}{GSA list generated from \code{\link{rbioArray_allGSA}}.}
+\item{...}{Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.}
 
 \item{rankCutoff}{Cutoff value for GS rank line.}
 
@@ -18,7 +18,7 @@ rbioGS_scatter(GSAList, rankCutoff, pCutoff, fileName, plotWidth = 170,
 
 \item{plotHeight}{Set the height of the plot. Default is \code{150}.}
 
-\item{GS}{if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.}
+\item{GS_list}{GSA list generated from \code{\link{rbioArray_allGSA}}.}
 }
 \value{
 Outputs a \code{pdf} scatter figure file with allGSA results.
@@ -32,7 +32,7 @@ The function is based on piano package.
 \examples{
 \dontrun{
 
-rbioGS_scatter(GS_Pos, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+rbioGS_scatter(GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
 
 }
 }

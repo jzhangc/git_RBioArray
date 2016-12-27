@@ -24,7 +24,7 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 }
 
 
-#' @title rbioGS_all
+#' @title rbioGS
 #'
 #' @description Add Human entrez ID to the DE dataframe
 #' @param objTitle User set name for the output list. Default is \code{"DE_data"}
@@ -43,12 +43,12 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
-#' gsoutpu <- rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
+#' gsoutpu <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 #'
 #'
 #' }
 #' @export
-rbioGS_all <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
+rbioGS <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
@@ -64,9 +64,6 @@ rbioGS_all <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, mu
 
   GS_list_t <- vector(mode = "list", length = length(GSigM_t))
   names(GS_list_t) <- GSigM_t
-
-  fullGS_list <- vector(mode = "list", length = 2)
-  names(fullGS_list) <- c("GS_analysis_p", "GS_analysis_t")
 
   ## make tmp GS functions for parallel computing, as well as the
   tmpfunc_p <- function(i, GSmethod_p, ...){
@@ -119,7 +116,6 @@ rbioGS_all <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, mu
 
   }
 
-
   fullGS_list <- c(GS_list_p, GS_list_t)
 
   assign(paste(objTitle, "_GS", sep = ""), fullGS_list, envir = .GlobalEnv)
@@ -129,28 +125,32 @@ rbioGS_all <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, mu
 #' @title rbioGS_boxplot
 #'
 #' @description Generate boxplot from piano GS rank object,
-#' @param GSrank piano GS rank object.
+#' @param GS_list piano GS results object.
+#' @param ... Arguments passing to \code{consensusScores} function from \code{piano} package. See the corresponding \code{piano} package help page for details.
 #' @param GS if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.
-#' @param fileName Output file name.
+#' @param fileName Output file name. Default is \code{"GS_list"}.
 #' @param plotWidth Set the width of the plot. Default is \code{170}.
 #' @param plotHeight Set the height of the plot. Default is \code{150}.
-#' @details GSrank takes the resulted object generated from the piano function consensusScores().
+#' @details The function is a wrapper that takes resulted object from \code{runGSA} function from \code{piano} package.
 #' @return Outputs a \code{pdf} boxplot figure file with allGSA results.
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
 #' @import ggplot2
+#' @importFrom piano consensusScores
 #' @examples
 #' \dontrun{
-#' pcPos_rank_mxdn <- piano::consensusScores(pc_Pos, class = "mixed", direction="down",n = 15, adjusted = TRUE,
-#'                                    method = "median", plot = TRUE, showLegend = F,
-#'                                    rowNames = "names")
 #'
-#' rbioGS_boxplot(pcPos_rank_mxdn, fileName = "pcPos_rank_mxdn", plotWidth = 260, plotHeight = 240)
+#' rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", plot = TRUE, rowNames = "names", plotWidth = 260, plotHeight = 240)
 #'
 #' }
 #' @export
-rbioGS_boxplot <- function(GSrank, GS = "OTHER", fileName,
-                      plotWidth = 170, plotHeight = 150){
+rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
+                           plotWidth = 170, plotHeight = 150){
+
+  # prepare consensus score list
+  GSrank <- consensusScores(resList = GS_list, plot = FALSE, ...)
+
+
   # prepare the dataframe for ggplot2
   DFM <- data.frame(GSrank$rankMat)
   DFM <- DFM[, c(-1, -2)]
@@ -191,8 +191,8 @@ rbioGS_boxplot <- function(GSrank, GS = "OTHER", fileName,
 #' @title rbioGS_scatter
 #'
 #' @description Generate scatter plot for piano GS rank heatmap obejct.
-#' @param GSAList GSA list generated from \code{\link{rbioArray_allGSA}}.
-#' @param GS if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.
+#' @param GS_list GSA list generated from \code{\link{rbioArray_allGSA}}.
+#' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
 #' @param rankCutoff Cutoff value for GS rank line.
 #' @param pCutoff Cutoff value for GS p value line.
 #' @param fileName Output file name.
@@ -206,15 +206,14 @@ rbioGS_boxplot <- function(GSrank, GS = "OTHER", fileName,
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_scatter(GS_Pos, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+#' rbioGS_scatter(GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
 #'
 #' }
 #' @export
-rbioGS_scatter<-function(GSAList, rankCutoff, pCutoff,
+rbioGS_scatter <- function(GSAList, ..., rankCutoff, pCutoff,
                        fileName, plotWidth = 170, plotHeight = 150){
-  HTmap <-consensusHeatmap(GSAList, cutoff = 15, method = "median",
-                             colorkey = TRUE, colorgrad = c("blue","white"),
-                             cellnote = "none")
+
+  HTmap <-consensusHeatmap(GSAList, plot = FALSE, ...)
 
   ## data frame prep
   rank_tmp <- data.frame(HTmap$rankMat)
@@ -279,9 +278,6 @@ rbioGS_scatter<-function(GSAList, rankCutoff, pCutoff,
   ggsave(filename = paste(fileName,".scatterplot.pdf",sep = ""), plot = ScatterP,
          width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
   grid.draw(ScatterP) # preview
-
-  # return the plot dataframe
-  return(dfm4plot)
 }
 
 #' @title rbioGS_kegg
