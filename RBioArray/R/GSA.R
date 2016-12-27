@@ -27,7 +27,6 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @title rbioGS
 #'
 #' @description Add Human entrez ID to the DE dataframe
-#' @param objTitle User set name for the output list. Default is \code{"DE_data"}
 #' @param GS Pre-loaded gene set objects.
 #' @param pVar Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.
 #' @param logFCVar Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.
@@ -43,12 +42,12 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
-#' gsoutpu <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
+#' gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 #'
 #'
 #' }
 #' @export
-rbioGS <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
+rbioGS <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
@@ -118,7 +117,8 @@ rbioGS <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, multic
 
   fullGS_list <- c(GS_list_p, GS_list_t)
 
-  assign(paste(objTitle, "_GS", sep = ""), fullGS_list, envir = .GlobalEnv)
+  return(fullGS_list)
+
 }
 
 
@@ -310,3 +310,104 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
   return(assign(paste("kegg_", keggID, "_" , deparse(substitute(dfm)), sep = "") ,KEGG, envir = .GlobalEnv))
 }
 
+#' @title rbioGS_all
+#'
+#' @description Add Human entrez ID to the DE dataframe
+#' @param fileName Output figure file name.
+#' @param input Input list object for DE results.
+#' @param entrezVar Name of the EntrezID variable in the \code{input} object.
+#' @param GS Pre-loaded gene set objects.
+#' @param multicore If to use parallel computing or not. Default is \code{FALSE}
+#' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
+#' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
+#' @importFrom piano runGSA
+#' @importFrom foreach foreach
+#' @importFrom doParallel registerDoParallel
+#' @importFrom parallel detectCores makeCluster stopCluster mclapply
+#' @examples
+#' \dontrun{
+#' rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
+#'
+#'
+#' }
+#' @export
+rbioGS_all <- function(fileName, input, entrezVar = NULL,
+                   GS = NULL, plot = TRUE,
+                   multicore = FALSE, clusterType = "PSOCK"){
+
+  if (is.null(entrezVar)){
+    stop("please tell the function the name of the Entrez ID vaiable")
+  }
+
+  if (is.null(GS)){
+    stop("please choose a proper gene set")
+  }
+
+  ##
+  GSlst <- vector(mode = "list", length(names(input)))
+  names(GSlst) <- names(input)
+
+
+  ## GSA
+  if (!multicore){
+    # remove the rows with NA in the Entrez ID variable
+    DELst <- lapply(input, function(x)x[complete.cases(x[, entrezVar]), ])
+
+    # run GSA
+    GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+                                                          tVar = i$t, idVar = i[, entrezVar]), multicore = multicore, clusterType = clusterType)
+
+    if (plot){
+      lapply(GSlst, RBioArray::rbioGS_boxplot)
+      lapply(GSlst, RBioArray::rbioGS_scatter)
+    }
+
+  } else { # parallel computing
+
+    # set up clusters
+    n_cores <- detectCores() - 1
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl) # part of doParallel package
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # parallel computing
+    if (clusterType == "FORK"){ # mac and linux only
+      # remove the rows with NA in the Entrez ID variable
+      DELst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_core, mc.preschedule = FALSE)
+
+      # run GSA
+      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+                                                              tVar = i$t, idVar = i[, entrezVar]), mc.cores = n_core, mc.preschedule = FALSE)
+
+      if (plot){
+        mclapply(GSlst, RBioArray::rbioGS_boxplot, mc.cores = n_core, mc.preschedule = FALSE)
+        mclapply(GSlst, RBioArray::rbioGS_scatter, mc.cores = n_cores, mc.preschedule = FALSE)
+      }
+
+    } else { # windows etc
+      GS_list_p[] <- foreach(x = input) %dopar% {
+        out <- function(x)x[complete.cases(x[, entrezVar]), ]
+      }
+
+      GS_list[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
+        out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+                      tVar = i$t, idVar = i[, entrezVar])
+      }
+
+      if (plot){
+        foreach(x = GSlst, .packages = c("RBioArray", "piano")) %dopar% {
+          out <- rbioGS_boxplot(x, mc.cores = n_core, mc.preschedule = FALSE)
+        }
+
+        foreach(x = GSlst, .packages = c("RBioArray", "piano")) %dopar% {
+          out <- rbioGS_scatter(x, mc.cores = n_core, mc.preschedule = FALSE)
+        }
+
+      }
+
+    }
+
+  }
+
+}

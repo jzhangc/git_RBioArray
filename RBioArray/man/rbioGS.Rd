@@ -4,12 +4,10 @@
 \alias{rbioGS}
 \title{rbioGS}
 \usage{
-rbioGS(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar,
-  multicore = FALSE, clusterType = "PSOCK", ...)
+rbioGS(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE,
+  clusterType = "PSOCK", ...)
 }
 \arguments{
-\item{objTitle}{User set name for the output list. Default is \code{"DE_data"}}
-
 \item{GS}{Pre-loaded gene set objects.}
 
 \item{pVar}{Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.}
@@ -35,7 +33,7 @@ The function is based on piano package. It runs "fisher", "stouffer", "reporter"
 }
 \examples{
 \dontrun{
-gsoutpu <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
+gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 
 
 }
