@@ -27,6 +27,7 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @title rbioGS_all
 #'
 #' @description Add Human entrez ID to the DE dataframe
+#' @param objTitle User set name for the output list. Default is \code{"DE_data"}
 #' @param GS Pre-loaded gene set objects.
 #' @param pVar Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.
 #' @param logFCVar Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.
@@ -47,7 +48,7 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #'
 #' }
 #' @export
-rbioGS_all <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
+rbioGS_all <- function(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clusterType = "PSOCK", ...){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
@@ -121,7 +122,7 @@ rbioGS_all <- function(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE, clust
 
   fullGS_list <- c(GS_list_p, GS_list_t)
 
-  return(fullGS_list)
+  assign(paste(objTitle, "_GS", sep = ""), fullGS_list, envir = .GlobalEnv)
 }
 
 

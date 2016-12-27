@@ -4,10 +4,12 @@
 \alias{rbioGS_all}
 \title{rbioGS_all}
 \usage{
-rbioGS_all(GS, pVar, logFCVar, tVar, idVar, multicore = FALSE,
-  clusterType = "PSOCK", ...)
+rbioGS_all(objTitle = "DE_data", GS, pVar, logFCVar, tVar, idVar,
+  multicore = FALSE, clusterType = "PSOCK", ...)
 }
 \arguments{
+\item{objTitle}{User set name for the output list. Default is \code{"DE_data"}}
+
 \item{GS}{Pre-loaded gene set objects.}
 
 \item{pVar}{Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.}
