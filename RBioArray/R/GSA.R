@@ -182,12 +182,14 @@ rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
 
   # plot
   grid.newpage()
-  plt <- ggplot(DFM_mlt, aes(x = variable, y = value)) + geom_boxplot() +
-    guides(fill = FALSE) + scale_x_discrete(limits = with(DFM_mlt, rev(levels(variable)))) +
+  plt <- ggplot(DFM_mlt, aes(x = variable, y = value)) +
+    geom_boxplot() +
+    guides(fill = FALSE) +
+    scale_x_discrete(limits = with(DFM_mlt, rev(levels(variable)))) +
     ggtitle(plotTitle) +
-    xlab(xLabel) +
-    ylab(yLabel) +
     coord_flip() + # flip the axes
+    xlab(yLabel) + # reverse the arguments because of the flipping
+    ylab(xLabel) + # reverse the arguments because of the flipping
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
           axis.title = element_text(face = "bold"),
