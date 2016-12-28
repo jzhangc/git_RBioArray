@@ -208,6 +208,9 @@ rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
 #' @param rankCutoff Cutoff value for GS rank line.
 #' @param pCutoff Cutoff value for GS p value line.
 #' @param fileName Output file name.
+#' @param plotTitle Title of the plot. Default is \code{NULL}.
+#' @param xLabel X-axis label. Default is \code{"median p value"}.
+#' @param yLabel Y-axis label. Default is \code{"consensus score"}.
 #' @param plotHeight Set the height of the plot. Default is \code{150}.
 #' @return Outputs a \code{pdf} scatter figure file with allGSA results.
 #' @details The function is based on piano package.
@@ -332,6 +335,8 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
 #' @param input Input list object for DE results.
 #' @param entrezVar Name of the EntrezID variable in the \code{input} object.
 #' @param GS Pre-loaded gene set objects.
+#' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.
+#' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.
 #' @param multicore If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
@@ -342,8 +347,8 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
-#' rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 #'
+#' rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 #'
 #' }
 #' @export

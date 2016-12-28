@@ -18,6 +18,10 @@ rbioGS_all(fileName, input, entrezVar = NULL, GS = NULL,
 
 \item{GS}{Pre-loaded gene set objects.}
 
+\item{method_p}{Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.}
+
+\item{method_t}{Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.}
+
 \item{multicore}{If to use parallel computing or not. Default is \code{FALSE}}
 
 \item{clusterType}{Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
@@ -33,8 +37,8 @@ This is an all-in-one function for GS anlyasis based on piano package. It runs "
 }
 \examples{
 \dontrun{
-rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 
+rbioGS_all(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
 
 }
 }

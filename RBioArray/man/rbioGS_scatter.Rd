@@ -17,6 +17,12 @@ rbioGS_scatter(GSAList, ..., rankCutoff, pCutoff, fileName = "GS_list",
 
 \item{fileName}{Output file name.}
 
+\item{plotTitle}{Title of the plot. Default is \code{NULL}.}
+
+\item{xLabel}{X-axis label. Default is \code{"median p value"}.}
+
+\item{yLabel}{Y-axis label. Default is \code{"consensus score"}.}
+
 \item{plotHeight}{Set the height of the plot. Default is \code{150}.}
 
 \item{GS_list}{GSA list generated from \code{\link{rbioArray_allGSA}}.}
