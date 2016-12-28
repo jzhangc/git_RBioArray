@@ -4,8 +4,9 @@
 \alias{rbioGS_scatter}
 \title{rbioGS_scatter}
 \usage{
-rbioGS_scatter(GSAList, ..., rankCutoff, pCutoff, fileName, plotWidth = 170,
-  plotHeight = 150)
+rbioGS_scatter(GSAList, ..., rankCutoff, pCutoff, fileName = "GS_list",
+  plotTitle = NULL, xLabel = "median p value", yLabel = "consensus score",
+  plotWidth = 170, plotHeight = 150)
 }
 \arguments{
 \item{...}{Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.}

@@ -4,8 +4,10 @@
 \alias{rbioGS_all}
 \title{rbioGS_all}
 \usage{
-rbioGS_all(fileName, input, entrezVar = NULL, GS = NULL, plot = TRUE,
-  multicore = FALSE, clusterType = "PSOCK")
+rbioGS_all(fileName, input, entrezVar = NULL, GS = NULL,
+  method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
+  method_t = c("page", "gsea", "maxmean"), plot = TRUE, multicore = FALSE,
+  clusterType = "PSOCK")
 }
 \arguments{
 \item{fileName}{Output figure file name.}

@@ -222,8 +222,9 @@ rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
 #'
 #' }
 #' @export
-rbioGS_scatter <- function(GSAList, ..., rankCutoff, pCutoff,
-                       fileName, plotWidth = 170, plotHeight = 150){
+rbioGS_scatter <- function(GSAList, ..., rankCutoff, pCutoff, fileName = "GS_list",
+                           plotTitle = NULL, xLabel = "median p value", yLabel = "consensus score",
+                           plotWidth = 170, plotHeight = 150){
 
   HTmap <-consensusHeatmap(GSAList, plot = FALSE, ...)
 
@@ -263,26 +264,28 @@ rbioGS_scatter <- function(GSAList, ..., rankCutoff, pCutoff,
 
   ## ggplotting
   grid.newpage()
-  ScatterP<-ggplot(dfm4plot, aes(x = p_value, y = rank))+
-    geom_point(aes(shape = factor(p_class)), size=3)+
+  ScatterP<-ggplot(dfm4plot, aes(x = p_value, y = rank)) +
+    geom_point(aes(shape = factor(p_class)), size = 3) +
+    ggtitle(Title) +
+    xlab(xLabel) +
+    ylab(yLabel) +
     scale_x_continuous(breaks = c(0.1, 0.05, 0),
                        labels = c("0.1", "0.05", "0"),
                        expand = c(0, 0),
-                       trans = "reverse", limits = c(0.1, NA))+
+                       trans = "reverse", limits = c(0.1, NA)) +
     scale_y_continuous(breaks = c(100, 50, 0),
                        labels = c("100", "50", "0"),
                        expand = c(0, 0),
-                       trans = "reverse", limits = c(100, NA))+
-    geom_vline(xintercept = pCutoff)+
-    geom_hline(yintercept = rankCutoff)+
-    labs(x="median p value",y = "consensus score")+
+                       trans = "reverse", limits = c(100, NA)) +
+    geom_vline(xintercept = pCutoff, linetype = "dashed") +
+    geom_hline(yintercept = rankCutoff, linetype = "dashed") +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-          panel.border = element_rect(colour = "black", fill=NA, size=0.5),
+          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
           axis.title = element_text(face = "bold"),
           legend.position = "bottom",
           legend.title = element_blank(),
           legend.background = element_rect(),
-          legend.key = element_blank())+
+          legend.key = element_blank()) +
     scale_shape_manual(values = c(1:5))
 
   # export the files and draw a preview
@@ -345,8 +348,11 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
 #' }
 #' @export
 rbioGS_all <- function(fileName, input, entrezVar = NULL,
-                   GS = NULL, plot = TRUE,
-                   multicore = FALSE, clusterType = "PSOCK"){
+                       GS = NULL,
+                       method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
+                       method_t = c("page", "gsea", "maxmean"),
+                       plot = TRUE,
+                       multicore = FALSE, clusterType = "PSOCK"){
 
   if (is.null(entrezVar)){
     stop("please tell the function the name of the Entrez ID vaiable")
@@ -368,7 +374,9 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
 
     # run GSA
     GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                                                          tVar = i$t, idVar = i[, entrezVar]), multicore = multicore, clusterType = clusterType)
+                                                          tVar = i$t, idVar = i[, entrezVar]),
+                      method_p = method_p, method_t = method_t,
+                      multicore = multicore, clusterType = clusterType)
 
     if (plot){
       lapply(GSlst, RBioArray::rbioGS_boxplot)
@@ -386,8 +394,12 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
       DELst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
-      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                                                              tVar = i$t, idVar = i[, entrezVar]), mc.cores = n_cores, mc.preschedule = FALSE)
+      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(pVar = i$P.Value, logFCVar = i$logFC,
+                                                              tVar = i$t, idVar = i[, entrezVar]), GS = GS,
+                          method_p = method_p, method_t = method_t,
+                          mc.cores = n_cores, mc.preschedule = FALSE)
+
+
 
       if (plot){
         mclapply(GSlst, RBioArray::rbioGS_boxplot, mc.cores = n_cores, mc.preschedule = FALSE)
@@ -408,7 +420,7 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
 
       GS_list[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
         out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                      tVar = i$t, idVar = i[, entrezVar])
+                      tVar = i$t, idVar = i[, entrezVar], method_p = method_p, method_t = method_t)
       }
 
       if (plot){
