@@ -4,11 +4,13 @@
 \alias{rbioGS_scatter}
 \title{rbioGS_scatter}
 \usage{
-rbioGS_scatter(GSAList, fileName = "GS_list", ..., plotTitle = NULL,
+rbioGS_scatter(GSA_list, fileName = "GS_list", ..., plotTitle = NULL,
   xLabel = "median p value", yLabel = "consensus score", rankCutoff = 20,
   pCutoff = 0.05, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
+\item{GSA_list}{GSA list generated from \code{\link{rbioArray_allGSA}}.}
+
 \item{fileName}{Output file name.}
 
 \item{...}{Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.}
@@ -24,8 +26,6 @@ rbioGS_scatter(GSAList, fileName = "GS_list", ..., plotTitle = NULL,
 \item{pCutoff}{Cutoff value for GS p value line.}
 
 \item{plotHeight}{Set the height of the plot. Default is \code{150}.}
-
-\item{GS_list}{GSA list generated from \code{\link{rbioArray_allGSA}}.}
 }
 \value{
 Outputs a \code{pdf} scatter figure file with allGSA results.
@@ -39,7 +39,7 @@ The function is based on piano package.
 \examples{
 \dontrun{
 
-rbioGS_scatter(GSA = GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+rbioGS_scatter(GSA_list = GS_Pos, fileName = "GS_pos", cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05)
 
 }
 }

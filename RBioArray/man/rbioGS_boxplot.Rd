@@ -4,12 +4,12 @@
 \alias{rbioGS_boxplot}
 \title{rbioGS_boxplot}
 \usage{
-rbioGS_boxplot(GS_list, fileName = "GS_list", KEGG = FALSE, pClass = NULL,
-  classDirection = NULL, ..., plotTitle = NULL, xLabel = "rank",
-  yLabel = NULL, plotWidth = 170, plotHeight = 150)
+rbioGS_boxplot(GSA_list, fileName = "GS_list", KEGG = FALSE,
+  pClass = NULL, classDirection = NULL, ..., plotTitle = NULL,
+  xLabel = "rank", yLabel = NULL, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
-\item{GS_list}{piano GS results object.}
+\item{GSA_list}{piano GS results object.}
 
 \item{fileName}{Output file name. Default is \code{"GS_list"}.}
 
@@ -43,7 +43,7 @@ The function is a wrapper that takes resulted object from \code{runGSA} function
 \examples{
 \dontrun{
 
-GS_boxplot(GS_list = experi_preVpost_GS, pClass = "non", n = 20, adjusted = TRUE, method = "median", rowNames = "names", KEGG = TRUE,fileName = "GS_analysis", plotWidth = 260, plotHeight = 240)
+GS_boxplot(GSA_list = experi_preVpost_GS, pClass = "non", n = 20, adjusted = TRUE, method = "median", KEGG = TRUE,fileName = "GS_analysis", plotWidth = 260, plotHeight = 240)
 
 }
 }

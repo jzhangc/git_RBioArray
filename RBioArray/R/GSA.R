@@ -133,7 +133,7 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
 #' @title rbioGS_boxplot
 #'
 #' @description Generate boxplot from piano GS rank object,
-#' @param GS_list piano GS results object.
+#' @param GSA_list piano GS results object.
 #' @param fileName Output file name. Default is \code{"GS_list"}.
 #' @param KEGG if \code{TRUE}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{FALSE}.
 #' @param pClass P class for the consensus score. Options are "distinct", "mixed" or "non". Default is \code{NULL}.
@@ -153,11 +153,11 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
 #' @examples
 #' \dontrun{
 #'
-#' GS_boxplot(GS_list = experi_preVpost_GS, pClass = "non", n = 20, adjusted = TRUE, method = "median", rowNames = "names", KEGG = TRUE,fileName = "GS_analysis", plotWidth = 260, plotHeight = 240)
+#' GS_boxplot(GSA_list = experi_preVpost_GS, pClass = "non", n = 20, adjusted = TRUE, method = "median", KEGG = TRUE,fileName = "GS_analysis", plotWidth = 260, plotHeight = 240)
 #'
 #' }
 #' @export
-rbioGS_boxplot <- function(GS_list, fileName = "GS_list", KEGG = FALSE, pClass = NULL, classDirection = NULL, ...,
+rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass = NULL, classDirection = NULL, ...,
                            plotTitle = NULL, xLabel = "rank", yLabel = NULL, plotWidth = 170, plotHeight = 150){
 
   # check the arguments
@@ -223,7 +223,7 @@ rbioGS_boxplot <- function(GS_list, fileName = "GS_list", KEGG = FALSE, pClass =
 #' @title rbioGS_scatter
 #'
 #' @description Generate scatter plot for piano GS rank heatmap obejct.
-#' @param GS_list GSA list generated from \code{\link{rbioArray_allGSA}}.
+#' @param GSA_list GSA list generated from \code{\link{rbioArray_allGSA}}.
 #' @param fileName Output file name.
 #' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
 #' @param rankCutoff Cutoff value for GS rank line.
@@ -241,11 +241,11 @@ rbioGS_boxplot <- function(GS_list, fileName = "GS_list", KEGG = FALSE, pClass =
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_scatter(GSA = GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+#' rbioGS_scatter(GSA_list = GS_Pos, fileName = "GS_pos", cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05)
 #'
 #' }
 #' @export
-rbioGS_scatter <- function(GSAList, fileName = "GS_list",
+rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
                            ...,
                            plotTitle = NULL, xLabel = "median p value", yLabel = "consensus score",
                            rankCutoff = 20, pCutoff = 0.05,
@@ -387,11 +387,11 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
                        multicore = FALSE, clusterType = "PSOCK"){
 
   if (is.null(entrezVar)){
-    stop("please tell the function the name of the Entrez ID vaiable")
+    stop("please set the name of the Entrez ID vaiable")
   }
 
   if (is.null(GS)){
-    stop("please choose a proper gene set")
+    stop("please choose gene set(s)")
   }
 
   ##
