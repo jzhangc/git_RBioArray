@@ -4,18 +4,22 @@
 \alias{rbioGS_boxplot}
 \title{rbioGS_boxplot}
 \usage{
-rbioGS_boxplot(GS_list, ..., GS = "OTHER", fileName = "GS_list",
-  plotTitle = NULL, xLabel = "rank", yLabel = NULL, plotWidth = 170,
-  plotHeight = 150)
+rbioGS_boxplot(GS_list, fileName = "GS_list", KEGG = FALSE, pClass = NULL,
+  classDirection = NULL, ..., plotTitle = NULL, xLabel = "rank",
+  yLabel = NULL, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
 \item{GS_list}{piano GS results object.}
 
-\item{...}{Arguments passing to \code{consensusScores} function from \code{piano} package. See the corresponding \code{piano} package help page for details.}
-
-\item{GS}{if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.}
-
 \item{fileName}{Output file name. Default is \code{"GS_list"}.}
+
+\item{KEGG}{if \code{TRUE}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{FALSE}.}
+
+\item{pClass}{P class for the consensus score. Options are "distinct", "mixed" or "non". Default is \code{NULL}.}
+
+\item{classDirection}{The directionality of the p class, if pClass is set to \code{"distinct"} or \code{"mixed"}. Options are \code{"up"} and \code{"down"}. Default is \code{NULL}.}
+
+\item{...}{Arguments passing to \code{consensusScores} function from \code{piano} package. See the corresponding \code{piano} package help page for details.}
 
 \item{plotTitle}{Title of the plot. Default is \code{NULL}.}
 
@@ -39,7 +43,7 @@ The function is a wrapper that takes resulted object from \code{runGSA} function
 \examples{
 \dontrun{
 
-rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", rowNames = "names", plotWidth = 260, plotHeight = 240)
+GS_boxplot(GS_list = experi_preVpost_GS, pClass = "non", n = 20, adjusted = TRUE, method = "median", rowNames = "names", KEGG = TRUE,fileName = "GS_analysis", plotWidth = 260, plotHeight = 240)
 
 }
 }

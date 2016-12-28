@@ -134,9 +134,11 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
 #'
 #' @description Generate boxplot from piano GS rank object,
 #' @param GS_list piano GS results object.
-#' @param ... Arguments passing to \code{consensusScores} function from \code{piano} package. See the corresponding \code{piano} package help page for details.
-#' @param GS if GS = \code{"KEGG"}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{"OTHER"}.
 #' @param fileName Output file name. Default is \code{"GS_list"}.
+#' @param KEGG if \code{TRUE}, the function will remove the "KEGG_" string in the GS name variable. Default is \code{FALSE}.
+#' @param pClass P class for the consensus score. Options are "distinct", "mixed" or "non". Default is \code{NULL}.
+#' @param classDirection The directionality of the p class, if pClass is set to \code{"distinct"} or \code{"mixed"}. Options are \code{"up"} and \code{"down"}. Default is \code{NULL}.
+#' @param ... Arguments passing to \code{consensusScores} function from \code{piano} package. See the corresponding \code{piano} package help page for details.
 #' @param plotTitle Title of the plot. Default is \code{NULL}.
 #' @param xLabel X-axis label. Default is \code{"rank"}.
 #' @param yLabel Y-axis label. Default is \code{NULL}.
@@ -151,15 +153,24 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_boxplot(GS_object, fileName = "GS_analysis", class = "mixed", direction="down", n = 15, adjusted = TRUE, method = "median", rowNames = "names", plotWidth = 260, plotHeight = 240)
+#' GS_boxplot(GS_list = experi_preVpost_GS, pClass = "non", n = 20, adjusted = TRUE, method = "median", rowNames = "names", KEGG = TRUE,fileName = "GS_analysis", plotWidth = 260, plotHeight = 240)
 #'
 #' }
 #' @export
-rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
+rbioGS_boxplot <- function(GS_list, fileName = "GS_list", KEGG = FALSE, pClass = NULL, classDirection = NULL, ...,
                            plotTitle = NULL, xLabel = "rank", yLabel = NULL, plotWidth = 170, plotHeight = 150){
 
+  # check the arguments
+  if (is.null(pClass)) {
+    stop(cat("Please set p class(es): \"distinct\", \"mixed\" or \"non\" "))
+  }
+
+  if (is.null(classDirection) & pClass != "non"){
+    stop(cat("Please set direction: \"up\" or \"down\""))
+  }
+
   # prepare consensus score list
-  GSrank <- consensusScores(resList = GS_list, plot = FALSE, ...)
+  GSrank <- consensusScores(resList = GS_list, plot = FALSE, class = pClass, direction = classDirection, ...)
 
 
   # prepare the dataframe for ggplot2
@@ -169,7 +180,7 @@ rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
   DFM$enrichment <- rownames(DFM)
   DFM_mlt <- melt(DFM, id.vars = colnames(DFM)[length(colnames(DFM))])
 
-  if (GS == "KEGG"){ # remove "KEGG_" and the space between the terms
+  if (KEGG){ # remove "KEGG_" and the space between the terms
     DFM_mlt$variable <- sapply(DFM_mlt$variable, function(x){
       i <- substring(x, 6)
       gsub("_", " ", i)
@@ -196,20 +207,27 @@ rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
           legend.position = "bottom")
 
   # export the file and draw a preview
-  ggsave(filename = paste(fileName,".boxplot.pdf",sep = ""), plot = plt,
-         width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+  if (is.null(classDirection)){
+    ggsave(filename = paste(fileName,"_boxplot_", pClass, ".pdf",sep = ""), plot = plt,
+           width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+  } else {
+    ggsave(filename = paste(fileName,"_boxplot_", pClass, "_", classDirection , ".pdf",sep = ""), plot = plt,
+           width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+  }
+
   grid.draw(plt) # preview
 }
+
 
 
 #' @title rbioGS_scatter
 #'
 #' @description Generate scatter plot for piano GS rank heatmap obejct.
 #' @param GS_list GSA list generated from \code{\link{rbioArray_allGSA}}.
+#' @param fileName Output file name.
 #' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
 #' @param rankCutoff Cutoff value for GS rank line.
 #' @param pCutoff Cutoff value for GS p value line.
-#' @param fileName Output file name.
 #' @param plotTitle Title of the plot. Default is \code{NULL}.
 #' @param xLabel X-axis label. Default is \code{"median p value"}.
 #' @param yLabel Y-axis label. Default is \code{"consensus score"}.
@@ -223,17 +241,24 @@ rbioGS_boxplot <- function(GS_list, ..., GS = "OTHER", fileName = "GS_list",
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_scatter(GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+#' rbioGS_scatter(GSA = GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
 #'
 #' }
 #' @export
-rbioGS_scatter <- function(GSAList, ..., rankCutoff, pCutoff, fileName = "GS_list",
+rbioGS_scatter <- function(GSAList, fileName = "GS_list",
+                           ...,
                            plotTitle = NULL, xLabel = "median p value", yLabel = "consensus score",
+                           rankCutoff = 20, pCutoff = 0.05,
                            plotWidth = 170, plotHeight = 150){
 
   HTmap <-consensusHeatmap(GSAList, plot = FALSE, ...)
 
   ## data frame prep
+  p_class_name_rank <- c("disdn_rank", "mixdn_rank", "nondir_rank", "mixup_rank",
+                         "disup_rank")
+  p_class_name_p<-c("disdn_p", "mixdn_p", "nondir_p", "mixup_p",
+                    "disup_p")
+
   rank_tmp <- data.frame(HTmap$rankMat)
   p_value_tmp <- data.frame(HTmap$pMat)
   names(rank_tmp) <- p_class_name_rank
@@ -271,7 +296,7 @@ rbioGS_scatter <- function(GSAList, ..., rankCutoff, pCutoff, fileName = "GS_lis
   grid.newpage()
   ScatterP<-ggplot(dfm4plot, aes(x = p_value, y = rank)) +
     geom_point(aes(shape = factor(p_class)), size = 3) +
-    ggtitle(Title) +
+    ggtitle(plotTitle) +
     xlab(xLabel) +
     ylab(yLabel) +
     scale_x_continuous(breaks = c(0.1, 0.05, 0),

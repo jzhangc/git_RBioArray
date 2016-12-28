@@ -4,24 +4,24 @@
 \alias{rbioGS_scatter}
 \title{rbioGS_scatter}
 \usage{
-rbioGS_scatter(GSAList, ..., rankCutoff, pCutoff, fileName = "GS_list",
-  plotTitle = NULL, xLabel = "median p value", yLabel = "consensus score",
-  plotWidth = 170, plotHeight = 150)
+rbioGS_scatter(GSAList, fileName = "GS_list", ..., plotTitle = NULL,
+  xLabel = "median p value", yLabel = "consensus score", rankCutoff = 20,
+  pCutoff = 0.05, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
-\item{...}{Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.}
-
-\item{rankCutoff}{Cutoff value for GS rank line.}
-
-\item{pCutoff}{Cutoff value for GS p value line.}
-
 \item{fileName}{Output file name.}
+
+\item{...}{Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.}
 
 \item{plotTitle}{Title of the plot. Default is \code{NULL}.}
 
 \item{xLabel}{X-axis label. Default is \code{"median p value"}.}
 
 \item{yLabel}{Y-axis label. Default is \code{"consensus score"}.}
+
+\item{rankCutoff}{Cutoff value for GS rank line.}
+
+\item{pCutoff}{Cutoff value for GS p value line.}
 
 \item{plotHeight}{Set the height of the plot. Default is \code{150}.}
 
@@ -39,7 +39,7 @@ The function is based on piano package.
 \examples{
 \dontrun{
 
-rbioGS_scatter(GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
+rbioGS_scatter(GSA = GS_Pos, cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05, fileName = "GS_pos")
 
 }
 }
