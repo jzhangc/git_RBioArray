@@ -383,8 +383,20 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
                        GS = NULL,
                        method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
                        method_t = c("page", "gsea", "maxmean"),
-                       plot = TRUE,
-                       multicore = FALSE, clusterType = "PSOCK"){
+                       multicore = FALSE, clusterType = "PSOCK",
+                       boxplot = TRUE,
+                       boxplotFileName = "GS",
+                       boxplotKEGG = FALSE, boxplotPClass = NULL, boxplotClassDirection = NULL,
+                       boxplotN = 20,
+                       boxplotTitle = NULL, boxplotXlabel = "rank", boxplotYlabel = NULL,
+                       boxplotWidth = 170, boxplotHeight = 150,
+                       scatterplot = TRUE,
+                       scatterplotFileName = "GS",
+                       scatterplotCutoff = 20,
+                       scatterRankline = 20, scatterPline = 0.05,
+                       scatterTitle = NULL, scatterXlabel = "median p value", scattrYlabel = "consensus score",
+                       scatterWidth = 170, scatterHeight = 150,
+                       plotMethod = "median", plotPadjust = TRUE){
 
   if (is.null(entrezVar)){
     stop("please set the name of the Entrez ID vaiable")
@@ -394,7 +406,8 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
     stop("please choose gene set(s)")
   }
 
-  ##
+
+  ## make an empty list to store the GS results
   GSlst <- vector(mode = "list", length(names(input)))
   names(GSlst) <- names(input)
 
@@ -405,14 +418,27 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
     DELst <- lapply(input, function(x)x[complete.cases(x[, entrezVar]), ])
 
     # run GSA
-    GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                                                          tVar = i$t, idVar = i[, entrezVar]),
-                      method_p = method_p, method_t = method_t,
-                      multicore = multicore, clusterType = clusterType)
+    GSlst[[]] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+                                                            tVar = i$t, idVar = i[, entrezVar]),
+                        method_p = method_p, method_t = method_t,
+                        multicore = multicore, clusterType = clusterType)
 
-    if (plot){
-      lapply(GSlst, RBioArray::rbioGS_boxplot)
-      lapply(GSlst, RBioArray::rbioGS_scatter)
+    if (boxplot){
+
+      # boxplots
+      lapply(1: length(GSlst), RBioArray::rbioGS_boxplot)
+
+    }
+
+    if (scatterplot){
+
+      # scatter plots
+      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]]), fileName = scatterplotFileName, cutoff = scatterplotCutoff,
+             method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+             pCutoff = scatterPline,
+             plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
+             plotWidth = scatterWidth, plotHeight = scatterHeight)
+
     }
 
   } else { # parallel computing
@@ -426,16 +452,27 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
       DELst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
-      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(pVar = i$P.Value, logFCVar = i$logFC,
-                                                              tVar = i$t, idVar = i[, entrezVar]), GS = GS,
-                          method_p = method_p, method_t = method_t,
-                          mc.cores = n_cores, mc.preschedule = FALSE)
+      GSlst[[]] <- mclapply(DElst, function(i)RBioArray::rbioGS(pVar = i$P.Value, logFCVar = i$logFC,
+                                                                tVar = i$t, idVar = i[, entrezVar]), GS = GS,
+                            method_p = method_p, method_t = method_t,
+                            mc.cores = n_cores, mc.preschedule = FALSE)
 
 
 
-      if (plot){
+      if (boxplot){
         mclapply(GSlst, RBioArray::rbioGS_boxplot, mc.cores = n_cores, mc.preschedule = FALSE)
-        mclapply(GSlst, RBioArray::rbioGS_scatter, mc.cores = n_cores, mc.preschedule = FALSE)
+
+      }
+
+      if (scatterplot){
+
+        mclapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]]), fileName = scatterplotFileName, cutoff = scatterplotCutoff,
+                 method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+                 pCutoff = scatterPline,
+                 plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
+                 plotWidth = scatterWidth, plotHeight = scatterHeight,
+                 mc.cores = n_cores, mc.preschedule = FALSE)
+
       }
 
     } else { # windows etc
@@ -445,25 +482,31 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
-
-      GS_list_p[] <- foreach(x = input) %dopar% {
+      # remove the rows with NA in the Entrez ID variable
+      DElst <- foreach(x = input) %dopar% {
         out <- function(x)x[complete.cases(x[, entrezVar]), ]
       }
 
-      GS_list[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
+      GS_list[[]] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
         out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
                       tVar = i$t, idVar = i[, entrezVar], method_p = method_p, method_t = method_t)
       }
 
-      if (plot){
-        foreach(x = GSlst, .packages = c("RBioArray", "piano")) %dopar% {
-          out <- rbioGS_boxplot(x)
+      if (boxplot){
+        foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
+          out <- rbioGS_boxplot(GSlst[[x]])
         }
 
-        foreach(x = GSlst, .packages = c("RBioArray", "piano")) %dopar% {
-          out <- rbioGS_scatter(x)
-        }
+      }
 
+      if (scatterplot){
+        foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
+          rbioGS_scatter(GSA_list = GSlst[[x]], fileName = scatterplotFileName, cutoff = scatterplotCutoff,
+                         method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+                         pCutoff = scatterPline,
+                         plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
+                         plotWidth = scatterWidth, plotHeight = scatterHeight)
+        }
       }
 
     }

@@ -6,8 +6,16 @@
 \usage{
 rbioGS_all(fileName, input, entrezVar = NULL, GS = NULL,
   method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
-  method_t = c("page", "gsea", "maxmean"), plot = TRUE, multicore = FALSE,
-  clusterType = "PSOCK")
+  method_t = c("page", "gsea", "maxmean"), multicore = FALSE,
+  clusterType = "PSOCK", boxplot = TRUE, boxplotFileName = "GS",
+  boxplotKEGG = FALSE, boxplotPClass = NULL, boxplotClassDirection = NULL,
+  boxplotN = 20, boxplotTitle = NULL, boxplotXlabel = "rank",
+  boxplotYlabel = NULL, boxplotWidth = 170, boxplotHeight = 150,
+  scatterplot = TRUE, scatterplotFileName = "GS", scatterplotCutoff = 20,
+  scatterRankline = 20, scatterPline = 0.05, scatterTitle = NULL,
+  scatterXlabel = "median p value", scattrYlabel = "consensus score",
+  scatterWidth = 170, scatterHeight = 150, plotMethod = "median",
+  plotPadjust = TRUE)
 }
 \arguments{
 \item{fileName}{Output figure file name.}
