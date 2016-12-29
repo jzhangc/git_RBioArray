@@ -34,6 +34,7 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @param idVar Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.
 #' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.
 #' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.
+#' @param ... Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.
 #' @param multicore If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details The function is based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
@@ -44,15 +45,15 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
-#' gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, multicore = TRUE, clusterType = "FORK")
+#' gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, nPerm = 1000, multicore = TRUE, clusterType = "FORK")
 #'
 #'
 #' }
 #' @export
 rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
                    method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
-                   method_t = c("page", "gsea", "maxmean"),
-                   multicore = FALSE, clusterType = "PSOCK", ...){
+                   method_t = c("page", "gsea", "maxmean"), ...,
+                   multicore = FALSE, clusterType = "PSOCK"){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
@@ -364,6 +365,7 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
 #' @param GS Pre-loaded gene set objects.
 #' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.
 #' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.
+#' @param ... Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.
 #' @param multicore If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
@@ -379,10 +381,11 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
 #'
 #' }
 #' @export
-rbioGS_all <- function(fileName, input, entrezVar = NULL,
+rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
                        GS = NULL,
                        method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
                        method_t = c("page", "gsea", "maxmean"),
+                       ...,
                        multicore = FALSE, clusterType = "PSOCK",
                        boxplot = TRUE,
                        boxplotFileName = "GS",
@@ -421,7 +424,7 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
     GSlst[[]] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
                                                             tVar = i$t, idVar = i[, entrezVar]),
                         method_p = method_p, method_t = method_t,
-                        multicore = multicore, clusterType = clusterType)
+                        multicore = multicore, clusterType = clusterType, ...)
 
     if (boxplot){
 
@@ -433,7 +436,7 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
     if (scatterplot){
 
       # scatter plots
-      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]]), fileName = scatterplotFileName, cutoff = scatterplotCutoff,
+      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]]), fileName = paste(scatterplotFileName, "_", GS, sep = ""), cutoff = scatterplotCutoff,
              method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
              pCutoff = scatterPline,
              plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
@@ -466,7 +469,7 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
 
       if (scatterplot){
 
-        mclapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]]), fileName = scatterplotFileName, cutoff = scatterplotCutoff,
+        mclapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]]), fileName = paste(scatterplotFileName, "_", GS, sep = ""), cutoff = scatterplotCutoff,
                  method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
                  pCutoff = scatterPline,
                  plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
@@ -501,7 +504,7 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
 
       if (scatterplot){
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
-          rbioGS_scatter(GSA_list = GSlst[[x]], fileName = scatterplotFileName, cutoff = scatterplotCutoff,
+          rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(scatterplotFileName, "_", GS, sep = ""), cutoff = scatterplotCutoff,
                          method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
                          pCutoff = scatterPline,
                          plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
@@ -512,5 +515,7 @@ rbioGS_all <- function(fileName, input, entrezVar = NULL,
     }
 
   }
+
+  assign(paste(objTitle, "_GS_list", sep = ""), GS_list, envir = .GlobalEnv)
 
 }

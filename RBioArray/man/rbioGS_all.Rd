@@ -4,9 +4,9 @@
 \alias{rbioGS_all}
 \title{rbioGS_all}
 \usage{
-rbioGS_all(fileName, input, entrezVar = NULL, GS = NULL,
+rbioGS_all(objTitle = "DE", input, entrezVar = NULL, GS = NULL,
   method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
-  method_t = c("page", "gsea", "maxmean"), multicore = FALSE,
+  method_t = c("page", "gsea", "maxmean"), ..., multicore = FALSE,
   clusterType = "PSOCK", boxplot = TRUE, boxplotFileName = "GS",
   boxplotKEGG = FALSE, boxplotPClass = NULL, boxplotClassDirection = NULL,
   boxplotN = 20, boxplotTitle = NULL, boxplotXlabel = "rank",
@@ -18,8 +18,6 @@ rbioGS_all(fileName, input, entrezVar = NULL, GS = NULL,
   plotPadjust = TRUE)
 }
 \arguments{
-\item{fileName}{Output figure file name.}
-
 \item{input}{Input list object for DE results.}
 
 \item{entrezVar}{Name of the EntrezID variable in the \code{input} object.}
@@ -30,9 +28,13 @@ rbioGS_all(fileName, input, entrezVar = NULL, GS = NULL,
 
 \item{method_t}{Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.}
 
+\item{...}{Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.}
+
 \item{multicore}{If to use parallel computing or not. Default is \code{FALSE}}
 
 \item{clusterType}{Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+
+\item{fileName}{Output figure file name.}
 }
 \value{
 Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
