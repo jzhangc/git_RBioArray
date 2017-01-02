@@ -76,7 +76,7 @@ rbioGS_all(objTitle = "DE", input, entrezVar = NULL, GS = NULL, ...,
 Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 }
 \description{
-Add Human entrez ID to the DE dataframe
+All-in-one wrapper for GSA and plotting.
 }
 \details{
 This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.

@@ -360,7 +360,7 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
 
 #' @title rbioGS_all
 #'
-#' @description Add Human entrez ID to the DE dataframe
+#' @description All-in-one wrapper for GSA and plotting.
 #' @param objTitle Object title for the output GS analysis list from \code{piano} package.
 #' @param input The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.
 #' @param entrezVar Name of the EntrezID variable in the \code{input} object.
