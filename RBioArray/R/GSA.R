@@ -171,7 +171,7 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
   }
 
   # prepare consensus score list
-  GSrank <- consensusScores(resList = GS_list, plot = FALSE, class = pClass, direction = classDirection, ...)
+  GSrank <- consensusScores(resList = GSA_list, plot = FALSE, class = pClass, direction = classDirection, ...)
 
 
   # prepare the dataframe for ggplot2
@@ -252,7 +252,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
                            rankCutoff = 20, pCutoff = 0.05,
                            plotWidth = 170, plotHeight = 150){
 
-  HTmap <-consensusHeatmap(GSAList, plot = FALSE, ...)
+  HTmap <-consensusHeatmap(GSA_list, plot = FALSE, ...)
 
   ## data frame prep
   p_class_name_rank <- c("disdn_rank", "mixdn_rank", "nondir_rank", "mixup_rank",
@@ -293,7 +293,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
   } # merge all the temp data frames together
 
 
-  ## ggplotting
+  ## plotting
   grid.newpage()
   ScatterP<-ggplot(dfm4plot, aes(x = p_value, y = rank)) +
     geom_point(aes(shape = factor(p_class)), size = 3) +
@@ -356,19 +356,40 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
   return(assign(paste("kegg_", keggID, "_" , deparse(substitute(dfm)), sep = "") ,KEGG, envir = .GlobalEnv))
 }
 
+
+
 #' @title rbioGS_all
 #'
 #' @description Add Human entrez ID to the DE dataframe
-#' @param fileName Output figure file name.
-#' @param input Input list object for DE results.
+#' @param objTitle Object title for the output GS analysis list from \code{piano} package.
+#' @param input The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.
 #' @param entrezVar Name of the EntrezID variable in the \code{input} object.
 #' @param GS Pre-loaded gene set objects.
-#' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.
-#' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.
-#' @param ... Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.
-#' @param multicore If to use parallel computing or not. Default is \code{FALSE}
-#' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
+#' @param ... Arguments to pass to \code{\link{rbioGS}}.
+#' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
+#' @param cluster Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param boxplot If to plot boxplots. Default is \code{TRUE}.
+#' @param boxplotKEGG When \code{boxplot = TRUE}, to set if the gene set is KEGG. Default is \code{FALSE}.
+#' @param boxplotFileName When \code{boxplot = TRUE}, to set the prefix of the boxplots file name. Default is \code{"GS"}.
+#' @param boxplotN When \code{boxplot = TRUE}, to set the \code{n} (rank cutoff) argument passed to \code{consensusScores} function from \code{piano} package. Default is \code{20}.
+#' @param boxplotTitle When \code{boxplot = TRUE}, to set the title of the boxplots. Default is \code{NULL}.
+#' @param boxplotXlabel When \code{boxplot = TRUE}, to set the boxplots x-axis label. Default is \code{"rank"}.
+#' @param boxplotYlabel When \code{boxplot = TRUE}, to set the boxplots y-axis label. Default is \code{NULL}.
+#' @param boxplotWidth When \code{boxplot = TRUE}, to set the boxplots width. Default is \code{170}.
+#' @param boxplotHeight When \code{boxplot = TRUE}, to set the boxplots height. Default is \code{150}.
+#' @param scatterplot When \code{scatterplot = TRUE}, to set if to plot a scatter plot. Default is \code{TRUE}.
+#' @param scatterplotFileName When \code{scatterplot = TRUE}, to set the prefix of the scatter plot file name. Default is \code{"GS"}.
+#' @param scatterplotCutoff When \code{scatterplot = TRUE}, to set the rank cutoff of the scatter plot. Default is \code{20}.
+#' @param scatterplotRankline When \code{scatterplot = TRUE}, to set the rank line on the scatter plot. Default is \code{20}.
+#' @param scatterplotPline When \code{scatterplot = TRUE}, to set the p value line on the scatter plot. Default is \code{0.05}.
+#' @param scatterTitle When \code{scatterplot = TRUE}, to set the title of the scatter plot. Default is \code{NULL}.
+#' @param scatterXlabel When \code{scatterplot = TRUE}, to set the scatter plot x-axis label. Default is \code{"median p value"}.
+#' @param scatterYlabel When \code{scatterplot = TRUE}, to set the scatter plot y-axis label. Default is \code{"consensus score"}.
+#' @param scatterWidth When \code{scatterplot = TRUE}, to set the scatter plot width. Default is \code{170}.
+#' @param scatterHeight When \code{scatterplot = TRUE}, to set the scatter plot height. Default is \code{150}.
+#' @param plotMethod When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the p methods. Options are \code{"median"} and \code{"mean"}. Default is \code{"median"}.
+#' @param plotPadjust When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set if to use FDR adjusted p value or not. Default is \code{TRUE}.
+#' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 #' @importFrom piano runGSA
 #' @importFrom foreach foreach
@@ -382,15 +403,11 @@ rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
 #' }
 #' @export
 rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
-                       GS = NULL,
-                       method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
-                       method_t = c("page", "gsea", "maxmean"),
-                       ...,
-                       multicore = FALSE, clusterType = "PSOCK",
+                       GS = NULL, ...,
+                       parallelComputing = FALSE, cluster = "PSOCK",
                        boxplot = TRUE,
                        boxplotFileName = "GS",
-                       boxplotKEGG = FALSE, boxplotPClass = NULL, boxplotClassDirection = NULL,
-                       boxplotN = 20,
+                       boxplotKEGG = FALSE, boxplotN = 20,
                        boxplotTitle = NULL, boxplotXlabel = "rank", boxplotYlabel = NULL,
                        boxplotWidth = 170, boxplotHeight = 150,
                        scatterplot = TRUE,
@@ -414,22 +431,37 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
   GSlst <- vector(mode = "list", length(names(input)))
   names(GSlst) <- names(input)
 
-
   ## GSA
-  if (!multicore){
+  if (!parallelComputing){
     # remove the rows with NA in the Entrez ID variable
-    DELst <- lapply(input, function(x)x[complete.cases(x[, entrezVar]), ])
+    DElst <- lapply(input, function(x)x[complete.cases(x[, entrezVar]), ])
 
     # run GSA
-    GSlst[[]] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                                                            tVar = i$t, idVar = i[, entrezVar]),
-                        method_p = method_p, method_t = method_t,
-                        multicore = multicore, clusterType = clusterType, ...)
+    GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+                                                          tVar = i$t, idVar = i[, entrezVar],
+                                                          multicore = parallelComputing, clusterType = cluster, ...))
+
 
     if (boxplot){
+      pCl <- c("distinct", "mixed") # for boxplot
+      classDirt <- c("up", "down") # for boxplot
 
       # boxplots
-      lapply(1: length(GSlst), RBioArray::rbioGS_boxplot)
+      lapply(1: length(GSlst), function(x){
+        for (i in 1:2){
+          for (j in 1:2){
+            RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(boxplotFileName, "_", pCl[i], "_", classDirt[j], sep = ""),
+                                      KEGG = boxplotKEGG, pClass = pCl[i], classDirection = classDirt[j],
+                                      n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                      plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
+          }
+        }
+      })
+
+      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(boxplotFileName, "_non", sep = ""),
+                                                                    KEGG = boxplotKEGG, pClass = "non",
+                                                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                    plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight))
 
     }
 
@@ -450,20 +482,40 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "FORK"){ # mac and linux only
+    if (cluster == "FORK"){ # mac and linux only
       # remove the rows with NA in the Entrez ID variable
-      DELst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
+      DElst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
-      GSlst[[]] <- mclapply(DElst, function(i)RBioArray::rbioGS(pVar = i$P.Value, logFCVar = i$logFC,
-                                                                tVar = i$t, idVar = i[, entrezVar]), GS = GS,
-                            method_p = method_p, method_t = method_t,
-                            mc.cores = n_cores, mc.preschedule = FALSE)
+      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+                                                              tVar = i$t, idVar = i[, entrezVar],
+                                                              multicore = FALSE, ...),
+                          mc.cores = n_cores, mc.preschedule = FALSE)
 
 
 
       if (boxplot){
-        mclapply(GSlst, RBioArray::rbioGS_boxplot, mc.cores = n_cores, mc.preschedule = FALSE)
+
+        pCl <- c("distinct", "mixed") # for boxplot
+        classDirt <- c("up", "down") # for boxplot
+
+        # boxplots
+        mclapply(1: length(GSlst), function(x){
+          for (i in 1:2){
+            for (j in 1:2){
+              RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(boxplotFileName, "_", pCl[i], "_", classDirt[j], sep = ""),
+                                        KEGG = boxplotKEGG, pClass = pCl[i], classDirection = classDirt[j],
+                                        n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                        plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
+            }
+          }
+        }, mc.cores = n_cores, mc.preschedule = FALSE)
+
+        mclapply(1: length(GSlst), function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(boxplotFileName, "_non", sep = ""),
+                                                                        KEGG = boxplotKEGG, pClass = "non",
+                                                                        n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                        plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
+                 mc.cores = n_cores, mc.preschedule = FALSE)
 
       }
 
@@ -481,23 +533,45 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
     } else { # windows etc
 
       # set up clusters for PSOCK
-      cl <- makeCluster(n_cores, type = clusterType)
+      cl <- makeCluster(n_cores, type = cluster)
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
       # remove the rows with NA in the Entrez ID variable
       DElst <- foreach(x = input) %dopar% {
-        out <- function(x)x[complete.cases(x[, entrezVar]), ]
+        out <- x[complete.cases(x[, entrezVar]), ]
       }
 
-      GS_list[[]] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
+      GSlst[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
         out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                      tVar = i$t, idVar = i[, entrezVar], method_p = method_p, method_t = method_t)
+                      tVar = i$t, idVar = i[, entrezVar], multicore = FALSE, ...)
       }
 
+      # plot
       if (boxplot){
+
+
+        pCl <- c("distinct", "mixed") # for boxplot
+        classDirt <- c("up", "down") # for boxplot
+
+        # boxplots
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
-          out <- rbioGS_boxplot(GSlst[[x]])
+          for (i in 1:2){
+            for (j in 1:2){
+              RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(boxplotFileName, "_", pCl[i], "_", classDirt[j], sep = ""),
+                                        KEGG = boxplotKEGG, pClass = pCl[i], classDirection = classDirt[j],
+                                        n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                        plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
+            }
+          }
+        }
+
+
+        foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
+          RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(boxplotFileName, "_non", sep = ""),
+                                    KEGG = boxplotKEGG, pClass = "non",
+                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                    plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
         }
 
       }
@@ -516,6 +590,6 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
 
   }
 
-  assign(paste(objTitle, "_GS_list", sep = ""), GS_list, envir = .GlobalEnv)
+  assign(paste(objTitle, "_GS_list_", deparse(substitute(GS_kegg)), sep = ""), GSlst, envir = .GlobalEnv)
 
 }
