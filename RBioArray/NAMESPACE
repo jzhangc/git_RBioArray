@@ -2,9 +2,11 @@
 
 export(rbioGS)
 export(rbioGS_all)
+export(rbioGS_all_noplot)
 export(rbioGS_boxplot)
 export(rbioGS_entrez2geneStats)
 export(rbioGS_kegg)
+export(rbioGS_plotting)
 export(rbioGS_scatter)
 export(rbioarray_DE)
 export(rbioarray_PreProc)
