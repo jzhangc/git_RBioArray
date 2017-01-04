@@ -107,7 +107,7 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
     } else { # windows etc
 
       # set up cpu cluster for PSOCK
-      cl <- makeCluster(n_cores, type = clusterType)
+      cl <- makeCluster(n_cores, type = clusterType, outfile = "")
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
@@ -525,7 +525,7 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
     } else { # windows etc
 
       # set up clusters for PSOCK
-      cl <- makeCluster(n_cores, type = cluster)
+      cl <- makeCluster(n_cores, type = cluster, outfile = "")
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
@@ -646,7 +646,7 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
     } else { # windows etc
 
       # set up clusters for PSOCK
-      cl <- makeCluster(n_cores, type = cluster)
+      cl <- makeCluster(n_cores, type = cluster, outfile = "")
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
@@ -796,7 +796,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
     } else { # windows etc
 
       # set up clusters for PSOCK
-      cl <- makeCluster(n_cores, type = cluster)
+      cl <- makeCluster(n_cores, type = cluster, outfile = "")
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 

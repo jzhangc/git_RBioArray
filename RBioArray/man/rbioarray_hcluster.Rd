@@ -4,7 +4,7 @@
 \alias{rbioarray_hcluster}
 \title{rbioarray_hcluster}
 \usage{
-rbioarray_hcluster(plotName = "data", normlist, n = "all", fct,
+rbioarray_hcluster(plotName = "data", fltlist, n = "all", fct,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = "euclidean", clust = "complete", colColour = "Paired",
   mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
@@ -13,7 +13,7 @@ rbioarray_hcluster(plotName = "data", normlist, n = "all", fct,
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
 
-\item{normlist}{Input normalized data, either a list, \code{EList} or \code{MAList} object.}
+\item{fltlist}{Input filtered data, either a list, \code{EList} or \code{MAList} object.}
 
 \item{n}{Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
 
@@ -45,7 +45,7 @@ Wrapper for hierarchical clustering analysis and heatmap visualization.
 }
 \examples{
 \dontrun{
-rbioarray_hcluster(normlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
+rbioarray_hcluster(fltlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
 }
 }
 
