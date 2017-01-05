@@ -154,7 +154,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @description DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
 #' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object.
-#' @param anno Annotation object, usually a \code{dataframe}.
+#' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.

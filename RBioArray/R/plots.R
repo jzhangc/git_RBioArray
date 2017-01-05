@@ -74,12 +74,16 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all",
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
+#' @param rowLabel Whether to display row label or not. Default is \code{FALSE}.
+#' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
 #' @param colColour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @details Note that both \code{anno} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
@@ -88,9 +92,11 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all",
 #' rbioarray_hcluster_super(normlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
 #' }
 #' @export
-rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, pcutoff = NULL, method = "spikein",
+rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
+                                     pcutoff = NULL, method = "spikein",
                                      fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = "euclidean", clust = "complete",
+                                     rowLabel = FALSE, anno = NULL, genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                      plotWidth = 7, plotHeight = 7){ #DOI: fltered subset data of interest
 
@@ -106,10 +112,6 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, pcutoff =
     dfm <- dfm[dfm$ProbeName %in% pb_name, ]
   }
 
-  mtx <- as.matrix(dfm[, -c(1:2)])
-  rownames(mtx) <- dfm[, 1]
-
-
   ## heatmap
   # set up dis and cluster functions
   distfunc <- function(x)dist(x, method = distance)
@@ -122,8 +124,44 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, pcutoff =
   colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
 
   # draw heatmap
-  pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
-  heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
-            col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
-  dev.off()
+
+  if (rowLabel){
+
+    if (is.null(anno) | is.null(genesymbolVar)){
+      mtx <- as.matrix(dfm[, -c(1:2)])
+      rownames(mtx) <- dfm[, 1]
+
+      pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+      dev.off()
+      print("No annotation object or gene sybmol variable set. Row labels will be the default probe names.")
+
+    } else {
+      geneSymbl <- anno[anno$ProbeName %in% dfm$ProbeName, ][, genesymbolVar]
+
+      dfm$geneSymbol <- geneSymbl
+      dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
+
+      mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
+      rownames(mtx) <- dfm[, length(colnames(dfm))] # row names are now gene symbols
+
+      pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+      dev.off()
+
+      print("Probes with no gene names are removed.")
+    }
+
+  } else {
+    mtx <- as.matrix(dfm[, -c(1:2)])
+    rownames(mtx) <- dfm[, 1]
+
+    pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+    heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+              col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = FALSE,...)
+    dev.off()
+  }
+
 }

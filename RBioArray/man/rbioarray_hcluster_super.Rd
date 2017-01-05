@@ -7,6 +7,7 @@
 rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
   method = "spikein", fct, colGroup = ifelse(length(levels(fct)) < 19,
   length(levels(fct)), 19), distance = "euclidean", clust = "complete",
+  rowLabel = FALSE, anno = NULL, genesymbolVar = NULL,
   colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
   plotWidth = 7, plotHeight = 7)
 }

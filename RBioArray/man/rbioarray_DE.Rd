@@ -16,7 +16,7 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
 
 \item{fltdata}{filtered data, either a list, \code{EList} or \code{MAList} object.}
 
-\item{anno}{Annotation object, usually a \code{dataframe}.}
+\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}}
 
 \item{design}{Design matrix.}
 
