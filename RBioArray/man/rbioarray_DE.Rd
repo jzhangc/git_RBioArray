@@ -65,7 +65,7 @@ The function outputs a \code{list} object with DE results, merged with annotatio
 DE analysis function.
 }
 \details{
-When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the lables will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the lables will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 }
 \examples{
 \dontrun{
