@@ -176,7 +176,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
-#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the lables will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
 #' @importFrom limma lmFit eBayes topTable
 #' @importFrom foreach foreach
