@@ -10,7 +10,7 @@ Installation:
 Update log
 
     0.1.29
-      - Code redundancy further reduced for Array DE function
+      - Code redundancy further reduced for array DE function
 
     0.1.28
       - Array DE function re-written with better parallel computing (doParallel and foreach), greatly reduced code redundancy, and backend prepration for plot annotation functionality
