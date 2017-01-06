@@ -30,6 +30,12 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
 
 \item{clust}{Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.}
 
+\item{rowLabel}{Whether to display row label or not. Default is \code{FALSE}.}
+
+\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
+
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
+
 \item{colColour}{Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.}
 
 \item{mapColour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
@@ -48,9 +54,14 @@ A supervised heatmap based on hierarchical clustering analysis in \code{pdf} for
 \description{
 Wrapper for supervised hierarchical clustering analysis and heatmap visualization.
 }
+\details{
+Note that both \code{anno} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
+}
 \examples{
 \dontrun{
-rbioarray_hcluster_super(normlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
+rbioarray_hcluster_super(normlist = normdata, n = 500, fct = conSum, trace = "none",
+srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "",
+keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
 }
 }
 

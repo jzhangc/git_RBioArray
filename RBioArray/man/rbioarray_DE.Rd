@@ -5,11 +5,11 @@
 \title{rbioarray_DE}
 \usage{
 rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
-  weights = NULL, multicore = FALSE, ..., plot = TRUE, FC = 1.5,
-  DE = "fdr", q.value = 0.05, Title = NULL,
-  xLabel = "log2(fold change)", yLabel = "-log10(p value)",
-  symbolSize = 2, xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
-  plotHeight = 150)
+  weights = NULL, multicore = FALSE, ..., plot = TRUE, geneName = FALSE,
+  genesymbolVar = NULL, signifLabel = FALSE, FC = 1.5, DE = "fdr",
+  q.value = 0.05, Title = NULL, xLabel = "log2(fold change)",
+  yLabel = "-log10(p value)", symbolSize = 2, xTxtSize = 10,
+  yTxtSize = 10, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
@@ -29,6 +29,12 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
 \item{...}{arguments for \code{topTable()} from \code{limma} package.}
 
 \item{plot}{If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.}
+
+\item{geneName}{If to only plot probes with a gene name. Default is \code{FALSE}.}
+
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
+
+\item{signifLabel}{If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.}
 
 \item{FC}{Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.}
 
@@ -59,11 +65,14 @@ The function outputs a \code{list} object with DE results, merged with annotatio
 DE analysis function.
 }
 \details{
-When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}.
+When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the lables will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 }
 \examples{
 \dontrun{
-rbiorrary_DE(objTitle = "data", fltdata, design, anno = Anno)
+tstfunc(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
+        weights = fltdata$ArrayWeight, multicore = TRUE,
+        plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
+        DE = "spikein")
 }
 }
 

@@ -45,7 +45,9 @@ Wrapper for hierarchical clustering analysis and heatmap visualization.
 }
 \examples{
 \dontrun{
-rbioarray_hcluster(fltlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
+rbioarray_hcluster(fltlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45,
+offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5,
+key.xlab = "Normalized expression value", key.ylab = "Probe count")
 }
 }
 

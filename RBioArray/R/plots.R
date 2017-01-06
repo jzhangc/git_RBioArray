@@ -19,7 +19,9 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @examples
 #' \dontrun{
-#' rbioarray_hcluster(fltlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
+#' rbioarray_hcluster(fltlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45,
+#' offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5,
+#' key.xlab = "Normalized expression value", key.ylab = "Probe count")
 #' }
 #' @export
 rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all",
@@ -89,7 +91,9 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all",
 #' @importFrom RColorBrewer brewer.pal
 #' @examples
 #' \dontrun{
-#' rbioarray_hcluster_super(normlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
+#' rbioarray_hcluster_super(normlist = normdata, n = 500, fct = conSum, trace = "none",
+#' srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "",
+#' keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
 #' }
 #' @export
 rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
@@ -140,15 +144,17 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
     } else {
       geneSymbl <- anno[anno$ProbeName %in% dfm$ProbeName, ][, genesymbolVar]
 
+
       dfm$geneSymbol <- geneSymbl
       dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
+      labrow <- dfm$geneSymbol
 
       mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-      rownames(mtx) <- dfm[, length(colnames(dfm))] # row names are now gene symbols
+      rownames(mtx) <- dfm[, 1] # row names are now gene symbols
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
-                col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+                col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = labrow, ...)
       dev.off()
 
       print("Probes with no gene names are removed.")

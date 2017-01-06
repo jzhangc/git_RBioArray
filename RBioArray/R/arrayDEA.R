@@ -161,6 +161,9 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param multicore If to use parallel computing. Default is \code{FALSE}.
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
 #' @param plot If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.
+#' @param geneName If to only plot probes with a gene name. Default is \code{FALSE}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
+#' @param signifLabel If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
 #' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
 #' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
 #' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
@@ -173,21 +176,26 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
-#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}.
+#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the lables will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
 #' @importFrom limma lmFit eBayes topTable
-#' @importFrom parallel detectCores makeCluster stopCluster parApply parLapply
+#' @importFrom foreach foreach
+#' @importFrom doParallel registerDoParallel
+#' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @examples
 #' \dontrun{
-#' rbiorrary_DE(objTitle = "data", fltdata, design, anno = Anno)
+#' tstfunc(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
+#'         weights = fltdata$ArrayWeight, multicore = TRUE,
+#'         plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
+#'         DE = "spikein")
 #' }
 #' @export
 rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
                          design, contra, weights = NULL,
                          multicore = FALSE, ...,
-                         plot = TRUE,
+                         plot = TRUE, geneName = FALSE, genesymbolVar = NULL, signifLabel = FALSE,
                          FC = 1.5, DE = "fdr", q.value = 0.05,
                          Title = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
                          symbolSize = 2, xTxtSize = 10, yTxtSize =10,
@@ -212,17 +220,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
       fit <- eBayes(fit)
       fit$genes <- fltdata$genes # add genes matrix to the DE results
 
-      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
-
-      outlist <- lapply(cf, function(i){
-        tmp <- topTable(out, coef = i, number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by = "ProbeName")
-        return(tmp)
-      })
-
-      names(outlist) <- cf
-
     } else {
 
       ## DE
@@ -230,18 +227,18 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
       fit <- contrasts.fit(fit, contrasts = contra)
       fit <- eBayes(fit)
 
-      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
-
-      outlist <- lapply(cf, function(i){
-        tmp <- topTable(out, coef = i, number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by = "ProbeName")
-        return(tmp)
-      })
-
-      names(outlist) <- cf
-
     }
+
+    out <- fit[fit$genes$ControlType == 0, ] # remove control probes
+
+    outlist <- lapply(cf, function(i){
+      tmp <- topTable(out, coef = i, number = Inf, ...)
+      tmp$ProbeName <- rownames(tmp)
+      tmp <- merge(tmp, anno, by = "ProbeName")
+      return(tmp)
+    })
+
+    names(outlist) <- cf
 
     ## write DE results into files
     lapply(1:length(cf), function(j){
@@ -252,156 +249,112 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
     # plot
     if (plot){
 
-      if (DE == "fdr"){
-        n_probe <- length(rownames(topTable(out, n = Inf))) #extract the total probe number
-
-        threshold_summary[] <- t(sapply(1: length(cf), function(j){
-
-          # set the cutoff
-          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / n_probe) # divide by the probe number
-
-          # plot
-          loclEnv <- environment()
-          plt <- ggplot(outlist[[j]], aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
-            geom_point(alpha = 0.4, size = symbolSize) +
-            ggtitle(Title) +
-            scale_y_continuous(expand = c(0.02, 0)) +
-            xlab(xLabel) +
-            ylab(yLabel) +
-            geom_vline(xintercept = log2(FC), linetype = "dashed") +
-            geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-            geom_hline(yintercept = - log10(q.value / length(rownames(topTable(out, n = Inf)))), linetype = "dashed") +
-            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                  panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-                  plot.title = element_text(hjust = 0.5),
-                  legend.position = "none",
-                  legend.title = element_blank(),
-                  axis.text.x = element_text(size = xTxtSize),
-                  axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+      if (DE == "spikein"){ # extract PC stats for spikein method
+        PCntl <- fit[fit$genes$ControlType == 1, ]
+      }
 
 
-          grid.newpage()
+      threshold_summary[] <- t(sapply(1: length(cf), function(j){
 
-          # extract gtable
-          pltgtb <- ggplot_gtable(ggplot_build(plt))
-
-          # add the right side y axis
-          Aa <- which(pltgtb$layout$name == "axis-l")
-          pltgtb_a <- pltgtb$grobs[[Aa]]
-          axs <- pltgtb_a$children[[2]]
-          axs$widths <- rev(axs$widths)
-          axs$grobs <- rev(axs$grobs)
-          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-          pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-          pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
-
-          # export the file and draw a preview
-          ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-                 width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
-          grid.draw(pltgtb) # preview
-
-          # dump the info to the threshold dataframe
-          if (length(levels(cutoff)) == 1){
-
-            if (levels(cutoff) == "TRUE"){
-
-              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
-
-            } else {
-              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
-            }
-
+        # set the data frame
+        if (geneName){
+          if (!is.null(genesymbolVar)){
+            tmpdfm <- outlist[[j]][complete.cases(outlist[[j]][, genesymbolVar]), ]
           } else {
-            tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+            warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
+            tmpdfm <- outlist[[j]]
+          }
+        } else {
+          tmpdfm <- outlist[[j]]
+        }
+
+        # set the cutoff
+        if (DE == "fdr"){
+
+          if (length(which(tmpdfm$adj.P.Val < 0.05)) == 0){
+            pcutoff <- 1
+          } else {
+            pcutoff <- min(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
           }
 
-        }))
+          cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value <= pcutoff)
 
+        } else if (DE == "spikein") {
 
-
-      } else if (DE == "spikein"){
-
-
-        PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
-
-        threshold_summary[] <- t(sapply(1: length(cf), function(j){
-
-          # set cutoff
           ifelse(min(PCntl$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, cf[j]]))
+          cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value <= pcutoff)
 
-          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
-
-          # plot
-          loclEnv <- environment()
-          plt <- ggplot(outlist[[j]], aes(x = logFC, y = - log10(P.Value), colour = cutoff), environment = loclEnv) +
-            geom_point(alpha = 0.4, size = symbolSize) +
-            ggtitle(Title) +
-            scale_y_continuous(expand = c(0.02, 0)) +
-            xlab(xLabel) +
-            ylab(yLabel) +
-            geom_vline(xintercept = log2(FC), linetype = "dashed") +
-            geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-            geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
-            theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                  panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-                  plot.title = element_text(hjust = 0.5),
-                  legend.position = "none",
-                  legend.title = element_blank(),
-                  axis.text.x = element_text(size = xTxtSize),
-                  axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+        } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
 
 
-          grid.newpage()
-
-          # extract gtable
-          pltgtb <- ggplot_gtable(ggplot_build(plt))
-
-          # add the right side y axis
-          Aa <- which(pltgtb$layout$name == "axis-l")
-          pltgtb_a <- pltgtb$grobs[[Aa]]
-          axs <- pltgtb_a$children[[2]]
-          axs$widths <- rev(axs$widths)
-          axs$grobs <- rev(axs$grobs)
-          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-          pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-          pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
-
-          # export the file and draw a preview
-          ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-                 width = plotWidth, height = plotHeight, units = "mm", dpi = 600) # deparse(substitute(x)) converts object name into a character string
-          grid.draw(pltgtb) # preview
+        # plot
+        loclEnv <- environment()
+        plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
+          geom_point(alpha = 0.4, size = symbolSize) +
+          ggtitle(Title) +
+          scale_y_continuous(expand = c(0.02, 0)) +
+          xlab(xLabel) +
+          ylab(yLabel) +
+          geom_vline(xintercept = log2(FC), linetype = "dashed") +
+          geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+          geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(hjust = 0.5),
+                legend.position = "none",
+                legend.title = element_blank(),
+                axis.text.x = element_text(size = xTxtSize),
+                axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
 
 
-          # dump the info to the threshold dataframe
-          if (length(levels(cutoff)) == 1){
+        grid.newpage()
 
-            if (levels(cutoff) == "TRUE"){
+        # extract gtable
+        pltgtb <- ggplot_gtable(ggplot_build(plt))
 
-              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+        # add the right side y axis
+        Aa <- which(pltgtb$layout$name == "axis-l")
+        pltgtb_a <- pltgtb$grobs[[Aa]]
+        axs <- pltgtb_a$children[[2]]
+        axs$widths <- rev(axs$widths)
+        axs$grobs <- rev(axs$grobs)
+        axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+        Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+        pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+        pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
-            } else {
-              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
-            }
+        # export the file and draw a preview
+        ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+               width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+        grid.draw(pltgtb) # preview
+
+        # dump the info to the threshold dataframe
+        if (length(levels(cutoff)) == 1){
+
+          if (levels(cutoff) == "TRUE"){
+
+            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
 
           } else {
-            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
           }
 
-        }))
+        } else {
+          tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+        }
 
-      } else {stop("Please choose a proper DE method for p value thresholding")}
+      }))
 
     }
 
   } else {
 
+
     ## parallel computing
     # set up cpu cluster
     n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores)
-    clusterExport(cl, varlist = c("fltdata", "design", "anno"), envir = environment())
+    cl <- makeCluster(n_cores, type = "PSOCK")
+    registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     ## DE
@@ -413,188 +366,141 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
       fit <- eBayes(fit)
       fit$genes <- fltdata$genes # add genes matrix to the DE results
 
-      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
-
-      outlist <- parLapply(cl, cf, fun = function(i){
-        tmp <- limma::topTable(out, coef = i, number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by = "ProbeName")
-        return(tmp)
-      })
-
-      names(outlist) <- cf
-
     } else {
 
       fit <- lmFit(fltdata, design, weights = weights)
       fit <- contrasts.fit(fit, contrasts = contra)
       fit <- eBayes(fit)
 
-      out <- fit[fit$genes$ControlType == 0, ] # remove control probes
+    }
 
-      outlist <- parLapply(cl, cf, fun = function(i){
-        tmp <- limma::topTable(out, coef = i, number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by = "ProbeName")
-        return(tmp)
-      })
+    out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 
-      names(outlist) <- cf
+    outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
+
+      tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
+      tmp$ProbeName <- rownames(tmp)
+      tmp <- merge(tmp, anno, by = "ProbeName")
+      return(tmp)
 
     }
 
+    names(outlist) <- cf
+
     ## write DE results into files
-    parLapply(cl, 1:length(cf), fun = function(j){
+    foreach(j = 1: length(cf)) %dopar% {
       write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
-    })
+    }
 
     ## volcano plot
     if (plot){
 
-      if (DE == "fdr"){
+      if (DE == "spikein"){ # extract PC stats for spikein method
+        PCntl <- fit[fit$genes$ControlType == 1, ]
+      }
 
-        n_probe <- length(rownames(topTable(out, n = Inf))) #extract the total probe number
-
-        threshold_summary[] <- t(parSapply(cl, 1: length(cf), FUN = function(j){
-
-          # set the cutoff
-          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= q.value / n_probe) # divide by the probe number
-
-          # plot
-          loclEnv <- environment()
-          plt <- ggplot2::ggplot(outlist[[j]], ggplot2::aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
-            ggplot2::geom_point(alpha = 0.4, size = symbolSize) +
-            ggplot2::ggtitle(Title) +
-            ggplot2::scale_y_continuous(expand = c(0.02, 0)) +
-            ggplot2::xlab(xLabel) +
-            ggplot2::ylab(yLabel) +
-            ggplot2::geom_vline(xintercept = log2(FC), linetype = "dashed") +
-            ggplot2::geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-            ggplot2::geom_hline(yintercept = - log10(q.value / length(rownames(limma::topTable(out, n = Inf)))), linetype = "dashed") +
-            ggplot2::theme(panel.background = ggplot2::element_rect(fill = 'white', colour = 'black'),
-                           panel.border = ggplot2::element_rect(colour = "black", fill = NA, size = 0.5),
-                           plot.title = ggplot2::element_text(hjust = 0.5),
-                           legend.position = "none",
-                           legend.title = ggplot2::element_blank(),
-                           axis.text.x = ggplot2::element_text(size = xTxtSize),
-                           axis.text.y = ggplot2::element_text(size = yTxtSize, hjust = 0.5))
-
-
-          grid::grid.newpage()
-
-          # extract gtable
-          pltgtb <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(plt))
-
-          # add the right side y axis
-          Aa <- which(pltgtb$layout$name == "axis-l")
-          pltgtb_a <- pltgtb$grobs[[Aa]]
-          axs <- pltgtb_a$children[[2]]
-          axs$widths <- rev(axs$widths)
-          axs$grobs <- rev(axs$grobs)
-          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - ggplot2::unit(1, "npc") + ggplot2::unit(0.08, "cm")
-          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-          pltgtb <- gtable::gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-          pltgtb <- gtable::gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
-
-          # export the file and draw a preview
-          ggplot2::ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-                          width = plotWidth, height = plotHeight, units = "mm",dpi = 600) # deparse(substitute(x)) converts object name into a character string
-          grid::grid.draw(pltgtb) # preview
-
-          # dump the info to the threshold dataframe
-          if (length(levels(cutoff)) == 1){
-
-            if (levels(cutoff) == "TRUE"){
-
-              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
-
-            } else {
-              tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
-            }
-
+      threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
+        # set the data frame
+        if (geneName){
+          if (!is.null(genesymbolVar)){
+            tmpdfm <- outlist[[j]][complete.cases(outlist[[j]][, genesymbolVar]), ]
           } else {
-            tmp <- c(cf[[j]], signif(q.value / n_probe, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+            warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
+            tmpdfm <- outlist[[j]]
           }
-        }))
+        } else {
+          tmpdfm <- outlist[[j]]
+        }
 
-      } else if (DE == "spikein"){
+        # set the cutoff
+        if (DE == "fdr"){
 
+          if (length(which(tmpdfm$adj.P.Val < 0.05)) == 0){
+            pcutoff <- 1
+          } else {
+            pcutoff <- min(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
+          }
 
-        PCntl <- fit[fit$genes$ControlType == 1, ] # extract PC stats
+          cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value <= pcutoff)
 
-        threshold_summary[] <- t(parSapply(cl, 1: length(cf), FUN = function(j){
+        } else if (DE == "spikein") {
 
-          # set cutoff
           ifelse(min(PCntl$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, cf[j]]))
+          cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value <= pcutoff)
 
-          cutoff <- as.factor(abs(outlist[[j]]$logFC) >= log2(FC) & outlist[[j]]$P.Value <= pcutoff)
-
-          # plot
-          loclEnv <- environment()
-          plt <- ggplot2::ggplot(outlist[[j]], ggplot2::aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
-            ggplot2::geom_point(alpha = 0.4, size = symbolSize) +
-            ggplot2::ggtitle(Title) +
-            ggplot2::scale_y_continuous(expand = c(0.02, 0)) +
-            ggplot2::xlab(xLabel) +
-            ggplot2::ylab(yLabel) +
-            ggplot2::geom_vline(xintercept = log2(FC), linetype = "dashed") +
-            ggplot2::geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-            ggplot2::geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
-            ggplot2::theme(panel.background = ggplot2::element_rect(fill = 'white', colour = 'black'),
-                           panel.border = ggplot2::element_rect(colour = "black", fill = NA, size = 0.5),
-                           plot.title = ggplot2::element_text(hjust = 0.5),
-                           legend.position = "none",
-                           legend.title = ggplot2::element_blank(),
-                           axis.text.x = ggplot2::element_text(size = xTxtSize),
-                           axis.text.y = ggplot2::element_text(size = yTxtSize, hjust = 0.5))
+        } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
 
 
-          grid::grid.newpage()
+        # plot
+        loclEnv <- environment()
+        plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
+          geom_point(alpha = 0.4, size = symbolSize) +
+          ggtitle(Title) +
+          scale_y_continuous(expand = c(0.02, 0)) +
+          xlab(xLabel) +
+          ylab(yLabel) +
+          geom_vline(xintercept = log2(FC), linetype = "dashed") +
+          geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+          geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(hjust = 0.5),
+                legend.position = "none",
+                legend.title = element_blank(),
+                axis.text.x = element_text(size = xTxtSize),
+                axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
 
-          # extract gtable
-          pltgtb <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(plt))
 
-          # add the right side y axis
-          Aa <- which(pltgtb$layout$name == "axis-l")
-          pltgtb_a <- pltgtb$grobs[[Aa]]
-          axs <- pltgtb_a$children[[2]]
-          axs$widths <- rev(axs$widths)
-          axs$grobs <- rev(axs$grobs)
-          axs$grobs[[1]]$x <- axs$grobs[[1]]$x - ggplot2::unit(1, "npc") + ggplot2::unit(0.08, "cm")
-          Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-          pltgtb <- gtable::gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-          pltgtb <- gtable::gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+        grid.newpage()
 
-          # export the file and draw a preview
-          ggplot2::ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-                          width = plotWidth, height = plotHeight, units = "mm", dpi = 600) # deparse(substitute(x)) converts object name into a character string
-          grid::grid.draw(pltgtb) # preview
+        # extract gtable
+        pltgtb <- ggplot_gtable(ggplot_build(plt))
 
-          # dump the info to the threshold dataframe
-          if (length(levels(cutoff)) == 1){
+        # add the right side y axis
+        Aa <- which(pltgtb$layout$name == "axis-l")
+        pltgtb_a <- pltgtb$grobs[[Aa]]
+        axs <- pltgtb_a$children[[2]]
+        axs$widths <- rev(axs$widths)
+        axs$grobs <- rev(axs$grobs)
+        axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+        Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+        pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+        pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
-            if (levels(cutoff) == "TRUE"){
+        # export the file and draw a preview
+        ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+               width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+        grid.draw(pltgtb) # preview
 
-              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+        # dump the info to the threshold dataframe
+        if (length(levels(cutoff)) == 1){
 
-            } else {
-              tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
-            }
+          if (levels(cutoff) == "TRUE"){
+
+            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
 
           } else {
-            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+            tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
           }
 
-        }))
-
-      } else {stop("Please choose a proper DE method for p value thresholding")}
+        } else {
+          tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+        }
+      }
 
     }
+
 
   }
 
   ## output the DE object to the environment
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
   write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
+
+
+  ## message
+  if (geneName & !is.null(genesymbolVar)){
+    print("Probes without a gene symbol are removed from the volcano plots")
+  }
 
 }
