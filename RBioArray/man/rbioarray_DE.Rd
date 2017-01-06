@@ -69,10 +69,10 @@ When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When 
 }
 \examples{
 \dontrun{
-tstfunc(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
-        weights = fltdata$ArrayWeight, multicore = TRUE,
-        plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-        DE = "spikein")
+rbioarray_DE(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
+             weights = fltdata$ArrayWeight, multicore = TRUE,
+             plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
+             DE = "spikein")
 }
 }
 

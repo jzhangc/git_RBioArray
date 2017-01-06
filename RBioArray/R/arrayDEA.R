@@ -186,10 +186,10 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @importFrom gtable gtable_add_cols gtable_add_grob
 #' @examples
 #' \dontrun{
-#' tstfunc(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
-#'         weights = fltdata$ArrayWeight, multicore = TRUE,
-#'         plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-#'         DE = "spikein")
+#' rbioarray_DE(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
+#'              weights = fltdata$ArrayWeight, multicore = TRUE,
+#'              plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
+#'              DE = "spikein")
 #' }
 #' @export
 rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
