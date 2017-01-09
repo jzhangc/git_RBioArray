@@ -14,8 +14,7 @@ Update log
       - Volcano dots annotation functionality added
       - KEGG visualization function updated
       - Bug fixes and other improvements
-
-
+      
     0.1.29
       - Code redundancy further reduced for array DE function
 
