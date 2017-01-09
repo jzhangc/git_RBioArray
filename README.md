@@ -11,14 +11,15 @@ Update log
 
     0.1.30
       - Volcano dots colours are now user customizable
-      - Volcano dots annotation function added
+      - Volcano dots annotation functionality added
       - Bug fixes and other improvements
 
     0.1.29
       - Code redundancy further reduced for array DE function
 
     0.1.28
-      - Array DE function re-written with better parallel computing (doParallel and foreach), greatly reduced code redundancy, and backend prepration for plot annotation functionality
+      - Array DE function re-written with better parallel computing (doParallel and foreach), 
+      greatly reduced code redundancy, and backend prepration for plot annotation functionality
       - Bug fixes
       
     0.1.27
