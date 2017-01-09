@@ -330,6 +330,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #'
 #' @description Download and generate DE results masked kegg pathway figures
 #' @param dfm GS dataframe with \code{ENTREZID} and \code{logFC} variables.
+#' @param entrezVar Name of the EntrezID variable in the \code{input} object.
 #' @param keggID Make sure to have quotation marks around the ID number.
 #' @param suffix Output file name suffix. Make sure to put it in quotation marks.
 #' @param species Set the species. Default is \code{"hsa"}. Visit kegg website for details.
@@ -344,16 +345,25 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #'
 #' }
 #' @export
-rbioGS_kegg<- function(dfm, keggID, suffix, species = "hsa"){
-  logFC <- dfm$logFC
-  names(logFC) <- dfm$ENTREZID
+rbioGS_kegg <- function(dfm, entrezVar = NULL,
+                       keggID, suffix, species = "hsa"){
 
+  # check entrez ID variable name
+  if (is.null(entrezVar)){
+    stop("Please provide the name for the Entrez ID variable from the input dataframe")
+  }
+
+  # prepare objects
+  logFC <- dfm$logFC
+  names(logFC) <- dfm[, entrezVar]
+
+  # visualize
   KEGG <- pathview(gene.data = logFC, pathway.id = keggID, species = species,
                    out.suffix = suffix, keys.align = "y", kegg.native = TRUE, match.data = FALSE,
                    key.pos = "topright")
 
   # set the .GlobalEnv to the envir argument so that the assign function will assign the value to a global object, aka outside the function
-  return(assign(paste("kegg_", keggID, "_" , deparse(substitute(dfm)), sep = "") ,KEGG, envir = .GlobalEnv))
+  return(assign(paste("kegg_", keggID, "_" , deparse(substitute(dfm)), sep = ""), KEGG, envir = .GlobalEnv))
 }
 
 
