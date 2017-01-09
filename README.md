@@ -9,6 +9,11 @@ Installation:
 
 Update log
 
+    0.1.30
+      - Volcano dots colours are now user customizable
+      - Volcano dots annotation function added
+      - Bug fixes and other improvements
+
     0.1.29
       - Code redundancy further reduced for array DE function
 

@@ -4,27 +4,27 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
-  weights = NULL, multicore = FALSE, ..., plot = TRUE, geneName = FALSE,
-  genesymbolVar = NULL, signifLabel = FALSE, FC = 1.5, DE = "fdr",
+rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
+  design = NULL, contra = NULL, weights = NULL, ..., plot = TRUE,
+  geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
+  nGeneSymbol = 5, padding = 0.5, FC = 1.5, DE = "fdr",
   q.value = 0.05, Title = NULL, xLabel = "log2(fold change)",
-  yLabel = "-log10(p value)", symbolSize = 2, xTxtSize = 10,
-  yTxtSize = 10, plotWidth = 170, plotHeight = 150)
+  yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
+  nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
+  plotHeight = 150, multicore = FALSE)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
 
-\item{fltdata}{filtered data, either a list, \code{EList} or \code{MAList} object.}
+\item{fltdata}{filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
 
-\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}}
+\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.}
 
-\item{design}{Design matrix.}
+\item{design}{Design matrix. Default is \code{NULL}.}
 
-\item{contra}{Contrast matrix.}
+\item{contra}{Contrast matrix. Default is \code{NULL}.}
 
 \item{weights}{Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.}
-
-\item{multicore}{If to use parallel computing. Default is \code{FALSE}.}
 
 \item{...}{arguments for \code{topTable()} from \code{limma} package.}
 
@@ -34,7 +34,11 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 
-\item{signifLabel}{If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.}
+\item{topgeneLabel}{If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.}
+
+\item{nGeneSymbol}{When \code{topgeneLabel = TRUE}, to set how many genes to display. Default is \code{5}.}
+
+\item{padding}{When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.}
 
 \item{FC}{Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.}
 
@@ -50,6 +54,10 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
 
 \item{symbolSize}{Size of the symbol. Default is \code{2}.}
 
+\item{sigColour}{Colour of the significant genes or probes. Default is \code{"red"}.}
+
+\item{nonsigColour}{Colour of the non-significant genes or probes. Default is \code{"gray"}.}
+
 \item{xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
 
 \item{yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
@@ -57,6 +65,8 @@ rbioarray_DE(objTitle = "data_filtered", fltdata, anno, design, contra,
 \item{plotWidth}{The width of the figure for the final output figure file. Default is \code{170}.}
 
 \item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
+
+\item{multicore}{If to use parallel computing. Default is \code{FALSE}.}
 }
 \value{
 The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.

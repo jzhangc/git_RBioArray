@@ -153,17 +153,18 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #'
 #' @description DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
-#' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object.
-#' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}
-#' @param design Design matrix.
-#' @param contra Contrast matrix.
+#' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
+#' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.
+#' @param design Design matrix. Default is \code{NULL}.
+#' @param contra Contrast matrix. Default is \code{NULL}.
 #' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
-#' @param multicore If to use parallel computing. Default is \code{FALSE}.
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
 #' @param plot If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.
 #' @param geneName If to only plot probes with a gene name. Default is \code{FALSE}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
-#' @param signifLabel If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
+#' @param topgeneLabel If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
+#' @param nGeneSymbol When \code{topgeneLabel = TRUE}, to set how many genes to display. Default is \code{5}.
+#' @param padding When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
 #' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
 #' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
 #' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
@@ -171,10 +172,13 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
 #' @param symbolSize Size of the symbol. Default is \code{2}.
+#' @param sigColour Colour of the significant genes or probes. Default is \code{"red"}.
+#' @param nonsigColour Colour of the non-significant genes or probes. Default is \code{"gray"}.
 #' @param xTxtSize Font size for the x-axis text. Default is \code{10}.
 #' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
+#' @param multicore If to use parallel computing. Default is \code{FALSE}.
 #' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
@@ -184,6 +188,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
+#' @importFrom ggrepel geom_text_repel
 #' @examples
 #' \dontrun{
 #' rbioarray_DE(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
@@ -192,14 +197,33 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #'              DE = "spikein")
 #' }
 #' @export
-rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
-                         design, contra, weights = NULL,
-                         multicore = FALSE, ...,
-                         plot = TRUE, geneName = FALSE, genesymbolVar = NULL, signifLabel = FALSE,
+rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
+                         design = NULL, contra = NULL, weights = NULL,
+                         ...,
+                         plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
                          FC = 1.5, DE = "fdr", q.value = 0.05,
                          Title = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
-                         symbolSize = 2, xTxtSize = 10, yTxtSize =10,
-                         plotWidth = 170, plotHeight = 150){
+                         symbolSize = 2, sigColour = "red", nonsigColour = "gray",
+                         xTxtSize = 10, yTxtSize =10,
+                         plotWidth = 170, plotHeight = 150,
+                         multicore = FALSE){
+
+  ## check the key arguments
+  if (is.null(fltdata)){
+    stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data.")
+  }
+
+  if (is.null(anno)){
+    stop(cat("Please set the annotatioin dataframe. Make sure to name the variable containing probe name \"ProbeName\"."))
+  }
+
+  if (is.null(design)){
+    stop("Please set design matrix.")
+  }
+
+  if (is.null(contra)){
+    stop("Please set contrast object.")
+  }
 
   ## extract coefficients
   cf <- colnames(contra) # extract coefficient
@@ -234,20 +258,21 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
         pcutoff <- min(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
       }
 
-      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value <= pcutoff)
+      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
 
     } else if (DE == "spikein") {
 
       ifelse(min(PCntl$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, cf[j]]))
-      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value <= pcutoff)
+      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
 
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
 
 
     # plot
     loclEnv <- environment()
-    plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value), colour = cutoff), environment = loclEnv) +
-      geom_point(alpha = 0.4, size = symbolSize) +
+    plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
+      geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
+      scale_color_manual(values = c(nonsigColour, sigColour)) +
       ggtitle(Title) +
       scale_y_continuous(expand = c(0.02, 0)) +
       xlab(xLabel) +
@@ -263,6 +288,13 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata, anno,
             axis.text.x = element_text(size = xTxtSize),
             axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
 
+    if (topgeneLabel){
+      tmpfltdfm <- tmpdfm[abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff, ]
+      tmpfltdfm <- tmpfltdfm[order(tmpfltdfm$P.Value), ]
+      plt <- plt + geom_text_repel(data = head(tmpfltdfm, n = nGeneSymbol),
+                                   aes(x = logFC, y = -log10(P.Value), label = head(tmpfltdfm, n = nGeneSymbol)[, genesymbolVar]),
+                                   point.padding = unit(padding, "lines"))
+    }
 
     grid.newpage()
 
