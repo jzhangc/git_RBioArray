@@ -71,6 +71,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all",
 #' @param fltDOI Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
 #' @param pcutoff P value cut off. Default is \code{NULL}.
+#' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
 #' @param fct Input \code{factor} object for samples.
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
@@ -91,13 +92,20 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all",
 #' @importFrom RColorBrewer brewer.pal
 #' @examples
 #' \dontrun{
-#' rbioarray_hcluster_super(normlist = normdata, n = 500, fct = conSum, trace = "none",
-#' srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "",
-#' keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
+#' rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive,
+#'                          FC = 1.5, pcutoff = 0.0003461,
+#'                          clust = "ward.D2",
+#'                          fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
+#'                          levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),
+#'                          rowLabel = TRUE, anno = Anno, genesymbolVar = "GeneSymbol",
+#'                          offsetRow = 0, adjRow = c(0, 0.5), cexRow = 0.6,
+#'                          key.title = "", keysize = 1.5,
+#'                          key.xlab = "Normalized expression value", key.ylab = "Gene count")
 #' }
 #' @export
 rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
-                                     pcutoff = NULL, method = "spikein",
+                                     pcutoff = NULL, FC = NULL,
+                                     method = "spikein",
                                      fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = "euclidean", clust = "complete",
                                      rowLabel = FALSE, anno = NULL, genesymbolVar = NULL,
@@ -114,6 +122,12 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   } else {
     ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val <= pcutoff, "ProbeName"], pb_name <- dfmDE[dfmDE$P.Value <= pcutoff, "ProbeName"])
     dfm <- dfm[dfm$ProbeName %in% pb_name, ]
+  }
+
+  ## set FC filter
+  if (!is.null(FC)){
+    pb_name_fc <- dfmDE[dfmDE$logFC <= log2(FC), "ProbeName"]
+    dfm <- dfm[dfm$ProbeName %in% pb_name_fc, ]
   }
 
   ## heatmap

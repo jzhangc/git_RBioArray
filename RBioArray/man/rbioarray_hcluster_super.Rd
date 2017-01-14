@@ -5,11 +5,12 @@
 \title{rbioarray_hcluster_super}
 \usage{
 rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
-  method = "spikein", fct, colGroup = ifelse(length(levels(fct)) < 19,
-  length(levels(fct)), 19), distance = "euclidean", clust = "complete",
-  rowLabel = FALSE, anno = NULL, genesymbolVar = NULL,
-  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+  FC = NULL, method = "spikein", fct,
+  colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+  distance = "euclidean", clust = "complete", rowLabel = FALSE,
+  anno = NULL, genesymbolVar = NULL, colColour = "Paired",
+  mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
+  plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -19,6 +20,8 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
 \item{dfmDE}{A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).}
 
 \item{pcutoff}{P value cut off. Default is \code{NULL}.}
+
+\item{FC}{Fold change (FC) filter for the heatmap. Default is \code{NULL}.}
 
 \item{method}{Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.}
 
@@ -59,9 +62,15 @@ Note that both \code{anno} and \code{genesymbolVar} need to be set to display ge
 }
 \examples{
 \dontrun{
-rbioarray_hcluster_super(normlist = normdata, n = 500, fct = conSum, trace = "none",
-srtCol = 45, offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "",
-keysize = 1.5, key.xlab = "Normalized expression value", key.ylab = "Probe count")
+rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive,
+                         FC = 1.5, pcutoff = 0.0003461,
+                         clust = "ward.D2",
+                         fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
+                         levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),
+                         rowLabel = TRUE, anno = Anno, genesymbolVar = "GeneSymbol",
+                         offsetRow = 0, adjRow = c(0, 0.5), cexRow = 0.6,
+                         key.title = "", keysize = 1.5,
+                         key.xlab = "Normalized expression value", key.ylab = "Gene count")
 }
 }
 
