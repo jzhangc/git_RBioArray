@@ -2,7 +2,15 @@
 Simple to use package for both microarray and RNAseq data analysis (limma based)
 
 Installation:
+
+  - Install devtools
+    install.package("devtools")
     
+  - Install bioconductor
+    source("https://bioconductor.org/biocLite.R")
+    biocLite()
+    
+  - Install the package
     devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos())   
 
 
