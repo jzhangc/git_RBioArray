@@ -5,17 +5,17 @@ Installation:
 
   - Install devtools
   
-      install.package("devtools")
+        install.package("devtools")
     
   - Install bioconductor
   
-      source("https://bioconductor.org/biocLite.R")
+        source("https://bioconductor.org/biocLite.R")
       
-      biocLite()
+        biocLite()
     
   - Install the package
   
-      devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos())   
+        devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos())   
 
 
 
