@@ -3,6 +3,7 @@
 #' @description Wrapper for hierarchical clustering analysis and heatmap visualization.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltlist Input filtered data, either a list, \code{EList} or \code{MAList} object.
+#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
 #' @param fct Input \code{factor} object for samples.
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
@@ -24,20 +25,22 @@
 #' key.xlab = "Normalized expression value", key.ylab = "Probe count")
 #' }
 #' @export
-rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all",
-                 fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-                 distance = "euclidean", clust = "complete",
-                 colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-                 plotWidth = 7, plotHeight = 7){
+rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n = "all",
+                               fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+                               distance = "euclidean", clust = "complete",
+                               colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+                               plotWidth = 7, plotHeight = 7){
+
 
   ## prepare matrix for plotting
-  dfm <- data.frame(fltlist$genes, fltlist$E)
+  dfm <- data.frame(fltlist$genes, fltlist$E, check.names = FALSE)
 
-  if (n == "all"){
-    dfm <- dfm[dfm$ControlType == 0, ] # remove control probes
-  } else {
-    dfm <- dfm[dfm$ControlType == 0, ] # remove control probes
-    dfm <- dfm[1:n, ] # subset
+  if (rmControl){ # remove control
+    dfm <- dfm[dfm$ControlType == 0, ]
+  }
+
+  if (n != "all"){ # subset
+    dfm <- dfm[1:n, ]
   }
 
   mtx <- as.matrix(dfm[, -c(1:2)])

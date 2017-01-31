@@ -21,8 +21,11 @@ Installation:
 
 Update log
 
-
-    0.1.31 (Jan. 17. 2017)
+    0.1.32 (Jan. 31. 2017)
+      - Users can now choose to keep or remove the control probes (Agilent microarray platform) for rbioarray_hcluster() function. 
+    
+    
+    0.1.31
       - FC filter added for supervised hclust heatmap function
 
     0.1.30
