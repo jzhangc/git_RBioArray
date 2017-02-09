@@ -85,4 +85,3 @@ rbioarray_DE(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contr
              DE = "spikein")
 }
 }
-

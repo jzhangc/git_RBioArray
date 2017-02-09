@@ -76,4 +76,3 @@ rbioGS_plotting(GSlist = myGSlist, plotGSname = "kegg", parallelComputing = TRUE
 
 }
 }
-

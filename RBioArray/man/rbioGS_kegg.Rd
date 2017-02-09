@@ -35,4 +35,3 @@ Visit website \url{http://www.genome.jp/kegg/pathway.html} for kegg IDs.
 
 }
 }
-

@@ -20,9 +20,30 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @examples
 #' \dontrun{
+#'
+#' # standard usage
 #' rbioarray_hcluster(fltlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45,
 #' offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5,
 #' key.xlab = "Normalized expression value", key.ylab = "Probe count")
+#'
+#' # for non microarray or RNAseq data sets
+#' ###### unsupervised heatmap ######
+#' ## load the file
+#' raw <- read.csv(file = "all_data.csv", na.strings = " ", stringsAsFactors = FALSE, check.names = FALSE)
+#'
+#' ## build the index
+#' idx <- raw[, 1:2] # extract the sample information
+#'
+#' conSum <- factor(idx$Condition, levels = unique(idx$Condition)) # extract the factor
+#'
+#' # create the input data for RBioArray pacakge
+#' rawT <- t(raw[, -(1:2)])
+#' colnames(rawT) <- idx$SampleID
+#' rawT <- apply(rawT, c(1,2), FUN = log2) # log2 tranforamtion
+#' inputlist <- list(E = as.matrix(rawT),
+#'                   genes = data.frame(GeneNames = rownames(rawT), ControlType = rep(0, length(rownames(rawT))),
+#'                   stringsAsFactors = FALSE), target = idx)
+#'
 #' }
 #' @export
 rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n = "all",

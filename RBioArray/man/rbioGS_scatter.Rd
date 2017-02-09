@@ -43,4 +43,3 @@ rbioGS_scatter(GSA_list = GS_Pos, fileName = "GS_pos", cutoff = 15, method = "me
 
 }
 }
-

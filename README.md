@@ -21,7 +21,11 @@ Installation:
 
 Update log
 
-    0.1.32 (Jan. 31. 2017)
+    0.1.33 (Feb. 2. 2017)
+      - Help page for unsupervised heat map updated.
+      
+
+    0.1.32
       - Users can now choose to keep or remove the control probes (Agilent microarray platform) for rbioarray_hcluster() function. 
     
     

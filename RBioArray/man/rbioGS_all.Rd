@@ -85,4 +85,3 @@ rbioGS_all(objTitle = "mydata", input = DElist, entrezVar = "EntrezID", method_p
 
 }
 }
-

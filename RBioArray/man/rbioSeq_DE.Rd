@@ -24,4 +24,3 @@ The function below is an all-in-one solution to get DGE list and itrequires limm
 DE_dataframe <- rbioArray_DE(dataframe)
 }
 }
-

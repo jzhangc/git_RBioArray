@@ -36,4 +36,3 @@ rbioGS_all_noplot(input = DElist, entrezVar = "EntrezID", method_p = c("stouffer
 
 }
 }
-

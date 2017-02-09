@@ -45,4 +45,3 @@ gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = d
 
 }
 }
-

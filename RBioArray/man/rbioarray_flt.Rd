@@ -24,4 +24,3 @@ data filter function based on spike-in negative control.
 fltdata <- rbioarray_flt(normdata)
 }
 }
-
