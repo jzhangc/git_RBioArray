@@ -5,7 +5,7 @@ Installation:
 
   - Install devtools
   
-        install.package("devtools")
+        install.packages("devtools")
     
   - Install bioconductor
   
