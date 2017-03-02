@@ -38,7 +38,7 @@ Update log
     
     
     0.1.34 
-      - Elist objects now can be propered recognized by all the functions
+      - Elist objects now can be properly recognized by all the functions
 
 
     0.1.33
