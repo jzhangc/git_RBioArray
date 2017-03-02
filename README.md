@@ -26,7 +26,7 @@ Update log
       - Multicore support added for venn diagram function
       - Code optimization for venn diagram function
       - Removing probes without gene symbol functionality added for unsupervised hcluser function
-      - DE function now outoputs F stats into both the environment and work directory
+      - DE function now outputs F stats into both the environment and work directory
       - Bug fixes
     
     
