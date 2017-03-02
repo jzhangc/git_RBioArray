@@ -3,9 +3,10 @@
 #' @description Wrapper for hierarchical clustering analysis and heatmap visualization.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltlist Input filtered data, either a list, \code{EList} or \code{MAList} object.
-#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
+#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.#'
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
 #' @param fct Input \code{factor} object for samples.
+#' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
@@ -55,8 +56,9 @@
 #'
 #' }
 #' @export
-rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n = "all",
-                               fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+rbioarray_hcluster <- function(plotName = "data", fltlist, n = "all", rmControl = TRUE,
+                               fct, sampleName = NULL,
+                               colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                distance = "euclidean", clust = "complete",
                                colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                plotWidth = 7, plotHeight = 7){
@@ -73,8 +75,17 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n =
     dfm <- dfm[1:n, ]
   }
 
-  mtx <- as.matrix(dfm[, -c(1:2)])
-  rownames(mtx) <- dfm[, 1]
+  if (class(fltlist) == "list"){
+    mtx <- as.matrix(dfm[, -c(1:2)])
+    rownames(mtx) <- dfm[, 1]
+  } else { # limma Elist objects have five columns from gene name dataframe
+    mtx <- as.matrix(dfm[, -c(1:5)])
+    rownames(mtx) <- dfm[, "ProbeName"]
+  }
+
+  if (!is.null(sampleName)){
+    colnames(mtx) <- sampleName
+  }
 
 
   ## heatmap
@@ -84,7 +95,12 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n =
 
   # set ColSideColors
 
-  col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:2)])))
+  if (class(fltlist) == "list"){
+    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:2)])))
+  } else { # limma Elist objects have five columns from gene name dataframe
+    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:5)])))
+  }
+
   colG <- cutree(col_cluster, colGroup) # column group
   colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
 
@@ -94,6 +110,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n =
             col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
   dev.off()
 }
+
 
 
 
@@ -107,6 +124,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n =
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
 #' @param fct Input \code{factor} object for samples.
+#' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
@@ -139,7 +157,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist, rmControl = TRUE, n =
 rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                                      pcutoff = NULL, FC = NULL,
                                      method = "spikein",
-                                     fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+                                     fct, sampleName = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = "euclidean", clust = "complete",
                                      rowLabel = FALSE, anno = NULL, genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
@@ -170,7 +188,12 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 
   # set ColSideColors
 
-  col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:2)])))
+  if (class(fltlist) == "list"){
+    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:2)])))
+  } else { # limma Elist objects have five columns from gene name dataframe
+    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:5)])))
+  }
+
   colG <- cutree(col_cluster, colGroup) # column group
   colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
 
@@ -179,8 +202,19 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   if (rowLabel){
 
     if (is.null(anno) | is.null(genesymbolVar)){
-      mtx <- as.matrix(dfm[, -c(1:2)])
-      rownames(mtx) <- dfm[, 1]
+
+      # create a matrix according to input type, same below
+      if (class(fltlist) == "list"){
+        mtx <- as.matrix(dfm[, -c(1:2)])
+        rownames(mtx) <- dfm[, 1]
+      } else { # limma Elist objects have five columns from gene name dataframe
+        mtx <- as.matrix(dfm[, -c(1:5)])
+        rownames(mtx) <- dfm[, "ProbeName"]
+      }
+
+      if (!is.null(sampleName)){
+        colnames(mtx) <- sampleName
+      }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
@@ -196,8 +230,17 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
       labrow <- dfm$geneSymbol
 
-      mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-      rownames(mtx) <- dfm[, 1] # row names are now gene symbols
+      if (class(fltlist) == "list"){
+        mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
+        rownames(mtx) <- dfm[, 1] # row names are now gene symbols
+      } else { # limma Elist objects have five columns from gene name dataframe
+        mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
+        rownames(mtx) <- dfm[, 1] # row names are now gene symbols
+      }
+
+      if (!is.null(sampleName)){
+        colnames(mtx) <- sampleName
+      }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
@@ -208,13 +251,192 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
     }
 
   } else {
-    mtx <- as.matrix(dfm[, -c(1:2)])
-    rownames(mtx) <- dfm[, 1]
+
+    if (class(fltlist) == "list"){
+      mtx <- as.matrix(dfm[, -c(1:2)])
+      rownames(mtx) <- dfm[, 1]
+    } else { # limma Elist objects have five columns from gene name dataframe
+      mtx <- as.matrix(dfm[, -c(1:5)])
+      rownames(mtx) <- dfm[, "ProbeName"]
+    }
+
+    if (!is.null(sampleName)){
+      colnames(mtx) <- sampleName
+    }
 
     pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
     heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
               col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = FALSE,...)
     dev.off()
   }
+
+}
+
+#' @title rbioarray_venn_DE
+#'
+#' @description Venn diagrame for DE results. Uses \code{vennDiagram()} from \code{limma} package.
+#' @param plotName Name for the output venn diagram. Default is \code{"DE"}.
+#' @param DEdata Input DE object from \code{\link{rbioarray_DE}} or \code{link{rbioseq_DE}}.
+#' @param fltdata Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
+#' @param design Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.
+#' @param contra Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.
+#' @param weights Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
+#' @param ... arguments for \code{vennDiagram()} from \code{limma} package.
+#' @param geneName If to only use probes with a gene name. Default is \code{FALSE}.
+#' @param genesymbolVar Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
+#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
+#' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
+#' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
+#' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
+#' @param multicore If to use parallel computing. Default is \code{FALSE}.
+#' @return The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
+#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{DE = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
+#' @import doParallel
+#' @importFrom limma lmFit eBayes topTable contrasts.fit vennDiagram
+#' @importFrom foreach foreach
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @examples
+#' \dontrun{
+#' rbioarray_venn_DE(plotName = "DE",
+#'                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
+#'                   DE = "spikein", fltdata = fltdata, anno = anno, design = design, contra = contra, weights = fltdata$ArrayWeight,
+#'                   multicore = FALSE)
+#' }
+#' @export
+rbioarray_venn_DE <- function(plotName = "DE", plotWidth = 5, plotHeight = 5,
+                              DEdata = NULL,
+                              geneName = FALSE, genesymbolVar = NULL,
+                              DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05,
+                              ...,
+                              multicore = FALSE){
+
+  ## check the key arguments
+  if (is.null(DEdata)){
+    stop("Please set input DE data object. Hint: it is the output list from rbioarray_DE().")
+  }
+
+  if (is.null(design)){
+    stop("Please set design matrix.")
+  }
+  if (is.null(contra)){
+    stop("Please set contrast object.")
+  }
+
+  ## set up the DE dataframe
+  vennDE <- vector(mode = "list", length = length(names(DEdata)))
+  names(vennDE) <- names(DEdata)
+
+  if (geneName){
+    if (!is.null(genesymbolVar)){
+      for (i in 1:length(names(DEdata))){
+        vennDE[[i]] <- DEdata[[i]][complete.cases(DEdata[[i]][, genesymbolVar]), ]
+      }
+    } else {
+      warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
+      vennDE <- DEdata
+    }
+  } else {
+    vennDE <- DEdata
+  }
+
+
+  ## tempfunc
+  # m - vennDE; n - individual coef
+  cal_pcutoff <- function(m, n){
+
+    # set up tmpdfm
+    tmpdfm <- m[[n]]
+
+    # set the cutoff
+    if (DE == "fdr"){
+
+      if (length(which(tmpdfm$adj.P.Val < 0.05)) == 0){
+        p_threshold <- 1
+      } else {
+        p_threshold <- min(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
+      }
+
+    } else if (DE == "spikein") {
+
+      # check arugments
+      if (is.null(fltdata) | is.null(design) | is.null(contra) | is.null(weights)){
+        warning(cat("Arguments not complete for \"spikein\" method. Proceed with \"fdr\" instead."))
+
+        if (length(which(tmpdfm$adj.P.Val < 0.05)) == 0){
+          p_threshold <- 1
+        } else {
+          p_threshold <- min(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
+        }
+
+      } else {
+        # DE for extracting positive control
+        if (class(fltdata) == "list"){
+          fit <- lmFit(fltdata$E, design, weights = weights)
+          fit <- contrasts.fit(fit, contrasts = contra)
+          fit <- eBayes(fit)
+          fit$genes <- fltdata$genes # add genes matrix to the DE results
+        } else {
+          fit <- lmFit(fltdata, design, weights = weights)
+          fit <- contrasts.fit(fit, contrasts = contra)
+          fit <- eBayes(fit)
+        }
+        cf <- names(m)
+        PC <- fit[fit$genes$ControlType == 1, ]
+        ifelse(min(PC$p.value[, cf[n]]) > 0.05, p_threshold <- q.value, p_threshold <- min(PC$p.value[, cf[n]]))
+      }
+
+    } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
+
+    return(p_threshold)
+  }
+
+  ## prepare matrices
+  # log fold change
+  lfc <- matrix(nrow = length(vennDE[[1]]$ProbeName), ncol = length(vennDE))
+  rownames(lfc) <- vennDE[[1]]$ProbeName
+  colnames(lfc) <- names(vennDE)
+
+  # p value
+  p <- array(NA, dim(lfc), dimnames = dimnames(lfc)) # this is another way to create a matrix. Give the value of NA.
+
+  # matrix for plotting
+  mtx <- array(0L, dim(lfc), dimnames = dimnames(lfc)) # note we are using factors here e.g. "-1L, 0L, 1L". the starting value is 0L
+
+  ## populate the matrices
+  if (!multicore){
+
+    for (j in 1:length(names(vennDE))){
+      lfc[, j] <- vennDE[[j]]$logFC # extract log fold change
+      p[, j] <- vennDE[[j]]$P.Value # extract p value (p) to a matrix
+
+      pcutoff <- cal_pcutoff(m = vennDE, n = j)
+      mtx[, j][p[, j] < pcutoff] <- 1L # give 1L to the significant entries, for now.
+    }
+
+    mtx[lfc < 0] <- - mtx[lfc < 0] # determine the correct sgin by giving -1L to down-regualtions according to fold change.
+
+  } else { # parallel computing
+
+    ## set up cpu cluster
+    n_cores <- detectCores() - 1
+    cl <- makeCluster(n_cores, type = "PSOCK")
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    ## populate matrices
+  }
+
+  ## venn diagram plotting
+  pdf(file = paste(plotName, "_venn_total.pdf", sep = ""), width = plotWidth, height = plotHeight)
+  vennDiagram(mtx, circle.col = 1:length(names(DEdata)), ...)
+  dev.off()
+
+  pdf(file = paste(plotName, "_venn_up.pdf", sep = ""), width = plotWidth, height = plotHeight)
+  vennDiagram(mtx, circle.col = 1:length(names(DEdata)), include = "up", ...)
+  dev.off()
+
+  pdf(file = paste(plotName, "_venn_down.pdf", sep = ""), width = plotWidth, height = plotHeight)
+  vennDiagram(mtx, circle.col = 1:length(names(DEdata)), include = "down", ...)
+  dev.off()
 
 }

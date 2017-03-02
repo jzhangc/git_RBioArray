@@ -40,8 +40,8 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @details The function is based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
 #' @return Outputs a \code{list} object with GSA results, both for p value based and t value based.
 #' @importFrom piano runGSA
+#' @import doParallel
 #' @importFrom foreach foreach
-#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
@@ -400,9 +400,9 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #' @param plotGSname When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the GS name in the file name. Default is \code{"GS"}.
 #' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
+#' @import doParallel
 #' @importFrom piano runGSA
 #' @importFrom foreach foreach
-#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
@@ -596,9 +596,9 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
 #' @param cluster Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
+#' @import doParallel
 #' @importFrom piano runGSA
 #' @importFrom foreach foreach
-#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
@@ -707,8 +707,8 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
 #' @param cluster Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details The function takes the reuslted list from \code{\link{rbioGS_all_noplot}} function.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files, i.e. boxplots and scatter plot.
+#' @import doParallel
 #' @importFrom foreach foreach
-#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{

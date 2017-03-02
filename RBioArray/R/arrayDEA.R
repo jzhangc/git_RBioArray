@@ -10,6 +10,9 @@
 #' @param normMethod Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
 #' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
 #' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values. If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
+#' @import doParallel
+#' @importFrom foreach foreach
+#' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
 #' @examples
 #' \dontrun{
@@ -34,12 +37,13 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
         # parallel computing
         # set up cpu cluster
         n_cores <- detectCores() - 1
-        cl <- makeCluster(n_cores)
-        clusterExport(cl, varlist = "rawlist", envir = environment())
+        cl <- makeCluster(n_cores, type = "PSOCK")
         on.exit(stopCluster(cl)) # close connect when exiting the function
 
         # log transform
-        mtx <- parApply(cl, rawlist$E, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
+        mtx <- foreach(i = rawlist$E) %dopar% {
+          out <- apply(i, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
+        }
 
       }
 
@@ -67,6 +71,8 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
     ## normalization
     BgC <- backgroundCorrect(rawlist, method = bgMethod, ...) #background correction
     Norm <- normalizeBetweenArrays(BgC, method = normMethod) # quantile normalization
+    Wgt <- arrayWeights(Norm)
+    Norm$ArrayWeight <- Wgt
 
     output <- Norm
   }
@@ -83,6 +89,7 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' @param percentile The percentile cutoff, only used when muliptle negative control probes are detected. Default is \code{0.95}.
 #' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
 #' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
+#' @importFrom limma avereps
 #' @examples
 #' \dontrun{
 #' fltdata <- rbioarray_flt(normdata)
@@ -182,9 +189,9 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
-#' @importFrom limma lmFit eBayes topTable
+#' @import doParallel
+#' @importFrom limma lmFit eBayes topTable contrasts.fit
 #' @importFrom foreach foreach
-#' @importFrom doParallel registerDoParallel
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom gtable gtable_add_cols gtable_add_grob
@@ -235,7 +242,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
   ## temp func for plotting
   # i: outlist (object) listed below
-  tmpfunc <- function(i, j){
+  tmpfunc <- function(i, j, PC = NULL){
 
     # set the data frame
     if (geneName){
@@ -262,7 +269,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
     } else if (DE == "spikein") {
 
-      ifelse(min(PCntl$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PCntl$p.value[, cf[j]]))
+      ifelse(min(PC$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PC$p.value[, cf[j]]))
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
 
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
@@ -355,10 +362,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
   if (DE == "spikein"){ # extract PC stats for spikein method
     PCntl <- fit[fit$genes$ControlType == 1, ]
+  } else {
+    PCntl <- NULL
   }
-
-
-
 
   ## output and plotting
   if(!multicore){
@@ -378,10 +384,10 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
       write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
     })
 
-    # volcano plot
+    # volcano plot and output summary
     if (plot){
 
-      threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x)))
+      threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
 
     }
 
@@ -390,7 +396,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     # set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores, type = "PSOCK")
-    registerDoParallel(cl)
+    registerDoParallel(cl) # from doParallel package
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
@@ -409,17 +415,14 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
       write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
     }
 
-    # volcano plot
+    # volcano plot and output summary
     if (plot){
 
       threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
-        tmpfunc(i = outlist, j = j)
+        tmpfunc(i = outlist, j = j, PC = PCntl)
 
       }
-
     }
-
-
   }
 
   ## output the DE object to the environment

@@ -20,13 +20,22 @@ Installation:
 
 
 Update log
+    0.2.0 (March.1.2017)
+      - Venn diagram function added
+      - Array weight added to data preprocessing function for Elist objects
+      - Missing depndencies for parallel computing added for various functions
+      - Bug fixes
+    
+    0.1.34 
+      - Elist objects now can be propered recognized by all the functions
 
-    0.1.33 (Feb. 2. 2017)
-      - Help page for unsupervised heat map updated.
+
+    0.1.33
+      - Help page for unsupervised heat map updated
       
 
     0.1.32
-      - Users can now choose to keep or remove the control probes (Agilent microarray platform) for rbioarray_hcluster() function. 
+      - Users can now choose to keep or remove the control probes (Agilent microarray platform) for rbioarray_hcluster() function
     
     
     0.1.31
