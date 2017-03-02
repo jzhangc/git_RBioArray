@@ -20,6 +20,7 @@ Installation:
 
 
 Update log
+
     0.2.0 (March.1.2017)
       - Venn diagram function added
       - Array weight added to data preprocessing function for Elist objects
