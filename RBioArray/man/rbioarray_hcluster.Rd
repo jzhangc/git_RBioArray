@@ -4,25 +4,29 @@
 \alias{rbioarray_hcluster}
 \title{rbioarray_hcluster}
 \usage{
-rbioarray_hcluster(plotName = "data", fltlist, n = "all",
-  rmControl = TRUE, fct, sampleName = NULL,
-  colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-  distance = "euclidean", clust = "complete", colColour = "Paired",
-  mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
-  plotHeight = 7)
+rbioarray_hcluster(plotName = "data", fltlist, genesymbolOnly = FALSE,
+  anno = NULL, genesymbolVar = NULL, n = "all", rmControl = TRUE,
+  sampleName = NULL, fct, colGroup = ifelse(length(levels(fct)) < 19,
+  length(levels(fct)), 19), distance = "euclidean", clust = "complete",
+  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+  plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
 
 \item{fltlist}{Input filtered data, either a list, \code{EList} or \code{MAList} object.}
 
+\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.}
+
+\item{genesymbolVar}{Whether or not to remove probes without gene symbol. Default is \code{FALSE}.}
+
 \item{n}{Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
 
 \item{rmControl}{If to remove control probes (Agilent platform). Default is \code{TRUE}.#'}
 
-\item{fct}{Input \code{factor} object for samples.}
-
 \item{sampleName}{A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.}
+
+\item{fct}{Input \code{factor} object for samples.}
 
 \item{colGroup}{Colour group, numeric or dependent on \code{fct}.}
 
@@ -41,6 +45,8 @@ rbioarray_hcluster(plotName = "data", fltlist, n = "all",
 \item{plotWidth}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plotHeight}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.}
 }
 \value{
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.

@@ -4,10 +4,10 @@
 \alias{rbioarray_venn_DE}
 \title{rbioarray_venn_DE}
 \usage{
-rbioarray_venn_DE(plotName = "DE", plotWidth = 5, plotHeight = 5,
-  DEdata = NULL, geneName = FALSE, genesymbolVar = NULL, DE = "fdr",
-  fltdata = NULL, design = NULL, contra = NULL, weights = NULL,
-  q.value = 0.05, ..., multicore = FALSE)
+rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
+  plotHeight = 5, ..., anno = NULL, DEdata = NULL, geneName = FALSE,
+  genesymbolVar = NULL, DE = "fdr", fltdata = NULL, design = NULL,
+  contra = NULL, weights = NULL, q.value = 0.05, multicore = FALSE)
 }
 \arguments{
 \item{plotName}{Name for the output venn diagram. Default is \code{"DE"}.}
@@ -16,7 +16,11 @@ rbioarray_venn_DE(plotName = "DE", plotWidth = 5, plotHeight = 5,
 
 \item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 
-\item{DEdata}{Input DE object from \code{\link{rbioarray_DE}} or \code{link{rbioseq_DE}}.}
+\item{...}{arguments for \code{vennDiagram()} from \code{limma} package.}
+
+\item{anno}{Annotation data frame. If set, the output csv file will have a gene symbol column. The function will seek \code{genesymbolVar} value as the variable name for the gene symbol information. Default is \code{NULL}.}
+
+\item{DEdata}{Input DE object from \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
 \item{geneName}{If to only use probes with a gene name. Default is \code{FALSE}.}
 
@@ -34,8 +38,6 @@ rbioarray_venn_DE(plotName = "DE", plotWidth = 5, plotHeight = 5,
 
 \item{q.value}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
 
-\item{...}{arguments for \code{vennDiagram()} from \code{limma} package.}
-
 \item{multicore}{If to use parallel computing. Default is \code{FALSE}.}
 }
 \value{
@@ -49,7 +51,7 @@ When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When 
 }
 \examples{
 \dontrun{
-rbioarray_venn_DE(plotName = "DE",
+rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
                   DE = "spikein", fltdata = fltdata, anno = anno, design = design, contra = contra, weights = fltdata$ArrayWeight,
                   multicore = FALSE)

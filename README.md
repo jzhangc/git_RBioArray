@@ -21,11 +21,21 @@ Installation:
 
 Update log
 
-    0.2.0 (March.1.2017)
+    0.2.1 (March.2.2017)
+      - Venn diagram function now outputs a csv containing overlapping genes/probes
+      - Multicore support added for venn diagram function
+      - Code optimization for venn diagram function
+      - Removing probes without gene symbol functionality added for unsupervised hcluser function
+      - DE function now outoputs F stats into both the environment and work directory
+      - Bug fixes
+    
+    
+    0.2.0 
       - Venn diagram function added
       - Array weight added to data preprocessing function for Elist objects
       - Missing depndencies for parallel computing added for various functions
       - Bug fixes
+    
     
     0.1.34 
       - Elist objects now can be propered recognized by all the functions

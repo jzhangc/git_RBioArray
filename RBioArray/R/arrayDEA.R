@@ -186,7 +186,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @param multicore If to use parallel computing. Default is \code{FALSE}.
-#' @return The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
+#' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
 #' @import doParallel
@@ -396,7 +396,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     # set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores, type = "PSOCK")
-    registerDoParallel(cl) # from doParallel package
+    registerDoParallel(cl)
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
     outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
@@ -425,11 +425,16 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     }
   }
 
-  ## output the DE object to the environment
+  ## output the DE/fit objects to the environment, as well as the DE csv files into wd
+  fitout <- topTable(out, number = Inf)
+  fitout <- merge(fitout, anno, by = "ProbeName")
+  assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
+  write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
+
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
+
+
   write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
-
-
   ## message
   if (geneName & !is.null(genesymbolVar)){
     print("Probes without a gene symbol are removed from the volcano plots")

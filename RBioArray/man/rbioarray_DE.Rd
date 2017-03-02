@@ -69,7 +69,7 @@ rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
 \item{multicore}{If to use parallel computing. Default is \code{FALSE}.}
 }
 \value{
-The function outputs a \code{list} object with DE results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
+The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 }
 \description{
 DE analysis function.
