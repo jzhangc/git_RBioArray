@@ -21,10 +21,10 @@ Installation:
 
 Update log
 
-    0.2.2
+    0.2.2 (March.15.2017)
       - Bug fixes
 
-    0.2.1 (March.2.2017)
+    0.2.1
       - Venn diagram function now outputs a csv containing overlapping genes/probes
       - Multicore support added for venn diagram function
       - Code optimization for venn diagram function
