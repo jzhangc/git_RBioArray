@@ -315,8 +315,8 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 #' @return The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{DE = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
 #' @import doParallel
+#' @import foreach
 #' @importFrom limma lmFit eBayes topTable contrasts.fit vennDiagram
-#' @importFrom foreach foreach
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @examples
 #' \dontrun{

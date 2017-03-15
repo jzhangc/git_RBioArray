@@ -41,7 +41,7 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @return Outputs a \code{list} object with GSA results, both for p value based and t value based.
 #' @importFrom piano runGSA
 #' @import doParallel
-#' @importFrom foreach foreach
+#' @import foreach
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
@@ -401,8 +401,8 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 #' @import doParallel
+#' @import foreach
 #' @importFrom piano runGSA
-#' @importFrom foreach foreach
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
@@ -597,8 +597,8 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
 #' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 #' @import doParallel
+#' @import foreach
 #' @importFrom piano runGSA
-#' @importFrom foreach foreach
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
@@ -708,7 +708,7 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
 #' @details The function takes the reuslted list from \code{\link{rbioGS_all_noplot}} function.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files, i.e. boxplots and scatter plot.
 #' @import doParallel
-#' @importFrom foreach foreach
+#' @import foreach
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
