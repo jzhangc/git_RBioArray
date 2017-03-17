@@ -191,7 +191,8 @@ rbioarray_hcluster <- function(plotName = "data", fltlist,
 rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                                      pcutoff = NULL, FC = NULL,
                                      method = "spikein",
-                                     fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+                                     fct, sampleName = NULL,
+                                     colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = "euclidean", clust = "complete",
                                      rowLabel = FALSE, anno = NULL, genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
@@ -205,13 +206,13 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   if (is.null(pcutoff)){
     stop("Please set p value threshold.")
   } else {
-    ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val <= pcutoff, "ProbeName"], pb_name <- dfmDE[dfmDE$P.Value <= pcutoff, "ProbeName"])
+    ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val < pcutoff, "ProbeName"], pb_name <- dfmDE[dfmDE$P.Value < pcutoff, "ProbeName"])
     dfm <- dfm[dfm$ProbeName %in% pb_name, ]
   }
 
   ## set FC filter
   if (!is.null(FC)){
-    pb_name_fc <- dfmDE[dfmDE$logFC <= log2(FC), "ProbeName"]
+    pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), "ProbeName"]
     dfm <- dfm[dfm$ProbeName %in% pb_name_fc, ]
   }
 
@@ -222,7 +223,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 
   # set ColSideColors
 
-  if (class(fltlist) == "list"){
+  if (class(fltDOI) == "list"){
     col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:2)])))
   } else { # limma Elist objects have five columns from gene name dataframe
     col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:5)])))
@@ -239,12 +240,16 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       warning("No annotation object or gene sybmol variable detected. Row labels will be the default probe names.")
 
       # create a matrix according to input type, same below
-      if (class(fltlist) == "list"){
+      if (class(fltDOI) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2)])
         rownames(mtx) <- dfm[, "ProbeName"]
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5)])
         rownames(mtx) <- dfm[, "ProbeName"]
+      }
+
+      if (!is.null(sampleName)){
+        colnames(mtx) <- sampleName
       }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
@@ -259,12 +264,16 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
       labrow <- dfm$geneSymbol
 
-      if (class(fltlist) == "list"){
+      if (class(fltDOI) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
         rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
         rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols
+      }
+
+      if (!is.null(sampleName)){
+        colnames(mtx) <- sampleName
       }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
@@ -277,12 +286,16 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 
   } else {
 
-    if (class(fltlist) == "list"){
+    if (class(fltDOI) == "list"){
       mtx <- as.matrix(dfm[, -c(1:2)])
       rownames(mtx) <- dfm[, "ProbeName"]
     } else { # limma Elist objects have five columns from gene name dataframe
       mtx <- as.matrix(dfm[, -c(1:5)])
       rownames(mtx) <- dfm[, "ProbeName"]
+    }
+
+    if (!is.null(sampleName)){
+      colnames(mtx) <- sampleName
     }
 
     pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
@@ -292,6 +305,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   }
 
 }
+
 
 
 #' @title rbioarray_venn_DE

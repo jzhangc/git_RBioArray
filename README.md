@@ -21,7 +21,7 @@ Installation:
 
 Update log
 
-    0.2.2 (March.15.2017)
+    0.2.2 - 0.2.3 (March.16.2017)
       - Bug fixes
 
     0.2.1

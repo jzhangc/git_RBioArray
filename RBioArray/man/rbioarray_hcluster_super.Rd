@@ -5,7 +5,7 @@
 \title{rbioarray_hcluster_super}
 \usage{
 rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
-  FC = NULL, method = "spikein", fct,
+  FC = NULL, method = "spikein", fct, sampleName = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = "euclidean", clust = "complete", rowLabel = FALSE,
   anno = NULL, genesymbolVar = NULL, colColour = "Paired",
@@ -26,6 +26,8 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
 \item{method}{Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.}
 
 \item{fct}{Input \code{factor} object for samples.}
+
+\item{sampleName}{A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.}
 
 \item{colGroup}{Colour group, numeric or dependent on \code{fct}.}
 
@@ -50,8 +52,6 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
 \item{plotWidth}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plotHeight}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
-
-\item{sampleName}{A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.}
 }
 \value{
 A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
