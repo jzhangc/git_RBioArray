@@ -31,7 +31,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   }
 
   # extract hsa orthorlogy information
-  sp_ensemble <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
+  sp_ensembl <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
   attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
   sp_hsa_orth <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
                        mart = sp_ensembl)
