@@ -61,7 +61,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   # looping through the DElist
   # vectorize the output list
   out <- vector(mode = "list", length(names(DElst)))
-  names(GSlst) <- names(DElst)
+  names(out) <- names(DElst)
 
   # looping
   if (!parallelComputing){
