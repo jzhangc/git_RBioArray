@@ -680,7 +680,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 #' @import doParallel
 #' @import foreach
-#' @importFrom piano runGSA
+#' @importFrom piano runGSA loadGSC
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
