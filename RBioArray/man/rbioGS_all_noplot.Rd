@@ -4,13 +4,13 @@
 \alias{rbioGS_all_noplot}
 \title{rbioGS_all_noplot}
 \usage{
-rbioGS_all_noplot(input, entrezVar = NULL, GS = NULL, ...,
-  parallelComputing = FALSE, cluster = "PSOCK")
+rbioGS_all_noplot(DElst, entrezVar = NULL, GS = NULL, ...,
+  parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
-\item{input}{The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.}
+\item{DElst}{The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
-\item{entrezVar}{Name of the EntrezID variable in the \code{input} object.}
+\item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
 
 \item{GS}{Pre-loaded gene set objects.}
 
@@ -18,7 +18,7 @@ rbioGS_all_noplot(input, entrezVar = NULL, GS = NULL, ...,
 
 \item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 
-\item{cluster}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
@@ -32,7 +32,7 @@ This is an all-in-one function for GS anlyasis based on piano package. It runs "
 \examples{
 \dontrun{
 
-rbioGS_all_noplot(input = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, cluster = "FORK")
+rbioGS_all_noplot(DElst = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, clusterType = "FORK")
 
 }
 }

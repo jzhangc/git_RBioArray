@@ -7,7 +7,8 @@
 rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
   plotHeight = 5, ..., anno = NULL, DEdata = NULL, geneName = FALSE,
   genesymbolVar = NULL, DE = "fdr", fltdata = NULL, design = NULL,
-  contra = NULL, weights = NULL, q.value = 0.05, multicore = FALSE)
+  contra = NULL, weights = NULL, q.value = 0.05,
+  parallelComputing = FALSE)
 }
 \arguments{
 \item{plotName}{Name for the output venn diagram. Default is \code{"DE"}.}
@@ -38,7 +39,7 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
 
 \item{q.value}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
 
-\item{multicore}{If to use parallel computing. Default is \code{FALSE}.}
+\item{parallelComputing}{If to use parallel computing. Default is \code{FALSE}.}
 }
 \value{
 The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
@@ -54,6 +55,6 @@ When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When 
 rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
                   DE = "spikein", fltdata = fltdata, anno = anno, design = design, contra = contra, weights = fltdata$ArrayWeight,
-                  multicore = FALSE)
+                  parallelComputing = FALSE)
 }
 }

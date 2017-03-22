@@ -11,9 +11,11 @@ rbioGS_plotting(GSlst, plotGSname = "GS", boxplot = TRUE,
   scatterRankline = 20, scatterPline = 0.05, scatterTitle = NULL,
   scatterXlabel = "median p value", scatterYlabel = "consensus score",
   scatterWidth = 170, scatterHeight = 150, plotMethod = "median",
-  plotPadjust = TRUE, parallelComputing = FALSE, cluster = "PSOCK")
+  plotPadjust = TRUE, parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
+\item{GSlst}{The input list with GS reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.}
+
 \item{plotGSname}{When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the GS name in the file name. Default is \code{"GS"}.}
 
 \item{boxplot}{If to plot boxplots. Default is \code{TRUE}.}
@@ -52,9 +54,7 @@ rbioGS_plotting(GSlst, plotGSname = "GS", boxplot = TRUE,
 
 \item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 
-\item{cluster}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
-
-\item{input}{The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.}
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
 \item{scatterplotRankline}{When \code{scatterplot = TRUE}, to set the rank line on the scatter plot. Default is \code{20}.}
 
@@ -72,7 +72,7 @@ The function takes the reuslted list from \code{\link{rbioGS_all_noplot}} functi
 \examples{
 \dontrun{
 
-rbioGS_plotting(GSlist = myGSlist, plotGSname = "kegg", parallelComputing = TRUE, cluster = "FORK")
+rbioGS_plotting(GSlist = myGSlist, plotGSname = "kegg", parallelComputing = TRUE, clusterType = "FORK")
 
 }
 }

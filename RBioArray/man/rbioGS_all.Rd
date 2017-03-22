@@ -4,8 +4,8 @@
 \alias{rbioGS_all}
 \title{rbioGS_all}
 \usage{
-rbioGS_all(objTitle = "DE", input, entrezVar = NULL, GS = NULL, ...,
-  parallelComputing = FALSE, cluster = "PSOCK", boxplot = TRUE,
+rbioGS_all(objTitle = "DE", DElst, entrezVar = NULL, GS = NULL, ...,
+  parallelComputing = FALSE, clusterType = "PSOCK", boxplot = TRUE,
   boxplotKEGG = FALSE, boxplotN = 20, boxplotTitle = NULL,
   boxplotXlabel = "rank", boxplotYlabel = NULL, boxplotWidth = 170,
   boxplotHeight = 150, scatterplot = TRUE, scatterplotCutoff = 20,
@@ -17,9 +17,9 @@ rbioGS_all(objTitle = "DE", input, entrezVar = NULL, GS = NULL, ...,
 \arguments{
 \item{objTitle}{Object title for the output GS analysis list from \code{piano} package.}
 
-\item{input}{The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.}
+\item{DElst}{The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
-\item{entrezVar}{Name of the EntrezID variable in the \code{input} object.}
+\item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
 
 \item{GS}{Pre-loaded gene set objects.}
 
@@ -27,7 +27,7 @@ rbioGS_all(objTitle = "DE", input, entrezVar = NULL, GS = NULL, ...,
 
 \item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 
-\item{cluster}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
 \item{boxplot}{If to plot boxplots. Default is \code{TRUE}.}
 
@@ -81,7 +81,7 @@ This is an all-in-one function for GS anlyasis based on piano package. It runs "
 \examples{
 \dontrun{
 
-rbioGS_all(objTitle = "mydata", input = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, cluster = "FORK")
+rbioGS_all(objTitle = "mydata", DElst = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, clusterType = "FORK")
 
 }
 }

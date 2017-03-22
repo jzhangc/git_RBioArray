@@ -6,7 +6,7 @@
 \usage{
 rbioGS(GS, pVar, logFCVar, tVar, idVar, method_p = c("fisher", "stouffer",
   "reporter", "tailStrength", "wilcoxon"), method_t = c("page", "gsea",
-  "maxmean"), ..., multicore = FALSE, clusterType = "PSOCK")
+  "maxmean"), ..., parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
 \item{GS}{Pre-loaded gene set objects.}
@@ -25,9 +25,9 @@ rbioGS(GS, pVar, logFCVar, tVar, idVar, method_p = c("fisher", "stouffer",
 
 \item{...}{Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.}
 
-\item{multicore}{If to use parallel computing or not. Default is \code{FALSE}}
+\item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 
-\item{clusterType}{Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 Outputs a \code{list} object with GSA results, both for p value based and t value based.
@@ -40,7 +40,7 @@ The function is based on piano package. It runs "fisher", "stouffer", "reporter"
 }
 \examples{
 \dontrun{
-gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, nPerm = 1000, multicore = TRUE, clusterType = "FORK")
+gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, nPerm = 1000, parallelComputing = TRUE, clusterType = "FORK")
 
 
 }

@@ -5,7 +5,7 @@
 #' @param logTrans If to perfom a log transformation on the data or not. Default is \code{FALSE}.
 #' @param logTransMethod If \code{logTrans = TRUE}, set which method to use for the transformation, \code{"log2"} or \code{"log10"}. Default is \code{"log2"}.
 #' @param logTransObjT If \code{logTrans = TRUE}, set the file name for the output \code{csv} file containing the log transformed data.
-#' @param logTransMulticore If \code{logTrans = TRUE}, set if to use parallel computing for the transformation or not. Default is \code{FALSE}.
+#' @param logTransParallelComputing If \code{logTrans = TRUE}, set if to use parallel computing for the transformation or not. Default is \code{FALSE}.
 #' @param bgMethod Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
 #' @param normMethod Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
 #' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
@@ -19,7 +19,7 @@
 #' normdata <- rbioarray_PreProc(mydata)
 #' }
 #' @export
-rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2", logTransObjT = "data", logTransMulticore = FALSE,
+rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2", logTransObjT = "data", logTransParallelComputing = FALSE,
                               bgMethod = "auto", normMethod = "quantile", ...){
 
   if (class(rawlist) == "list"){
@@ -27,7 +27,7 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
     ## log transform  or not
     if (logTrans){
 
-      if (!logTransMulticore){
+      if (!logTransParallelComputing){
 
         # log transform
         mtx <- apply(rawlist$E, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
@@ -185,7 +185,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @param multicore If to use parallel computing. Default is \code{FALSE}.
+#' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
@@ -199,7 +199,7 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @examples
 #' \dontrun{
 #' rbioarray_DE(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
-#'              weights = fltdata$ArrayWeight, multicore = TRUE,
+#'              weights = fltdata$ArrayWeight, parallelComputing = TRUE,
 #'              plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
 #'              DE = "spikein")
 #' }
@@ -213,7 +213,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
                          symbolSize = 2, sigColour = "red", nonsigColour = "gray",
                          xTxtSize = 10, yTxtSize =10,
                          plotWidth = 170, plotHeight = 150,
-                         multicore = FALSE){
+                         parallelComputing = FALSE){
 
   ## check the key arguments
   if (is.null(fltdata)){
@@ -367,7 +367,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
   }
 
   ## output and plotting
-  if(!multicore){
+  if(!parallelComputing){
 
     # compile resutls into a list
     outlist <- lapply(cf, function(i){

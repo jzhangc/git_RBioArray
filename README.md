@@ -21,7 +21,13 @@ Installation:
 
 Update log
 
-    0.2.2 - 0.2.3 (March.16.2017)
+    0.2.4 (March.21.2017)
+      - mmu/rno to hsa entrez ID converesion function overhaul
+      - Arguments for input DE data list for GS functions unified as "DElst"
+      - Arguments for parallel computing unified for all the relevant functions as "parallelComputing" and "clusterType"
+      - Bug fixes
+
+    0.2.2 - 0.2.3 
       - Bug fixes
 
     0.2.1

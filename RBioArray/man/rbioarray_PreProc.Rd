@@ -5,8 +5,8 @@
 \title{rbioarray_PreProc}
 \usage{
 rbioarray_PreProc(rawlist, logTrans = FALSE, logTransMethod = "log2",
-  logTransObjT = "data", logTransMulticore = FALSE, bgMethod = "auto",
-  normMethod = "quantile", ...)
+  logTransObjT = "data", logTransParallelComputing = FALSE,
+  bgMethod = "auto", normMethod = "quantile", ...)
 }
 \arguments{
 \item{rawlist}{Input data, either a list, \code{EList} or \code{MAList} object.}
@@ -17,7 +17,7 @@ rbioarray_PreProc(rawlist, logTrans = FALSE, logTransMethod = "log2",
 
 \item{logTransObjT}{If \code{logTrans = TRUE}, set the file name for the output \code{csv} file containing the log transformed data.}
 
-\item{logTransMulticore}{If \code{logTrans = TRUE}, set if to use parallel computing for the transformation or not. Default is \code{FALSE}.}
+\item{logTransParallelComputing}{If \code{logTrans = TRUE}, set if to use parallel computing for the transformation or not. Default is \code{FALSE}.}
 
 \item{bgMethod}{Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.}
 

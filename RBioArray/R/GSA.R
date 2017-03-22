@@ -1,26 +1,90 @@
-#' @title rbioGS_entrez2gene
+#' @title rbioGS_sp2hsaEntrez
 #'
-#' @description Add Human entrez ID to the DE dataframe
-#' @param DEGdfm Input DE data frame.
-#' @param cat Catergory, default is \code{"SYMBOL"}.
-#' @param species Set the species, default is \code{"Hs"}.
-#' @param pkg Name for the annotation package. The current package includes the human version.
-#' @return Outputs a \code{dataframe} object with Entrez ID.
-#' @importFrom pathview id2eg
+#' @description convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
+#' @param DElst The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param tgtSpecies The target species. Options are \code{"mmu"} and \code{"rno"}.
+#' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
+#' @param parallelComputing If to use parallel computing. The cluster mode is \code{PSOCK} for now. Default is \code{FALSE}.
+#' @return Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
+#' @import doParallel
+#' @import foreach
+#' @importFrom biomaRt useMart getBM
 #' @examples
 #' \dontrun{
-#' DE_dataframe <- rbioGS_entrez2gene(dataframe)
+#' rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemlTransVar = "EnsemblID")
 #' }
 #' @export
-rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg = "org.Hs.eg.db"){
-  EnsemblVector <- DEGdfm$gene_name # create a vector conatining all the log-fold changes
-  names(EnsemblVector) <- DEGdfm$gene_name # add names to each data point in the vector
-  RNA_id <- id2eg(ids = names(EnsemblVector), category = cat, org = species, pkg.name = pkg)
-  DEGdfm$SYMBOL <- DEGdfm$gene_name
-  DEGdfm <- merge(DEGdfm, RNA_id, by = "SYMBOL")
-  DEGdfm <- DEGdfm[complete.cases(DEGdfm), ]
-  DEGdfm <- unique(DEGdfm)
-  return(DEGdfm)
+rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
+                                parallelComputing = FALSE){
+
+  ## check the arguments
+  if (is.null(ensemblTransVar)){
+    stop("Please set the variable name for the ensembl transcript ID.")
+  }
+
+  ## prepare reference hsa entrezID
+  # set the target species
+  if (tgtSpecies == "mmu"){
+    sp <- "mmusculus"
+  } else if (tgtSpecies == "rno"){
+    sp <- "rnorvegicus"
+  }
+
+  # extract hsa orthorlogy information
+  sp_ensemble <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
+  attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
+  sp_hsa_orth <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
+                       mart = mice_ensembl)
+  names(sp_hsa_orth)[names(sp_hsa_orth) == "ensembl_transcript_id"] <- paste0(tgtSpecies, "_ensembl_transcript_id") # generalized term for change column names
+
+  # extract hsa entrezgene ID
+  hsa_ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl") # establish the human set
+  attr_hsa <- c("ensembl_gene_id", "entrezgene")
+  hsa_entrez <- getBM(attr_hsa, filters = "", values = TRUE,
+                      mart = hsa_ensembl)
+
+  # merge the two dataframes
+  sp_hsa_orth_entrez <- merge(sp_hsa_orth, hsa_entrez,
+                              by.x = "hsapiens_homolog_ensembl_gene", by.y = "ensembl_gene_id",
+                              all.x = TRUE)
+  names(sp_hsa_orth_entrez)[names(sp_hsa_orth_entrez) == "entrezgene"] <- "hsa_entrezgene"
+  sp_hsa_orth_entrez <- sp1_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez$mmu_ensembl_transcript_id), ]
+
+  ## add the hsa entrez ID to the non-hsa DElist
+  # temp func for adding the variable, i is the DE dataframe
+  tmpfunc <- function(i){
+    j <- merge(i, hsa_orth_entrez,
+               by.x = ensemblTransVar, by.y = paste0(sp, "_ensembl_transcript_id"), all.x = TRUE)
+    return(j)
+  }
+
+  # looping through the DElist
+  # vectorize the output list
+  out <- vector(mode = "list", length(names(DElst)))
+  names(GSlst) <- names(DElst)
+
+  # looping
+  if (!parallelComputing){
+
+    out[] <- lapply(DElst, function(i)tmpfun(i))
+
+  } else { # parallel computing
+
+    # set up clusters for PSOCK
+    cl <- makeCluster(n_cores, type = cluster, outfile = "")
+    registerDoParallel(cl) # part of doParallel package
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # computing
+    out[] <- foreach(i = DElist) %dopar% {
+      tmpout <- tmpfun(i)
+    }
+
+  }
+
+  ## output
+  assign(paste(deparse(substitute(DElist)), "_hsaEntrez",sep = ""), out, envir = .GlobalEnv)
+
 }
 
 
@@ -35,8 +99,8 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.
 #' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.
 #' @param ... Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.
-#' @param multicore If to use parallel computing or not. Default is \code{FALSE}
-#' @param clusterType Only set when \code{multicore = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details The function is based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
 #' @return Outputs a \code{list} object with GSA results, both for p value based and t value based.
 #' @importFrom piano runGSA
@@ -45,7 +109,7 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
-#' gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, nPerm = 1000, multicore = TRUE, clusterType = "FORK")
+#' gsoutput <- rbioGS(GS = kegg, pVar = dfm$p_value, logFCVar = dfm$logFC, tVar = dfm$t_value, idVar = dfm$EntrezID, nPerm = 1000, parallelComputing = TRUE, clusterType = "FORK")
 #'
 #'
 #' }
@@ -53,7 +117,7 @@ rbioGS_entrez2geneStats <- function(DEGdfm, cat = "SYMBOL", species = "Hs", pkg 
 rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
                    method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
                    method_t = c("page", "gsea", "maxmean"), ...,
-                   multicore = FALSE, clusterType = "PSOCK"){
+                   parallelComputing = FALSE, clusterType = "PSOCK"){
 
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
@@ -82,7 +146,7 @@ rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
     GS_S.i <- runGSA(t, geneSetStat = GSmethod_t[i], ...)
   }
 
-  if (!multicore){
+  if (!parallelComputing){
 
     for (m in 1:length(GSigM_p)){
       GS_list_p[[m]] <- tmpfunc_p(m, GSmethod_p = GSigM_p, gsc = GS, ...)
@@ -330,7 +394,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #'
 #' @description Download and generate DE results masked kegg pathway figures
 #' @param dfm GS dataframe with \code{ENTREZID} and \code{logFC} variables.
-#' @param entrezVar Name of the EntrezID variable in the \code{input} object.
+#' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
 #' @param keggID Make sure to have quotation marks around the ID number.
 #' @param suffix Output file name suffix. Make sure to put it in quotation marks.
 #' @param species Set the species. Default is \code{"hsa"}. Visit kegg website for details.
@@ -372,12 +436,12 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #'
 #' @description All-in-one wrapper for GSA and plotting.
 #' @param objTitle Object title for the output GS analysis list from \code{piano} package.
-#' @param input The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.
-#' @param entrezVar Name of the EntrezID variable in the \code{input} object.
+#' @param DElst The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
 #' @param GS Pre-loaded gene set objects.
 #' @param ... Arguments to pass to \code{\link{rbioGS}}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
-#' @param cluster Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param boxplot If to plot boxplots. Default is \code{TRUE}.
 #' @param boxplotKEGG When \code{boxplot = TRUE}, to set if the gene set is KEGG. Default is \code{FALSE}.
 #' @param boxplotN When \code{boxplot = TRUE}, to set the \code{n} (rank cutoff) argument passed to \code{consensusScores} function from \code{piano} package. Default is \code{20}.
@@ -407,13 +471,13 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_all(objTitle = "mydata", input = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, cluster = "FORK")
+#' rbioGS_all(objTitle = "mydata", DElst = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, clusterType = "FORK")
 #'
 #' }
 #' @export
-rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
+rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                        GS = NULL, ...,
-                       parallelComputing = FALSE, cluster = "PSOCK",
+                       parallelComputing = FALSE, clusterType = "PSOCK",
                        boxplot = TRUE,
                        boxplotKEGG = FALSE, boxplotN = 20,
                        boxplotTitle = NULL, boxplotXlabel = "rank", boxplotYlabel = NULL,
@@ -451,18 +515,18 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
 
 
   ## make an empty list to store the GS results
-  GSlst <- vector(mode = "list", length(names(input)))
-  names(GSlst) <- names(input)
+  GSlst <- vector(mode = "list", length(names(DElst)))
+  names(GSlst) <- names(DElst)
 
   ## GSA
   if (!parallelComputing){
     # remove the rows with NA in the Entrez ID variable
-    DElst <- lapply(input, function(x)x[complete.cases(x[, entrezVar]), ])
+    DElst <- lapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ])
 
     # run GSA
     GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
                                                           tVar = i$t, idVar = i[, entrezVar],
-                                                          multicore = parallelComputing, clusterType = cluster, ...))
+                                                          parallelComputing = parallelComputing, clusterType = clusterType, ...))
 
 
     if (boxplot){
@@ -494,14 +558,14 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (cluster == "FORK"){ # mac and linux only
+    if (clusterType == "FORK"){ # mac and linux only
       # remove the rows with NA in the Entrez ID variable
-      DElst <- mclapply(input, FUN = function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
+      DElst <- mclapply(DElst, FUN = function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
       GSlst[] <- mclapply(DElst, FUN = function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
                                                                     tVar = i$t, idVar = i[, entrezVar],
-                                                                    multicore = FALSE, ...),
+                                                                    parallelComputing = FALSE, ...),
                           mc.cores = n_cores, mc.preschedule = FALSE)
 
 
@@ -535,18 +599,18 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
     } else { # windows etc
 
       # set up clusters for PSOCK
-      cl <- makeCluster(n_cores, type = cluster, outfile = "")
+      cl <- makeCluster(n_cores, type = clusterType, outfile = "")
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
       # remove the rows with NA in the Entrez ID variable
-      DElst <- foreach(x = input) %dopar% {
+      DElst <- foreach(x = DElst) %dopar% {
         out <- x[complete.cases(x[, entrezVar]), ]
       }
 
       GSlst[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
         out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                      tVar = i$t, idVar = i[, entrezVar], multicore = FALSE, ...)
+                      tVar = i$t, idVar = i[, entrezVar], parallelComputing = FALSE, ...)
       }
 
       # plot
@@ -588,12 +652,12 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
 #' @title rbioGS_all_noplot
 #'
 #' @description All-in-one wrapper for GSA (no plotting).
-#' @param input The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.
-#' @param entrezVar Name of the EntrezID variable in the \code{input} object.
+#' @param DElst The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
 #' @param GS Pre-loaded gene set objects.
 #' @param ... Arguments to pass to \code{\link{rbioGS}}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
-#' @param cluster Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 #' @import doParallel
@@ -603,13 +667,13 @@ rbioGS_all <- function(objTitle = "DE", input, entrezVar = NULL,
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_all_noplot(input = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, cluster = "FORK")
+#' rbioGS_all_noplot(DElst = DElist, entrezVar = "EntrezID", method_p = c("stouffer", "fisher"), method_t = c("gsea", "maxmean"), nPerm = 1000, GS = kegg, parallelComputing = TRUE, clusterType = "FORK")
 #'
 #' }
 #' @export
-rbioGS_all_noplot <- function(input, entrezVar = NULL,
+rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
                     GS = NULL, ...,
-                    parallelComputing = FALSE, cluster = "PSOCK"){
+                    parallelComputing = FALSE, clusterType = "PSOCK"){
 
   if (is.null(entrezVar)){
     stop("please set the name of the Entrez ID vaiable")
@@ -621,19 +685,19 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
 
 
   ## make an empty list to store the GS results
-  GSlst <- vector(mode = "list", length(names(input)))
-  names(GSlst) <- names(input)
+  GSlst <- vector(mode = "list", length(names(DElst)))
+  names(GSlst) <- names(DElst)
 
 
   ## GSA
   if (!parallelComputing){
     # remove the rows with NA in the Entrez ID variable
-    DElst <- lapply(input, function(x)x[complete.cases(x[, entrezVar]), ])
+    DElst <- lapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ])
 
     # run GSA
     GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
                                                           tVar = i$t, idVar = i[, entrezVar],
-                                                          multicore = parallelComputing, clusterType = cluster, ...))
+                                                          parallelComputing = parallelComputing, clusterType = clusterType, ...))
 
 
   } else { # parallel computing
@@ -642,32 +706,32 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (cluster == "FORK"){ # mac and linux only
+    if (clusterType == "FORK"){ # mac and linux only
       # remove the rows with NA in the Entrez ID variable
-      DElst <- mclapply(input, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
+      DElst <- mclapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
       GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
                                                               tVar = i$t, idVar = i[, entrezVar],
-                                                              multicore = FALSE, ...),
+                                                              parallelComputing = FALSE, ...),
                           mc.cores = n_cores, mc.preschedule = FALSE)
 
 
     } else { # windows etc
 
       # set up clusters for PSOCK
-      cl <- makeCluster(n_cores, type = cluster, outfile = "")
+      cl <- makeCluster(n_cores, type = clusterType, outfile = "")
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
       # remove the rows with NA in the Entrez ID variable
-      DElst <- foreach(x = input) %dopar% {
+      DElst <- foreach(x = DElst) %dopar% {
         out <- x[complete.cases(x[, entrezVar]), ]
       }
 
       GSlst[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
         out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
-                      tVar = i$t, idVar = i[, entrezVar], multicore = FALSE, ...)
+                      tVar = i$t, idVar = i[, entrezVar], parallelComputing = FALSE, ...)
       }
 
     }
@@ -682,7 +746,7 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
 #' @title rbioGS_plotting
 #'
 #' @description All-in-one wrapper for GSA plotting.
-#' @param input The input list with DE reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.
+#' @param GSlst The input list with GS reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.
 #' @param plotGSname When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the GS name in the file name. Default is \code{"GS"}.
 #' @param boxplot If to plot boxplots. Default is \code{TRUE}.
 #' @param boxplotKEGG When \code{boxplot = TRUE}, to set if the gene set is KEGG. Default is \code{FALSE}.
@@ -704,7 +768,7 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
 #' @param plotMethod When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the p methods. Options are \code{"median"} and \code{"mean"}. Default is \code{"median"}.
 #' @param plotPadjust When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set if to use FDR adjusted p value or not. Default is \code{TRUE}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
-#' @param cluster Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details The function takes the reuslted list from \code{\link{rbioGS_all_noplot}} function.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files, i.e. boxplots and scatter plot.
 #' @import doParallel
@@ -713,7 +777,7 @@ rbioGS_all_noplot <- function(input, entrezVar = NULL,
 #' @examples
 #' \dontrun{
 #'
-#' rbioGS_plotting(GSlist = myGSlist, plotGSname = "kegg", parallelComputing = TRUE, cluster = "FORK")
+#' rbioGS_plotting(GSlist = myGSlist, plotGSname = "kegg", parallelComputing = TRUE, clusterType = "FORK")
 #'
 #' }
 #' @export
@@ -728,7 +792,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
                             scatterTitle = NULL, scatterXlabel = "median p value", scatterYlabel = "consensus score",
                             scatterWidth = 170, scatterHeight = 150,
                             plotMethod = "median", plotPadjust = TRUE,
-                            parallelComputing = FALSE, cluster = "PSOCK"){
+                            parallelComputing = FALSE, clusterType = "PSOCK"){
 
 
   # set up a temp function for boxplot with directinality
@@ -775,7 +839,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (cluster == "FORK"){ # mac and linux only
+    if (clusterType == "FORK"){ # mac and linux only
 
       if (boxplot){
 
@@ -806,7 +870,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
     } else { # windows etc
 
       # set up clusters for PSOCK
-      cl <- makeCluster(n_cores, type = cluster, outfile = "")
+      cl <- makeCluster(n_cores, type = clusterType, outfile = "")
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 

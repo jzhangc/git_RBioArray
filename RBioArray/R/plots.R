@@ -325,7 +325,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 #' @param contra Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.
 #' @param weights Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
 #' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
-#' @param multicore If to use parallel computing. Default is \code{FALSE}.
+#' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @return The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{DE = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
 #' @import doParallel
@@ -337,7 +337,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 #' rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
 #'                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
 #'                   DE = "spikein", fltdata = fltdata, anno = anno, design = design, contra = contra, weights = fltdata$ArrayWeight,
-#'                   multicore = FALSE)
+#'                   parallelComputing = FALSE)
 #' }
 #' @export
 rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, plotHeight = 5, ...,
@@ -345,7 +345,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
                               DEdata = NULL,
                               geneName = FALSE, genesymbolVar = NULL,
                               DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05,
-                              multicore = FALSE){
+                              parallelComputing = FALSE){
 
   ## check the key arguments
   if (is.null(DEdata)){
@@ -440,7 +440,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
   mtx <- array(NA, dim(lfc), dimnames = dimnames(lfc))
 
   ## populate the matrices
-  if (!multicore){
+  if (!parallelComputing){
 
     for (j in 1:length(names(vennDE))){
       lfc[, j] <- vennDE[[j]]$logFC # extract log fold change

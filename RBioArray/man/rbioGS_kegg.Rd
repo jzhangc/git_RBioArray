@@ -9,7 +9,7 @@ rbioGS_kegg(dfm, entrezVar = NULL, keggID, suffix, species = "hsa")
 \arguments{
 \item{dfm}{GS dataframe with \code{ENTREZID} and \code{logFC} variables.}
 
-\item{entrezVar}{Name of the EntrezID variable in the \code{input} object.}
+\item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
 
 \item{keggID}{Make sure to have quotation marks around the ID number.}
 
