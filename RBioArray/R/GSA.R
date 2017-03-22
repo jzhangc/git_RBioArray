@@ -55,7 +55,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   # temp func for adding the variable, i is the DE dataframe
   tmpfunc <- function(i){
     j <- merge(i, sp_hsa_orth_entrez,
-               by.x = ensemblTransVar, by.y = paste0(sp, "_ensembl_transcript_id"), all.x = TRUE)
+               by.x = ensemblTransVar, by.y = paste0(tgtSpecies, "_ensembl_transcript_id"), all.x = TRUE)
     return(j)
   }
 
