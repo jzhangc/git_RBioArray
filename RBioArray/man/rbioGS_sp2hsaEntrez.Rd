@@ -24,6 +24,6 @@ convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the 
 }
 \examples{
 \dontrun{
-rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemlTransVar = "EnsemblID")
+rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemblTransVar = "EnsemblID")
 }
 }

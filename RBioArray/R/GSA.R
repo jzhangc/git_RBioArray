@@ -11,7 +11,7 @@
 #' @importFrom biomaRt useMart getBM
 #' @examples
 #' \dontrun{
-#' rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemlTransVar = "EnsemblID")
+#' rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemblTransVar = "EnsemblID")
 #' }
 #' @export
 rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
@@ -34,7 +34,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   sp_ensemble <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
   attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
   sp_hsa_orth <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
-                       mart = mice_ensembl)
+                       mart = sp_ensembl)
   names(sp_hsa_orth)[names(sp_hsa_orth) == "ensembl_transcript_id"] <- paste0(tgtSpecies, "_ensembl_transcript_id") # generalized term for change column names
 
   # extract hsa entrezgene ID
@@ -84,6 +84,9 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 
   ## output
   assign(paste(deparse(substitute(DElist)), "_hsaEntrez",sep = ""), out, envir = .GlobalEnv)
+
+  ## message
+  message(cat("Human entrez ID has been added as variable \"hsa_entrezgene\". "))
 
 }
 
