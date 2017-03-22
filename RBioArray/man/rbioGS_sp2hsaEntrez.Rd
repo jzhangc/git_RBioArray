@@ -20,7 +20,10 @@ rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
 Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
 }
 \description{
-convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
+Using up-to-date ensembl database, convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
+}
+\details{
+IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthorlogs.
 }
 \examples{
 \dontrun{
