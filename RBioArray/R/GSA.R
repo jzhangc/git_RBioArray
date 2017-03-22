@@ -48,7 +48,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
                               by.x = "hsapiens_homolog_ensembl_gene", by.y = "ensembl_gene_id",
                               all.x = TRUE)
   names(sp_hsa_orth_entrez)[names(sp_hsa_orth_entrez) == "entrezgene"] <- "hsa_entrezgene"
-  sp_hsa_orth_entrez <- sp1_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez$mmu_ensembl_transcript_id), ]
+  sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez$mmu_ensembl_transcript_id), ]
 
   ## add the hsa entrez ID to the non-hsa DElist
   # temp func for adding the variable, i is the DE dataframe
