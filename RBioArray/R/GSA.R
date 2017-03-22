@@ -84,7 +84,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   }
 
   ## output
-  assign(paste(deparse(substitute(DElist)), "_hsaEntrez",sep = ""), out, envir = .GlobalEnv)
+  assign(paste(deparse(substitute(DElst)), "_hsaEntrez",sep = ""), out, envir = .GlobalEnv)
 
   ## message
   message(cat("Human entrez ID has been added as variable \"hsa_entrezgene\". "))
