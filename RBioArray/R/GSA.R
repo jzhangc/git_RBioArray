@@ -67,7 +67,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   # looping
   if (!parallelComputing){
 
-    out[] <- lapply(DElst, function(i)tmpfun(i))
+    out[] <- lapply(DElst, function(i)tmpfunc(i))
 
   } else { # parallel computing
 
@@ -78,7 +78,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 
     # computing
     out[] <- foreach(i = DElist) %dopar% {
-      tmpout <- tmpfun(i)
+      tmpout <- tmpfunc(i)
     }
 
   }
