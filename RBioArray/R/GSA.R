@@ -72,7 +72,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   } else { # parallel computing
 
     # set up clusters for PSOCK
-    cl <- makeCluster(n_cores, type = cluster, outfile = "")
+    cl <- makeCluster(n_cores, type = "PSOCK", outfile = "")
     registerDoParallel(cl) # part of doParallel package
     on.exit(stopCluster(cl)) # close connect when exiting the function
 
