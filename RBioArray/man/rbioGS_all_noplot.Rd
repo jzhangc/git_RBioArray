@@ -12,13 +12,15 @@ rbioGS_all_noplot(DElst, entrezVar = NULL, GS = NULL, ...,
 
 \item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
 
-\item{GS}{Pre-loaded gene set objects.}
+\item{GS}{Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.}
 
 \item{...}{Arguments to pass to \code{\link{rbioGS}}.}
 
 \item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+
+\item{GSfile}{GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
 }
 \value{
 Outputs  \code{csv} files and \code{pdf} figure files with GSA results.

@@ -96,7 +96,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 #' @title rbioGS
 #'
 #' @description Add Human entrez ID to the DE dataframe
-#' @param GS Pre-loaded gene set objects.
+#' @param GS pre-loaded gene set objects. Default is \code{NULL}.
 #' @param pVar Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.
 #' @param logFCVar Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.
 #' @param tVar Gene leve t values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}.
@@ -119,11 +119,12 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 #'
 #' }
 #' @export
-rbioGS <- function(GS, pVar, logFCVar, tVar, idVar,
+rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
                    method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
                    method_t = c("page", "gsea", "maxmean"), ...,
                    parallelComputing = FALSE, clusterType = "PSOCK"){
 
+  ## setup parameters
   gStats <- list(p_value = pVar,
                  logFC = logFCVar,
                  t_value = tVar)
@@ -443,7 +444,8 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #' @param objTitle Object title for the output GS analysis list from \code{piano} package.
 #' @param DElst The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
-#' @param GS Pre-loaded gene set objects.
+#' @param GS Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.
+#' @param GSfile GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param ... Arguments to pass to \code{\link{rbioGS}}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -471,7 +473,7 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 #' @import doParallel
 #' @import foreach
-#' @importFrom piano runGSA
+#' @importFrom piano runGSA loadGSC
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @examples
 #' \dontrun{
@@ -481,7 +483,7 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #' }
 #' @export
 rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
-                       GS = NULL, ...,
+                       GS = NULL, GSfile = NULL, ...,
                        parallelComputing = FALSE, clusterType = "PSOCK",
                        boxplot = TRUE,
                        boxplotKEGG = FALSE, boxplotN = 20,
@@ -494,14 +496,24 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                        scatterWidth = 170, scatterHeight = 150,
                        plotMethod = "median", plotPadjust = TRUE, plotGSname = "GS"){
 
+  ## checke arguments
   if (is.null(entrezVar)){
     stop("please set the name of the Entrez ID vaiable")
   }
 
-  if (is.null(GS)){
+  if (is.null(GS) & is.null(GSfile)){
     stop("please choose gene set(s)")
   }
 
+  ## set up gene set object
+  if (is.null(GSfile)){
+    GSdata <- GS
+  } else if (is.null(GS)){
+    GSdata <- loadGSC(file = GSfile, type = "gmt")
+  }
+
+
+  ## tmp functions
   if (boxplot){
     # set up a temp function for boxplot with directinality
     tmpfunc <- function(x){
@@ -529,7 +541,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
     DElst <- lapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ])
 
     # run GSA
-    GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+    GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                                                           tVar = i$t, idVar = i[, entrezVar],
                                                           parallelComputing = parallelComputing, clusterType = clusterType, ...))
 
@@ -568,7 +580,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       DElst <- mclapply(DElst, FUN = function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
-      GSlst[] <- mclapply(DElst, FUN = function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+      GSlst[] <- mclapply(DElst, FUN = function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                                                                     tVar = i$t, idVar = i[, entrezVar],
                                                                     parallelComputing = FALSE, ...),
                           mc.cores = n_cores, mc.preschedule = FALSE)
@@ -614,7 +626,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       }
 
       GSlst[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
-        out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+        out <- rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                       tVar = i$t, idVar = i[, entrezVar], parallelComputing = FALSE, ...)
       }
 
@@ -659,7 +671,8 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 #' @description All-in-one wrapper for GSA (no plotting).
 #' @param DElst The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
-#' @param GS Pre-loaded gene set objects.
+#' @param GS Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.
+#' @param GSfile GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param ... Arguments to pass to \code{\link{rbioGS}}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -680,12 +693,20 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
                     GS = NULL, ...,
                     parallelComputing = FALSE, clusterType = "PSOCK"){
 
+  ## check arguments
   if (is.null(entrezVar)){
     stop("please set the name of the Entrez ID vaiable")
   }
 
-  if (is.null(GS)){
-    stop("please choose gene set")
+  if (is.null(GS) & is.null(GSfile)){
+    stop("please choose gene set(s)")
+  }
+
+  ## set up gene set object
+  if (is.null(GSfile)){
+    GSdata <- GS
+  } else if (is.null(GS)){
+    GSdata <- loadGSC(file = GSfile, type = "gmt")
   }
 
 
@@ -700,7 +721,7 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
     DElst <- lapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ])
 
     # run GSA
-    GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+    GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                                                           tVar = i$t, idVar = i[, entrezVar],
                                                           parallelComputing = parallelComputing, clusterType = clusterType, ...))
 
@@ -716,7 +737,7 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
       DElst <- mclapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
 
       # run GSA
-      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                                                               tVar = i$t, idVar = i[, entrezVar],
                                                               parallelComputing = FALSE, ...),
                           mc.cores = n_cores, mc.preschedule = FALSE)
@@ -735,7 +756,7 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
       }
 
       GSlst[] <- foreach(i = DElst, .packages = c("RBioArray", "piano")) %dopar% {
-        out <- rbioGS(GS = GS, pVar = i$P.Value, logFCVar = i$logFC,
+        out <- rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                       tVar = i$t, idVar = i[, entrezVar], parallelComputing = FALSE, ...)
       }
 

@@ -4,15 +4,16 @@
 \alias{rbioGS_all}
 \title{rbioGS_all}
 \usage{
-rbioGS_all(objTitle = "DE", DElst, entrezVar = NULL, GS = NULL, ...,
-  parallelComputing = FALSE, clusterType = "PSOCK", boxplot = TRUE,
-  boxplotKEGG = FALSE, boxplotN = 20, boxplotTitle = NULL,
-  boxplotXlabel = "rank", boxplotYlabel = NULL, boxplotWidth = 170,
-  boxplotHeight = 150, scatterplot = TRUE, scatterplotCutoff = 20,
-  scatterRankline = 20, scatterPline = 0.05, scatterTitle = NULL,
-  scatterXlabel = "median p value", scatterYlabel = "consensus score",
-  scatterWidth = 170, scatterHeight = 150, plotMethod = "median",
-  plotPadjust = TRUE, plotGSname = "GS")
+rbioGS_all(objTitle = "DE", DElst, entrezVar = NULL, GS = NULL,
+  GSfile = NULL, ..., parallelComputing = FALSE, clusterType = "PSOCK",
+  boxplot = TRUE, boxplotKEGG = FALSE, boxplotN = 20,
+  boxplotTitle = NULL, boxplotXlabel = "rank", boxplotYlabel = NULL,
+  boxplotWidth = 170, boxplotHeight = 150, scatterplot = TRUE,
+  scatterplotCutoff = 20, scatterRankline = 20, scatterPline = 0.05,
+  scatterTitle = NULL, scatterXlabel = "median p value",
+  scatterYlabel = "consensus score", scatterWidth = 170,
+  scatterHeight = 150, plotMethod = "median", plotPadjust = TRUE,
+  plotGSname = "GS")
 }
 \arguments{
 \item{objTitle}{Object title for the output GS analysis list from \code{piano} package.}
@@ -21,7 +22,9 @@ rbioGS_all(objTitle = "DE", DElst, entrezVar = NULL, GS = NULL, ...,
 
 \item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
 
-\item{GS}{Pre-loaded gene set objects.}
+\item{GS}{Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.}
+
+\item{GSfile}{GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
 
 \item{...}{Arguments to pass to \code{\link{rbioGS}}.}
 

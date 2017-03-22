@@ -4,12 +4,12 @@
 \alias{rbioGS}
 \title{rbioGS}
 \usage{
-rbioGS(GS, pVar, logFCVar, tVar, idVar, method_p = c("fisher", "stouffer",
-  "reporter", "tailStrength", "wilcoxon"), method_t = c("page", "gsea",
-  "maxmean"), ..., parallelComputing = FALSE, clusterType = "PSOCK")
+rbioGS(GS = NULL, pVar, logFCVar, tVar, idVar, method_p = c("fisher",
+  "stouffer", "reporter", "tailStrength", "wilcoxon"), method_t = c("page",
+  "gsea", "maxmean"), ..., parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
-\item{GS}{Pre-loaded gene set objects.}
+\item{GS}{pre-loaded gene set objects. Default is \code{NULL}.}
 
 \item{pVar}{Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.}
 
