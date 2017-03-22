@@ -5,7 +5,7 @@
 #' @param tgtSpecies The target species. Options are \code{"mmu"} and \code{"rno"}.
 #' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
 #' @param parallelComputing If to use parallel computing. The cluster mode is \code{PSOCK} for now. Default is \code{FALSE}.
-#' @details IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthorlogs.
+#' @details IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
 #' @return Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
 #' @import doParallel
 #' @import foreach
@@ -31,7 +31,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
     sp <- "rnorvegicus"
   }
 
-  # extract hsa orthorlogy information
+  # extract hsa ortholog information
   sp_ensembl <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
   attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
   sp_hsa_orth <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
