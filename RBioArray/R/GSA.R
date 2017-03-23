@@ -660,8 +660,12 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 
   }
 
-  assign(paste(objTitle, "_GS_list_", deparse(substitute(GS)), sep = ""), GSlst, envir = .GlobalEnv)
 
+  if (is.null(GSfile)){
+    assign(paste(objTitle, "_GS_list_", deparse(substitute(GS)), sep = ""), GSlst, envir = .GlobalEnv)
+  } else if (is.null(GS)){
+    assign(paste(objTitle, "_GS_list_", plotGSname, sep = ""), GSlst, envir = .GlobalEnv)
+  }
 }
 
 
