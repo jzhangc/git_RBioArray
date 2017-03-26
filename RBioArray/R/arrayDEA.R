@@ -186,11 +186,13 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
 #' @import doParallel
 #' @import foreach
+#' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @importFrom limma lmFit eBayes topTable contrasts.fit
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
@@ -213,7 +215,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
                          symbolSize = 2, sigColour = "red", nonsigColour = "gray",
                          xTxtSize = 10, yTxtSize =10,
                          plotWidth = 170, plotHeight = 150,
-                         parallelComputing = FALSE){
+                         parallelComputing = FALSE, clusterType = "PSOCK"){
 
   ## check the key arguments
   if (is.null(fltdata)){
@@ -393,36 +395,71 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
   } else { ## parallel computing
 
-    # set up cpu cluster
+    # check the cluster type
+    if (clusterType != "PSOCK" & clusterType != "FORK"){
+      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
+    }
+
+    # set up cpu cores
     n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, type = "PSOCK")
-    registerDoParallel(cl)
-    on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
+    if (clusterType == "PSOCK"){
+      # set up cpu cluster
+      cl <- makeCluster(n_cores, type = "PSOCK")
+      registerDoParallel(cl)
+      on.exit(stopCluster(cl)) # close connect when exiting the function
 
-      tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
-      tmp$ProbeName <- rownames(tmp)
-      tmp <- merge(tmp, anno, by = "ProbeName")
-      return(tmp)
+      outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
 
-    }
-
-    names(outlist) <- cf
-
-    # write DE results into files
-    foreach(j = 1: length(cf)) %dopar% {
-      write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
-    }
-
-    # volcano plot and output summary
-    if (plot){
-
-      threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
-        tmpfunc(i = outlist, j = j, PC = PCntl)
+        tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        tmp <- merge(tmp, anno, by = "ProbeName")
+        return(tmp)
 
       }
+
+      names(outlist) <- cf
+
+      # write DE results into files
+      foreach(j = 1: length(cf)) %dopar% {
+        write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
+      }
+
+      # volcano plot and output summary
+      if (plot){
+
+        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
+          tmpfunc(i = outlist, j = j, PC = PCntl)
+
+        }
+      }
+
+    } else {
+
+      outlist <- mclapply(cf, FUN = function(i){
+        tmp <- topTable(out, coef = i, number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        tmp <- merge(tmp, anno, by = "ProbeName")
+        return(tmp)
+      }, mc.cores = n_cores, mc.preschedule = FALSE)
+
+      names(outlist) <- cf
+
+      # write DE results into files
+      mclapply(1:length(cf), FUN = function(j){
+        write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+      }, mc.cores = n_cores, mc.preschedule = FALSE)
+
+      # volcano plot and output summary
+      if (plot){
+
+        threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
+
+      }
+
     }
+
+
   }
 
   ## output the DE/fit objects to the environment, as well as the DE csv files into wd

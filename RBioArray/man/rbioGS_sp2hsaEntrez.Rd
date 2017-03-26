@@ -5,7 +5,7 @@
 \title{rbioGS_sp2hsaEntrez}
 \usage{
 rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
-  parallelComputing = FALSE)
+  parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
 \item{DElst}{The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
@@ -15,6 +15,8 @@ rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
 \item{ensemblTransVar}{The name of the variable from DE list containing ensembl transcript ID.}
 
 \item{parallelComputing}{If to use parallel computing. The cluster mode is \code{PSOCK} for now. Default is \code{FALSE}.}
+
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.

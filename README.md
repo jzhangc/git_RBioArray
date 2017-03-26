@@ -21,7 +21,13 @@ Installation:
 
 Update log
 
-    0.2.5 (March.22.2017)
+    0.2.6 (March.26.2017)
+      - Both PSOCK and FORK cluster types are now avaiable for all the functions featuring parallel computing
+      - Small "quality of life" changes
+      - Bug fixes
+    
+
+    0.2.5
       - Direct loading GS database files functionality added for GS functions
       - Bug fixes
       

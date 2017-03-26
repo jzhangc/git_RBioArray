@@ -5,10 +5,12 @@
 #' @param tgtSpecies The target species. Options are \code{"mmu"} and \code{"rno"}.
 #' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
 #' @param parallelComputing If to use parallel computing. The cluster mode is \code{PSOCK} for now. Default is \code{FALSE}.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
 #' @return Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
 #' @import doParallel
 #' @import foreach
+#' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @importFrom biomaRt useMart getBM
 #' @examples
 #' \dontrun{
@@ -16,7 +18,7 @@
 #' }
 #' @export
 rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
-                                parallelComputing = FALSE){
+                                parallelComputing = FALSE, clusterType = "PSOCK"){
 
   ## check the arguments
   if (is.null(ensemblTransVar)){
@@ -71,16 +73,29 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 
   } else { # parallel computing
 
-    # set up clusters for PSOCK
-    n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, type = "PSOCK", outfile = "")
-    registerDoParallel(cl) # part of doParallel package
-    on.exit(stopCluster(cl)) # close connect when exiting the function
-
-    # computing
-    out[] <- foreach(i = DElst) %dopar% {
-      tmpout <- tmpfunc(i)
+    # check the cluster type
+    if (clusterType != "PSOCK" & clusterType != "FORK"){
+      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
     }
+
+    # set up core numbers
+    n_cores <- detectCores() - 1
+
+    if (clusterType == "PSOCK"){
+      # set up clusters for PSOCK
+      cl <- makeCluster(n_cores, type = "PSOCK", outfile = "")
+      registerDoParallel(cl) # part of doParallel package
+      on.exit(stopCluster(cl)) # close connect when exiting the function
+
+      # computing
+      out[] <- foreach(i = DElst) %dopar% {
+        tmpout <- tmpfunc(i) }
+
+      } else {
+
+        out[] <- mclapply(DElst, FUN = tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
+
+      }
 
   }
 
@@ -165,16 +180,17 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
   } else {
 
     ## parallel computing
+    # check cluster type
+    if (clusterType != "PSOCK" & clusterType != "FORK"){
+      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
+    }
+
+
     # set up cpu core number
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "FORK"){ # mac and linux only
-
-      GS_list_p[] <- mclapply(1: length(GSigM_p), FUN = tmpfunc_p, GSmethod_p = GSigM_p, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
-      GS_list_t[] <- mclapply(1: length(GSigM_t), FUN = tmpfunc_t, GSmethod_t = GSigM_t, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
-
-    } else { # windows etc
+    if (clusterType == "PSOCK"){ # windows etc
 
       # set up cpu cluster for PSOCK
       cl <- makeCluster(n_cores, type = clusterType, outfile = "")
@@ -189,6 +205,12 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
       GS_list_t[] <- foreach(i = 1: length(GSigM_t), .packages = "piano") %dopar% {
         out <- tmpfunc_t(i, GSmethod_t =  GSigM_t, gsc = GS, ...)
       }
+
+
+    } else { # mac and linux only
+
+      GS_list_p[] <- mclapply(1: length(GSigM_p), FUN = tmpfunc_p, GSmethod_p = GSigM_p, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
+      GS_list_t[] <- mclapply(1: length(GSigM_t), FUN = tmpfunc_t, GSmethod_t = GSigM_t, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
 
     }
 
@@ -571,49 +593,16 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 
   } else { # parallel computing
 
+    # check cluster type
+    if (clusterType != "PSOCK" & clusterType != "FORK"){
+      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
+    }
+
     # set up cpu cores
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "FORK"){ # mac and linux only
-      # remove the rows with NA in the Entrez ID variable
-      DElst <- mclapply(DElst, FUN = function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
-
-      # run GSA
-      GSlst[] <- mclapply(DElst, FUN = function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
-                                                                    tVar = i$t, idVar = i[, entrezVar],
-                                                                    parallelComputing = FALSE, ...),
-                          mc.cores = n_cores, mc.preschedule = FALSE)
-
-
-
-      if (boxplot){
-
-        # boxplots
-        mclapply(1: length(GSlst), tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
-
-        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
-                                                                              KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
-                                                                              plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
-                 mc.cores = n_cores, mc.preschedule = FALSE)
-
-      }
-
-      if (scatterplot){
-
-        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
-                                                                              cutoff = scatterplotCutoff,
-                                                                              method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
-                                                                              pCutoff = scatterPline,
-                                                                              plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
-                                                                              plotWidth = scatterWidth, plotHeight = scatterHeight),
-                 mc.cores = n_cores, mc.preschedule = FALSE)
-
-
-      }
-
-    } else { # windows etc
+    if (clusterType == "PSOCK"){ # windows etc
 
       # set up clusters for PSOCK
       cl <- makeCluster(n_cores, type = clusterType, outfile = "")
@@ -656,12 +645,56 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
         }
       }
 
+
+    } else { # mac and linux only
+
+      # remove the rows with NA in the Entrez ID variable
+      DElst <- mclapply(DElst, FUN = function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
+
+      # run GSA
+      GSlst[] <- mclapply(DElst, FUN = function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
+                                                                    tVar = i$t, idVar = i[, entrezVar],
+                                                                    parallelComputing = FALSE, ...),
+                          mc.cores = n_cores, mc.preschedule = FALSE)
+
+
+
+      if (boxplot){
+
+        # boxplots
+        mclapply(1: length(GSlst), tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
+
+        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+                                                                              KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
+                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                              plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
+                 mc.cores = n_cores, mc.preschedule = FALSE)
+
+      }
+
+      if (scatterplot){
+
+        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+                                                                              cutoff = scatterplotCutoff,
+                                                                              method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+                                                                              pCutoff = scatterPline,
+                                                                              plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
+                                                                              plotWidth = scatterWidth, plotHeight = scatterHeight),
+                 mc.cores = n_cores, mc.preschedule = FALSE)
+
+
+      }
+
     }
 
   }
 
-  assign(paste(objTitle, "_GS_list_", deparse(substitute(GS)), sep = ""), GSlst, envir = .GlobalEnv)
 
+  if (is.null(GSfile)){
+    assign(paste(objTitle, "_GS_list_", deparse(substitute(GS)), sep = ""), GSlst, envir = .GlobalEnv)
+  } else if (is.null(GS)){
+    assign(paste(objTitle, "_GS_list_", plotGSname, sep = ""), GSlst, envir = .GlobalEnv)
+  }
 }
 
 
@@ -728,22 +761,16 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
 
   } else { # parallel computing
 
+    # check cluster type
+    if (clusterType != "PSOCK" & clusterType != "FORK"){
+      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
+    }
+
     # set up cpu cores
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "FORK"){ # mac and linux only
-      # remove the rows with NA in the Entrez ID variable
-      DElst <- mclapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
-
-      # run GSA
-      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
-                                                              tVar = i$t, idVar = i[, entrezVar],
-                                                              parallelComputing = FALSE, ...),
-                          mc.cores = n_cores, mc.preschedule = FALSE)
-
-
-    } else { # windows etc
+    if (clusterType == "PSOCK"){# windows etc
 
       # set up clusters for PSOCK
       cl <- makeCluster(n_cores, type = clusterType, outfile = "")
@@ -759,6 +786,18 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
         out <- rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                       tVar = i$t, idVar = i[, entrezVar], parallelComputing = FALSE, ...)
       }
+
+
+    } else { # mac and linux only
+      # remove the rows with NA in the Entrez ID variable
+      DElst <- mclapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
+
+      # run GSA
+      GSlst[] <- mclapply(DElst, function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
+                                                              tVar = i$t, idVar = i[, entrezVar],
+                                                              parallelComputing = FALSE, ...),
+                          mc.cores = n_cores, mc.preschedule = FALSE)
+
 
     }
 
@@ -861,39 +900,16 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
 
   } else { # parallel computing
 
+    # check cluster type
+    if (clusterType != "PSOCK" & clusterType != "FORK"){
+      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
+    }
+
     # set up cpu cores
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "FORK"){ # mac and linux only
-
-      if (boxplot){
-
-        # boxplots
-        mclapply(1: length(GSlst), tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
-
-        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
-                                                                              KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
-                                                                              plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
-                 mc.cores = n_cores, mc.preschedule = FALSE)
-
-      }
-
-      if (scatterplot){
-
-
-        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
-                                                                              method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
-                                                                              pCutoff = scatterPline,
-                                                                              plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
-                                                                              plotWidth = scatterWidth, plotHeight = scatterHeight),
-                 mc.cores = n_cores, mc.preschedule = FALSE)
-
-
-      }
-
-    } else { # windows etc
+    if (clusterType == "PSOCK"){# windows etc
 
       # set up clusters for PSOCK
       cl <- makeCluster(n_cores, type = clusterType, outfile = "")
@@ -924,6 +940,34 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
                                     plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
                                     plotWidth = scatterWidth, plotHeight = scatterHeight)
         }
+      }
+
+    } else {# mac and linux only
+
+      if (boxplot){
+
+        # boxplots
+        mclapply(1: length(GSlst), tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
+
+        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+                                                                              KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
+                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                              plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
+                 mc.cores = n_cores, mc.preschedule = FALSE)
+
+      }
+
+      if (scatterplot){
+
+
+        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
+                                                                              method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+                                                                              pCutoff = scatterPline,
+                                                                              plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
+                                                                              plotWidth = scatterWidth, plotHeight = scatterHeight),
+                 mc.cores = n_cores, mc.preschedule = FALSE)
+
+
       }
 
     }

@@ -11,7 +11,7 @@ rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
   q.value = 0.05, Title = NULL, xLabel = "log2(fold change)",
   yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
   nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
-  plotHeight = 150, parallelComputing = FALSE)
+  plotHeight = 150, parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
@@ -67,6 +67,8 @@ rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
 \item{plotHeight}{The height of the figure for the final output figure file. Default is \code{150}.}
 
 \item{parallelComputing}{If to use parallel computing. Default is \code{FALSE}.}
+
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
