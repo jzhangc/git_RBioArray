@@ -403,7 +403,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     # set up cpu cores
     n_cores <- detectCores() - 1
 
-    if (clusterType == "PSOCK"){
+    if (clusterType == "PSOCK"){ # all OS types
       # set up cpu cluster
       cl <- makeCluster(n_cores, type = "PSOCK")
       registerDoParallel(cl)
@@ -434,7 +434,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
         }
       }
 
-    } else {
+    } else { # macOS and Unix-like systems
 
       outlist <- mclapply(cf, FUN = function(i){
         tmp <- topTable(out, coef = i, number = Inf, ...)

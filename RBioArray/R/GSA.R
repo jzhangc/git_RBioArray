@@ -81,7 +81,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
     # set up core numbers
     n_cores <- detectCores() - 1
 
-    if (clusterType == "PSOCK"){
+    if (clusterType == "PSOCK"){ # all OS types
       # set up clusters for PSOCK
       cl <- makeCluster(n_cores, type = "PSOCK", outfile = "")
       registerDoParallel(cl) # part of doParallel package
@@ -91,7 +91,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
       out[] <- foreach(i = DElst) %dopar% {
         tmpout <- tmpfunc(i) }
 
-      } else {
+      } else { # macOS and Unix-like only
 
         out[] <- mclapply(DElst, FUN = tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
 
@@ -190,7 +190,7 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "PSOCK"){ # windows etc
+    if (clusterType == "PSOCK"){ # all OS types
 
       # set up cpu cluster for PSOCK
       cl <- makeCluster(n_cores, type = clusterType, outfile = "")
@@ -602,7 +602,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "PSOCK"){ # windows etc
+    if (clusterType == "PSOCK"){ # all OS types
 
       # set up clusters for PSOCK
       cl <- makeCluster(n_cores, type = clusterType, outfile = "")
@@ -909,7 +909,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
     n_cores <- detectCores() - 1
 
     # parallel computing
-    if (clusterType == "PSOCK"){# windows etc
+    if (clusterType == "PSOCK"){ # All OS types
 
       # set up clusters for PSOCK
       cl <- makeCluster(n_cores, type = clusterType, outfile = "")
