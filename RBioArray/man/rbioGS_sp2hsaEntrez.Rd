@@ -14,7 +14,7 @@ rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
 
 \item{ensemblTransVar}{The name of the variable from DE list containing ensembl transcript ID.}
 
-\item{parallelComputing}{If to use parallel computing. The cluster mode is \code{PSOCK} for now. Default is \code{FALSE}.}
+\item{parallelComputing}{If to use parallel computing. Default is \code{FALSE}.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }

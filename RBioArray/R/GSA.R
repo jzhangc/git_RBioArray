@@ -4,7 +4,7 @@
 #' @param DElst The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param tgtSpecies The target species. Options are \code{"mmu"} and \code{"rno"}.
 #' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
-#' @param parallelComputing If to use parallel computing. The cluster mode is \code{PSOCK} for now. Default is \code{FALSE}.
+#' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
 #' @return Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
