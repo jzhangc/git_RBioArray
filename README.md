@@ -26,7 +26,7 @@ Update log
       - Bug fixes
     
     
-    0.2.6 (March.26.2017)
+    0.2.6
       - Both PSOCK and FORK cluster types are now avaiable for all the functions featuring parallel computing
       - Small "quality of life" changes
       - Bug fixes
