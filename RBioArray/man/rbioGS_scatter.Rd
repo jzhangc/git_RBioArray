@@ -5,8 +5,8 @@
 \title{rbioGS_scatter}
 \usage{
 rbioGS_scatter(GSA_list, fileName = "GS_list", ..., plotTitle = NULL,
-  xLabel = "median p value", yLabel = "consensus score", rankCutoff = 20,
-  pCutoff = 0.05, plotWidth = 170, plotHeight = 150)
+  xLabel = "median p value", yLabel = "log consensus score",
+  rankCutoff = 20, pCutoff = 0.05, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
 \item{GSA_list}{GSA list generated from \code{\link{rbioArray_allGSA}}.}
@@ -19,9 +19,9 @@ rbioGS_scatter(GSA_list, fileName = "GS_list", ..., plotTitle = NULL,
 
 \item{xLabel}{X-axis label. Default is \code{"median p value"}.}
 
-\item{yLabel}{Y-axis label. Default is \code{"consensus score"}.}
+\item{yLabel}{Y-axis label. Default is \code{"log consensus score"}.}
 
-\item{rankCutoff}{Cutoff value for GS rank line.}
+\item{rankCutoff}{Cutoff value for GS rank line. The input number will be log2 transformed when plotting.}
 
 \item{pCutoff}{Cutoff value for GS p value line.}
 
@@ -31,7 +31,7 @@ rbioGS_scatter(GSA_list, fileName = "GS_list", ..., plotTitle = NULL,
 Outputs a \code{pdf} scatter figure file with allGSA results.
 }
 \description{
-Generate scatter plot for piano GS rank heatmap obejct.
+Generate scatter plot for piano GS rank heatmap obejct. Note that the rank is log2 transformed.
 }
 \details{
 The function is based on piano package.

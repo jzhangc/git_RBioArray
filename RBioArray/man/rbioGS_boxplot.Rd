@@ -6,7 +6,8 @@
 \usage{
 rbioGS_boxplot(GSA_list, fileName = "GS_list", KEGG = FALSE,
   pClass = NULL, classDirection = NULL, ..., plotTitle = NULL,
-  xLabel = "rank", yLabel = NULL, plotWidth = 170, plotHeight = 150)
+  xLabel = "rank", yLabel = NULL, yLabelSize = 7, plotWidth = 170,
+  plotHeight = 150)
 }
 \arguments{
 \item{GSA_list}{piano GS results object.}
@@ -26,6 +27,8 @@ rbioGS_boxplot(GSA_list, fileName = "GS_list", KEGG = FALSE,
 \item{xLabel}{X-axis label. Default is \code{"rank"}.}
 
 \item{yLabel}{Y-axis label. Default is \code{NULL}.}
+
+\item{yLabelSize}{The font size for the y-axis label. Default is \code{7}.}
 
 \item{plotWidth}{Set the width of the plot. Default is \code{170}.}
 

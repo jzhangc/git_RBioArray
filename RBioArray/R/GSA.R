@@ -235,6 +235,7 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
 #' @param plotTitle Title of the plot. Default is \code{NULL}.
 #' @param xLabel X-axis label. Default is \code{"rank"}.
 #' @param yLabel Y-axis label. Default is \code{NULL}.
+#' @param yLabelSize The font size for the y-axis label. Default is \code{7}.
 #' @param plotWidth Set the width of the plot. Default is \code{170}.
 #' @param plotHeight Set the height of the plot. Default is \code{150}.
 #' @details The function is a wrapper that takes resulted object from \code{runGSA} function from \code{piano} package.
@@ -251,7 +252,7 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
 #' }
 #' @export
 rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass = NULL, classDirection = NULL, ...,
-                           plotTitle = NULL, xLabel = "rank", yLabel = NULL, plotWidth = 170, plotHeight = 150){
+                           plotTitle = NULL, xLabel = "rank", yLabel = NULL, yLabelSize = 7, plotWidth = 170, plotHeight = 150){
 
   # check the arguments
   if (is.null(pClass)) {
@@ -297,6 +298,7 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
           axis.title = element_text(face = "bold"),
+          axis.text.y = element_text(size = yLabelSize),
           legend.position = "bottom")
 
   # export the file and draw a preview
@@ -315,15 +317,15 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
 
 #' @title rbioGS_scatter
 #'
-#' @description Generate scatter plot for piano GS rank heatmap obejct.
+#' @description Generate scatter plot for piano GS rank heatmap obejct. Note that the rank is log2 transformed.
 #' @param GSA_list GSA list generated from \code{\link{rbioArray_allGSA}}.
 #' @param fileName Output file name.
 #' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
-#' @param rankCutoff Cutoff value for GS rank line.
+#' @param rankCutoff Cutoff value for GS rank line. The input number will be log2 transformed when plotting.
 #' @param pCutoff Cutoff value for GS p value line.
 #' @param plotTitle Title of the plot. Default is \code{NULL}.
 #' @param xLabel X-axis label. Default is \code{"median p value"}.
-#' @param yLabel Y-axis label. Default is \code{"consensus score"}.
+#' @param yLabel Y-axis label. Default is \code{"log consensus score"}.
 #' @param plotHeight Set the height of the plot. Default is \code{150}.
 #' @return Outputs a \code{pdf} scatter figure file with allGSA results.
 #' @details The function is based on piano package.
@@ -340,7 +342,7 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
 #' @export
 rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
                            ...,
-                           plotTitle = NULL, xLabel = "median p value", yLabel = "consensus score",
+                           plotTitle = NULL, xLabel = "median p value", yLabel = "log consensus score",
                            rankCutoff = 20, pCutoff = 0.05,
                            plotWidth = 170, plotHeight = 150){
 
@@ -387,21 +389,15 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 
   ## plotting
   grid.newpage()
-  ScatterP<-ggplot(dfm4plot, aes(x = p_value, y = rank)) +
+  ScatterP<-ggplot(dfm4plot, aes(x = p_value, y = log2(rank))) +
     geom_point(aes(shape = factor(p_class)), size = 3) +
     ggtitle(plotTitle) +
     xlab(xLabel) +
     ylab(yLabel) +
-    scale_x_continuous(breaks = c(0.1, 0.05, 0),
-                       labels = c("0.1", "0.05", "0"),
-                       expand = c(0, 0),
-                       trans = "reverse", limits = c(0.1, NA)) +
-    scale_y_continuous(breaks = c(100, 50, 0),
-                       labels = c("100", "50", "0"),
-                       expand = c(0, 0),
-                       trans = "reverse", limits = c(100, NA)) +
+    scale_x_continuous(trans = "reverse", limits = c(1, NA)) +
+    scale_y_continuous(trans = "reverse") +
     geom_vline(xintercept = pCutoff, linetype = "dashed") +
-    geom_hline(yintercept = rankCutoff, linetype = "dashed") +
+    geom_hline(yintercept = log2(rankCutoff), linetype = "dashed") +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
           panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
           axis.title = element_text(face = "bold"),
@@ -477,6 +473,7 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 #' @param boxplotTitle When \code{boxplot = TRUE}, to set the title of the boxplots. Default is \code{NULL}.
 #' @param boxplotXlabel When \code{boxplot = TRUE}, to set the boxplots x-axis label. Default is \code{"rank"}.
 #' @param boxplotYlabel When \code{boxplot = TRUE}, to set the boxplots y-axis label. Default is \code{NULL}.
+#' @param boxplotYlabelsize When \code{boxplot = TRUE}, to set the boxplots y-axis label size. Default is \code{7}.
 #' @param boxplotWidth When \code{boxplot = TRUE}, to set the boxplots width. Default is \code{170}.
 #' @param boxplotHeight When \code{boxplot = TRUE}, to set the boxplots height. Default is \code{150}.
 #' @param scatterplot When \code{scatterplot = TRUE}, to set if to plot a scatter plot. Default is \code{TRUE}.
@@ -510,6 +507,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                        boxplot = TRUE,
                        boxplotKEGG = FALSE, boxplotN = 20,
                        boxplotTitle = NULL, boxplotXlabel = "rank", boxplotYlabel = NULL,
+                       boxplotYlabelsize = 7,
                        boxplotWidth = 170, boxplotHeight = 150,
                        scatterplot = TRUE,
                        scatterplotCutoff = 20,
@@ -546,7 +544,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       lapply(pCl, function(m)lapply(classDirt,
                                     function(n)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                          KEGG = boxplotKEGG, pClass = m, classDirection = n, adjust = plotPadjust,
-                                                                         n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                         n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                          plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)))
 
     }
@@ -575,7 +573,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 
       lapply(1: length(GSlst), function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight))
 
     }
@@ -629,7 +627,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
           RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
         }
 
@@ -666,7 +664,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 
         mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                               KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                               plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
                  mc.cores = n_cores, mc.preschedule = FALSE)
 
@@ -819,6 +817,7 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
 #' @param boxplotTitle When \code{boxplot = TRUE}, to set the title of the boxplots. Default is \code{NULL}.
 #' @param boxplotXlabel When \code{boxplot = TRUE}, to set the boxplots x-axis label. Default is \code{"rank"}.
 #' @param boxplotYlabel When \code{boxplot = TRUE}, to set the boxplots y-axis label. Default is \code{NULL}.
+#' @param boxplotYlabelsize When \code{boxplot = TRUE}, to set the boxplots y-axis label size. Default is \code{7}.
 #' @param boxplotWidth When \code{boxplot = TRUE}, to set the boxplots width. Default is \code{170}.
 #' @param boxplotHeight When \code{boxplot = TRUE}, to set the boxplots height. Default is \code{150}.
 #' @param scatterplot When \code{scatterplot = TRUE}, to set if to plot a scatter plot. Default is \code{TRUE}.
@@ -827,7 +826,7 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
 #' @param scatterplotPline When \code{scatterplot = TRUE}, to set the p value line on the scatter plot. Default is \code{0.05}.
 #' @param scatterTitle When \code{scatterplot = TRUE}, to set the title of the scatter plot. Default is \code{NULL}.
 #' @param scatterXlabel When \code{scatterplot = TRUE}, to set the scatter plot x-axis label. Default is \code{"median p value"}.
-#' @param scatterYlabel When \code{scatterplot = TRUE}, to set the scatter plot y-axis label. Default is \code{"consensus score"}.
+#' @param scatterYlabel When \code{scatterplot = TRUE}, to set the scatter plot y-axis label. Default is \code{"log consensus score"}.
 #' @param scatterWidth When \code{scatterplot = TRUE}, to set the scatter plot width. Default is \code{170}.
 #' @param scatterHeight When \code{scatterplot = TRUE}, to set the scatter plot height. Default is \code{150}.
 #' @param plotMethod When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the p methods. Options are \code{"median"} and \code{"mean"}. Default is \code{"median"}.
@@ -850,11 +849,12 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
                             boxplot = TRUE,
                             boxplotKEGG = FALSE, boxplotN = 20,
                             boxplotTitle = NULL, boxplotXlabel = "rank", boxplotYlabel = NULL,
+                            boxplotYlabelsize = 7,
                             boxplotWidth = 170, boxplotHeight = 150,
                             scatterplot = TRUE,
                             scatterplotCutoff = 20,
                             scatterRankline = 20, scatterPline = 0.05,
-                            scatterTitle = NULL, scatterXlabel = "median p value", scatterYlabel = "consensus score",
+                            scatterTitle = NULL, scatterXlabel = "median p value", scatterYlabel = "log consensus score",
                             scatterWidth = 170, scatterHeight = 150,
                             plotMethod = "median", plotPadjust = TRUE,
                             parallelComputing = FALSE, clusterType = "PSOCK"){
@@ -869,7 +869,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
     lapply(pCl, function(m)lapply(classDirt,
                                   function(n)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                        KEGG = boxplotKEGG, pClass = m, classDirection = n, adjust = plotPadjust,
-                                                                       n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                       n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                        plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)))
 
   }
@@ -882,7 +882,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
 
       lapply(1: length(GSlst), function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight))
 
     }
@@ -926,7 +926,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
           RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                    n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
         }
 
@@ -951,7 +951,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
 
         mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                               KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
-                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel,
+                                                                              n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                               plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
                  mc.cores = n_cores, mc.preschedule = FALSE)
 

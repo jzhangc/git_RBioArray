@@ -21,6 +21,11 @@ Installation:
 
 Update log
 
+    0.2.7 (March.28.2017)
+      - Boxplot and Scatter plot functions for GS optimized
+      - Bug fixes
+    
+    
     0.2.6 (March.26.2017)
       - Both PSOCK and FORK cluster types are now avaiable for all the functions featuring parallel computing
       - Small "quality of life" changes

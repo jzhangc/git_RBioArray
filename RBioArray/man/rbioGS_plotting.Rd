@@ -6,12 +6,13 @@
 \usage{
 rbioGS_plotting(GSlst, plotGSname = "GS", boxplot = TRUE,
   boxplotKEGG = FALSE, boxplotN = 20, boxplotTitle = NULL,
-  boxplotXlabel = "rank", boxplotYlabel = NULL, boxplotWidth = 170,
-  boxplotHeight = 150, scatterplot = TRUE, scatterplotCutoff = 20,
-  scatterRankline = 20, scatterPline = 0.05, scatterTitle = NULL,
-  scatterXlabel = "median p value", scatterYlabel = "consensus score",
-  scatterWidth = 170, scatterHeight = 150, plotMethod = "median",
-  plotPadjust = TRUE, parallelComputing = FALSE, clusterType = "PSOCK")
+  boxplotXlabel = "rank", boxplotYlabel = NULL, boxplotYlabelsize = 7,
+  boxplotWidth = 170, boxplotHeight = 150, scatterplot = TRUE,
+  scatterplotCutoff = 20, scatterRankline = 20, scatterPline = 0.05,
+  scatterTitle = NULL, scatterXlabel = "median p value",
+  scatterYlabel = "log consensus score", scatterWidth = 170,
+  scatterHeight = 150, plotMethod = "median", plotPadjust = TRUE,
+  parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
 \item{GSlst}{The input list with GS reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.}
@@ -30,6 +31,8 @@ rbioGS_plotting(GSlst, plotGSname = "GS", boxplot = TRUE,
 
 \item{boxplotYlabel}{When \code{boxplot = TRUE}, to set the boxplots y-axis label. Default is \code{NULL}.}
 
+\item{boxplotYlabelsize}{When \code{boxplot = TRUE}, to set the boxplots y-axis label size. Default is \code{7}.}
+
 \item{boxplotWidth}{When \code{boxplot = TRUE}, to set the boxplots width. Default is \code{170}.}
 
 \item{boxplotHeight}{When \code{boxplot = TRUE}, to set the boxplots height. Default is \code{150}.}
@@ -42,7 +45,7 @@ rbioGS_plotting(GSlst, plotGSname = "GS", boxplot = TRUE,
 
 \item{scatterXlabel}{When \code{scatterplot = TRUE}, to set the scatter plot x-axis label. Default is \code{"median p value"}.}
 
-\item{scatterYlabel}{When \code{scatterplot = TRUE}, to set the scatter plot y-axis label. Default is \code{"consensus score"}.}
+\item{scatterYlabel}{When \code{scatterplot = TRUE}, to set the scatter plot y-axis label. Default is \code{"log consensus score"}.}
 
 \item{scatterWidth}{When \code{scatterplot = TRUE}, to set the scatter plot width. Default is \code{170}.}
 
