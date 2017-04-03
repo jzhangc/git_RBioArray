@@ -21,7 +21,10 @@ Installation:
 
 Update log
 
-    0.2.7 (March.28.2017)
+    0.2.8 (March.29.2017)
+      - Bug fixes
+
+    0.2.7
       - Boxplot and Scatter plot functions for GS optimized
       - Bug fixes
     
