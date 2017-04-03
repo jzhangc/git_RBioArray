@@ -4,7 +4,7 @@
 \alias{rbioGS_kegg}
 \title{rbioGS_kegg}
 \usage{
-rbioGS_kegg(dfm, entrezVar = NULL, keggID, suffix, species = "hsa")
+rbioGS_kegg(dfm, entrezVar = NULL, keggID, suffix, species = "hsa", ...)
 }
 \arguments{
 \item{dfm}{GS dataframe with \code{ENTREZID} and \code{logFC} variables.}
@@ -16,12 +16,14 @@ rbioGS_kegg(dfm, entrezVar = NULL, keggID, suffix, species = "hsa")
 \item{suffix}{Output file name suffix. Make sure to put it in quotation marks.}
 
 \item{species}{Set the species. Default is \code{"hsa"}. Visit kegg website for details.}
+
+\item{...}{Additinal arguments for \code{pathview()} from \code{pathview} package.}
 }
 \value{
 Outputs a \code{list} kegg object, as well as masked figure files in \code{pdf} format.
 }
 \description{
-Download and generate DE results masked kegg pathway figures
+Download and generate DE results masked kegg pathway figures, using pathview package
 }
 \details{
 GSrank takes the resulted object generated from the piano function consensusScores().
