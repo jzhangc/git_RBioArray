@@ -1,9 +1,3 @@
-.onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Written by Jing Zhang, Ph.D. Please direct questions to jzhangcad@gmail.com.")
-  suppressPackageStartupMessages(require(pathview))
-  return(TRUE)
-}
-
 #' @title rbioseq_DE
 #'
 #' @description The function below is an all-in-one solution to get DGE list and itrequires limma and edgeR packages for RNA-seq dataset.
