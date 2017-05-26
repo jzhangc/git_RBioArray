@@ -3,8 +3,10 @@
 #' @description Wrapper for hierarchical clustering analysis and heatmap visualization.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltlist Input filtered data, either a list, \code{EList} or \code{MAList} object.
-#' @param genesymbolVar Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
+#' @param dataProbeVar \code{fltlist} variable name for probe name. Default is \code{"ProbeName"}.
+#' @param genesymbolOnly Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
 #' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
+#' @param annoProbeVar \code{anno} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
 #' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.#'
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
@@ -59,8 +61,8 @@
 #'
 #' }
 #' @export
-rbioarray_hcluster <- function(plotName = "data", fltlist,
-                               genesymbolOnly = FALSE, anno = NULL, genesymbolVar = NULL,
+rbioarray_hcluster <- function(plotName = "data", fltlist, dataProbeVar = "ProbeName",
+                               genesymbolOnly = FALSE, anno = NULL, annoProbeVar = "ProbeName", genesymbolVar = NULL,
                                n = "all", rmControl = TRUE, sampleName = NULL,
                                fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                distance = "euclidean", clust = "complete",
@@ -101,24 +103,24 @@ rbioarray_hcluster <- function(plotName = "data", fltlist,
 
       if (class(fltlist) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2)])
-        rownames(mtx) <- dfm[, "ProbeName"]
+        rownames(mtx) <- dfm[, dataProbeVar]
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5)])
-        rownames(mtx) <- dfm[, "ProbeName"]
+        rownames(mtx) <- dfm[, dataProbeVar]
       }
 
     } else {
-      geneSymbl <- anno[anno$ProbeName %in% dfm$ProbeName, ][, genesymbolVar]
+      geneSymbl <- anno[anno[, annoProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
 
       dfm$geneSymbol <- geneSymbl
       dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
 
       if (class(fltlist) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols
+        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols
+        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
       }
 
     }
@@ -127,10 +129,10 @@ rbioarray_hcluster <- function(plotName = "data", fltlist,
 
     if (class(fltlist) == "list"){
       mtx <- as.matrix(dfm[, -c(1:2)])
-      rownames(mtx) <- dfm[, "ProbeName"]
+      rownames(mtx) <- dfm[, dataProbeVar]
     } else { # limma Elist objects have five columns from gene name dataframe
       mtx <- as.matrix(dfm[, -c(1:5)])
-      rownames(mtx) <- dfm[, "ProbeName"]
+      rownames(mtx) <- dfm[, dataProbeVar]
     }
   }
 
@@ -154,6 +156,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist,
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltDOI Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
+#' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param pcutoff P value cut off. Default is \code{NULL}.
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
@@ -164,6 +167,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist,
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
 #' @param rowLabel Whether to display row label or not. Default is \code{FALSE}.
 #' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param annoProbeVar \code{anno} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
 #' @param colColour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
@@ -177,24 +181,24 @@ rbioarray_hcluster <- function(plotName = "data", fltlist,
 #' @importFrom RColorBrewer brewer.pal
 #' @examples
 #' \dontrun{
-#' rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive,
+#' rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive, dataProbeVar = "ProbeName",
 #'                          FC = 1.5, pcutoff = 0.0003461,
 #'                          clust = "ward.D2",
 #'                          fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
 #'                          levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),
-#'                          rowLabel = TRUE, anno = Anno, genesymbolVar = "GeneSymbol",
+#'                          rowLabel = TRUE, anno = Anno, annoProbeVar = "ProbeName", genesymbolVar = "GeneSymbol",
 #'                          offsetRow = 0, adjRow = c(0, 0.5), cexRow = 0.6,
 #'                          key.title = "", keysize = 1.5,
 #'                          key.xlab = "Normalized expression value", key.ylab = "Gene count")
 #' }
 #' @export
-rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
+rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbeVar = "ProbeName",
                                      pcutoff = NULL, FC = NULL,
                                      method = "spikein",
                                      fct, sampleName = NULL,
                                      colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = "euclidean", clust = "complete",
-                                     rowLabel = FALSE, anno = NULL, genesymbolVar = NULL,
+                                     rowLabel = FALSE, anno = NULL, annoProbeVar = "ProbeName", genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                      plotWidth = 7, plotHeight = 7){ #DOI: fltered subset data of interest
 
@@ -206,13 +210,13 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   if (is.null(pcutoff)){
     stop("Please set p value threshold.")
   } else {
-    ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val < pcutoff, "ProbeName"], pb_name <- dfmDE[dfmDE$P.Value < pcutoff, "ProbeName"])
+    ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val < pcutoff, dataProbeVar], pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar])
     dfm <- dfm[dfm$ProbeName %in% pb_name, ]
   }
 
   ## set FC filter
   if (!is.null(FC)){
-    pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), "ProbeName"]
+    pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), dataProbeVar]
     dfm <- dfm[dfm$ProbeName %in% pb_name_fc, ]
   }
 
@@ -242,10 +246,10 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       # create a matrix according to input type, same below
       if (class(fltDOI) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2)])
-        rownames(mtx) <- dfm[, "ProbeName"]
+        rownames(mtx) <- dfm[, dataProbeVar]
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5)])
-        rownames(mtx) <- dfm[, "ProbeName"]
+        rownames(mtx) <- dfm[, dataProbeVar]
       }
 
       if (!is.null(sampleName)){
@@ -257,8 +261,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
       dev.off()
     } else {
-      geneSymbl <- anno[anno$ProbeName %in% dfm$ProbeName, ][, genesymbolVar]
-
+      geneSymbl <- anno[anno[, annoProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
 
       dfm$geneSymbol <- geneSymbl
       dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
@@ -266,10 +269,10 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 
       if (class(fltDOI) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols
+        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols
+        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
       }
 
       if (!is.null(sampleName)){
@@ -288,10 +291,10 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 
     if (class(fltDOI) == "list"){
       mtx <- as.matrix(dfm[, -c(1:2)])
-      rownames(mtx) <- dfm[, "ProbeName"]
+      rownames(mtx) <- dfm[, dataProbeVar]
     } else { # limma Elist objects have five columns from gene name dataframe
       mtx <- as.matrix(dfm[, -c(1:5)])
-      rownames(mtx) <- dfm[, "ProbeName"]
+      rownames(mtx) <- dfm[, dataProbeVar]
     }
 
     if (!is.null(sampleName)){
@@ -317,7 +320,9 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 #' @param ... arguments for \code{vennDiagram()} from \code{limma} package.
 #' @param anno Annotation data frame. If set, the output csv file will have a gene symbol column. The function will seek \code{genesymbolVar} value as the variable name for the gene symbol information. Default is \code{NULL}.
 #' @param DEdata Input DE object from \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param dataProbeVar \code{DEdata} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param geneName If to only use probes with a gene name. Default is \code{FALSE}.
+#' @param annoProbeVar \code{anno} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
 #' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
 #' @param fltdata Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
@@ -342,8 +347,8 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
 #' @export
 rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, plotHeight = 5, ...,
                               anno = NULL,
-                              DEdata = NULL,
-                              geneName = FALSE, genesymbolVar = NULL,
+                              DEdata = NULL, dataProbeVar = "ProbeName",
+                              geneName = FALSE, annoProbeVar = "ProbeName", genesymbolVar = NULL,
                               DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05,
                               parallelComputing = FALSE){
 
@@ -429,8 +434,8 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
 
   ## prepare matrices
   # log fold change
-  lfc <- matrix(nrow = length(vennDE[[1]]$ProbeName), ncol = length(vennDE))
-  rownames(lfc) <- vennDE[[1]]$ProbeName
+  lfc <- matrix(nrow = length(vennDE[[1]][, dataProbeVar]), ncol = length(vennDE))
+  rownames(lfc) <- vennDE[[1]][, dataProbeVar]
   colnames(lfc) <- names(vennDE)
 
   # p value
@@ -494,7 +499,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
     write.csv(outdfm, file = paste(objTitle, "_venn_table.csv", sep = ""), row.names = FALSE)
   } else {
     outdfm <- data.frame(ProbeName = rownames(mtx), mtx)
-    outdfm <- merge(anno[, c("ProbeName", genesymbolVar)], outdfm, by = "ProbeName", all.y = TRUE)
+    outdfm <- merge(anno[, c(annoProbeVar, genesymbolVar)], outdfm, by = dataProbeVar, all.y = TRUE)
     write.csv(outdfm, file = paste(objTitle, "_venn_table.csv", sep = ""), row.names = FALSE)
   }
 

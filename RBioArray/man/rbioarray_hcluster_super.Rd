@@ -4,13 +4,14 @@
 \alias{rbioarray_hcluster_super}
 \title{rbioarray_hcluster_super}
 \usage{
-rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
-  FC = NULL, method = "spikein", fct, sampleName = NULL,
+rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
+  dataProbeVar = "ProbeName", pcutoff = NULL, FC = NULL,
+  method = "spikein", fct, sampleName = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = "euclidean", clust = "complete", rowLabel = FALSE,
-  anno = NULL, genesymbolVar = NULL, colColour = "Paired",
-  mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
-  plotHeight = 7)
+  anno = NULL, annoProbeVar = "ProbeName", genesymbolVar = NULL,
+  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+  plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -18,6 +19,8 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
 \item{fltDOI}{Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.}
 
 \item{dfmDE}{A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).}
+
+\item{dataProbeVar}{\code{dfmDE} variable name for probe name. Default is \code{"ProbeName"}.}
 
 \item{pcutoff}{P value cut off. Default is \code{NULL}.}
 
@@ -38,6 +41,8 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, pcutoff = NULL,
 \item{rowLabel}{Whether to display row label or not. Default is \code{FALSE}.}
 
 \item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
+
+\item{annoProbeVar}{\code{anno} variable name for probe name. Default is \code{"ProbeName"}.}
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
 
@@ -64,12 +69,12 @@ Note that both \code{anno} and \code{genesymbolVar} need to be set to display ge
 }
 \examples{
 \dontrun{
-rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive,
+rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive, dataProbeVar = "ProbeName",
                          FC = 1.5, pcutoff = 0.0003461,
                          clust = "ward.D2",
                          fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
                          levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),
-                         rowLabel = TRUE, anno = Anno, genesymbolVar = "GeneSymbol",
+                         rowLabel = TRUE, anno = Anno, annoProbeVar = "ProbeName", genesymbolVar = "GeneSymbol",
                          offsetRow = 0, adjRow = c(0, 0.5), cexRow = 0.6,
                          key.title = "", keysize = 1.5,
                          key.xlab = "Normalized expression value", key.ylab = "Gene count")

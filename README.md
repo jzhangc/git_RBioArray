@@ -21,7 +21,14 @@ Installation:
 
 Update log
 
-    0.2.8 - 0.2.10 (May.12.2017)
+    0.3.0 (May.26.2017)
+      - RNAseq data preprocessing function added
+      - RNAseq data DE analysis module added
+      - heatmap and Venn functions updated with correct variable argument
+      - Bug fixes
+    
+   
+    0.2.8 - 0.2.10 
       - Bug fixes
 
     0.2.7

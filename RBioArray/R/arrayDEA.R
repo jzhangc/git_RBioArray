@@ -261,17 +261,17 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     # set the cutoff
     if (DE == "fdr"){
 
-      if (length(which(tmpdfm$adj.P.Val < 0.05)) == 0){
+      if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
         pcutoff <- 1
       } else {
-        pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
+        pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
 
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
 
     } else if (DE == "spikein") {
 
-      ifelse(min(PC$p.value[, cf[j]]) > 0.05, pcutoff <- q.value, pcutoff <- min(PC$p.value[, cf[j]]))
+      ifelse(min(PC$p.value[, cf[j]]) > q.value, pcutoff <- q.value, pcutoff <- min(PC$p.value[, cf[j]]))
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
 
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
