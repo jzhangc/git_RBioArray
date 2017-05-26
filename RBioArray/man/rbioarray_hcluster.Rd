@@ -85,7 +85,7 @@ inputlist <- list(E = as.matrix(rawT),
                   genes = data.frame(GeneNames = rownames(rawT), ControlType = rep(0, length(rownames(rawT))),
                   stringsAsFactors = FALSE), target = idx)
 
-rbioarray_hcluster(plotName = "all", fltlist = inputlist, n = "all", rmControl = FALSE, fct = conSum,
+rbioarray_hcluster(plotName = "all", fltlist = inputlist, dataProbeVar = "GeneNames", n = "all", rmControl = FALSE, fct = conSum,
                    trace = "none",
                    distance = "euclidean", clust = "complete", colColour = "Paired",
                    mapColour = "RdBu", n_mapColour = 11,
