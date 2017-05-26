@@ -345,6 +345,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
 
   ## DE
+  cat("Linear fitting...") # message
   if (class(fltdata) == "list"){
 
     fit <- lmFit(fltdata$E, design, weights = weights)
@@ -359,6 +360,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     fit <- eBayes(fit)
 
   }
+  cat("DONE!\n") # message
 
   out <- fit[fit$genes$ControlType == 0, ] # remove control probes
 

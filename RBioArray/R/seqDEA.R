@@ -1,39 +1,319 @@
 #' @title rbioseq_DE
 #'
-#' @description The function below is an all-in-one solution to get DGE list and itrequires limma and edgeR packages for RNA-seq dataset.
-#' @param AnnCountDfm Input data frame with annoatation merged.
-#' @param DEGNum Number of targets to display. Default is \code{Inf}.
-#' @param adjMethod P value correct methods. values: \code{"holm"}, \code{"hochberg"}, \code{"hommel"}, \code{"bonferroni"}, \code{"BH"}, \code{"BY"}, \code{"fdr"}, \code{"none"}.
-#' @return Outputs a \code{dataframe} object DE resutls.
-#' @importFrom edgeR DGEList calcNormFactors
-#' @importFrom limma plotMDS voomWithQualityWeights lmFit eBayes plotSA plotMA topTable
+#' @description DE analysis function for RNA-seq data, with count filtering functionality.
+#' @param objTitle Name for the output list. Default is \code{"seq_data"}.
+#' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
+#' @param dfm_anno Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
+#' @param count_threshold Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.
+#' @param qc_plot Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{TRUE}.
+#' @param design Design matrix. Default is \code{NULL}.
+#' @param contra Contrast matrix. Default is \code{NULL}.
+#' @param ... arguments for \code{topTable()} from \code{limma} package.
+#' @param plot If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.
+#' @param geneName If to only plot probes with a gene name. Default is \code{FALSE}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
+#' @param topgeneLabel If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
+#' @param nGeneSymbol When \code{topgeneLabel = TRUE}, to set how many genes to display. Default is \code{5}.
+#' @param padding When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
+#' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
+#' @param FDR Wether or not using FDR p value correction. Default is \code{TRUE}.
+#' @param q.value Threshold for the p value. Default is \code{0.05}.
+#' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
+#' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
+#' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
+#' @param symbolSize Size of the symbol. Default is \code{2}.
+#' @param sigColour Colour of the significant genes or probes. Default is \code{"red"}.
+#' @param nonsigColour Colour of the non-significant genes or probes. Default is \code{"gray"}.
+#' @param xTxtSize Font size for the x-axis text. Default is \code{10}.
+#' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
+#' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
+#' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
+#' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @return The function outputs a \code{list} object with DE results, a \code{dataframe} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
+#' @details Sample weights are automatically caluclated during Voom normalization. When \code{count_threshold = 0}, the function will filter out all the genomic features with a total read count 0. When there is no significant genes or probes identified under \code{FDR = TRUE}, the function conducts DE analysis without p value correction and outputs an warning. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Additionally, when set to display gene symbols, all the features without a gene symbol will be removed.
+#' @import ggplot2
+#' @import doParallel
+#' @import foreach
+#' @importFrom parallel detectCores makeCluster stopCluster mclapply
+#' @importFrom limma lmFit eBayes topTable contrasts.fit
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom gtable gtable_add_cols gtable_add_grob
+#' @importFrom ggrepel geom_text_repel
 #' @examples
 #' \dontrun{
-#' DE_dataframe <- rbioArray_DE(dataframe)
+#' rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_anno = Ann_Count_all[, 1:4], count_threshold = 50,
+#'            design = design, contra = contra,
+#'            FDR = TRUE, q.value = 0.05,
+#'            geneName = TRUE, genesymbolVar = "gene_name", topgeneLabel = TRUE, nGeneSymbol = 10)
 #' }
 #' @export
-rbioseq_DE <- function(AnnCountDfm, DEGNum = Inf, adjMethod = "fdr"){
-  # create the design matrix for Voom normalization
-  Exp <- factor(SampleIndex$Conditions, levels= c("Pre", "Post"))
-  design <- model.matrix( ~ Exp)
+rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = NULL,
+                       count_threshold = "none", qc_plot = TRUE,
+                       design = NULL, contra = NULL,
+                       ...,
+                       plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
+                       FC = 1.5, FDR = TRUE, q.value = 0.05,
+                       Title = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
+                       symbolSize = 2, sigColour = "red", nonsigColour = "gray",
+                       xTxtSize = 10, yTxtSize =10,
+                       plotWidth = 170, plotHeight = 150,
+                       parallelComputing = FALSE, clusterType = "PSOCK"){
+
+  ## check the key arguments
+  if (!class(dfm_count) %in% c("data.frame", "matrix")){
+    stop("dfm_count has to be either a data.frame or matrix object")
+  }
+
+  if (!class(dfm_anno) %in% c("data.frame", "matrix")){
+    stop("dfm_anno has to be either a data.frame or matrix object")
+  }
+
+  if (nrow(dfm_count) != nrow(dfm_anno)){
+    stop("Read count matrix doesn't have the same row number as the annotation matrix.")
+  }
+
+  if (is.null(design)){
+    stop("Please set design matrix.")
+  }
+
+  if (is.null(contra)){
+    stop("Please set contrast object.")
+  }
+
+  ## extract coefficients
+  cf <- colnames(contra) # extract coefficient
+
+  # set an empty matrix for exporting the threolding summery
+  threshold_summary <- matrix(nrow = length(cf), ncol = 5)
+  colnames(threshold_summary) <- c("coeffcient", "p.value.threshold", "fold.change.threshold", "True", "False")
+  threshold_summary <- as.matrix(threshold_summary)
+
+  ## temp func for plotting
+  # i: outlist (object) listed below
+  tmpfunc <- function(i, j){
+
+    # set the data frame
+    if (geneName){
+      if (!is.null(genesymbolVar)){
+        tmpdfm <- i[[j]][complete.cases(i[[j]][, genesymbolVar]), ]
+      } else {
+        warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
+        tmpdfm <- i[[j]]
+      }
+    } else {
+      tmpdfm <- i[[j]]
+    }
+
+    # set the cutoff
+    if (FDR){
+
+      if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
+        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
+        pcutoff <- q.value
+      } else {
+        pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
+      }
+
+      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
+
+    } else  {
+      pcutoff <- q.value
+      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
+    }
+
+
+    # plot
+    loclEnv <- environment()
+    plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
+      geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
+      scale_color_manual(values = c(nonsigColour, sigColour)) +
+      ggtitle(Title) +
+      scale_y_continuous(expand = c(0.02, 0)) +
+      xlab(xLabel) +
+      ylab(yLabel) +
+      geom_vline(xintercept = log2(FC), linetype = "dashed") +
+      geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+      geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
+      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            plot.title = element_text(hjust = 0.5),
+            legend.position = "none",
+            legend.title = element_blank(),
+            axis.text.x = element_text(size = xTxtSize),
+            axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+
+    if (topgeneLabel){
+      tmpfltdfm <- tmpdfm[abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff, ]
+      tmpfltdfm <- tmpfltdfm[order(tmpfltdfm$P.Value), ]
+      plt <- plt + geom_text_repel(data = head(tmpfltdfm, n = nGeneSymbol),
+                                   aes(x = logFC, y = -log10(P.Value), label = head(tmpfltdfm, n = nGeneSymbol)[, genesymbolVar]),
+                                   point.padding = unit(padding, "lines"))
+    }
+
+    grid.newpage()
+
+    # extract gtable
+    pltgtb <- ggplot_gtable(ggplot_build(plt))
+
+    # add the right side y axis
+    Aa <- which(pltgtb$layout$name == "axis-l")
+    pltgtb_a <- pltgtb$grobs[[Aa]]
+    axs <- pltgtb_a$children[[2]]
+    axs$widths <- rev(axs$widths)
+    axs$grobs <- rev(axs$grobs)
+    axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
+    Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
+    pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
+    pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
+
+    # export the file and draw a preview
+    ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+           width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+    grid.draw(pltgtb) # preview
+
+    # dump the info to the threshold dataframe
+    if (length(levels(cutoff)) == 1){
+
+      if (levels(cutoff) == "TRUE"){
+
+        tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+
+      } else {
+        tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
+      }
+
+    } else {
+      tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+    }
+
+  }
+
+
+  ## DE
   # create DGE object using edgeR
-  DGE_RNA <- DGEList(counts = AnnCountDfm[, 5:12], genes = AnnCountDfm[, 1:4])
+  cat("Data filtering and normalization...") # message
+  dge <- DGEList(counts = dfm_count, genes = dfm_anno)
+
+  if (count_threshold != "none"){ # set the count threshold for filtering
+    count_s <- rowSums(dge$counts) # thresholdd
+    isexpr <- count_s > count_threshold
+
+    dge <- dge[isexpr, , keep.lib.size = FALSE] # filtering
+  }
+
   # for data Voom normalization
-  DGE_RNA <- calcNormFactors(DGE_RNA)
+  dgenormf <- calcNormFactors(dge)
+  vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc_plot, normalization = "quantile") # Voom normalization with quality weights
+  cat("DONE!\n") # message
+
+  # fitting
+  cat("Linear fitting...") # message
+  fit <- lmFit(vmwt, design = design) # linear fitting
+  fit <- contrasts.fit(fit, contrasts = contra)
+  fit <- eBayes(fit)
+  cat("DONE!\n") # message
+
+  out <- fit
+
+  ## output and plotting
+  if(!parallelComputing){
+
+    # compile resutls into a list
+    outlist <- lapply(cf, function(i){
+      tmp <- topTable(out, coef = i, number = Inf, ...)
+      return(tmp)
+    })
+
+    names(outlist) <- cf
+
+    # write DE results into files
+    lapply(1:length(cf), function(j){
+      write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+    })
+
+    # volcano plot and output summary
+    if (plot){
+
+      threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x)))
+
+    }
+
+  } else { ## parallel computing
+
+    # check the cluster type
+    if (clusterType != "PSOCK" & clusterType != "FORK"){
+      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
+    }
+
+    # set up cpu cores
+    n_cores <- detectCores() - 1
+
+    if (clusterType == "PSOCK"){ # all OS types
+      # set up cpu cluster
+      cl <- makeCluster(n_cores, type = "PSOCK")
+      registerDoParallel(cl)
+      on.exit(stopCluster(cl)) # close connect when exiting the function
+
+      outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
+
+        tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
+        return(tmp)
+
+      }
+
+      names(outlist) <- cf
+
+      # write DE results into files
+      foreach(j = 1: length(cf)) %dopar% {
+        write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
+      }
+
+      # volcano plot and output summary
+      if (plot){
+
+        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
+          tmpfunc(i = outlist, j = j)
+
+        }
+      }
+
+    } else { # macOS and Unix-like systems
+
+      outlist <- mclapply(cf, FUN = function(i){
+        tmp <- topTable(out, coef = i, number = Inf, ...)
+        return(tmp)
+      }, mc.cores = n_cores, mc.preschedule = FALSE)
+
+      names(outlist) <- cf
+
+      # write DE results into files
+      mclapply(1:length(cf), FUN = function(j){
+        write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+      }, mc.cores = n_cores, mc.preschedule = FALSE)
+
+      # volcano plot and output summary
+      if (plot){
+
+        threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x)))
+
+      }
+    }
+  }
+
+  ## output the DE/fit objects to the environment, as well as the DE csv files into wd
+  fitout <- topTable(out, number = Inf)
+  assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
+  write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
+
+  assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
 
 
-  plotMDS(DGE_RNA) # MDS distribution before normalization
-  VmWts_RNA <- voomWithQualityWeights(DGE_RNA, design, plot=TRUE,
-                                      normalization = "quantile") # Voom normalization with quality weights
+  write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
+  ## message
+  if (geneName & !is.null(genesymbolVar)){
+    print("Probes without a gene symbol are removed from the volcano plots")
+  }
 
-  Fit_RNA <- lmFit(VmWts_RNA, design) # linear fitting
-  Bayes_RNA <- eBayes(Fit_RNA)
-
-  plotSA(Bayes_RNA, xlab = "Average log-expression", ylab = "log2(sigma)",
-         zero.weights=FALSE, pch=16, cex=0.2) # Simga vs Average plot
-  limma::plotMA(Bayes_RNA) # log-ratios vs mean average plot
-  DEGs_RNA <- topTable(Bayes_RNA, coef = "ExpPost", number = DEGNum, sort.by = "p",
-                       adjust.method = adjMethod)
-  # output
-  return(DEGs_RNA)
 }

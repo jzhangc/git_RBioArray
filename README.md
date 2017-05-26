@@ -22,14 +22,16 @@ Installation:
 Update log
 
     0.3.0 (May.26.2017)
-      - RNAseq data preprocessing function added
-      - RNAseq data DE analysis module added
-      - heatmap and Venn functions updated with correct variable argument
+      - RNAseq data DE analysis function rbioseq_DE() added
+      - RNAseq data preprocessing function added to rbioseq_DE()
+      - Message display added to the DE functions
+      - heatmap and Venn functions updated with correct variable arguments
       - Bug fixes
     
    
     0.2.8 - 0.2.10 
       - Bug fixes
+      
 
     0.2.7
       - Boxplot and Scatter plot functions for GS optimized
