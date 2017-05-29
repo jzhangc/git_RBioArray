@@ -4,10 +4,11 @@
 \alias{rbioarray_hcluster}
 \title{rbioarray_hcluster}
 \usage{
-rbioarray_hcluster(plotName = "data", fltlist, dataProbeVar = "ProbeName",
-  genesymbolOnly = FALSE, anno = NULL, annoProbeVar = "ProbeName",
-  genesymbolVar = NULL, n = "all", rmControl = TRUE, sampleName = NULL,
-  fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+rbioarray_hcluster(plotName = "data", fltlist = NULL,
+  dataProbeVar = "ProbeName", genesymbolOnly = FALSE, anno = NULL,
+  annoProbeVar = "ProbeName", genesymbolVar = NULL, n = "all",
+  rmControl = TRUE, sampleName = NULL, fct = NULL,
+  colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = "euclidean", clust = "complete", colColour = "Paired",
   mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
   plotHeight = 7)
