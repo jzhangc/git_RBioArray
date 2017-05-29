@@ -547,7 +547,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                                                                          KEGG = boxplotKEGG, pClass = m, classDirection = n, adjust = plotPadjust,
                                                                          n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                          plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)))
-
     }
   }
 
@@ -576,7 +575,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                                                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
                                                                     n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight))
-
     }
 
     if (scatterplot){
@@ -587,7 +585,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                                                                     pCutoff = scatterPline,
                                                                     plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
                                                                     plotWidth = scatterWidth, plotHeight = scatterHeight))
-
     }
 
   } else { # parallel computing
@@ -631,7 +628,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                                     n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
         }
-
       }
 
       if (scatterplot){
@@ -643,7 +639,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                          plotWidth = scatterWidth, plotHeight = scatterHeight)
         }
       }
-
 
     } else { # mac and linux only
 
@@ -683,11 +678,8 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 
 
       }
-
     }
-
   }
-
 
   if (is.null(GSfile)){
     assign(paste(objTitle, "_GS_list_", deparse(substitute(GS)), sep = ""), GSlst, envir = .GlobalEnv)
@@ -872,7 +864,6 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
                                                                        KEGG = boxplotKEGG, pClass = m, classDirection = n, adjust = plotPadjust,
                                                                        n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                        plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)))
-
   }
 
   if (!parallelComputing){
@@ -885,7 +876,6 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
                                                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
                                                                     n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight))
-
     }
 
     if (scatterplot){
@@ -896,7 +886,6 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
                                                                     pCutoff = scatterPline,
                                                                     plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
                                                                     plotWidth = scatterWidth, plotHeight = scatterHeight))
-
     }
 
   } else { # parallel computing
@@ -967,12 +956,7 @@ rbioGS_plotting <- function(GSlst, plotGSname = "GS",
                                                                               plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
                                                                               plotWidth = scatterWidth, plotHeight = scatterHeight),
                  mc.cores = n_cores, mc.preschedule = FALSE)
-
-
       }
-
     }
-
   }
-
 }
