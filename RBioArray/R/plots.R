@@ -8,7 +8,7 @@
 #' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
 #' @param annoProbeVar \code{anno} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
-#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.#'
+#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
 #' @param fct Input \code{factor} object for samples.
 #' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
@@ -125,10 +125,10 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
 
       if (class(fltlist) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
+        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols. note that the variable name is geneSymbol, NOT the argument value.
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
+        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols. note that the variable name is geneSymbol, NOT the argument value.
       }
 
     }

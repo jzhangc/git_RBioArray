@@ -21,7 +21,10 @@ Installation:
 
 Update log
 
-    0.3.0 (May.29.2017)
+    0.3.1 (June.6.2017)
+      - Bug fixes
+
+    0.3.0
       - RNAseq data DE analysis function rbioseq_DE() added
       - Unsupervised hcluster and heatmap functioin rbioseq_hcluster() added
       - RNAseq data preprocessing function added to rbioseq_DE()
