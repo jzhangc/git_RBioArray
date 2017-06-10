@@ -30,7 +30,7 @@ rbioarray_hcluster(plotName = "data", fltlist = NULL,
 
 \item{n}{Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
 
-\item{rmControl}{If to remove control probes (Agilent platform). Default is \code{TRUE}.#'}
+\item{rmControl}{If to remove control probes (Agilent platform). Default is \code{TRUE}.}
 
 \item{sampleName}{A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.}
 

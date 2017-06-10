@@ -329,7 +329,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
     stop("Please set p value threshold.")
   } else {
     ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val < pcutoff, dataProbeVar], pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar])
-    dfm <- dfm[dfm$ProbeName %in% pb_name, ]
+    dfm <- dfm[dfm$ProbeName %in% pb_name, ] # the reason to use $ProbeName is because dfm is from fltDOI
   }
 
   ## set FC filter
@@ -378,6 +378,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
       dev.off()
+
     } else {
       geneSymbl <- anno[anno[, annoProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
 
@@ -387,10 +388,10 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 
       if (class(fltDOI) == "list"){
         mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
+        rownames(mtx) <- labrow # row names are now gene symbols
       } else { # limma Elist objects have five columns from gene name dataframe
         mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, genesymbolVar] # row names are now gene symbols
+        rownames(mtx) <- labrow # row names are now gene symbols
       }
 
       if (!is.null(sampleName)){

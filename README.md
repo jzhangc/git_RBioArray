@@ -21,7 +21,7 @@ Installation:
 
 Update log
 
-    0.3.1 (June.6.2017)
+    0.3.2 (June 10 2017)
       - Bug fixes
 
     0.3.0
