@@ -10,7 +10,7 @@ rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
 \arguments{
 \item{DElst}{The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
-\item{tgtSpecies}{The target species. Options are \code{"mmu"} and \code{"rno"}.}
+\item{tgtSpecies}{The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.}
 
 \item{ensemblTransVar}{The name of the variable from DE list containing ensembl transcript ID.}
 

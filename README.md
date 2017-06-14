@@ -21,9 +21,14 @@ Installation:
 
 Update log
 
-    0.3.2 (June 10 2017)
+    0.3.3 (June 14 2017)
+      - Medaka added for rbioGS_sp2hsaEntrez funtion
+    
+    
+    0.3.2
       - Bug fixes
 
+    
     0.3.0
       - RNAseq data DE analysis function rbioseq_DE() added
       - Unsupervised hcluster and heatmap functioin rbioseq_hcluster() added

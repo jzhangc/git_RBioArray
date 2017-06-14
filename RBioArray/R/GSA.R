@@ -2,7 +2,7 @@
 #'
 #' @description Using up-to-date ensembl database, convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
 #' @param DElst The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
-#' @param tgtSpecies The target species. Options are \code{"mmu"} and \code{"rno"}.
+#' @param tgtSpecies The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.
 #' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -27,10 +27,12 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 
   ## prepare reference hsa entrezID
   # set the target species
-  if (tgtSpecies == "mmu"){
+  if (tgtSpecies %in% c("mmu", "")){
     sp <- "mmusculus"
-  } else if (tgtSpecies == "rno"){
+  } else if (tgtSpecies %in% c("rno", "rat")){
     sp <- "rnorvegicus"
+  } else if (tgtSpecies %in% c("medaka", "olatipes")){
+    sp <- "olatipes"
   }
 
   # extract hsa ortholog information
