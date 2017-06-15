@@ -24,8 +24,7 @@ Update log
     0.3.3 (June 14 2017)
       - Medaka added for rbioGS_sp2hsaEntrez function
       - EntrezGeneID option added for rbioGS_sp2hsaEntrez function
-      - Automatic input dataframe NA entry removal added in rbioGS_kegg
-    
+      
     
     0.3.2
       - Bug fixes
