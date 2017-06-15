@@ -4,6 +4,7 @@
 #' @param DElst The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param tgtSpecies The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.
 #' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
+#' @param entrezVar The name of the variable from DE list containing entrez gene ID.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
@@ -18,11 +19,12 @@
 #' }
 #' @export
 rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
+                                entrezVar = NULL,
                                 parallelComputing = FALSE, clusterType = "PSOCK"){
 
   ## check the arguments
-  if (is.null(ensemblTransVar)){
-    stop("Please set the variable name for the ensembl transcript ID.")
+  if (is.null(ensemblTransVar) & is.null(entrezVar)){
+    stop("Please set the variable name for the ensembl transcript ID or entrezID.")
   }
 
   ## prepare reference hsa entrezID
@@ -38,9 +40,14 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
   # extract hsa ortholog information
   sp_ensembl <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
   attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
-  sp_hsa_orth <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
+  attr_entrezgene <- c("ensembl_transcript_id", "entrezgene")
+  sp_tmp <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
                        mart = sp_ensembl)
+  sp_entrezgene <- getBM(attr_entrezgene, filters = "with_hsapiens_homolog", values = TRUE,
+                        mart = sp_ensembl) # extract entrezgene info for the species of interest
+  sp_hsa_orth <- merge(sp_tmp, sp_entrezgene, by  = "ensembl_transcript_id", all.x = TRUE) # merge to have entrezgene in the hsa orth dataframe
   names(sp_hsa_orth)[names(sp_hsa_orth) == "ensembl_transcript_id"] <- paste0(tgtSpecies, "_ensembl_transcript_id") # generalized term for change column names
+  names(sp_hsa_orth)[names(sp_hsa_orth) == "entrezgene"] <- paste0(tgtSpecies, "_entrezgene")
 
   # extract hsa entrezgene ID
   hsa_ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl") # establish the human set
@@ -57,10 +64,21 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 
   ## add the hsa entrez ID to the non-hsa DElist
   # temp func for adding the variable, i is the DE dataframe
-  tmpfunc <- function(i){
-    j <- merge(i, sp_hsa_orth_entrez,
-               by.x = ensemblTransVar, by.y = paste0(tgtSpecies, "_ensembl_transcript_id"), all.x = TRUE)
-    return(j)
+  if (!is.null(ensemblTransVar)){ # merge by ensemble
+    tmpfunc <- function(i){
+      j <- merge(i, sp_hsa_orth_entrez,
+                 by.x = ensemblTransVar, by.y = paste0(tgtSpecies, "_ensembl_transcript_id"), all.x = TRUE)
+      return(j)
+    }
+  } else if (!is.null(entrezVar)){ # merge by entrez
+    sp_hsa_orth_entrez <- sp_hsa_orth_entrez[, !names(sp_hsa_orth_entrez) %in% paste0(tgtSpecies, "_ensembl_transcript_id")]
+    sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez[, paste0(tgtSpecies, "_entrezgene")]), ]
+
+    tmpfunc <- function(i){
+      j <- merge(i, sp_hsa_orth_entrez,
+                 by.x = entrezVar, by.y = paste0(tgtSpecies, "_entrezgene"), all.x = TRUE)
+      return(j)
+    }
   }
 
   # looping through the DElist
@@ -444,9 +462,12 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
     stop("Please provide the name for the Entrez ID variable from the input dataframe")
   }
 
+  # extract the complete case
+  working_dfm <- dfm
+
   # prepare objects
-  logFC <- dfm$logFC
-  names(logFC) <- dfm[, entrezVar]
+  logFC <- working_dfm$logFC
+  names(logFC) <- working_dfm[, entrezVar]
 
   # visualize
   KEGG <- pathview(gene.data = logFC, pathway.id = keggID, species = species,

@@ -5,7 +5,7 @@
 \title{rbioGS_sp2hsaEntrez}
 \usage{
 rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
-  parallelComputing = FALSE, clusterType = "PSOCK")
+  entrezVar = NULL, parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
 \item{DElst}{The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
@@ -13,6 +13,8 @@ rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
 \item{tgtSpecies}{The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.}
 
 \item{ensemblTransVar}{The name of the variable from DE list containing ensembl transcript ID.}
+
+\item{entrezVar}{The name of the variable from DE list containing entrez gene ID.}
 
 \item{parallelComputing}{If to use parallel computing. Default is \code{FALSE}.}
 
