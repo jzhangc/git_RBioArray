@@ -15,7 +15,7 @@ rbioGS_plotting(GSlst, plotGSname = "GS", boxplot = TRUE,
   parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
-\item{GSlst}{The input list with GS reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.}
+\item{GSlst}{The input list with GS reuslt from the GS functions.}
 
 \item{plotGSname}{When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the GS name in the file name. Default is \code{"GS"}.}
 

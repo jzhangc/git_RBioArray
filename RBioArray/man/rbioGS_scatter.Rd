@@ -9,7 +9,7 @@ rbioGS_scatter(GSA_list, fileName = "GS_list", ..., plotTitle = NULL,
   rankCutoff = 20, pCutoff = 0.05, plotWidth = 170, plotHeight = 150)
 }
 \arguments{
-\item{GSA_list}{GSA list generated from \code{\link{rbioArray_allGSA}}.}
+\item{GSA_list}{piano GS results object.}
 
 \item{fileName}{Output file name.}
 

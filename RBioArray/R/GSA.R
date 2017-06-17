@@ -29,7 +29,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 
   ## prepare reference hsa entrezID
   # set the target species
-  if (tgtSpecies %in% c("mmu", "")){
+  if (tgtSpecies %in% c("mmu", "mouse")){
     sp <- "mmusculus"
   } else if (tgtSpecies %in% c("rno", "rat")){
     sp <- "rnorvegicus"
@@ -132,12 +132,13 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 #'
 #' @description Add Human entrez ID to the DE dataframe
 #' @param GS pre-loaded gene set objects. Default is \code{NULL}.
-#' @param pVar Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.
-#' @param logFCVar Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.
-#' @param tVar Gene leve t values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}.
+#' @param GSfile GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param idVar Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.
-#' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.
-#' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.
+#' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}, and can be set as \code{NULL}.
+#' @param pVar Set only method_p is not NULL, DE p values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.
+#' @param logFCVar Set only method_p is not NULL, DE logFC (log fold change). Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.
+#' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.
+#' @param tVar Set only method_t is not NULL, DE t values. Gene leve t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.
 #' @param ... Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -154,19 +155,54 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NUL
 #'
 #' }
 #' @export
-rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
+rbioGS <- function(GS = NULL, GSfile = NULL, idVar = NULL,
                    method_p = c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"),
-                   method_t = c("page", "gsea", "maxmean"), ...,
+                   pVar = NULL, logFCVar = NULL,
+                   method_t = c("page", "gsea", "maxmean"),
+                   tVar = NULL,
+                   ...,
                    parallelComputing = FALSE, clusterType = "PSOCK"){
 
-  ## setup parameters
-  gStats <- list(p_value = pVar,
-                 logFC = logFCVar,
-                 t_value = tVar)
-  gStats <- lapply(gStats, function(x){names(x) <- idVar; x})
+  ## check arguments
+  if (is.null(idVar)){stop("Please set the variable idVar.")}
 
+  if (is.null(pVar) != is.null(logFCVar)){ # is.null(pVar) and is.null(pFCVar) have to be the same
+    stop("pVar and logFCVar have to be NULL or not at the same time.")
+  }
+
+  if (is.null(pVar) & is.null(logFCVar)){
+    if (is.null(tVar)){
+      stop("pVar and logFCVar not set, please set tVar.")
+    }
+  }
+
+  if (is.null(GS) & is.null(GSfile)){
+    stop("Please set GS file.")
+  }
+
+  ## set up gene set object
+  if (is.null(GSfile)){
+    tmpGS <- GS
+  } else if (is.null(GS)){
+    tmpGS <- loadGSC(file = GSfile, type = "gmt")
+  }
+
+  ## setup parameters
   GSigM_p <- method_p
   GSigM_t <- method_t
+
+  if (is.null(method_t)){
+    gStats <- list(p_value = pVar,
+                   logFC = logFCVar)
+  } else if (is.null(method_p)){
+    gStats <- list(t_value = tVar)
+  } else if (!is.null(method_p) & !is.null(method_t)){
+    gStats <- list(p_value = pVar,
+                   logFC = logFCVar,
+                   t_value = tVar)
+  }
+
+  gStats <- lapply(gStats, function(x){names(x) <- idVar; x})
 
   ## make empty output lists
   GS_list_p <- vector(mode = "list", length = length(GSigM_p))
@@ -175,7 +211,7 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
   GS_list_t <- vector(mode = "list", length = length(GSigM_t))
   names(GS_list_t) <- GSigM_t
 
-  ## make tmp GS functions for parallel computing, as well as the
+  ## make tmp GS functions for parallel computing, as well as the non-parallel operations
   tmpfunc_p <- function(i, GSmethod_p, ...){
     p <- gStats$p_value
     logfc <- gStats$logFC
@@ -188,23 +224,24 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
   }
 
   if (!parallelComputing){
-
-    for (m in 1:length(GSigM_p)){
-      GS_list_p[[m]] <- tmpfunc_p(m, GSmethod_p = GSigM_p, gsc = GS, ...)
+    if (!is.null(method_p)){
+      for (m in 1:length(GSigM_p)){
+        GS_list_p[[m]] <- tmpfunc_p(m, GSmethod_p = GSigM_p, gsc = tmpGS, ...)
+      }
     }
-
-    for (n in 1:length(GSigM_t)){
-      GS_list_t[[n]] <- tmpfunc_t(n, GSmethod_t = GSigM_t, gsc = GS, ...)
+    if (!is.null(method_t)){
+      for (n in 1:length(GSigM_t)){
+        GS_list_t[[n]] <- tmpfunc_t(n, GSmethod_t = GSigM_t, gsc = tmpGS, ...)
+      }
     }
-
-  } else {
-
-    ## parallel computing
+    if (is.null(method_p) & is.null(method_t)){
+      stop(cat("Plesae set enrichment methods, for method_p and/or method_t."))
+    }
+  } else {## parallel computing
     # check cluster type
     if (clusterType != "PSOCK" & clusterType != "FORK"){
       stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
     }
-
 
     # set up cpu core number
     n_cores <- detectCores() - 1
@@ -218,30 +255,44 @@ rbioGS <- function(GS = NULL, pVar, logFCVar, tVar, idVar,
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
       # run functioins
-      GS_list_p[] <- foreach(i = 1: length(GSigM_p), .packages = "piano") %dopar% {
-        out <- tmpfunc_p(i, GSmethod_p = GSigM_p, gsc = GS, ...)
+      if (!is.null(method_p)){
+        GS_list_p[] <- foreach(i = 1: length(GSigM_p), .packages = "piano") %dopar% {
+          out <- tmpfunc_p(i, GSmethod_p = GSigM_p, gsc = tmpGS, ...)
+        }
       }
-
-      GS_list_t[] <- foreach(i = 1: length(GSigM_t), .packages = "piano") %dopar% {
-        out <- tmpfunc_t(i, GSmethod_t =  GSigM_t, gsc = GS, ...)
+      if (!is.null(method_t)){
+        GS_list_t[] <- foreach(i = 1: length(GSigM_t), .packages = "piano") %dopar% {
+          out <- tmpfunc_t(i, GSmethod_t =  GSigM_t, gsc = tmpGS, ...)
+        }
       }
-
+      if (is.null(method_p) & is.null(method_t)){
+        stop(cat("Plesae set enrichment methods, for method_p and/or method_t."))
+      }
 
     } else { # mac and linux only
-
-      GS_list_p[] <- mclapply(1: length(GSigM_p), FUN = tmpfunc_p, GSmethod_p = GSigM_p, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
-      GS_list_t[] <- mclapply(1: length(GSigM_t), FUN = tmpfunc_t, GSmethod_t = GSigM_t, gsc = GS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
-
+      if (!is.null(method_p)){
+        GS_list_p[] <- mclapply(1: length(GSigM_p), FUN = tmpfunc_p, GSmethod_p = GSigM_p, gsc = tmpGS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
+      }
+      if (!is.null(method_t)){
+        GS_list_t[] <- mclapply(1: length(GSigM_t), FUN = tmpfunc_t, GSmethod_t = GSigM_t, gsc = tmpGS, ..., mc.cores = n_cores, mc.preschedule = FALSE)
+      }
+      if (is.null(method_p) & is.null(method_t)){
+        stop(cat("Plesae set enrichment methods, for method_p and/or method_t."))
+      }
     }
-
   }
 
-  fullGS_list <- c(GS_list_p, GS_list_t)
+  ## prepare the output list
+  if (is.null(method_p)){
+    fullGS_list <- GS_list_t
+  } else if (is.null(method_t)){
+    fullGS_list <- GS_list_p
+  } else if (!is.null(method_p) & !is.null(method_t)){
+    fullGS_list <- c(GS_list_p, GS_list_t)
+  }
 
   return(fullGS_list)
-
 }
-
 
 #' @title rbioGS_boxplot
 #'
@@ -333,12 +384,10 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
   grid.draw(plt) # preview
 }
 
-
-
 #' @title rbioGS_scatter
 #'
 #' @description Generate scatter plot for piano GS rank heatmap obejct. Note that the rank is log2 transformed.
-#' @param GSA_list GSA list generated from \code{\link{rbioArray_allGSA}}.
+#' @param GSA_list piano GS results object.
 #' @param fileName Output file name.
 #' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
 #' @param rankCutoff Cutoff value for GS rank line. The input number will be log2 transformed when plotting.
@@ -479,7 +528,6 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL,
 }
 
 
-
 #' @title rbioGS_all
 #'
 #' @description All-in-one wrapper for GSA and plotting.
@@ -556,7 +604,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
     GSdata <- loadGSC(file = GSfile, type = "gmt")
   }
 
-
   ## tmp functions
   if (boxplot){
     # set up a temp function for boxplot with directinality
@@ -572,7 +619,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                                                                          plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)))
     }
   }
-
 
   ## make an empty list to store the GS results
   GSlst <- vector(mode = "list", length(names(DElst)))
@@ -711,8 +757,6 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
   }
 }
 
-
-
 #' @title rbioGS_all_noplot
 #'
 #' @description All-in-one wrapper for GSA (no plotting).
@@ -772,7 +816,6 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
                                                           tVar = i$t, idVar = i[, entrezVar],
                                                           parallelComputing = parallelComputing, clusterType = clusterType, ...))
 
-
   } else { # parallel computing
 
     # check cluster type
@@ -820,12 +863,10 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
   return(GSlst)
 }
 
-
-
 #' @title rbioGS_plotting
 #'
 #' @description All-in-one wrapper for GSA plotting.
-#' @param GSlst The input list with GS reuslt, i.e. a collection of dataframes from \code{topTable} function of \code{limma} package.
+#' @param GSlst The input list with GS reuslt from the GS functions.
 #' @param plotGSname When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the GS name in the file name. Default is \code{"GS"}.
 #' @param boxplot If to plot boxplots. Default is \code{TRUE}.
 #' @param boxplotKEGG When \code{boxplot = TRUE}, to set if the gene set is KEGG. Default is \code{FALSE}.

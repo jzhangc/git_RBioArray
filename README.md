@@ -21,7 +21,11 @@ Installation:
 
 Update log
 
-    0.3.3 (June 14 2017)
+    0.3.4 (Jun 17 2017)
+      - GS functions updated
+      - Bug fixes
+
+    0.3.3
       - Medaka added for rbioGS_sp2hsaEntrez function
       - EntrezGeneID option added for rbioGS_sp2hsaEntrez function
       

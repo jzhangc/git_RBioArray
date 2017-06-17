@@ -4,24 +4,27 @@
 \alias{rbioGS}
 \title{rbioGS}
 \usage{
-rbioGS(GS = NULL, pVar, logFCVar, tVar, idVar, method_p = c("fisher",
-  "stouffer", "reporter", "tailStrength", "wilcoxon"), method_t = c("page",
-  "gsea", "maxmean"), ..., parallelComputing = FALSE, clusterType = "PSOCK")
+rbioGS(GS = NULL, GSfile = NULL, idVar = NULL, method_p = c("fisher",
+  "stouffer", "reporter", "tailStrength", "wilcoxon"), pVar = NULL,
+  logFCVar = NULL, method_t = c("page", "gsea", "maxmean"), tVar = NULL,
+  ..., parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
 \item{GS}{pre-loaded gene set objects. Default is \code{NULL}.}
 
-\item{pVar}{Gene level p values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}.}
-
-\item{logFCVar}{Gene level logFC (log fold change). Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}.}
-
-\item{tVar}{Gene leve t values. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}.}
+\item{GSfile}{GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
 
 \item{idVar}{Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.}
 
-\item{method_p}{Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}.}
+\item{method_p}{Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}, and can be set as \code{NULL}.}
 
-\item{method_t}{Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}.}
+\item{pVar}{Set only method_p is not NULL, DE p values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.}
+
+\item{logFCVar}{Set only method_p is not NULL, DE logFC (log fold change). Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.}
+
+\item{method_t}{Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.}
+
+\item{tVar}{Set only method_t is not NULL, DE t values. Gene leve t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.}
 
 \item{...}{Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.}
 
