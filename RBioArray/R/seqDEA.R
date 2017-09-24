@@ -30,7 +30,7 @@
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @return The function outputs a \code{list} object with DE results, a \code{dataframe} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
+#' @return The function outputs a \code{dataframe} object with filtered and normalized readcounts, a \code{list} object with DE results, a \code{dataframe} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details Sample weights are automatically caluclated during Voom normalization. When \code{count_threshold = 0}, the function will filter out all the genomic features with a total read count 0. When there is no significant genes or probes identified under \code{FDR = TRUE}, the function conducts DE analysis without p value correction and outputs an warning. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Additionally, when set to display gene symbols, all the features without a gene symbol will be removed.
 #' @import ggplot2
 #' @import doParallel
@@ -304,6 +304,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
 
   ## output the DE/fit objects to the environment, as well as the DE csv files into wd
   fitout <- topTable(out, number = Inf)
+  assign(paste(objTitle, "_nrm", sep = ""), vmwt, envir = .GlobalEnv)
   assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
   write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
 

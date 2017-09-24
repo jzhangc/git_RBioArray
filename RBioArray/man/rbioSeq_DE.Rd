@@ -74,7 +74,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = NULL,
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
-The function outputs a \code{list} object with DE results, a \code{dataframe} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
+The function outputs a \code{dataframe} object with filtered and normalized readcounts, a \code{list} object with DE results, a \code{dataframe} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 }
 \description{
 DE analysis function for RNA-seq data, with count filtering functionality.

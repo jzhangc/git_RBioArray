@@ -21,18 +21,20 @@ Installation:
 
 Update log
 
-    0.3.4 (Jun 17 2017)
+    0.3.5 (Jun 17 2017)
+      - rbioseq_de() now outputs filtered and normalized read counts matrix to the environment
+      - Bug fixes
+
+    0.3.4
       - GS functions updated
       - Bug fixes
 
     0.3.3
       - Medaka added for rbioGS_sp2hsaEntrez function
       - EntrezGeneID option added for rbioGS_sp2hsaEntrez function
-      
     
     0.3.2
       - Bug fixes
-
     
     0.3.0
       - RNAseq data DE analysis function rbioseq_DE() added
@@ -41,38 +43,31 @@ Update log
       - Message display added to the DE functions
       - heatmap and Venn functions updated with correct variable arguments
       - Bug fixes
-    
    
     0.2.8 - 0.2.10 
       - Bug fixes
-      
 
     0.2.7
       - Boxplot and Scatter plot functions for GS optimized
       - Bug fixes
     
-    
     0.2.6
       - Both PSOCK and FORK cluster types are now avaiable for all the functions featuring parallel computing
       - Small "quality of life" changes
       - Bug fixes
-    
 
     0.2.5
       - Direct loading GS database files functionality added for GS functions
       - Bug fixes
-      
     
     0.2.4
       - mmu/rno to hsa entrez ID converesion function overhaul
       - Arguments for input DE data list for GS functions unified as "DElst"
       - Arguments for parallel computing unified for all the relevant functions as "parallelComputing" and "clusterType"
       - Bug fixes
-      
 
     0.2.2 - 0.2.3 
       - Bug fixes
-      
 
     0.2.1
       - Venn diagram function now outputs a csv containing overlapping genes/probes
@@ -82,25 +77,20 @@ Update log
       - DE function now outputs F stats into both the environment and work directory
       - Bug fixes
     
-    
     0.2.0 
       - Venn diagram function added
       - Array weight added to data preprocessing function for Elist objects
       - Missing depndencies for parallel computing added for various functions
       - Bug fixes
     
-    
     0.1.34 
       - Elist objects now can be properly recognized by all the functions
 
-
     0.1.33
       - Help page for unsupervised heat map updated
-      
 
     0.1.32
       - Users can now choose to keep or remove the control probes (Agilent microarray platform) for rbioarray_hcluster() function
-    
     
     0.1.31
       - FC filter added for supervised hclust heatmap function
