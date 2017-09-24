@@ -21,7 +21,7 @@ Installation:
 
 Update log
 
-    0.3.5 (Jun 17 2017)
+    0.3.5 (Sept 22 2017)
       - rbioseq_de() now outputs filtered and normalized read counts matrix to the environment
       - Bug fixes
 
