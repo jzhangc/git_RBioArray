@@ -267,10 +267,9 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_anno = NUL
 }
 
 
-
 #' @title rbioarray_hcluster_super
 #'
-#' @description Wrapper for supervised hierarchical clustering analysis and heatmap visualization.
+#' @description Wrapper for supervised hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltDOI Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
@@ -355,20 +354,18 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
   colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
 
   # draw heatmap
+  ogNcol <- dim(fltDOI$E)[2] # original numbers of col
+  annoNcol <- dim(dfm)[2] # numbers of col with annotation
+  s <- (annoNcol - ogNcol + 1):annoNcol # extract only the data by removing the annotation columns
 
   if (rowLabel){
 
     if (is.null(anno) | is.null(genesymbolVar)){
       warning("No annotation object or gene sybmol variable detected. Row labels will be the default probe names.")
 
-      # create a matrix according to input type, same below
-      if (class(fltDOI) == "list"){
-        mtx <- as.matrix(dfm[, -c(1:2)])
-        rownames(mtx) <- dfm[, dataProbeVar]
-      } else { # limma Elist objects have five columns from gene name dataframe
-        mtx <- as.matrix(dfm[, -c(1:5)])
-        rownames(mtx) <- dfm[, dataProbeVar]
-      }
+      # retrive correct data matrix without annoation
+      mtx <- as.matrix(dfm[, s])
+      rownames(mtx) <- dfm[, dataProbeVar]
 
       if (!is.null(sampleName)){
         colnames(mtx) <- sampleName
@@ -382,17 +379,14 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
     } else {
       geneSymbl <- anno[anno[, annoProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
 
+      # process dfm further to only retain probes with gene symbol
       dfm$geneSymbol <- geneSymbl
       dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
       labrow <- dfm$geneSymbol
 
-      if (class(fltDOI) == "list"){
-        mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- labrow # row names are now gene symbols
-      } else { # limma Elist objects have five columns from gene name dataframe
-        mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- labrow # row names are now gene symbols
-      }
+      # retrive correct data matrix without annoation
+      mtx <- as.matrix(dfm[, s])
+      rownames(mtx) <- dfm[, dataProbeVar]
 
       if (!is.null(sampleName)){
         colnames(mtx) <- sampleName
@@ -407,14 +401,8 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
     }
 
   } else {
-
-    if (class(fltDOI) == "list"){
-      mtx <- as.matrix(dfm[, -c(1:2)])
-      rownames(mtx) <- dfm[, dataProbeVar]
-    } else { # limma Elist objects have five columns from gene name dataframe
-      mtx <- as.matrix(dfm[, -c(1:5)])
-      rownames(mtx) <- dfm[, dataProbeVar]
-    }
+    mtx <- as.matrix(dfm[, s])
+    rownames(mtx) <- dfm[, dataProbeVar]
 
     if (!is.null(sampleName)){
       colnames(mtx) <- sampleName
@@ -428,6 +416,143 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 
 }
 
+
+#' @title rbioarray_corcluster_super
+#'
+#' @description Wrapper for supervised (or unsupervised) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
+#' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
+#' @param fltData Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
+#' @param n_subgroup A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.
+#' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
+#' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
+#' @param FDR If to use FDR corrcted p value. Default is \code{TRUE}.
+#' @param q.value P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{q.value = 1}.
+#' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
+#' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
+#' @param axisLabel Whether to display label for both x- and y- axes. Default is \code{FALSE}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
+#' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
+#' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
+#' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @details Note that both \code{anno} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
+#' @importFrom gplots heatmap.2
+#' @importFrom RColorBrewer brewer.pal
+#' @examples
+#' \dontrun{
+#'
+#' # n_subgroup = c(1:4) means the correlation uses samples from 1 to 4 (control in this case).
+#' # The settings can be obtained from the corresponding condition summary object.
+#' rbioarray_corcluster_super(fltData = all_nrm, n_subgroup = c(1:4),
+#'                            dataProbeVar = "gene_id", FDR = TRUE, q.value = 0.02,
+#'                            dfmDE = all_DE$`conSumPost - conSumPre`,
+#'                            axisLabel = TRUE, genesymbolVar = "gene_name",
+#'                            key.title = "", cexRow = 0.3, cexCol = 0.3, offsetRow = 0.001,
+#'                            offsetCol = 0.001, margins = c(4, 4))'
+#'
+#'
+#' }
+#' @export
+rbioarray_corcluster_super <- function(plotName = "data",
+                                       fltData = NULL, n_subgroup = NULL,
+                                       dfmDE = NULL, FDR = TURE, q.value = 0.05, FC = NULL,
+                                       dataProbeVar = NULL,
+                                       axisLabel = FALSE, genesymbolVar = NULL,
+                                       mapColour = "PRGn", n_mapColour = 11, ...,
+                                       plotWidth = 7, plotHeight = 7){
+
+  #### test variables
+  if (is.null(fltData)){
+    stop(cat("Please set processed data object via fltData"))
+  }
+
+  if (is.null(dfmDE)){
+    stop(cat("Please set DE object via dfmDE"))
+  }
+
+  if (is.null(dataProbeVar)){
+    stop(cat("Please set unique genomic feature ID via dataProbeVar"))
+  }
+
+  if (is.null(n_subgroup)){
+    stop(cat("Please set the index for phenotype group via n_subgroup"))
+  }
+
+  #### fiter and normalization
+  vmwt <- fltData
+  dfm <- data.frame(vmwt$genes, vmwt$E)
+
+  #### dfm subsetting using DE resutls (dfmDE)
+  ## p value filter
+  if (FDR){
+    if (length(which(dfmDE$adj.P.Val < q.value)) == 0){
+      warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
+      pcutoff <- q.value
+      pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+      dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+    } else {
+      pcutoff <- max(dfmDE[dfmDE$adj.P.Val < q.value, ]$P.Value)
+      pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+      dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+    }
+  } else {
+    pcutoff <- q.value
+    pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+  }
+
+  ## set FC filter, if applicable
+  if (!is.null(FC)){
+    pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), dataProbeVar]
+    dfm <- dfm[dfm$ProbeName %in% pb_name_fc, ]
+  }
+
+  #### heatmap
+
+  ogNcol <- dim(vmwt$E)[2] # original numbers of col
+  annoNcol <- dim(dfm)[2] # numbers of col with annotation
+  s <- (annoNcol - ogNcol + 1):annoNcol # extract only the data by removing the annotation columns
+
+  if (axisLabel){
+    if (!is.null(genesymbolVar)){
+      dfm <- dfm[complete.cases(dfm[, genesymbolVar]), ]
+      axisrow <- dfm[, genesymbolVar]
+      print("Probes with no gene names are removed.")
+
+      mtx <- as.matrix(dfm[, s])
+      rownames(mtx) <- dfm[, dataProbeVar]
+      cormtx <- t(mtx)
+
+      pdf(file = paste(plotName, "_corheatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      heatmap.2(cor(cormtx[n_subgroup, ], method = "pearson"), symm = TRUE, trace = "none",
+                col = brewer.pal(n_mapColour, mapColour), labRow = axisrow, labCol = axisrow, ...)
+      dev.off()
+    } else {
+      print("No gene symbol variable detected. Proceed without one.")
+
+      mtx <- as.matrix(dfm[, s])
+      rownames(mtx) <- dfm[, dataProbeVar]
+      cormtx <- t(mtx)
+
+      pdf(file = paste(plotName, "_corheatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      heatmap.2(cor(cormtx[n_subgroup, ], method = "pearson"), symm = TRUE, trace = "none",
+                col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
+      dev.off()
+    }
+  } else {
+    mtx <- as.matrix(dfm[, s])
+    rownames(mtx) <- dfm[, dataProbeVar]
+    cormtx <- t(mtx)
+
+    pdf(file = paste(plotName, "_corheatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+    heatmap.2(cor(cormtx[n_subgroup, ], method = "pearson"), symm = TRUE, trace = "none",
+              col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
+    dev.off()
+  }
+
+}
 
 
 #' @title rbioarray_venn_DE
