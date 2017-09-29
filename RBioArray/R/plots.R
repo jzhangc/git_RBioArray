@@ -450,8 +450,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #'                            dfmDE = all_DE$`conSumPost - conSumPre`,
 #'                            axisLabel = TRUE, genesymbolVar = "gene_name",
 #'                            key.title = "", cexRow = 0.3, cexCol = 0.3, offsetRow = 0.001,
-#'                            offsetCol = 0.001, margins = c(4, 4))'
-#'
+#'                            offsetCol = 0.001, margins = c(4, 4))
 #'
 #' }
 #' @export

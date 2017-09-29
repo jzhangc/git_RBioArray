@@ -52,3 +52,17 @@ Wrapper for supervised (or unsupervised) Pearson correlation clustering analysis
 \details{
 Note that both \code{anno} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
 }
+\examples{
+\dontrun{
+
+# n_subgroup = c(1:4) means the correlation uses samples from 1 to 4 (control in this case).
+# The settings can be obtained from the corresponding condition summary object.
+rbioarray_corcluster_super(fltData = all_nrm, n_subgroup = c(1:4),
+                           dataProbeVar = "gene_id", FDR = TRUE, q.value = 0.02,
+                           dfmDE = all_DE$`conSumPost - conSumPre`,
+                           axisLabel = TRUE, genesymbolVar = "gene_name",
+                           key.title = "", cexRow = 0.3, cexCol = 0.3, offsetRow = 0.001,
+                           offsetCol = 0.001, margins = c(4, 4))
+
+}
+}
