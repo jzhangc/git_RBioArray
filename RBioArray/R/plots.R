@@ -94,54 +94,32 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
   }
 
   ## set ColSideColors
-  if (class(fltlist) == "list"){
-    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:2)])))
-  } else { # limma Elist objects have five columns from gene name dataframe
-    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:5)])))
-  }
+  col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:(ncol(dfm) - ncol(fltlist$E)))])))
 
   colG <- cutree(col_cluster, colGroup) # column group
   colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
 
   ## prepare mtx for plotting
+  dfm2 <- dfm
   if (genesymbolOnly){ # remove probes without gene symbol or not
     if (is.null(anno) | is.null(genesymbolVar)){
       warning("No annotation object or gene sybmol variable detected. Cluster will proceed with all probes.")
-      dfm <- dfm
-
-      if (class(fltlist) == "list"){
-        mtx <- as.matrix(dfm[, -c(1:2)])
-        rownames(mtx) <- dfm[, dataProbeVar]
-      } else { # limma Elist objects have five columns from gene name dataframe
-        mtx <- as.matrix(dfm[, -c(1:5)])
-        rownames(mtx) <- dfm[, dataProbeVar]
-      }
+      dfm2 <- dfm2
+      mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E)))]) # remove annotation info. same as below.
+      rownames(mtx) <- dfm2[, dataProbeVar]
 
     } else {
-      geneSymbl <- anno[anno[, annoProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
+      geneSymbl <- anno[anno[, annoProbeVar] %in% dfm2[, dataProbeVar], ][, genesymbolVar]
 
-      dfm$geneSymbol <- geneSymbl
-      dfm <- dfm[complete.cases(dfm), ] # remove probes withnout a gene symbol
-
-      if (class(fltlist) == "list"){
-        mtx <- as.matrix(dfm[, -c(1:2, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols. note that the variable name is geneSymbol, NOT the argument value.
-      } else { # limma Elist objects have five columns from gene name dataframe
-        mtx <- as.matrix(dfm[, -c(1:5, length(colnames(dfm)))]) # remove all the annotation info
-        rownames(mtx) <- dfm[, "geneSymbol"] # row names are now gene symbols. note that the variable name is geneSymbol, NOT the argument value.
-      }
-
+      dfm2$geneSymbol <- geneSymbl
+      dfm2 <- dfm2[complete.cases(dfm2), ] # remove probes withnout a gene symbol
+      mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E) -1), ncol(dfm2))])
+      rownames(mtx) <- dfm2[, "geneSymbol"] # row names are now gene symbols. note that the variable name is geneSymbol, NOT the argument value.
     }
   } else {
-    dfm <- dfm
-
-    if (class(fltlist) == "list"){
-      mtx <- as.matrix(dfm[, -c(1:2)])
-      rownames(mtx) <- dfm[, dataProbeVar]
-    } else { # limma Elist objects have five columns from gene name dataframe
-      mtx <- as.matrix(dfm[, -c(1:5)])
-      rownames(mtx) <- dfm[, dataProbeVar]
-    }
+    dfm2 <- dfm2
+    mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E)))])
+    rownames(mtx) <- dfm2[, dataProbeVar]
   }
 
   if (!is.null(sampleName)){
@@ -719,8 +697,6 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
       pcutoff <- cal_pcutoff(m = vennDE, n = j)
       out <- ifelse(p[, j] >= pcutoff, 0L, ifelse(lfc[, j] > 0, 1L, -1L))
     }
-
-
   }
 
   ## venn diagram plotting
@@ -745,5 +721,4 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
     outdfm <- merge(anno[, c(annoProbeVar, genesymbolVar)], outdfm, by = dataProbeVar, all.y = TRUE)
     write.csv(outdfm, file = paste(objTitle, "_venn_table.csv", sep = ""), row.names = FALSE)
   }
-
 }

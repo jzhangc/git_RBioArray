@@ -21,7 +21,11 @@ Installation:
 
 Update log
 
-    0.4.0 (Sept 28 2017)
+    0.4.1 (Oct 31 2017)
+      - Code updated for rbioarray_hclust() for a better data format compatability
+      - Bug fixes
+
+    0.4.0
       - rbioarray_corcluster_super() added: Supervised Pearson correlation clustering analysis and heatmap
       - rbioarray_hcluster_super() updated with more concise codes
       - rbioseq_de() now outputs filtered and normalized read counts matrix to the environment
