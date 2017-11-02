@@ -5,15 +5,17 @@
 \title{rbioarray_corcluster_super}
 \usage{
 rbioarray_corcluster_super(plotName = "data", fltData = NULL,
-  n_subgroup = NULL, dfmDE = NULL, FDR = TURE, q.value = 0.05,
-  FC = NULL, dataProbeVar = NULL, axisLabel = FALSE,
-  genesymbolVar = NULL, mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+  rmControl = TRUE, n_subgroup = NULL, dfmDE = NULL, FDR = TURE,
+  q.value = 0.05, FC = NULL, dataProbeVar = NULL, axisLabel = FALSE,
+  anno = NULL, genesymbolVar = NULL, mapColour = "PRGn",
+  n_mapColour = 11, ..., plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
 
 \item{fltData}{Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.}
+
+\item{rmControl}{If to remove control probes (Agilent platform). Default is \code{TRUE}.}
 
 \item{n_subgroup}{A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.}
 
@@ -28,6 +30,8 @@ rbioarray_corcluster_super(plotName = "data", fltData = NULL,
 \item{dataProbeVar}{\code{dfmDE} variable name for probe name. Default is \code{NULL}.}
 
 \item{axisLabel}{Whether to display label for both x- and y- axes. Default is \code{FALSE}.}
+
+\item{anno}{The optional annotation matrix. Only needs to be set to display inforamtions for}
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
 

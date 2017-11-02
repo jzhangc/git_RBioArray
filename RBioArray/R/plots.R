@@ -107,10 +107,8 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
       dfm2 <- dfm2
       mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E)))]) # remove annotation info. same as below.
       rownames(mtx) <- dfm2[, dataProbeVar]
-
     } else {
       geneSymbl <- anno[anno[, annoProbeVar] %in% dfm2[, dataProbeVar], ][, genesymbolVar]
-
       dfm2$geneSymbol <- geneSymbl
       dfm2 <- dfm2[complete.cases(dfm2), ] # remove probes withnout a gene symbol
       mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E) -1), ncol(dfm2))])
@@ -133,9 +131,6 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
             col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
   dev.off()
 }
-
-
-
 
 #' @title rbioseq_hcluster
 #'
@@ -321,13 +316,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
   clustfunc <- function(x)hclust(x, method = clust)
 
   # set ColSideColors
-
-  if (class(fltDOI) == "list"){
-    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:2)])))
-  } else { # limma Elist objects have five columns from gene name dataframe
-    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:5)])))
-  }
-
+  col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:(ncol(dfm) - ncol(fltDOI$E)))])))
   colG <- cutree(col_cluster, colGroup) # column group
   colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
 
@@ -337,7 +326,6 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
   s <- (annoNcol - ogNcol + 1):annoNcol # extract only the data by removing the annotation columns
 
   if (rowLabel){
-
     if (is.null(anno) | is.null(genesymbolVar)){
       warning("No annotation object or gene sybmol variable detected. Row labels will be the default probe names.")
 
@@ -391,7 +379,6 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
               col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = FALSE,...)
     dev.off()
   }
-
 }
 
 
@@ -400,6 +387,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #' @description Wrapper for supervised (or unsupervised) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltData Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
+#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
 #' @param n_subgroup A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
 #' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
@@ -408,6 +396,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
 #' @param axisLabel Whether to display label for both x- and y- axes. Default is \code{FALSE}.
+#' @param anno The optional annotation matrix. Only needs to be set to display inforamtions for
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
@@ -433,10 +422,12 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #' }
 #' @export
 rbioarray_corcluster_super <- function(plotName = "data",
-                                       fltData = NULL, n_subgroup = NULL,
+                                       fltData = NULL, rmControl = TRUE,
+                                       n_subgroup = NULL,
                                        dfmDE = NULL, FDR = TURE, q.value = 0.05, FC = NULL,
                                        dataProbeVar = NULL,
-                                       axisLabel = FALSE, genesymbolVar = NULL,
+                                       axisLabel = FALSE,
+                                       anno = NULL, genesymbolVar = NULL,
                                        mapColour = "PRGn", n_mapColour = 11, ...,
                                        plotWidth = 7, plotHeight = 7){
 
@@ -460,6 +451,14 @@ rbioarray_corcluster_super <- function(plotName = "data",
   #### fiter and normalization
   vmwt <- fltData
   dfm <- data.frame(vmwt$genes, vmwt$E)
+
+  if (rmControl){ # remove control
+    dfm <- dfm[dfm$ControlType == 0, ]
+  }
+
+  if (!is.null(anno)){
+    dfm <- merge(annot[, c(dataProbeVar, genesymbolVar)], dfm, by = dataProbeVar, all.y = TRUE)
+  }
 
   #### dfm subsetting using DE resutls (dfmDE)
   ## p value filter
@@ -487,7 +486,6 @@ rbioarray_corcluster_super <- function(plotName = "data",
   }
 
   #### heatmap
-
   ogNcol <- dim(vmwt$E)[2] # original numbers of col
   annoNcol <- dim(dfm)[2] # numbers of col with annotation
   s <- (annoNcol - ogNcol + 1):annoNcol # extract only the data by removing the annotation columns
@@ -528,7 +526,6 @@ rbioarray_corcluster_super <- function(plotName = "data",
               col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
     dev.off()
   }
-
 }
 
 
@@ -572,7 +569,6 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
                               geneName = FALSE, annoProbeVar = "ProbeName", genesymbolVar = NULL,
                               DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05,
                               parallelComputing = FALSE){
-
   ## check the key arguments
   if (is.null(DEdata)){
     stop("Please set input DE data object. Hint: it is the output list from rbioarray_DE().")
@@ -602,7 +598,6 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
     vennDE <- DEdata
   }
 
-
   ## tempfunc
   # m - vennDE; n - individual coef
   cal_pcutoff <- function(m, n){
@@ -620,7 +615,6 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
       }
 
     } else if (DE == "spikein") {
-
       # check arugments
       if (is.null(fltdata) | is.null(design) | is.null(contra) | is.null(weights)){
         warning(cat("Arguments not complete for \"spikein\" method. Proceed with \"fdr\" instead."))
@@ -667,19 +661,14 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
 
   ## populate the matrices
   if (!parallelComputing){
-
     for (j in 1:length(names(vennDE))){
       lfc[, j] <- vennDE[[j]]$logFC # extract log fold change
       p[, j] <- vennDE[[j]]$P.Value # extract p value (p) to a matrix
-
       pcutoff <- cal_pcutoff(m = vennDE, n = j)
       # note we are using factors here e.g. "-1L, 0L, 1L". the starting value is 0L
       mtx[, j] <- ifelse(p[, j] >= pcutoff, 0L, ifelse(lfc[, j] > 0, 1L, -1L))
-
     }
-
   } else { # parallel computing
-
     ## set up cpu cluster
     n_cores <- detectCores() - 1
     cl <- makeCluster(n_cores, type = "PSOCK")

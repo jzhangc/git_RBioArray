@@ -80,8 +80,6 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
   return(output)
 }
 
-
-
 #' @title rbioarray_flt
 #'
 #' @description data filter function based on spike-in negative control.
@@ -96,8 +94,6 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' }
 #' @export
 rbioarray_flt <- function(normlst, percentile = 0.95){
-
-
   if (class(normlst$E[normlst$genes$ControlType == -1, ]) == "numeric"){
     ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
     ## extract the 95% quanitle of the negative control signals

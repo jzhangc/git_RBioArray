@@ -21,7 +21,13 @@ Installation:
 
 Update log
 
-    0.4.1 (Oct 31 2017)
+    0.4.2 (Nov 1 2017)
+      - Annotation matrix now can be accpeted by rbioarray_corcluster_super()
+      - Removing Agilent microarray control funtionality added to rbioarray_corcluster_super()
+      - Code updated for rbioarray_hclust_super() for a better data format compatability
+      - Bug fixes
+
+    0.4.1
       - Code updated for rbioarray_hclust() for a better data format compatability
       - Bug fixes
 
