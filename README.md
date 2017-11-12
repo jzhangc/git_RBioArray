@@ -21,7 +21,11 @@ Installation:
 
 Update log
 
-    0.4.2 (Nov 1 2017)
+    0.4.3 (Nov 11 2017)
+      - A bug fixed for rbioarray_venn_DE() when p value threshold method set to "fdr"
+      - Other bug fixes
+
+    0.4.2
       - Annotation matrix now can be accpeted by rbioarray_corcluster_super()
       - Removing Agilent microarray control funtionality added to rbioarray_corcluster_super()
       - Code updated for rbioarray_hclust_super() for a better data format compatability

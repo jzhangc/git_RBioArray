@@ -547,7 +547,8 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' @param design Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.
 #' @param contra Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.
 #' @param weights Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
-#' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
+#' @param q.value P value threshold. Only needed for \code{DE = "fdr"} and \code{DE = "spikein"} when calculated p value is larger than q.value. Default is \code{0.05}.
+#' @param FC Fold change threshold. Default is \code{1.5}.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @return The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
 #' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{DE = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
@@ -567,7 +568,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
                               anno = NULL,
                               DEdata = NULL, dataProbeVar = "ProbeName",
                               geneName = FALSE, annoProbeVar = "ProbeName", genesymbolVar = NULL,
-                              DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05,
+                              DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05, FC = 1.5,
                               parallelComputing = FALSE){
   ## check the key arguments
   if (is.null(DEdata)){
@@ -601,17 +602,15 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
   ## tempfunc
   # m - vennDE; n - individual coef
   cal_pcutoff <- function(m, n){
-
     # set up tmpdfm
     tmpdfm <- m[[n]]
 
     # set the cutoff
     if (DE == "fdr"){
-
-      if (length(which(tmpdfm$adj.P.Val < 0.05)) == 0){
+      if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
         p_threshold <- 1
       } else {
-        p_threshold <- min(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
+        p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
 
     } else if (DE == "spikein") {
@@ -619,10 +618,10 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
       if (is.null(fltdata) | is.null(design) | is.null(contra) | is.null(weights)){
         warning(cat("Arguments not complete for \"spikein\" method. Proceed with \"fdr\" instead."))
 
-        if (length(which(tmpdfm$adj.P.Val < 0.05)) == 0){
+        if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
           p_threshold <- 1
         } else {
-          p_threshold <- min(tmpdfm[tmpdfm$adj.P.Val < 0.05, ]$P.Value)
+          p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
         }
 
       } else {
@@ -639,11 +638,10 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
         }
         cf <- names(m)
         PC <- fit[fit$genes$ControlType == 1, ]
-        ifelse(min(PC$p.value[, cf[n]]) > 0.05, p_threshold <- q.value, p_threshold <- min(PC$p.value[, cf[n]]))
+        ifelse(min(PC$p.value[, cf[n]]) > q.value, p_threshold <- q.value, p_threshold <- min(PC$p.value[, cf[n]]))
       }
 
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
-
     return(p_threshold)
   }
 
@@ -666,7 +664,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
       p[, j] <- vennDE[[j]]$P.Value # extract p value (p) to a matrix
       pcutoff <- cal_pcutoff(m = vennDE, n = j)
       # note we are using factors here e.g. "-1L, 0L, 1L". the starting value is 0L
-      mtx[, j] <- ifelse(p[, j] >= pcutoff, 0L, ifelse(lfc[, j] > 0, 1L, -1L))
+      mtx[, j] <- ifelse(p[, j] >= pcutoff | abs(lfc[, j]) < log2(FC), 0L, ifelse(lfc[, j] > 0, 1L, -1L))
     }
   } else { # parallel computing
     ## set up cpu cluster
@@ -684,7 +682,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
     }
     mtx[] <- foreach(j = 1:length(names(vennDE)), .combine = "cbind", .packages = "limma") %dopar% {
       pcutoff <- cal_pcutoff(m = vennDE, n = j)
-      out <- ifelse(p[, j] >= pcutoff, 0L, ifelse(lfc[, j] > 0, 1L, -1L))
+      out <- ifelse(p[, j] >= pcutoff | abs(lfc[, j]) < log2(FC), 0L, ifelse(lfc[, j] > 0, 1L, -1L))
     }
   }
 

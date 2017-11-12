@@ -9,7 +9,7 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
   dataProbeVar = "ProbeName", geneName = FALSE,
   annoProbeVar = "ProbeName", genesymbolVar = NULL, DE = "fdr",
   fltdata = NULL, design = NULL, contra = NULL, weights = NULL,
-  q.value = 0.05, parallelComputing = FALSE)
+  q.value = 0.05, FC = 1.5, parallelComputing = FALSE)
 }
 \arguments{
 \item{plotName}{Name for the output venn diagram. Default is \code{"DE"}.}
@@ -42,7 +42,9 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
 
 \item{weights}{Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.}
 
-\item{q.value}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
+\item{q.value}{P value threshold. Only needed for \code{DE = "fdr"} and \code{DE = "spikein"} when calculated p value is larger than q.value. Default is \code{0.05}.}
+
+\item{FC}{Fold change threshold. Default is \code{1.5}.}
 
 \item{parallelComputing}{If to use parallel computing. Default is \code{FALSE}.}
 }

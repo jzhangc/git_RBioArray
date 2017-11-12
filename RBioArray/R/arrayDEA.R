@@ -241,7 +241,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
   ## temp func for plotting
   # i: outlist (object) listed below
   tmpfunc <- function(i, j, PC = NULL){
-
     # set the data frame
     if (geneName){
       if (!is.null(genesymbolVar)){
@@ -256,20 +255,15 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
     # set the cutoff
     if (DE == "fdr"){
-
       if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
         pcutoff <- 1
       } else {
         pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
-
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
-
     } else if (DE == "spikein") {
-
       ifelse(min(PC$p.value[, cf[j]]) > q.value, pcutoff <- q.value, pcutoff <- min(PC$p.value[, cf[j]]))
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
-
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
 
 
@@ -324,11 +318,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
     # dump the info to the threshold dataframe
     if (length(levels(cutoff)) == 1){
-
       if (levels(cutoff) == "TRUE"){
-
         tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
-
       } else {
         tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
       }
@@ -336,25 +327,19 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     } else {
       tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
     }
-
   }
-
 
   ## DE
   cat("Linear fitting...") # message
   if (class(fltdata) == "list"){
-
     fit <- lmFit(fltdata$E, design, weights = weights)
     fit <- contrasts.fit(fit, contrasts = contra)
     fit <- eBayes(fit)
     fit$genes <- fltdata$genes # add genes matrix to the DE results
-
   } else {
-
     fit <- lmFit(fltdata, design, weights = weights)
     fit <- contrasts.fit(fit, contrasts = contra)
     fit <- eBayes(fit)
-
   }
   cat("DONE!\n") # message
 
@@ -368,7 +353,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
   ## output and plotting
   if(!parallelComputing){
-
     # compile resutls into a list
     outlist <- lapply(cf, function(i){
       tmp <- topTable(out, coef = i, number = Inf, ...)
@@ -378,7 +362,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     })
 
     names(outlist) <- cf
-
     # write DE results into files
     lapply(1:length(cf), function(j){
       write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
@@ -386,13 +369,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
     # volcano plot and output summary
     if (plot){
-
       threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
-
     }
-
   } else { ## parallel computing
-
     # check the cluster type
     if (clusterType != "PSOCK" & clusterType != "FORK"){
       stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
@@ -408,14 +387,11 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
       outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
-
         tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
         tmp <- merge(tmp, anno, by = "ProbeName")
         return(tmp)
-
       }
-
       names(outlist) <- cf
 
       # write DE results into files
@@ -425,13 +401,11 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
       # volcano plot and output summary
       if (plot){
-
         threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
           tmpfunc(i = outlist, j = j, PC = PCntl)
 
         }
       }
-
     } else { # macOS and Unix-like systems
 
       outlist <- mclapply(cf, FUN = function(i){
@@ -450,14 +424,10 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
       # volcano plot and output summary
       if (plot){
-
         threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
 
       }
-
     }
-
-
   }
 
   ## output the DE/fit objects to the environment, as well as the DE csv files into wd
@@ -465,14 +435,11 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
   fitout <- merge(fitout, anno, by = "ProbeName")
   assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
   write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
-
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
-
-
   write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
+
   ## message
   if (geneName & !is.null(genesymbolVar)){
     print("Probes without a gene symbol are removed from the volcano plots")
   }
-
 }
