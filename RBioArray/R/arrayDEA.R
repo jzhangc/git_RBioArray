@@ -94,14 +94,18 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' }
 #' @export
 rbioarray_flt <- function(normlst, percentile = 0.95){
-  if (class(normlst$E[normlst$genes$ControlType == -1, ]) == "numeric"){
-    ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
-    ## extract the 95% quanitle of the negative control signals
-    neg <- normlst$E[normlst$genes$ControlType == -1, ] # no 95% percentile as only one entry
+  if (!is.null(normlst$genes$ControlType)){
+    if (class(normlst$E[normlst$genes$ControlType == -1, ]) == "numeric"){
+      ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
+      ## extract the 95% quanitle of the negative control signals
+      neg <- normlst$E[normlst$genes$ControlType == -1, ] # no 95% percentile as only one entry
+    } else {
+      ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
+      ## extract the 95% quanitle of the negative control signals
+      neg <- apply(normlst$E[normlst$genes$ControlType == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
+    }
   } else {
-    ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
-    ## extract the 95% quanitle of the negative control signals
-    neg <- apply(normlst$E[normlst$genes$ControlType == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
+   stop(cat("No control type variable provided. Failed to filter data."))
   }
 
   if (class(normlst) == "list"){
@@ -126,10 +130,8 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
                         target = normlst$target, ArrayWeight = normlst$ArrayWeight)
 
   } else {
-
     ## low expression cuttoff set at at least 10% hihger than the neg95
     LE_cutoff <- matrix(1.1 * neg, nrow(normlst), ncol(normlst), byrow = TRUE)
-
 
     ## summary after applying LE_cutoff (T/F for each sample)
     # this only compares the element Nrm$E

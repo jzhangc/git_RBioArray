@@ -23,7 +23,14 @@ Installation:
 
 Update log
 
-    0.4.4 (Dec.5.2017)
+    0.4.4 (update preview)
+      - Gene repeats processing methods added via argument geneRepMethod, for functions:
+          - rbioarray_de()
+          - rbioseq_de()
+          - rbioarray_corcluster_super()
+          - rbioarray_hcluster()
+          - rbioseq_hcluster()
+      - Generic filtering method added  to rbioarray_flt()
       - The argument for annotation files changed from "anno" to "annot"
       - Codes cleared up
       - Bug fixes
@@ -35,11 +42,11 @@ Update log
     0.4.2
       - Annotation matrix now can be accpeted by rbioarray_corcluster_super()
       - Removing Agilent microarray control funtionality added to rbioarray_corcluster_super()
-      - Code updated for rbioarray_hclust_super() for a better data format compatability
+      - rbioarray_hclust_super() updated for a better data format compatability
       - Bug fixes
 
     0.4.1
-      - Code updated for rbioarray_hclust() for a better data format compatability
+      - rbioarray_hclust() updated for a better data format compatability
       - Bug fixes
 
     0.4.0
