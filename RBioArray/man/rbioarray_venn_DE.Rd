@@ -5,9 +5,9 @@
 \title{rbioarray_venn_DE}
 \usage{
 rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
-  plotHeight = 5, ..., anno = NULL, DEdata = NULL,
+  plotHeight = 5, ..., annot = NULL, DEdata = NULL,
   dataProbeVar = "ProbeName", geneName = FALSE,
-  annoProbeVar = "ProbeName", genesymbolVar = NULL, DE = "fdr",
+  annotProbeVar = "ProbeName", genesymbolVar = NULL, DE = "fdr",
   fltdata = NULL, design = NULL, contra = NULL, weights = NULL,
   q.value = 0.05, FC = 1.5, parallelComputing = FALSE)
 }
@@ -20,7 +20,7 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
 
 \item{...}{arguments for \code{vennDiagram()} from \code{limma} package.}
 
-\item{anno}{Annotation data frame. If set, the output csv file will have a gene symbol column. The function will seek \code{genesymbolVar} value as the variable name for the gene symbol information. Default is \code{NULL}.}
+\item{annot}{Annotation data frame. If set, the output csv file will have a gene symbol column. The function will seek \code{genesymbolVar} value as the variable name for the gene symbol information. Default is \code{NULL}.}
 
 \item{DEdata}{Input DE object from \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
@@ -28,9 +28,9 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
 
 \item{geneName}{If to only use probes with a gene name. Default is \code{FALSE}.}
 
-\item{annoProbeVar}{\code{anno} variable name for probe name. Default is \code{"ProbeName"}.}
+\item{annotProbeVar}{\code{annot} variable name for probe name. Default is \code{"ProbeName"}.}
 
-\item{genesymbolVar}{Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
+\item{genesymbolVar}{Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 
 \item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.}
 
@@ -61,7 +61,7 @@ When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When 
 \dontrun{
 rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-                  DE = "spikein", fltdata = fltdata, anno = anno, design = design, contra = contra, weights = fltdata$ArrayWeight,
+                  DE = "spikein", fltdata = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
                   parallelComputing = FALSE)
 }
 }

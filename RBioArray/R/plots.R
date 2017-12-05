@@ -5,9 +5,9 @@
 #' @param fltlist Input filtered data, either a list, \code{EList} or \code{MAList} object.
 #' @param dataProbeVar \code{fltlist} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolOnly Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
-#' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
-#' @param annoProbeVar \code{anno} variable name for probe name. Default is \code{"ProbeName"}.
-#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
+#' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
+#' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
 #' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
 #' @param fct Input \code{factor} object for samples.
@@ -62,7 +62,7 @@
 #' }
 #' @export
 rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar = "ProbeName",
-                               genesymbolOnly = FALSE, anno = NULL, annoProbeVar = "ProbeName", genesymbolVar = NULL,
+                               genesymbolOnly = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
                                n = "all", rmControl = TRUE, sampleName = NULL,
                                fct = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                distance = "euclidean", clust = "complete",
@@ -102,13 +102,13 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
   ## prepare mtx for plotting
   dfm2 <- dfm
   if (genesymbolOnly){ # remove probes without gene symbol or not
-    if (is.null(anno) | is.null(genesymbolVar)){
+    if (is.null(annot) | is.null(genesymbolVar)){
       warning("No annotation object or gene sybmol variable detected. Cluster will proceed with all probes.")
       dfm2 <- dfm2
       mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E)))]) # remove annotation info. same as below.
       rownames(mtx) <- dfm2[, dataProbeVar]
     } else {
-      geneSymbl <- anno[anno[, annoProbeVar] %in% dfm2[, dataProbeVar], ][, genesymbolVar]
+      geneSymbl <- annot[annot[, annotProbeVar] %in% dfm2[, dataProbeVar], ][, genesymbolVar]
       dfm2$geneSymbol <- geneSymbl
       dfm2 <- dfm2[complete.cases(dfm2), ] # remove probes withnout a gene symbol
       mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E) -1), ncol(dfm2))])
@@ -137,7 +137,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
 #' @description Wrapper for hierarchical clustering analysis and heatmap visualization for RNA seq data.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
-#' @param dfm_anno Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
+#' @param dfm_annot Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
 #' @param count_threshold Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.
 #' @param qc_plot Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{FALSE}.
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
@@ -163,7 +163,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
 #'
 #' }
 #' @export
-rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_anno = NULL, geneidVar = "gene_id",
+rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NULL, geneidVar = "gene_id",
                              count_threshold = "none", design = NULL, qc_plot = FALSE,
                              n = "all", sampleName = NULL,
                              fct = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
@@ -172,7 +172,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_anno = NUL
                              plotWidth = 7, plotHeight = 7){
 
   ## chekc variables
-  if (is.null(dfm_count) | is.null(dfm_anno) | class(dfm_count) != "data.frame" | class(dfm_anno) != "data.frame"){
+  if (is.null(dfm_count) | is.null(dfm_annot) | class(dfm_count) != "data.frame" | class(dfm_annot) != "data.frame"){
     stop("Please provide the read count and annotation dataframes. Please also make sure the type as data.frame")
   }
 
@@ -192,7 +192,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_anno = NUL
   ## clustering analysis and colour setup
   # normalization and filtering
   cat("Data filtering and normalization...") # message
-  dge <- DGEList(counts = dfm_count, genes = dfm_anno)
+  dge <- DGEList(counts = dfm_count, genes = dfm_annot)
 
   if (count_threshold != "none"){ # set the count threshold for filtering
     count_s <- rowSums(dge$counts) # thresholdd
@@ -256,16 +256,16 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_anno = NUL
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
 #' @param rowLabel Whether to display row label or not. Default is \code{FALSE}.
-#' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
-#' @param annoProbeVar \code{anno} variable name for probe name. Default is \code{"ProbeName"}.
-#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
 #' @param colColour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
-#' @details Note that both \code{anno} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @details Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
@@ -276,7 +276,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_anno = NUL
 #'                          clust = "ward.D2",
 #'                          fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
 #'                          levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),
-#'                          rowLabel = TRUE, anno = Anno, annoProbeVar = "ProbeName", genesymbolVar = "GeneSymbol",
+#'                          rowLabel = TRUE, annot = annot, annotProbeVar = "ProbeName", genesymbolVar = "GeneSymbol",
 #'                          offsetRow = 0, adjRow = c(0, 0.5), cexRow = 0.6,
 #'                          key.title = "", keysize = 1.5,
 #'                          key.xlab = "Normalized expression value", key.ylab = "Gene count")
@@ -288,7 +288,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
                                      fct, sampleName = NULL,
                                      colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = "euclidean", clust = "complete",
-                                     rowLabel = FALSE, anno = NULL, annoProbeVar = "ProbeName", genesymbolVar = NULL,
+                                     rowLabel = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                      plotWidth = 7, plotHeight = 7){ #DOI: fltered subset data of interest
 
@@ -326,7 +326,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
   s <- (annoNcol - ogNcol + 1):annoNcol # extract only the data by removing the annotation columns
 
   if (rowLabel){
-    if (is.null(anno) | is.null(genesymbolVar)){
+    if (is.null(annot) | is.null(genesymbolVar)){
       warning("No annotation object or gene sybmol variable detected. Row labels will be the default probe names.")
 
       # retrive correct data matrix without annoation
@@ -343,7 +343,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
       dev.off()
 
     } else {
-      geneSymbl <- anno[anno[, annoProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
+      geneSymbl <- annot[annot[, annotProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
 
       # process dfm further to only retain probes with gene symbol
       dfm$geneSymbol <- geneSymbl
@@ -396,14 +396,14 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
 #' @param axisLabel Whether to display label for both x- and y- axes. Default is \code{FALSE}.
-#' @param anno The optional annotation matrix. Only needs to be set to display inforamtions for
-#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param annot The optional annotation matrix. Only needs to be set to display inforamtions for
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
-#' @details Note that both \code{anno} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @details Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
@@ -427,7 +427,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
                                        dfmDE = NULL, FDR = TURE, q.value = 0.05, FC = NULL,
                                        dataProbeVar = NULL,
                                        axisLabel = FALSE,
-                                       anno = NULL, genesymbolVar = NULL,
+                                       annot = NULL, genesymbolVar = NULL,
                                        mapColour = "PRGn", n_mapColour = 11, ...,
                                        plotWidth = 7, plotHeight = 7){
 
@@ -456,7 +456,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
     dfm <- dfm[dfm$ControlType == 0, ]
   }
 
-  if (!is.null(anno)){
+  if (!is.null(annot)){
     dfm <- merge(annot[, c(dataProbeVar, genesymbolVar)], dfm, by = dataProbeVar, all.y = TRUE)
   }
 
@@ -536,12 +536,12 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @param ... arguments for \code{vennDiagram()} from \code{limma} package.
-#' @param anno Annotation data frame. If set, the output csv file will have a gene symbol column. The function will seek \code{genesymbolVar} value as the variable name for the gene symbol information. Default is \code{NULL}.
+#' @param annot Annotation data frame. If set, the output csv file will have a gene symbol column. The function will seek \code{genesymbolVar} value as the variable name for the gene symbol information. Default is \code{NULL}.
 #' @param DEdata Input DE object from \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param dataProbeVar \code{DEdata} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param geneName If to only use probes with a gene name. Default is \code{FALSE}.
-#' @param annoProbeVar \code{anno} variable name for probe name. Default is \code{"ProbeName"}.
-#' @param genesymbolVar Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
+#' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
+#' @param genesymbolVar Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
 #' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
 #' @param fltdata Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
 #' @param design Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.
@@ -560,14 +560,14 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' \dontrun{
 #' rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
 #'                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-#'                   DE = "spikein", fltdata = fltdata, anno = anno, design = design, contra = contra, weights = fltdata$ArrayWeight,
+#'                   DE = "spikein", fltdata = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
 #'                   parallelComputing = FALSE)
 #' }
 #' @export
 rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, plotHeight = 5, ...,
-                              anno = NULL,
+                              annot = NULL,
                               DEdata = NULL, dataProbeVar = "ProbeName",
-                              geneName = FALSE, annoProbeVar = "ProbeName", genesymbolVar = NULL,
+                              geneName = FALSE, annotProbeVar = "ProbeName", genesymbolVar = NULL,
                               DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05, FC = 1.5,
                               parallelComputing = FALSE){
   ## check the key arguments
@@ -700,12 +700,12 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
   dev.off()
 
   ## output a csv file with annotation
-  if (is.null(anno)){
+  if (is.null(annot)){
     outdfm <- data.frame(ProbeName = rownames(mtx), mtx)
     write.csv(outdfm, file = paste(objTitle, "_venn_table.csv", sep = ""), row.names = FALSE)
   } else {
     outdfm <- data.frame(ProbeName = rownames(mtx), mtx)
-    outdfm <- merge(anno[, c(annoProbeVar, genesymbolVar)], outdfm, by = dataProbeVar, all.y = TRUE)
+    outdfm <- merge(annot[, c(annotProbeVar, genesymbolVar)], outdfm, by = dataProbeVar, all.y = TRUE)
     write.csv(outdfm, file = paste(objTitle, "_venn_table.csv", sep = ""), row.names = FALSE)
   }
 }

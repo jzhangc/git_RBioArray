@@ -157,14 +157,14 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @description DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
 #' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
-#' @param anno Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.
+#' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.
 #' @param design Design matrix. Default is \code{NULL}.
 #' @param contra Contrast matrix. Default is \code{NULL}.
 #' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
 #' @param plot If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.
 #' @param geneName If to only plot probes with a gene name. Default is \code{FALSE}.
-#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
 #' @param topgeneLabel If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
 #' @param nGeneSymbol When \code{topgeneLabel = TRUE}, to set how many genes to display. Default is \code{5}.
 #' @param padding When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
@@ -196,13 +196,13 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
 #' @importFrom ggrepel geom_text_repel
 #' @examples
 #' \dontrun{
-#' rbioarray_DE(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
+#' rbioarray_DE(objTitle = "fltdata2", fltdata, annot = Anno, design, contra = contra,
 #'              weights = fltdata$ArrayWeight, parallelComputing = TRUE,
 #'              plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
 #'              DE = "spikein")
 #' }
 #' @export
-rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
+rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NULL,
                          design = NULL, contra = NULL, weights = NULL,
                          ...,
                          plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
@@ -212,13 +212,12 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
                          xTxtSize = 10, yTxtSize =10,
                          plotWidth = 170, plotHeight = 150,
                          parallelComputing = FALSE, clusterType = "PSOCK"){
-
   ## check the key arguments
   if (is.null(fltdata)){
     stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data.")
   }
 
-  if (is.null(anno)){
+  if (is.null(annot)){
     stop(cat("Please set the annotatioin dataframe. Make sure to name the variable containing probe name \"ProbeName\"."))
   }
 
@@ -232,7 +231,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
   ## extract coefficients
   cf <- colnames(contra) # extract coefficient
-
   # set an empty matrix for exporting the threolding summery
   threshold_summary <- matrix(nrow = length(cf), ncol = 5)
   colnames(threshold_summary) <- c("coeffcient", "p.value.threshold", "fold.change.threshold", "True", "False")
@@ -357,7 +355,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
     outlist <- lapply(cf, function(i){
       tmp <- topTable(out, coef = i, number = Inf, ...)
       tmp$ProbeName <- rownames(tmp)
-      tmp <- merge(tmp, anno, by = "ProbeName")
+      tmp <- merge(tmp, annot, by = "ProbeName")
       return(tmp)
     })
 
@@ -389,7 +387,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
       outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
         tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by = "ProbeName")
+        tmp <- merge(tmp, annot, by = "ProbeName")
         return(tmp)
       }
       names(outlist) <- cf
@@ -403,20 +401,17 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
       if (plot){
         threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
           tmpfunc(i = outlist, j = j, PC = PCntl)
-
         }
       }
     } else { # macOS and Unix-like systems
-
       outlist <- mclapply(cf, FUN = function(i){
         tmp <- topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, anno, by = "ProbeName")
+        tmp <- merge(tmp, annot, by = "ProbeName")
         return(tmp)
       }, mc.cores = n_cores, mc.preschedule = FALSE)
 
       names(outlist) <- cf
-
       # write DE results into files
       mclapply(1:length(cf), FUN = function(j){
         write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
@@ -432,7 +427,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, anno = NULL
 
   ## output the DE/fit objects to the environment, as well as the DE csv files into wd
   fitout <- topTable(out, number = Inf)
-  fitout <- merge(fitout, anno, by = "ProbeName")
+  fitout <- merge(fitout, annot, by = "ProbeName")
   assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
   write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)

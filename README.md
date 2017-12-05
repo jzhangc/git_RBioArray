@@ -13,15 +13,22 @@ Installation:
       
         biocLite()
     
-  - Install the package
+  - Install stable release
   
         devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos())   
 
-
+  - Install development build
+  
+        devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos(), ref = "beta")  
 
 Update log
 
-    0.4.3 (Nov 11 2017)
+    0.4.4 (Dec.5.2017)
+      - The argument for annotation files changed from "anno" to "annot"
+      - Codes cleared up
+      - Bug fixes
+
+    0.4.3
       - A bug fixed for rbioarray_venn_DE() when p value threshold method set to "fdr"
       - Other bug fixes
 

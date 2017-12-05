@@ -4,7 +4,7 @@
 \alias{rbioseq_hcluster}
 \title{rbioseq_hcluster}
 \usage{
-rbioseq_hcluster(plotName = "data", dfm_count = NULL, dfm_anno = NULL,
+rbioseq_hcluster(plotName = "data", dfm_count = NULL, dfm_annot = NULL,
   geneidVar = "gene_id", count_threshold = "none", design = NULL,
   qc_plot = FALSE, n = "all", sampleName = NULL, fct = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
@@ -17,7 +17,7 @@ rbioseq_hcluster(plotName = "data", dfm_count = NULL, dfm_anno = NULL,
 
 \item{dfm_count}{Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.}
 
-\item{dfm_anno}{Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.}
+\item{dfm_annot}{Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.}
 
 \item{count_threshold}{Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.}
 

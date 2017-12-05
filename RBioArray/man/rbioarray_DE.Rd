@@ -4,7 +4,7 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
+rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, annot = NULL,
   design = NULL, contra = NULL, weights = NULL, ..., plot = TRUE,
   geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
   nGeneSymbol = 5, padding = 0.5, FC = 1.5, DE = "fdr",
@@ -18,7 +18,7 @@ rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
 
 \item{fltdata}{filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
 
-\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.}
+\item{annot}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.}
 
 \item{design}{Design matrix. Default is \code{NULL}.}
 
@@ -32,7 +32,7 @@ rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, anno = NULL,
 
 \item{geneName}{If to only plot probes with a gene name. Default is \code{FALSE}.}
 
-\item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 
 \item{topgeneLabel}{If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.}
 
@@ -81,7 +81,7 @@ When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When 
 }
 \examples{
 \dontrun{
-rbioarray_DE(objTitle = "fltdata2", fltdata, anno = Anno, design, contra = contra,
+rbioarray_DE(objTitle = "fltdata2", fltdata, annot = Anno, design, contra = contra,
              weights = fltdata$ArrayWeight, parallelComputing = TRUE,
              plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
              DE = "spikein")

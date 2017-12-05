@@ -4,7 +4,7 @@
 \alias{rbioseq_DE}
 \title{rbioseq_DE}
 \usage{
-rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = NULL,
+rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
   count_threshold = "none", qc_plot = TRUE, design = NULL,
   contra = NULL, ..., plot = TRUE, geneName = FALSE,
   genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5,
@@ -19,7 +19,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = NULL,
 
 \item{dfm_count}{Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.}
 
-\item{dfm_anno}{Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.}
+\item{dfm_annot}{Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.}
 
 \item{count_threshold}{Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.}
 
@@ -35,7 +35,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = NULL,
 
 \item{geneName}{If to only plot probes with a gene name. Default is \code{FALSE}.}
 
-\item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 
 \item{topgeneLabel}{If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.}
 
@@ -84,7 +84,7 @@ Sample weights are automatically caluclated during Voom normalization. When \cod
 }
 \examples{
 \dontrun{
-rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_anno = Ann_Count_all[, 1:4], count_threshold = 50,
+rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_annot = Ann_Count_all[, 1:4], count_threshold = 50,
            design = design, contra = contra,
            FDR = TRUE, q.value = 0.05,
            geneName = TRUE, genesymbolVar = "gene_name", topgeneLabel = TRUE, nGeneSymbol = 10)

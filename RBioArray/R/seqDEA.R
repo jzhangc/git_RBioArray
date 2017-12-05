@@ -3,7 +3,7 @@
 #' @description DE analysis function for RNA-seq data, with count filtering functionality.
 #' @param objTitle Name for the output list. Default is \code{"seq_data"}.
 #' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
-#' @param dfm_anno Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
+#' @param dfm_annot Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
 #' @param count_threshold Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.
 #' @param qc_plot Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{TRUE}.
 #' @param design Design matrix. Default is \code{NULL}.
@@ -11,7 +11,7 @@
 #' @param ... arguments for \code{topTable()} from \code{limma} package.
 #' @param plot If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.
 #' @param geneName If to only plot probes with a gene name. Default is \code{FALSE}.
-#' @param genesymbolVar The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
 #' @param topgeneLabel If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
 #' @param nGeneSymbol When \code{topgeneLabel = TRUE}, to set how many genes to display. Default is \code{5}.
 #' @param padding When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
@@ -43,13 +43,13 @@
 #' @importFrom ggrepel geom_text_repel
 #' @examples
 #' \dontrun{
-#' rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_anno = Ann_Count_all[, 1:4], count_threshold = 50,
+#' rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_annot = Ann_Count_all[, 1:4], count_threshold = 50,
 #'            design = design, contra = contra,
 #'            FDR = TRUE, q.value = 0.05,
 #'            geneName = TRUE, genesymbolVar = "gene_name", topgeneLabel = TRUE, nGeneSymbol = 10)
 #' }
 #' @export
-rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = NULL,
+rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
                        count_threshold = "none", qc_plot = TRUE,
                        design = NULL, contra = NULL,
                        ...,
@@ -60,17 +60,16 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
                        xTxtSize = 10, yTxtSize =10,
                        plotWidth = 170, plotHeight = 150,
                        parallelComputing = FALSE, clusterType = "PSOCK"){
-
   ## check the key arguments
   if (!class(dfm_count) %in% c("data.frame", "matrix")){
     stop("dfm_count has to be either a data.frame or matrix object")
   }
 
-  if (!class(dfm_anno) %in% c("data.frame", "matrix")){
-    stop("dfm_anno has to be either a data.frame or matrix object")
+  if (!class(dfm_annot) %in% c("data.frame", "matrix")){
+    stop("dfm_annot has to be either a data.frame or matrix object")
   }
 
-  if (nrow(dfm_count) != nrow(dfm_anno)){
+  if (nrow(dfm_count) != nrow(dfm_annot)){
     stop("Read count matrix doesn't have the same row number as the annotation matrix.")
   }
 
@@ -93,7 +92,6 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
   ## temp func for plotting
   # i: outlist (object) listed below
   tmpfunc <- function(i, j){
-
     # set the data frame
     if (geneName){
       if (!is.null(genesymbolVar)){
@@ -108,21 +106,17 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
 
     # set the cutoff
     if (FDR){
-
       if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
         warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
         pcutoff <- q.value
       } else {
         pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
-
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
-
     } else  {
       pcutoff <- q.value
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
     }
-
 
     # plot
     loclEnv <- environment()
@@ -153,10 +147,8 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
     }
 
     grid.newpage()
-
     # extract gtable
     pltgtb <- ggplot_gtable(ggplot_build(plt))
-
     # add the right side y axis
     Aa <- which(pltgtb$layout$name == "axis-l")
     pltgtb_a <- pltgtb$grobs[[Aa]]
@@ -175,11 +167,8 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
 
     # dump the info to the threshold dataframe
     if (length(levels(cutoff)) == 1){
-
       if (levels(cutoff) == "TRUE"){
-
         tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
-
       } else {
         tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
       }
@@ -187,19 +176,16 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
     } else {
       tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
     }
-
   }
-
 
   ## DE
   # create DGE object using edgeR
   cat("Data filtering and normalization...") # message
-  dge <- DGEList(counts = dfm_count, genes = dfm_anno)
+  dge <- DGEList(counts = dfm_count, genes = dfm_annot)
 
   if (count_threshold != "none"){ # set the count threshold for filtering
     count_s <- rowSums(dge$counts) # thresholdd
     isexpr <- count_s > count_threshold
-
     dge <- dge[isexpr, , keep.lib.size = FALSE] # filtering
   }
 
@@ -214,12 +200,10 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
   fit <- contrasts.fit(fit, contrasts = contra)
   fit <- eBayes(fit)
   cat("DONE!\n") # message
-
   out <- fit
 
   ## output and plotting
   if(!parallelComputing){
-
     # compile resutls into a list
     outlist <- lapply(cf, function(i){
       tmp <- topTable(out, coef = i, number = Inf, ...)
@@ -227,7 +211,6 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
     })
 
     names(outlist) <- cf
-
     # write DE results into files
     lapply(1:length(cf), function(j){
       write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
@@ -235,13 +218,9 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
 
     # volcano plot and output summary
     if (plot){
-
       threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x)))
-
     }
-
   } else { ## parallel computing
-
     # check the cluster type
     if (clusterType != "PSOCK" & clusterType != "FORK"){
       stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
@@ -249,22 +228,17 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
 
     # set up cpu cores
     n_cores <- detectCores() - 1
-
     if (clusterType == "PSOCK"){ # all OS types
       # set up cpu cluster
       cl <- makeCluster(n_cores, type = "PSOCK")
       registerDoParallel(cl)
       on.exit(stopCluster(cl)) # close connect when exiting the function
-
       outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
-
         tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
         return(tmp)
-
       }
 
       names(outlist) <- cf
-
       # write DE results into files
       foreach(j = 1: length(cf)) %dopar% {
         write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
@@ -272,22 +246,17 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
 
       # volcano plot and output summary
       if (plot){
-
         threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
           tmpfunc(i = outlist, j = j)
-
         }
       }
-
     } else { # macOS and Unix-like systems
-
       outlist <- mclapply(cf, FUN = function(i){
         tmp <- topTable(out, coef = i, number = Inf, ...)
         return(tmp)
       }, mc.cores = n_cores, mc.preschedule = FALSE)
 
       names(outlist) <- cf
-
       # write DE results into files
       mclapply(1:length(cf), FUN = function(j){
         write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
@@ -295,9 +264,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
 
       # volcano plot and output summary
       if (plot){
-
         threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x)))
-
       }
     }
   }
@@ -307,14 +274,10 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_anno = 
   assign(paste(objTitle, "_nrm", sep = ""), vmwt, envir = .GlobalEnv)
   assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
   write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
-
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
-
-
   write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
   ## message
   if (geneName & !is.null(genesymbolVar)){
     print("Probes without a gene symbol are removed from the volcano plots")
   }
-
 }

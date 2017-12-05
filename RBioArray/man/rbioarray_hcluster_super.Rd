@@ -9,7 +9,7 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
   method = "spikein", fct, sampleName = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = "euclidean", clust = "complete", rowLabel = FALSE,
-  anno = NULL, annoProbeVar = "ProbeName", genesymbolVar = NULL,
+  annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
   colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
   plotWidth = 7, plotHeight = 7)
 }
@@ -40,11 +40,11 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
 
 \item{rowLabel}{Whether to display row label or not. Default is \code{FALSE}.}
 
-\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
+\item{annot}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
 
-\item{annoProbeVar}{\code{anno} variable name for probe name. Default is \code{"ProbeName"}.}
+\item{annotProbeVar}{\code{annot} variable name for probe name. Default is \code{"ProbeName"}.}
 
-\item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
 
 \item{colColour}{Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.}
 
@@ -65,7 +65,7 @@ A supervised heatmap based on hierarchical clustering analysis in \code{pdf} for
 Wrapper for supervised hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
 }
 \details{
-Note that both \code{anno} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
+Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
 }
 \examples{
 \dontrun{
@@ -74,7 +74,7 @@ rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaiv
                          clust = "ward.D2",
                          fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
                          levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),
-                         rowLabel = TRUE, anno = Anno, annoProbeVar = "ProbeName", genesymbolVar = "GeneSymbol",
+                         rowLabel = TRUE, annot = annot, annotProbeVar = "ProbeName", genesymbolVar = "GeneSymbol",
                          offsetRow = 0, adjRow = c(0, 0.5), cexRow = 0.6,
                          key.title = "", keysize = 1.5,
                          key.xlab = "Normalized expression value", key.ylab = "Gene count")

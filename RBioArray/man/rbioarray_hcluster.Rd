@@ -5,8 +5,8 @@
 \title{rbioarray_hcluster}
 \usage{
 rbioarray_hcluster(plotName = "data", fltlist = NULL,
-  dataProbeVar = "ProbeName", genesymbolOnly = FALSE, anno = NULL,
-  annoProbeVar = "ProbeName", genesymbolVar = NULL, n = "all",
+  dataProbeVar = "ProbeName", genesymbolOnly = FALSE, annot = NULL,
+  annotProbeVar = "ProbeName", genesymbolVar = NULL, n = "all",
   rmControl = TRUE, sampleName = NULL, fct = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = "euclidean", clust = "complete", colColour = "Paired",
@@ -22,11 +22,11 @@ rbioarray_hcluster(plotName = "data", fltlist = NULL,
 
 \item{genesymbolOnly}{Whether or not to remove probes without gene symbol. Default is \code{FALSE}.}
 
-\item{anno}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.}
+\item{annot}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.}
 
-\item{annoProbeVar}{\code{anno} variable name for probe name. Default is \code{"ProbeName"}.}
+\item{annotProbeVar}{\code{annot} variable name for probe name. Default is \code{"ProbeName"}.}
 
-\item{genesymbolVar}{The name of the variable for gene symbols from the \code{anno} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.}
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.}
 
 \item{n}{Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
 
