@@ -30,6 +30,7 @@ Update log
           - rbioarray_corcluster_super()
           - rbioarray_hcluster()
           - rbioseq_hcluster()
+      - Additional arguments added for rbioarray_flt() for the non-Agilent datasets and datasets without a control type variable
       - Generic filtering method added  to rbioarray_flt()
       - The argument for annotation files changed from "anno" to "annot"
       - Codes cleared up

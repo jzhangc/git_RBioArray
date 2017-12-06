@@ -4,14 +4,17 @@
 \alias{rbioarray_flt}
 \title{rbioarray_flt}
 \usage{
-rbioarray_flt(normlst, percentile = 0.95)
+rbioarray_flt(normlst = NULL, percetile = 0.95, ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType")
 }
 \arguments{
 \item{normlst}{Normalized data, either a list, \code{EList} or \code{MAList} object.}
 
-\item{percentile}{The percentile cutoff, only used when muliptle negative control probes are detected. Default is \code{0.95}.}
+\item{ctrlProbe}{Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.}
 
-\item{...}{arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.}
+\item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
+
+\item{percentile}{The percentile cutoff, only used when muliptle negative control probes are detected. Default is \code{0.95}.}
 }
 \value{
 Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.

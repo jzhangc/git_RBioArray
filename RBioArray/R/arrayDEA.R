@@ -21,62 +21,44 @@
 #' @export
 rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2", logTransObjT = "data", logTransParallelComputing = FALSE,
                               bgMethod = "auto", normMethod = "quantile", ...){
-
   if (class(rawlist) == "list"){
-
     ## log transform  or not
     if (logTrans){
-
       if (!logTransParallelComputing){
-
         # log transform
         mtx <- apply(rawlist$E, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
-
       } else {
-
         # parallel computing
         # set up cpu cluster
         n_cores <- detectCores() - 1
         cl <- makeCluster(n_cores, type = "PSOCK")
         on.exit(stopCluster(cl)) # close connect when exiting the function
-
         # log transform
         mtx <- foreach(i = rawlist$E) %dopar% {
           out <- apply(i, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
         }
-
       }
-
       tmpdata <- list(E = mtx, genes = rawlist$genes, target = rawlist$target)
-
       # store and export log transformed data into a csv file
       logTransOut <- data.frame(rawlist$genes, mtx)
       write.csv(logTransOut, file = paste(logTransObjT, "_log_transformed.csv", sep = ""), row.names = FALSE)
-
     } else {
-
       tmpdata <- rawlist
-
     }
 
     ## normalization
     BgC <- backgroundCorrect.matrix(tmpdata$E, method = bgMethod, ...) #background correction
     Norm <- normalizeBetweenArrays(BgC, normMethod) # quantile normalization
     Wgt <- arrayWeights(Norm) # array weight
-
     output <- list(E = Norm, genes = rawlist$genes, target = rawlist$target, ArrayWeight = Wgt)
-
   } else {
-
     ## normalization
     BgC <- backgroundCorrect(rawlist, method = bgMethod, ...) #background correction
     Norm <- normalizeBetweenArrays(BgC, method = normMethod) # quantile normalization
     Wgt <- arrayWeights(Norm)
     Norm$ArrayWeight <- Wgt
-
     output <- Norm
   }
-
   return(output)
 }
 
@@ -85,7 +67,8 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' @description data filter function based on spike-in negative control.
 #' @param normlst Normalized data, either a list, \code{EList} or \code{MAList} object.
 #' @param percentile The percentile cutoff, only used when muliptle negative control probes are detected. Default is \code{0.95}.
-#' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
+#' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
+#' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
 #' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
 #' @importFrom limma avereps
 #' @examples
@@ -93,26 +76,26 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' fltdata <- rbioarray_flt(normdata)
 #' }
 #' @export
-rbioarray_flt <- function(normlst, percentile = 0.95){
-  if (!is.null(normlst$genes$ControlType)){
-    if (class(normlst$E[normlst$genes$ControlType == -1, ]) == "numeric"){
-      ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
-      ## extract the 95% quanitle of the negative control signals
-      neg <- normlst$E[normlst$genes$ControlType == -1, ] # no 95% percentile as only one entry
+rbioarray_flt <- function(normlst = NULL, percetile = 0.95, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"){
+  ## check variables
+  if (is.null(normlst)){
+    stop(cat("No normalized data provided. Function aborted."))
+  }
+
+  ## extract the 95% percentile of the negative control signals
+  if (negCtrl){ # if there are neg control probes
+    if (class(normlst$E[normlst$genes[, negCtrlVar] == -1, ]) == "numeric"){ # if there is only one entry in the neg values
+      neg <- normlst$E[normlst$genes[, negCtrlVar] == -1, ] # no 95% percentile required as only one neg entry
     } else {
-      ### LE keeps expression values more than 10% brighter than NC (dark corner) on at least 3 arrays
-      ## extract the 95% quanitle of the negative control signals
-      neg <- apply(normlst$E[normlst$genes$ControlType == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
+      neg <- apply(normlst$E[normlst$genes[, negCtrlVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
     }
-  } else {
-   stop(cat("No control type variable provided. Failed to filter data."))
+  } else { # no neg control probes, we use the
+    neg <- apply(normdata$E, 2, function(x)quantile(x, p = 0.05)) # 5% percetile of all the data
   }
 
   if (class(normlst) == "list"){
-
-    ## low expression cuttoff set at at least 10% hihger than the neg95
+    ## low expression cuttoff set at at least 10% hihger than the neg
     LE_cutoff <- matrix(1.1 * neg, nrow(normlst$E), ncol(normlst$E), byrow = TRUE)
-
 
     ## summary after applying LE_cutoff (T/F for each sample)
     # this only compares the element Nrm$E
@@ -123,12 +106,9 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
     flt_E <- normlst$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
     flt_gene <- normlst$gene[isexpr, ]
     fltlst <- list(E = flt_E, genes = flt_gene, target = normlst$target)
-
     flt_E_avg <- avereps(fltlst$E, ID = fltlst$genes$ProbeName)
-
     avgProbesLE <- list(E = flt_E_avg, genes = unique(fltlst$genes[fltlst$genes$ProbeName %in% rownames(flt_E_avg), ]),
                         target = normlst$target, ArrayWeight = normlst$ArrayWeight)
-
   } else {
     ## low expression cuttoff set at at least 10% hihger than the neg95
     LE_cutoff <- matrix(1.1 * neg, nrow(normlst), ncol(normlst), byrow = TRUE)
@@ -137,19 +117,14 @@ rbioarray_flt <- function(normlst, percentile = 0.95){
     # this only compares the element Nrm$E
     isexpr <- rowSums(normlst$E > LE_cutoff) >= 3 # We keep probes that meet the criterion on at least 3 arrays (minimum for stats)
 
-
     ## filter out only the low expressed probes (not control) in the dataset
     # LE means low expression removed (only)
     fltNrmLE <- normlst[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-
     avgProbesLE <- avereps(fltNrmLE, ID = fltNrmLE$genes$ProbeName) #average the probes. note: use ProbeName instead of SystematicName
-
   }
-
 
   ## output
   print(table(isexpr)) # output the isexpr summary
-
   return(avgProbesLE)
 }
 
@@ -266,7 +241,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
 
-
     # plot
     loclEnv <- environment()
     plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
@@ -296,10 +270,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
     }
 
     grid.newpage()
-
     # extract gtable
     pltgtb <- ggplot_gtable(ggplot_build(plt))
-
     # add the right side y axis
     Aa <- which(pltgtb$layout$name == "axis-l")
     pltgtb_a <- pltgtb$grobs[[Aa]]
@@ -344,7 +316,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
   cat("DONE!\n") # message
 
   out <- fit[fit$genes$ControlType == 0, ] # remove control probes
-
   if (DE == "spikein"){ # extract PC stats for spikein method
     PCntl <- fit[fit$genes$ControlType == 1, ]
   } else {
