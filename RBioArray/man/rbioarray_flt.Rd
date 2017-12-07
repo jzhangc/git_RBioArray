@@ -4,8 +4,8 @@
 \alias{rbioarray_flt}
 \title{rbioarray_flt}
 \usage{
-rbioarray_flt(normlst = NULL, percetile = 0.95, ctrlProbe = TRUE,
-  ctrlTypeVar = "ControlType")
+rbioarray_flt(normlst = NULL, ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType", percetile = ifelse(ctrlProbe, 0.95, 0.05))
 }
 \arguments{
 \item{normlst}{Normalized data, either a list, \code{EList} or \code{MAList} object.}
@@ -14,13 +14,16 @@ rbioarray_flt(normlst = NULL, percetile = 0.95, ctrlProbe = TRUE,
 
 \item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
 
-\item{percentile}{The percentile cutoff, only used when muliptle negative control probes are detected. Default is \code{0.95}.}
+\item{percentile}{The percentile cutoff. When \code{ctrlProbe = TRUE} and muliptle negative control probes are detected, the default is \code{0.95}. When \code{ctrlProbe = FALSE}, default value is \code{0.05}.}
 }
 \value{
 Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
 }
 \description{
 data filter function based on spike-in negative control.
+}
+\details{
+When ctrlProbe is present, the retained probes are the ones with expression value above 10% of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10% higher than the 5% percentile of total expression values are retained by default.
 }
 \examples{
 \dontrun{

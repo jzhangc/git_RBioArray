@@ -8,7 +8,9 @@
 #' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
 #' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
-#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
+#' @param rmControl Set only when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set,  whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.
+#' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
+#' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
 #' @param fct Input \code{factor} object for samples.
 #' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
@@ -63,19 +65,28 @@
 #' @export
 rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar = "ProbeName",
                                genesymbolOnly = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-                               n = "all", rmControl = TRUE, sampleName = NULL,
+                               n = "all",
+                               rmControl = TRUE, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
+                               sampleName = NULL,
                                fct = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                distance = "euclidean", clust = "complete",
                                colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                plotWidth = 7, plotHeight = 7){
-
   ## chekc arguments
   if (is.null(fltlist)){
     stop("Please provide filtered input data.")
   }
-
   if (is.null(fct)){
     stop("Please provide smaple index with argument fct.")
+  }
+  if (rmControl){
+    if (!ctrlProbe){
+      stop(cat("rmControl can only be set TRUE when ctrlProbe = TRUE"))
+    } else {
+      if (!ctrlTypeVar %in% names(fltlist$genes)){
+        stop(cat("ctrlTypeVar not found."))
+      }
+    }
   }
 
   ## set up dis and cluster functions
@@ -86,7 +97,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
   dfm <- data.frame(fltlist$genes, fltlist$E, check.names = FALSE)
 
   if (rmControl){ # remove control
-    dfm <- dfm[dfm$ControlType == 0, ]
+    dfm <- dfm[dfm[, ctrlTypeVar] == 0, ]
   }
 
   if (n != "all"){ # subset
@@ -187,7 +198,6 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
   ## set up dis and cluster functions
   distfunc <- function(x)dist(x, method = distance)
   clustfunc <- function(x)hclust(x, method = clust)
-
 
   ## clustering analysis and colour setup
   # normalization and filtering
@@ -604,7 +614,6 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
   cal_pcutoff <- function(m, n){
     # set up tmpdfm
     tmpdfm <- m[[n]]
-
     # set the cutoff
     if (DE == "fdr"){
       if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){

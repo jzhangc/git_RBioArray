@@ -7,8 +7,9 @@
 rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, annot = NULL,
   design = NULL, contra = NULL, weights = NULL, ..., plot = TRUE,
   geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
-  nGeneSymbol = 5, padding = 0.5, FC = 1.5, DE = "fdr",
-  q.value = 0.05, Title = NULL, xLabel = "log2(fold change)",
+  nGeneSymbol = 5, padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType", DE = "fdr", q.value = 0.05,
+  plotTitle = NULL, xLabel = "log2(fold change)",
   yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
   nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
   plotHeight = 150, parallelComputing = FALSE, clusterType = "PSOCK")
@@ -42,11 +43,15 @@ rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, annot = NULL,
 
 \item{FC}{Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.}
 
-\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.}
+\item{ctrlProbe}{Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.}
+
+\item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
+
+\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.}
 
 \item{q.value}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
 
-\item{Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+\item{plotTitle}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
 \item{xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 

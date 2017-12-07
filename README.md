@@ -24,15 +24,19 @@ Installation:
 Update log
 
     0.4.4 (update preview)
-      - Gene repeats processing methods added via argument geneRepMethod, for functions:
-          - rbioarray_de()
-          - rbioseq_de()
+      - Gene repeats processing methods added via argument geneRepMethod for functions:
+          - rbioarray_flt()
           - rbioarray_corcluster_super()
           - rbioarray_hcluster()
           - rbioseq_hcluster()
-      - Additional arguments added for rbioarray_flt() for the non-Agilent datasets and datasets without a control type variable
+      - Additional arguments added the non-Agilent datasets and datasets without a control type variable for functions:
+          - rbioarray_flt()
+          - rbioarray_DE()
+          - rbioarray_hclust()
+      - Additional argument checking mechanisms added for rbioarray_flt() and rbioarray_DE()
       - Generic filtering method added  to rbioarray_flt()
       - The argument for annotation files changed from "anno" to "annot"
+      - annot = NULL is now acceptable to rbioarray_DE()
       - Codes cleared up
       - Bug fixes
 

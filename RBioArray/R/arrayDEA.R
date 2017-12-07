@@ -66,9 +66,10 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #'
 #' @description data filter function based on spike-in negative control.
 #' @param normlst Normalized data, either a list, \code{EList} or \code{MAList} object.
-#' @param percentile The percentile cutoff, only used when muliptle negative control probes are detected. Default is \code{0.95}.
 #' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
 #' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
+#' @param percentile The percentile cutoff. When \code{ctrlProbe = TRUE} and muliptle negative control probes are detected, the default is \code{0.95}. When \code{ctrlProbe = FALSE}, default value is \code{0.05}.
+#' @details When ctrlProbe is present, the retained probes are the ones with expression value above 10% of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10% higher than the 5% percentile of total expression values are retained by default.
 #' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
 #' @importFrom limma avereps
 #' @examples
@@ -76,21 +77,26 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' fltdata <- rbioarray_flt(normdata)
 #' }
 #' @export
-rbioarray_flt <- function(normlst = NULL, percetile = 0.95, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"){
+rbioarray_flt <- function(normlst = NULL, ctrlProbe = TRUE, ctrlTypeVar = "ControlType", percetile = ifelse(ctrlProbe, 0.95, 0.05)){
   ## check variables
   if (is.null(normlst)){
     stop(cat("No normalized data provided. Function aborted."))
   }
+  if (ctrlProbe){
+    if (!ctrlTypeVar %in% names(normlst$genes)){
+      stop(cat("ctrlTypeVar not found."))
+    }
+  }
 
   ## extract the 95% percentile of the negative control signals
-  if (negCtrl){ # if there are neg control probes
-    if (class(normlst$E[normlst$genes[, negCtrlVar] == -1, ]) == "numeric"){ # if there is only one entry in the neg values
-      neg <- normlst$E[normlst$genes[, negCtrlVar] == -1, ] # no 95% percentile required as only one neg entry
+  if (ctrlProbe){ # if there are neg control probes
+    if (class(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ]) == "numeric"){ # if there is only one entry in the neg values
+      neg <- normlst$E[normlst$genes[, ctrlTypeVar] == -1, ] # no 95% percentile required as only one neg entry
     } else {
-      neg <- apply(normlst$E[normlst$genes[, negCtrlVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
+      neg <- apply(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
     }
   } else { # no neg control probes, we use the
-    neg <- apply(normdata$E, 2, function(x)quantile(x, p = 0.05)) # 5% percetile of all the data
+    neg <- apply(normdata$E, 2, function(x)quantile(x, p = percetile)) # 5% percetile of all the data
   }
 
   if (class(normlst) == "list"){
@@ -146,9 +152,11 @@ rbioarray_flt <- function(normlst = NULL, percetile = 0.95, ctrlProbe = TRUE, ct
 #' @param nGeneSymbol When \code{topgeneLabel = TRUE}, to set how many genes to display. Default is \code{5}.
 #' @param padding When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
 #' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
-#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
+#' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
+#' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
+#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.
 #' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
-#' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
+#' @param plotTitle Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
 #' @param symbolSize Size of the symbol. Default is \code{2}.
@@ -183,8 +191,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
                          design = NULL, contra = NULL, weights = NULL,
                          ...,
                          plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
-                         FC = 1.5, DE = "fdr", q.value = 0.05,
-                         Title = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
+                         FC = 1.5,
+                         ctrlProbe = TRUE, ctrlTypeVar = "ControlType", DE = "fdr", q.value = 0.05,
+                         plotTitle = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
                          symbolSize = 2, sigColour = "red", nonsigColour = "gray",
                          xTxtSize = 10, yTxtSize =10,
                          plotWidth = 170, plotHeight = 150,
@@ -193,17 +202,26 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
   if (is.null(fltdata)){
     stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data.")
   }
-
-  if (is.null(annot)){
-    stop(cat("Please set the annotatioin dataframe. Make sure to name the variable containing probe name \"ProbeName\"."))
+  if (!is.null(annot)){ # check if the variable "ProbeName" is included in the annotation dataframe
+    if (!"ProbeName" %in% names(annot)){
+      stop(cat("For the annotation dataframe, make sure to name the variable containing probe name \"ProbeName\"."))
+    }
   }
-
   if (is.null(design)){
     stop("Please set design matrix.")
   }
-
   if (is.null(contra)){
     stop("Please set contrast object.")
+  }
+  if (tolower(DE) == "spikein"){
+    if (!ctrlProbe){
+      stop(cat("\"spiken\" DE method can only be set when ctrlProbe = TRUE and ctrlTypeVar is properly set."))
+    }
+  }
+  if (ctrlProbe){
+    if (!ctrlTypeVar %in% names(normlst$genes)){
+      stop(cat("ctrlTypeVar not found."))
+    }
   }
 
   ## extract coefficients
@@ -229,14 +247,14 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
     }
 
     # set the cutoff
-    if (DE == "fdr"){
+    if (tolower(DE) == "fdr"){
       if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
         pcutoff <- 1
       } else {
         pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
-    } else if (DE == "spikein") {
+    } else if (tolower(DE) == "spikein") {
       ifelse(min(PC$p.value[, cf[j]]) > q.value, pcutoff <- q.value, pcutoff <- min(PC$p.value[, cf[j]]))
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
@@ -246,7 +264,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
     plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
       geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
       scale_color_manual(values = c(nonsigColour, sigColour)) +
-      ggtitle(Title) +
+      ggtitle(plotTitle) +
       scale_y_continuous(expand = c(0.02, 0)) +
       xlab(xLabel) +
       ylab(yLabel) +
@@ -295,7 +313,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
       } else {
         tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
       }
-
     } else {
       tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
     }
@@ -315,9 +332,10 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
   }
   cat("DONE!\n") # message
 
-  out <- fit[fit$genes$ControlType == 0, ] # remove control probes
-  if (DE == "spikein"){ # extract PC stats for spikein method
-    PCntl <- fit[fit$genes$ControlType == 1, ]
+  out <- fit[fit$genes[, ctrlTypeVar] == 0, ] # remove control probes
+
+  if (tolower(DE) == "spikein"){ # extract PC stats for spikein method
+    PCntl <- fit[fit$genes[, ctrlTypeVar] == 1, ]
   } else {
     PCntl <- NULL
   }
@@ -328,7 +346,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
     outlist <- lapply(cf, function(i){
       tmp <- topTable(out, coef = i, number = Inf, ...)
       tmp$ProbeName <- rownames(tmp)
-      tmp <- merge(tmp, annot, by = "ProbeName")
+      if (!is.null(annot)){ # merge with annotation dataframe
+        tmp <- merge(tmp, annot, by = "ProbeName")
+      }
       return(tmp)
     })
 
@@ -360,7 +380,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
       outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
         tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, annot, by = "ProbeName")
+        if (!is.null(annot)){ # merge with annotation dataframe
+          tmp <- merge(tmp, annot, by = "ProbeName")
+        }
         return(tmp)
       }
       names(outlist) <- cf
@@ -393,7 +415,6 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
       # volcano plot and output summary
       if (plot){
         threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
-
       }
     }
   }
