@@ -74,17 +74,17 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
                                plotWidth = 7, plotHeight = 7){
   ## chekc arguments
   if (is.null(fltlist)){
-    stop("Please provide filtered input data.")
+    stop(cat("Please provide filtered input data. Function terminated.\n"))
   }
   if (is.null(fct)){
-    stop("Please provide smaple index with argument fct.")
+    stop(cat("Please provide smaple index with argument fct. Function terminated.\nFunction terminated.\n"))
   }
   if (rmControl){
     if (!ctrlProbe){
-      stop(cat("rmControl can only be set TRUE when ctrlProbe = TRUE"))
+      stop(cat("rmControl can only be set TRUE when ctrlProbe = TRUE. Function terminated.\n"))
     } else {
       if (!ctrlTypeVar %in% names(fltlist$genes)){
-        stop(cat("ctrlTypeVar not found."))
+        stop(cat("ctrlTypeVar not found. Function terminated.\n"))
       }
     }
   }
@@ -184,15 +184,15 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 
   ## chekc variables
   if (is.null(dfm_count) | is.null(dfm_annot) | class(dfm_count) != "data.frame" | class(dfm_annot) != "data.frame"){
-    stop("Please provide the read count and annotation dataframes. Please also make sure the type as data.frame")
+    stop(cat("Please provide the read count and annotation dataframes. Please also make sure the type as data.frame. Function terminated.\n"))
   }
 
   if (is.null(design)){
-    stop("Please provide design matrix.")
+    stop(cat("Please provide design matrix. Function terminated.\n"))
   }
 
   if (is.null(fct)){
-    stop("Please provide smaple index with argument fct.")
+    stop(cat("Please provide smaple index with argument fct. Function terminated.\n"))
   }
 
   ## set up dis and cluster functions
@@ -443,19 +443,19 @@ rbioarray_corcluster_super <- function(plotName = "data",
 
   #### test variables
   if (is.null(fltData)){
-    stop(cat("Please set processed data object via fltData"))
+    stop(cat("Please set processed data object via fltData. Function terminated.\n"))
   }
 
   if (is.null(dfmDE)){
-    stop(cat("Please set DE object via dfmDE"))
+    stop(cat("Please set DE object via dfmDE. Function terminated.\n"))
   }
 
   if (is.null(dataProbeVar)){
-    stop(cat("Please set unique genomic feature ID via dataProbeVar"))
+    stop(cat("Please set unique genomic feature ID via dataProbeVar. Function terminated.\n"))
   }
 
   if (is.null(n_subgroup)){
-    stop(cat("Please set the index for phenotype group via n_subgroup"))
+    stop(cat("Please set the index for phenotype group via n_subgroup. Function terminated.\n"))
   }
 
   #### fiter and normalization
@@ -582,14 +582,14 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
                               parallelComputing = FALSE){
   ## check the key arguments
   if (is.null(DEdata)){
-    stop("Please set input DE data object. Hint: it is the output list from rbioarray_DE().")
+    stop(cat("Please set input DE data object. Hint: it is the output list from rbioarray_DE(). Function terminated.\n"))
   }
 
   if (is.null(design)){
-    stop("Please set design matrix.")
+    stop(cat("Please set design matrix. Function terminated.\n"))
   }
   if (is.null(contra)){
-    stop("Please set contrast object.")
+    stop(cat("Please set contrast object. Function terminated.\n"))
   }
 
   ## set up the DE dataframe

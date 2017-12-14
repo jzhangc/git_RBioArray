@@ -24,7 +24,7 @@ Installation:
 Update log
 
     0.4.4 (update preview)
-      - Gene repeats processing methods added via argument geneRepMethod for functions:
+      - Gene repeats processing methods added via argument combineGeneDup for functions:
           - rbioarray_flt()
           - rbioarray_corcluster_super()
           - rbioarray_hcluster()

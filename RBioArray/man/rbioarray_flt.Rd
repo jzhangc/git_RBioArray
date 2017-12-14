@@ -4,8 +4,10 @@
 \alias{rbioarray_flt}
 \title{rbioarray_flt}
 \usage{
-rbioarray_flt(normlst = NULL, ctrlProbe = TRUE,
-  ctrlTypeVar = "ControlType", percetile = ifelse(ctrlProbe, 0.95, 0.05))
+rbioarray_flt(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
+  percetile = ifelse(ctrlProbe, 0.95, 0.05), combineGeneDup = FALSE,
+  geneSymbolVar = NULL, annot = NULL, parallelComputing = FALSE,
+  clusterType = "PSOCK")
 }
 \arguments{
 \item{normlst}{Normalized data, either a list, \code{EList} or \code{MAList} object.}
@@ -13,6 +15,16 @@ rbioarray_flt(normlst = NULL, ctrlProbe = TRUE,
 \item{ctrlProbe}{Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.}
 
 \item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
+
+\item{combineGeneDup}{Wether or not to combine gene duplicates (different probe ID) by probe signal variance. Default is \code{FALSE}.}
+
+\item{geneSymbolVar}{Set only when \code{combineGeneDup = TRUE}, the name for variables contained in normlst or annotation dataframe. Default is \code{NULL}.}
+
+\item{annot}{Set only when \code{combineGeneDup = TRUE} and normlst is a \code{EList} object, the probe annotation dataframe.}
+
+\item{parallelComputing}{Set only when \code{combineGeneDup = TRUE}, if to use parallel computing. Default is \code{FALSE}.}
+
+\item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 
 \item{percentile}{The percentile cutoff. When \code{ctrlProbe = TRUE} and muliptle negative control probes are detected, the default is \code{0.95}. When \code{ctrlProbe = FALSE}, default value is \code{0.05}.}
 }
@@ -23,7 +35,7 @@ Depending on the input type, the function outputs a \code{list}, \code{Elist} or
 data filter function based on spike-in negative control.
 }
 \details{
-When ctrlProbe is present, the retained probes are the ones with expression value above 10% of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10% higher than the 5% percentile of total expression values are retained by default.
+When ctrlProbe is present, the retained probes are the ones with expression value above 10% of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10% higher than the 5% percentile of total expression values are retained by default. When \code{combineGeneDup = TRUE}, the probe with the highest variance in signal will be retained for the gene of interest.
 }
 \examples{
 \dontrun{

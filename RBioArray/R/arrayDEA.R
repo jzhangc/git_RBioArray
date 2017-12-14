@@ -69,7 +69,12 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
 #' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
 #' @param percentile The percentile cutoff. When \code{ctrlProbe = TRUE} and muliptle negative control probes are detected, the default is \code{0.95}. When \code{ctrlProbe = FALSE}, default value is \code{0.05}.
-#' @details When ctrlProbe is present, the retained probes are the ones with expression value above 10% of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10% higher than the 5% percentile of total expression values are retained by default.
+#' @param combineGeneDup Wether or not to combine gene duplicates (different probe ID) by probe signal variance. Default is \code{FALSE}.
+#' @param geneSymbolVar Set only when \code{combineGeneDup = TRUE}, the name for variables contained in normlst or annotation dataframe. Default is \code{NULL}.
+#' @param annot Set only when \code{combineGeneDup = TRUE} and normlst is a \code{EList} object, the probe annotation dataframe.
+#' @param parallelComputing Set only when \code{combineGeneDup = TRUE}, if to use parallel computing. Default is \code{FALSE}.
+#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @details When ctrlProbe is present, the retained probes are the ones with expression value above 10% of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10% higher than the 5% percentile of total expression values are retained by default. When \code{combineGeneDup = TRUE}, the probe with the highest variance in signal will be retained for the gene of interest.
 #' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
 #' @importFrom limma avereps
 #' @examples
@@ -77,14 +82,36 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' fltdata <- rbioarray_flt(normdata)
 #' }
 #' @export
-rbioarray_flt <- function(normlst = NULL, ctrlProbe = TRUE, ctrlTypeVar = "ControlType", percetile = ifelse(ctrlProbe, 0.95, 0.05)){
-  ## check variables
-  if (is.null(normlst)){
-    stop(cat("No normalized data provided. Function aborted."))
+rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType", percetile = ifelse(ctrlProbe, 0.95, 0.05),
+                          combineGeneDup = FALSE, geneSymbolVar = NULL, annot = NULL,
+                          parallelComputing = FALSE, clusterType = "PSOCK"){
+  ## check key arguments
+  if (combineGeneDup){
+    if (is.null(geneSymbolVar)){
+      stop(cat("Please set variable name for gene symbol when combineGeneDup = TRUE. Function terminated.\n"))
+    }
   }
+
+  if (!"ProbeName" %in% names(normlst$genes)){
+    stop(cat("Make sure to name the variable containing probe name \"ProbeName\". Function terminated.\n"))
+  }
+
   if (ctrlProbe){
     if (!ctrlTypeVar %in% names(normlst$genes)){
-      stop(cat("ctrlTypeVar not found."))
+      stop(cat("Make sure to include the correct variable name for control probes. Function terminated.\n"))
+    }
+  }
+
+  if (!class(normlst) == "list" & combineGeneDup){
+    if(is.null(annot)){
+      stop(cat("Since combineGeneDup = TRUE and norlst is an Elist objects, please set annotation dataframe for annot argument.
+               Function terminated.\n"))
+    }
+    if (!"ProbeName" %in% names(annot)){
+      stop(cat("Make sure to name the variable containing probe name \"ProbeName\" in annotation dataframe. Function terminated.\n"))
+    }
+    if (!geneSymbolVar %in% names(annot)){
+      stop(cat("Make sure to name the variable containing gene symbols in annotation data.frame. Function terminated.\n"))
     }
   }
 
@@ -96,7 +123,7 @@ rbioarray_flt <- function(normlst = NULL, ctrlProbe = TRUE, ctrlTypeVar = "Contr
       neg <- apply(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
     }
   } else { # no neg control probes, we use the
-    neg <- apply(normdata$E, 2, function(x)quantile(x, p = percetile)) # 5% percetile of all the data
+    neg <- apply(normlst$E, 2, function(x)quantile(x, p = 0.05)) # 5% percetile of all the data
   }
 
   if (class(normlst) == "list"){
@@ -113,8 +140,57 @@ rbioarray_flt <- function(normlst = NULL, ctrlProbe = TRUE, ctrlTypeVar = "Contr
     flt_gene <- normlst$gene[isexpr, ]
     fltlst <- list(E = flt_E, genes = flt_gene, target = normlst$target)
     flt_E_avg <- avereps(fltlst$E, ID = fltlst$genes$ProbeName)
-    avgProbesLE <- list(E = flt_E_avg, genes = unique(fltlst$genes[fltlst$genes$ProbeName %in% rownames(flt_E_avg), ]),
+    genes <- unique(fltlst$genes[fltlst$genes$ProbeName %in% rownames(flt_E_avg), ])
+
+    ## to combine gene repeats by probe signel variance (retain maximum variance probes for the same gene)
+    if (combineGeneDup){
+      tmplst <- list(E = flt_E_avg, genes = genes)
+
+      if (parallelComputing){  # parallel computing
+        # set up clusters for PSOCK
+        n_cores <- detectCores() - 1
+        cl <- makeCluster(n_cores, type = clusterType, outfile = "")
+        registerDoParallel(cl) # part of doParallel package
+        on.exit(stopCluster(cl)) # close connect when exiting the function
+
+        cat("Combining gene duplicates by signal variance...") # initiation message
+        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %dopar% {
+          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
+          if (is.null(nrow(tmp))){
+            out <- var(tmp)
+          } else {
+            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+              var(as.numeric(tmp[j, ]))
+            }
+          }
+          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
+          out[which(out$var %in% max(out$var)), "ProbeName"]
+        }
+        cat("DONE!\n") # termination message
+      } else {  # single core
+        cat("Combining gene duplicates by signal variance...") # initiation message
+        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %do% {
+          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
+          if (is.null(nrow(tmp))){
+            out <- var(tmp)
+          } else {
+            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+              var(as.numeric(tmp[j, ]))
+            }
+          }
+          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
+          out[which(out$var %in% max(out$var)), "ProbeName"]
+        }
+        cat("DONE!\n") # termination message
+      }
+      avgProbes <- list(E = flt_E_avg[which(genes$ProbeName %in% combGeneProbe), ],
+                        genes = genes[which(genes$ProbeName %in% combGeneProbe), ],
                         target = normlst$target, ArrayWeight = normlst$ArrayWeight)
+    } else {
+      avgProbes <- list(E = flt_E_avg, genes = genes,
+                        target = normlst$target, ArrayWeight = normlst$ArrayWeight)
+    }
+
   } else {
     ## low expression cuttoff set at at least 10% hihger than the neg95
     LE_cutoff <- matrix(1.1 * neg, nrow(normlst), ncol(normlst), byrow = TRUE)
@@ -125,15 +201,61 @@ rbioarray_flt <- function(normlst = NULL, ctrlProbe = TRUE, ctrlTypeVar = "Contr
 
     ## filter out only the low expressed probes (not control) in the dataset
     # LE means low expression removed (only)
-    fltNrmLE <- normlst[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-    avgProbesLE <- avereps(fltNrmLE, ID = fltNrmLE$genes$ProbeName) #average the probes. note: use ProbeName instead of SystematicName
+    fltNrm <- normlst[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
+    avgProbes <- avereps(fltNrm, ID = fltNrm$genes$ProbeName) #average the probes. note: use ProbeName instead of SystematicName
+
+    ## to combine gene repeats by probe signel variance (retain maximum variance probes for the same gene)
+    if (combineGeneDup){
+      tmplst <- avgProbes
+      tmplst$genes <- merge(tmplst$genes, annot, by = "ProbeName", all.x = TRUE)
+
+      if (parallelComputing){
+        # set up clusters for PSOCK
+        n_cores <- detectCores() - 1
+        cl <- makeCluster(n_cores, type = clusterType, outfile = "")
+        registerDoParallel(cl) # part of doParallel package
+        on.exit(stopCluster(cl)) # close connect when exiting the function
+
+        cat("Combining gene duplicates by signal variance...") # initiation message
+        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %dopar% {
+          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
+          if (is.null(nrow(tmp))){
+            out <- var(tmp)
+          } else {
+            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+              var(as.numeric(tmp[j, ]))
+            }
+          }
+          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
+          out[which(out$var %in% max(out$var)), "ProbeName"]
+        }
+        cat("DONE!\n") # termination message
+      } else {
+        cat("Combining gene duplicates by signal variance...") # initiation message
+        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %do% {
+          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
+          if (is.null(nrow(tmp))){
+            out <- var(tmp)
+          } else {
+            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+              var(as.numeric(tmp[j, ]))
+            }
+          }
+          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
+          out[which(out$var %in% max(out$var)), "ProbeName"]
+        }
+        cat("DONE!\n") # termination message
+      }
+
+      avgProbes <- avgProbes[avgProbes$genes[, "ProbeName"] %in% combGeneProbe, ]
+    }
   }
 
   ## output
+  cat("Probes retained upon backgroud filtering:\n")
   print(table(isexpr)) # output the isexpr summary
-  return(avgProbesLE)
+  return(avgProbes)
 }
-
 
 #' @title rbioarray_DE
 #'
@@ -200,27 +322,27 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
                          parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check the key arguments
   if (is.null(fltdata)){
-    stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data.")
+    stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data. Function terminated.\n")
   }
   if (!is.null(annot)){ # check if the variable "ProbeName" is included in the annotation dataframe
     if (!"ProbeName" %in% names(annot)){
-      stop(cat("For the annotation dataframe, make sure to name the variable containing probe name \"ProbeName\"."))
+      stop(cat("For the annotation dataframe, make sure to name the variable containing probe name \"ProbeName\". Function terminated.\n"))
     }
   }
   if (is.null(design)){
-    stop("Please set design matrix.")
+    stop("Please set design matrix. Function terminated.\n")
   }
   if (is.null(contra)){
-    stop("Please set contrast object.")
+    stop("Please set contrast object. Function terminated.\n")
   }
   if (tolower(DE) == "spikein"){
     if (!ctrlProbe){
-      stop(cat("\"spiken\" DE method can only be set when ctrlProbe = TRUE and ctrlTypeVar is properly set."))
+      stop(cat("\"spiken\" DE method can only be set when ctrlProbe = TRUE and ctrlTypeVar is properly set. Function terminated.\n"))
     }
   }
   if (ctrlProbe){
     if (!ctrlTypeVar %in% names(normlst$genes)){
-      stop(cat("ctrlTypeVar not found."))
+      stop(cat("ctrlTypeVar not found. Function terminated.\n"))
     }
   }
 
