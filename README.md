@@ -30,7 +30,7 @@ Update log
           - rbioarray_DE()
           - rbioarray_hclust()
       - Additional argument checking mechanisms added for rbioarray_flt() and rbioarray_DE()
-      - Generic filtering method added  to rbioarray_flt()
+      - Filtering without control probes method added to rbioarray_flt()
       - The argument for annotation files changed from "anno" to "annot"
       - annot = NULL is now acceptable to rbioarray_DE()
       - Codes cleared up
