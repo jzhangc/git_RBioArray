@@ -24,11 +24,7 @@ Installation:
 Update log
 
     0.4.4 (update preview)
-      - Gene repeats processing methods added via argument combineGeneDup for functions:
-          - rbioarray_flt()
-          - rbioarray_corcluster_super()
-          - rbioarray_hcluster()
-          - rbioseq_hcluster()
+      - Gene repeats processing methods added via argument combineGeneDup for rbioarray_flt()
       - Additional arguments added the non-Agilent datasets and datasets without a control type variable for functions:
           - rbioarray_flt()
           - rbioarray_DE()
