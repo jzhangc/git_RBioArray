@@ -35,7 +35,6 @@ Update log
           - rbioarray_corcluster_super()
       - Unified argument fltlist set for all the functions that take the filtered data list
       - Filtering without control probes method added to rbioarray_flt()
-      - Cluster method "FORK" now is proptery coded for all the functions using parallel computing
       - The argument for annotation files changed from "anno" to "annot"
       - annot = NULL is now acceptable to rbioarray_DE()
       - Codes cleared up
