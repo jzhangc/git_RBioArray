@@ -29,12 +29,18 @@ Update log
           - rbioarray_flt()
           - rbioarray_DE()
           - rbioarray_hclust()
-      - Additional argument checking mechanisms added for rbioarray_flt() and rbioarray_DE()
+      - Additional argument checking mechanisms added for functions:
+          - rbioarray_flt()
+          - rbioarray_DE()
+          - rbioarray_corcluster_super()
+      - Unified argument fltlist set for all the functions that take the filtered data list
       - Filtering without control probes method added to rbioarray_flt()
+      - Cluster method "FORK" now is proptery coded for all the functions using parallel computing
       - The argument for annotation files changed from "anno" to "annot"
       - annot = NULL is now acceptable to rbioarray_DE()
       - Codes cleared up
-      - Bug fixes
+      - A bug fixed for rbioarray_DE() where 1 was set for pcutoff when no significant target found under FDR
+      - Other bug fixes
 
     0.4.3
       - A bug fixed for rbioarray_venn_DE() when p value threshold method set to "fdr"

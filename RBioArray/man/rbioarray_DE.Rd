@@ -4,7 +4,7 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, annot = NULL,
+rbioarray_DE(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
   design = NULL, contra = NULL, weights = NULL, ..., plot = TRUE,
   geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
   nGeneSymbol = 5, padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
@@ -17,7 +17,7 @@ rbioarray_DE(objTitle = "data_filtered", fltdata = NULL, annot = NULL,
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
 
-\item{fltdata}{filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
+\item{fltlist}{filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
 
 \item{annot}{Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.}
 
@@ -86,7 +86,7 @@ When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When 
 }
 \examples{
 \dontrun{
-rbioarray_DE(objTitle = "fltdata2", fltdata, annot = Anno, design, contra = contra,
+rbioarray_DE(objTitle = "fltdata2", fltlist, annot = Anno, design, contra = contra,
              weights = fltdata$ArrayWeight, parallelComputing = TRUE,
              plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
              DE = "spikein")

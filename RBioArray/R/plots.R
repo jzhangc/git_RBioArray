@@ -396,7 +396,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #'
 #' @description Wrapper for supervised (or unsupervised) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
-#' @param fltData Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
+#' @param fltlist Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
 #' @param n_subgroup A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
@@ -422,7 +422,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #'
 #' # n_subgroup = c(1:4) means the correlation uses samples from 1 to 4 (control in this case).
 #' # The settings can be obtained from the corresponding condition summary object.
-#' rbioarray_corcluster_super(fltData = all_nrm, n_subgroup = c(1:4),
+#' rbioarray_corcluster_super(fltlist = all_nrm, n_subgroup = c(1:4),
 #'                            dataProbeVar = "gene_id", FDR = TRUE, q.value = 0.02,
 #'                            dfmDE = all_DE$`conSumPost - conSumPre`,
 #'                            axisLabel = TRUE, genesymbolVar = "gene_name",
@@ -432,7 +432,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #' }
 #' @export
 rbioarray_corcluster_super <- function(plotName = "data",
-                                       fltData = NULL, rmControl = TRUE,
+                                       fltlist = NULL, rmControl = TRUE,
                                        n_subgroup = NULL,
                                        dfmDE = NULL, FDR = TURE, q.value = 0.05, FC = NULL,
                                        dataProbeVar = NULL,
@@ -442,8 +442,8 @@ rbioarray_corcluster_super <- function(plotName = "data",
                                        plotWidth = 7, plotHeight = 7){
 
   #### test variables
-  if (is.null(fltData)){
-    stop(cat("Please set processed data object via fltData. Function terminated.\n"))
+  if (is.null(fltlist)){
+    stop(cat("Please set processed data object via fltlist. Function terminated.\n"))
   }
 
   if (is.null(dfmDE)){
@@ -459,7 +459,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
   }
 
   #### fiter and normalization
-  vmwt <- fltData
+  vmwt <- fltlist
   dfm <- data.frame(vmwt$genes, vmwt$E)
 
   if (rmControl){ # remove control
@@ -553,7 +553,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
 #' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
-#' @param fltdata Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
+#' @param fltlist Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
 #' @param design Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.
 #' @param contra Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.
 #' @param weights Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
@@ -570,7 +570,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' \dontrun{
 #' rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
 #'                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-#'                   DE = "spikein", fltdata = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
+#'                   DE = "spikein", fltlist = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
 #'                   parallelComputing = FALSE)
 #' }
 #' @export
@@ -578,7 +578,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
                               annot = NULL,
                               DEdata = NULL, dataProbeVar = "ProbeName",
                               geneName = FALSE, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-                              DE = "fdr", fltdata = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05, FC = 1.5,
+                              DE = "fdr", fltlist = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05, FC = 1.5,
                               parallelComputing = FALSE){
   ## check the key arguments
   if (is.null(DEdata)){
@@ -624,7 +624,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
 
     } else if (DE == "spikein") {
       # check arugments
-      if (is.null(fltdata) | is.null(design) | is.null(contra) | is.null(weights)){
+      if (is.null(fltlist) | is.null(design) | is.null(contra) | is.null(weights)){
         warning(cat("Arguments not complete for \"spikein\" method. Proceed with \"fdr\" instead."))
 
         if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
@@ -635,13 +635,13 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
 
       } else {
         # DE for extracting positive control
-        if (class(fltdata) == "list"){
-          fit <- lmFit(fltdata$E, design, weights = weights)
+        if (class(fltlist) == "list"){
+          fit <- lmFit(fltlist$E, design, weights = weights)
           fit <- contrasts.fit(fit, contrasts = contra)
           fit <- eBayes(fit)
-          fit$genes <- fltdata$genes # add genes matrix to the DE results
+          fit$genes <- fltlist$genes # add genes matrix to the DE results
         } else {
-          fit <- lmFit(fltdata, design, weights = weights)
+          fit <- lmFit(fltlist, design, weights = weights)
           fit <- contrasts.fit(fit, contrasts = contra)
           fit <- eBayes(fit)
         }

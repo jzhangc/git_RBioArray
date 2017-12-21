@@ -8,7 +8,7 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
   plotHeight = 5, ..., annot = NULL, DEdata = NULL,
   dataProbeVar = "ProbeName", geneName = FALSE,
   annotProbeVar = "ProbeName", genesymbolVar = NULL, DE = "fdr",
-  fltdata = NULL, design = NULL, contra = NULL, weights = NULL,
+  fltlist = NULL, design = NULL, contra = NULL, weights = NULL,
   q.value = 0.05, FC = 1.5, parallelComputing = FALSE)
 }
 \arguments{
@@ -34,7 +34,7 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
 
 \item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.}
 
-\item{fltdata}{Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
+\item{fltlist}{Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
 
 \item{design}{Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.}
 
@@ -61,7 +61,7 @@ When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When 
 \dontrun{
 rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-                  DE = "spikein", fltdata = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
+                  DE = "spikein", fltlist = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
                   parallelComputing = FALSE)
 }
 }

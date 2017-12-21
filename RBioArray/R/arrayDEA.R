@@ -261,7 +261,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #'
 #' @description DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
-#' @param fltdata filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
+#' @param fltlist filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
 #' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.
 #' @param design Design matrix. Default is \code{NULL}.
 #' @param contra Contrast matrix. Default is \code{NULL}.
@@ -303,13 +303,13 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @importFrom ggrepel geom_text_repel
 #' @examples
 #' \dontrun{
-#' rbioarray_DE(objTitle = "fltdata2", fltdata, annot = Anno, design, contra = contra,
+#' rbioarray_DE(objTitle = "fltdata2", fltlist, annot = Anno, design, contra = contra,
 #'              weights = fltdata$ArrayWeight, parallelComputing = TRUE,
 #'              plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
 #'              DE = "spikein")
 #' }
 #' @export
-rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NULL,
+rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
                          design = NULL, contra = NULL, weights = NULL,
                          ...,
                          plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
@@ -321,7 +321,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
                          plotWidth = 170, plotHeight = 150,
                          parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check the key arguments
-  if (is.null(fltdata)){
+  if (is.null(fltlist)){
     stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data. Function terminated.\n")
   }
   if (!is.null(annot)){ # check if the variable "ProbeName" is included in the annotation dataframe
@@ -371,7 +371,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
     # set the cutoff
     if (tolower(DE) == "fdr"){
       if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
-        pcutoff <- 1
+        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
+        pcutoff <- q.value
       } else {
         pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
@@ -442,19 +443,23 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
 
   ## DE
   cat("Linear fitting...") # message
-  if (class(fltdata) == "list"){
-    fit <- lmFit(fltdata$E, design, weights = weights)
+  if (class(fltlist) == "list"){
+    fit <- lmFit(fltlist$E, design, weights = weights)
     fit <- contrasts.fit(fit, contrasts = contra)
     fit <- eBayes(fit)
-    fit$genes <- fltdata$genes # add genes matrix to the DE results
+    fit$genes <- fltlist$genes # add genes matrix to the DE results
   } else {
-    fit <- lmFit(fltdata, design, weights = weights)
+    fit <- lmFit(fltlist, design, weights = weights)
     fit <- contrasts.fit(fit, contrasts = contra)
     fit <- eBayes(fit)
   }
   cat("DONE!\n") # message
 
-  out <- fit[fit$genes[, ctrlTypeVar] == 0, ] # remove control probes
+  if (ctrlProbe){
+    out <- fit[fit$genes[, ctrlTypeVar] == 0, ] # remove control probes
+  } else {
+    out <- fit
+  }
 
   if (tolower(DE) == "spikein"){ # extract PC stats for spikein method
     PCntl <- fit[fit$genes[, ctrlTypeVar] == 1, ]
@@ -516,7 +521,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltdata = NULL, annot = NUL
 
       # volcano plot and output summary
       if (plot){
-        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind", .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
+        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
+                                       .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
           tmpfunc(i = outlist, j = j, PC = PCntl)
         }
       }

@@ -4,7 +4,7 @@
 \alias{rbioarray_corcluster_super}
 \title{rbioarray_corcluster_super}
 \usage{
-rbioarray_corcluster_super(plotName = "data", fltData = NULL,
+rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
   rmControl = TRUE, n_subgroup = NULL, dfmDE = NULL, FDR = TURE,
   q.value = 0.05, FC = NULL, dataProbeVar = NULL, axisLabel = FALSE,
   annot = NULL, genesymbolVar = NULL, mapColour = "PRGn",
@@ -13,7 +13,7 @@ rbioarray_corcluster_super(plotName = "data", fltData = NULL,
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
 
-\item{fltData}{Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.}
+\item{fltlist}{Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.}
 
 \item{rmControl}{If to remove control probes (Agilent platform). Default is \code{TRUE}.}
 
@@ -61,7 +61,7 @@ Note that both \code{annot} and \code{genesymbolVar} need to be set to display g
 
 # n_subgroup = c(1:4) means the correlation uses samples from 1 to 4 (control in this case).
 # The settings can be obtained from the corresponding condition summary object.
-rbioarray_corcluster_super(fltData = all_nrm, n_subgroup = c(1:4),
+rbioarray_corcluster_super(fltlist = all_nrm, n_subgroup = c(1:4),
                            dataProbeVar = "gene_id", FDR = TRUE, q.value = 0.02,
                            dfmDE = all_DE$`conSumPost - conSumPre`,
                            axisLabel = TRUE, genesymbolVar = "gene_name",
