@@ -276,7 +276,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
 #' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
 #' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
-#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.
+#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.
 #' @param q.value Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
 #' @param plotTitle Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
@@ -291,7 +291,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
-#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{q.value}. When set \code{DE = "none"}, the p cutoff will be \code{q.value}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
 #' @import doParallel
 #' @import foreach
@@ -376,11 +376,12 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
       } else {
         pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
-      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
     } else if (tolower(DE) == "spikein") {
       ifelse(min(PC$p.value[, cf[j]]) > q.value, pcutoff <- q.value, pcutoff <- min(PC$p.value[, cf[j]]))
-      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
+    } else if (tolower(DE) == "none"){
+      pcutoff <- q.value
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
+    cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
 
     # plot
     loclEnv <- environment()
@@ -425,7 +426,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
 
     # export the file and draw a preview
-    ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+    ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
            width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
     grid.draw(pltgtb) # preview
 
@@ -482,7 +483,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     names(outlist) <- cf
     # write DE results into files
     lapply(1:length(cf), function(j){
-      write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+      write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
     })
 
     # volcano plot and output summary
@@ -516,7 +517,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
 
       # write DE results into files
       foreach(j = 1: length(cf)) %dopar% {
-        write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
+        write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
       }
 
       # volcano plot and output summary
@@ -537,7 +538,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
       names(outlist) <- cf
       # write DE results into files
       mclapply(1:length(cf), FUN = function(j){
-        write.csv(outlist[[j]], file = paste(cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+        write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
       }, mc.cores = n_cores, mc.preschedule = FALSE)
 
       # volcano plot and output summary

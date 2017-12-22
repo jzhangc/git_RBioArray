@@ -37,8 +37,10 @@ Update log
       - Filtering without control probes method added to rbioarray_flt()
       - The argument for annotation files changed from "anno" to "annot"
       - annot = NULL is now acceptable to rbioarray_DE()
-      - Codes cleared up
+      - DE method "none" added for rbioarray_DE()
+      - objTitle argument value now added as prefix to the output file names for rbioarray_DE()
       - A bug fixed for rbioarray_DE() where 1 was set for pcutoff when no significant target found under FDR
+      - Codes cleared up
       - Other bug fixes
 
     0.4.3

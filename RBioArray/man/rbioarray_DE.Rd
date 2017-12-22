@@ -47,7 +47,7 @@ rbioarray_DE(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
 
 \item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
 
-\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.}
+\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.}
 
 \item{q.value}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
 
@@ -82,7 +82,7 @@ The function outputs a \code{list} object with DE results, a \code{data frame} o
 DE analysis function.
 }
 \details{
-When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{q.value}. When set \code{DE = "none"}, the p cutoff will be \code{q.value}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 }
 \examples{
 \dontrun{
