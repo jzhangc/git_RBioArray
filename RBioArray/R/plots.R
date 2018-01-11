@@ -400,11 +400,10 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
 #' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
 #' @param n_subgroup A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
-#' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
 #' @param FDR If to use FDR corrcted p value. Default is \code{TRUE}.
 #' @param q.value P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{q.value = 1}.
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
-#' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
+#' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
 #' @param axisLabel Whether to display label for both x- and y- axes. Default is \code{FALSE}.
 #' @param annot The optional annotation matrix. Only needs to be set to display inforamtions for
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
@@ -458,6 +457,12 @@ rbioarray_corcluster_super <- function(plotName = "data",
     stop(cat("Please set the index for phenotype group via n_subgroup. Function terminated.\n"))
   }
 
+  if (rmControl){
+    if (!"ControlType" %in% names(fltlist$genes)){
+      stop(cat("make sure to have/name ControlType variable in the fltlist"))
+    }
+  }
+
   #### fiter and normalization
   vmwt <- fltlist
   dfm <- data.frame(vmwt$genes, vmwt$E)
@@ -492,7 +497,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
   ## set FC filter, if applicable
   if (!is.null(FC)){
     pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), dataProbeVar]
-    dfm <- dfm[dfm$ProbeName %in% pb_name_fc, ]
+    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name_fc, ]
   }
 
   #### heatmap

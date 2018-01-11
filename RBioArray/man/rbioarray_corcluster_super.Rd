@@ -44,8 +44,6 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 \item{plotWidth}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plotHeight}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
-
-\item{method}{Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.}
 }
 \value{
 A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
