@@ -341,7 +341,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     }
   }
   if (ctrlProbe){
-    if (!ctrlTypeVar %in% names(normlst$genes)){
+    if (!ctrlTypeVar %in% names(fltlist$genes)){
       stop(cat("ctrlTypeVar not found. Function terminated.\n"))
     }
   }
@@ -358,6 +358,10 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
   tmpfunc <- function(i, j, PC = NULL){
     # set the data frame
     if (geneName){
+      if (!genesymbolVar %in% names(i[[j]])){
+        stop(cat("Invalid gene symbol variable"))
+      }
+
       if (!is.null(genesymbolVar)){
         tmpdfm <- i[[j]][complete.cases(i[[j]][, genesymbolVar]), ]
       } else {

@@ -25,6 +25,8 @@ Update log
 
     0.4.4 (update preview)
       - Gene repeats processing methods added via argument combineGeneDup for rbioarray_flt()
+      - rbioarray_corcluster_super() now also outputs a correlation matrix file to the working directory
+      - Additional arguments added to rbioarray_hclust_super() to enhance data compatibility
       - Additional arguments added the non-Agilent datasets and datasets without a control type variable for functions:
           - rbioarray_flt()
           - rbioarray_DE()
@@ -32,6 +34,7 @@ Update log
       - Additional argument checking mechanisms added for functions:
           - rbioarray_flt()
           - rbioarray_DE()
+          - rbioarray_hcluster_super()
           - rbioarray_corcluster_super()
       - Unified argument fltlist set for all the functions that take the filtered data list
       - Filtering without control probes method added to rbioarray_flt()

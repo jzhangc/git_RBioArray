@@ -4,9 +4,9 @@
 \alias{rbioarray_hcluster_super}
 \title{rbioarray_hcluster_super}
 \usage{
-rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
-  dataProbeVar = "ProbeName", pcutoff = NULL, FC = NULL,
-  method = "spikein", fct, sampleName = NULL,
+rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType", dataProbeVar = "ProbeName", pcutoff = 0.05,
+  FC = 1.5, method = "spikein", fct, sampleName = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = "euclidean", clust = "complete", rowLabel = FALSE,
   annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
@@ -20,13 +20,17 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
 
 \item{dfmDE}{A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).}
 
+\item{ctrlProbe}{Wether or not the data set has control type variable in \code{fltDOI}, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.}
+
+\item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
+
 \item{dataProbeVar}{\code{dfmDE} variable name for probe name. Default is \code{"ProbeName"}.}
 
 \item{pcutoff}{P value cut off. Default is \code{NULL}.}
 
 \item{FC}{Fold change (FC) filter for the heatmap. Default is \code{NULL}.}
 
-\item{method}{Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.}
+\item{method}{Thresholding method, "fdr", "spikein" or "none. Default is \code{"spikein"}.}
 
 \item{fct}{Input \code{factor} object for samples.}
 

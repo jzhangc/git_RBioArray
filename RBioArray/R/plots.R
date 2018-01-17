@@ -256,10 +256,12 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltDOI Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
+#' @param ctrlProbe Wether or not the data set has control type variable in \code{fltDOI}, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
+#' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
 #' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param pcutoff P value cut off. Default is \code{NULL}.
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
-#' @param method Thresholding method, "fdr" or "spikein". Default is \code{"spikein"}.
+#' @param method Thresholding method, "fdr", "spikein" or "none. Default is \code{"spikein"}.
 #' @param fct Input \code{factor} object for samples.
 #' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
@@ -292,8 +294,10 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 #'                          key.xlab = "Normalized expression value", key.ylab = "Gene count")
 #' }
 #' @export
-rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbeVar = "ProbeName",
-                                     pcutoff = NULL, FC = NULL,
+rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
+                                     ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
+                                     dataProbeVar = "ProbeName",
+                                     pcutoff = 0.05, FC = 1.5,
                                      method = "spikein",
                                      fct, sampleName = NULL,
                                      colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
@@ -302,22 +306,33 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE, dataProbe
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                      plotWidth = 7, plotHeight = 7){ #DOI: fltered subset data of interest
 
+  ## argument check
+  if (!dataProbeVar %in% names(dfmDE) | !dataProbeVar %in% names(fltDOI$genes)){
+    stop(cat("data probe variable not found in dfmDE or fltDOI"))
+  }
 
   ## prepare matrix for plotting
   dfm <- data.frame(fltDOI$genes, fltDOI$E)
-  dfm <- dfm[dfm$ControlType == 0, ] # remove control probes
+
+  if (ctrlProbe){
+    if (ctrlTypeVar %in% names(dfmDE)){
+      dfm <- dfm[dfm[, ctrlTypeVar] == 0, ] # remove control probes
+    } else {
+      print(cat("Control probe setting on, but invalid control type variable detected, proceed without removing control probes."))
+    }
+  }
 
   if (is.null(pcutoff)){
     stop("Please set p value threshold.")
   } else {
     ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val < pcutoff, dataProbeVar], pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar])
-    dfm <- dfm[dfm$ProbeName %in% pb_name, ] # the reason to use $ProbeName is because dfm is from fltDOI
+    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ] # the reason to use $ProbeName is because dfm is from fltDOI
   }
 
   ## set FC filter
   if (!is.null(FC)){
     pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), dataProbeVar]
-    dfm <- dfm[dfm$ProbeName %in% pb_name_fc, ]
+    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name_fc, ]
   }
 
   ## heatmap
@@ -453,6 +468,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
     stop(cat("Please set unique genomic feature ID via dataProbeVar. Function terminated.\n"))
   }
 
+
   if (is.null(n_subgroup)){
     stop(cat("Please set the index for phenotype group via n_subgroup. Function terminated.\n"))
   }
@@ -506,7 +522,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
   s <- (annoNcol - ogNcol + 1):annoNcol # extract only the data by removing the annotation columns
 
   if (axisLabel){
-    if (!is.null(genesymbolVar)){
+    if (!is.null(genesymbolVar) & !is.null(annot)){
       dfm <- dfm[complete.cases(dfm[, genesymbolVar]), ]
       axisrow <- dfm[, genesymbolVar]
       print("Probes with no gene names are removed.")
@@ -514,20 +530,24 @@ rbioarray_corcluster_super <- function(plotName = "data",
       mtx <- as.matrix(dfm[, s])
       rownames(mtx) <- dfm[, dataProbeVar]
       cormtx <- t(mtx)
+      corcoef <- cor(cormtx[n_subgroup, ], method = "pearson")
+      rownames(corcoef) <- axisrow
+      colnames(corcoef) <- axisrow
 
       pdf(file = paste(plotName, "_corheatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
-      heatmap.2(cor(cormtx[n_subgroup, ], method = "pearson"), symm = TRUE, trace = "none",
+      heatmap.2(corcoef, symm = TRUE, trace = "none",
                 col = brewer.pal(n_mapColour, mapColour), labRow = axisrow, labCol = axisrow, ...)
       dev.off()
     } else {
-      print("No gene symbol variable detected. Proceed without one.")
+      print("No gene symbol variable or annotation dataframe detected. Proceed without one.")
 
       mtx <- as.matrix(dfm[, s])
       rownames(mtx) <- dfm[, dataProbeVar]
       cormtx <- t(mtx)
+      corcoef <- cor(cormtx[n_subgroup, ], method = "pearson")
 
       pdf(file = paste(plotName, "_corheatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
-      heatmap.2(cor(cormtx[n_subgroup, ], method = "pearson"), symm = TRUE, trace = "none",
+      heatmap.2(corcoef, symm = TRUE, trace = "none",
                 col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
       dev.off()
     }
@@ -535,12 +555,16 @@ rbioarray_corcluster_super <- function(plotName = "data",
     mtx <- as.matrix(dfm[, s])
     rownames(mtx) <- dfm[, dataProbeVar]
     cormtx <- t(mtx)
+    corcoef <- cor(cormtx[n_subgroup, ], method = "pearson")
 
     pdf(file = paste(plotName, "_corheatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
-    heatmap.2(cor(cormtx[n_subgroup, ], method = "pearson"), symm = TRUE, trace = "none",
+    heatmap.2(corcoef, symm = TRUE, trace = "none",
               col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
     dev.off()
   }
+
+  # export correlation matrix
+  write.csv(corcoef, file = paste(plotName, ".cor.csv", sep = ""))
 }
 
 
