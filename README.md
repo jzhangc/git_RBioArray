@@ -23,6 +23,9 @@ Installation:
 
 Update log
 
+    0.4.5 (feature preview)
+      - Additional argument checking mechanisms added for functions
+    
     0.4.4 (Jan.17.2018)
       - Gene repeats processing methods added via argument combineGeneDup for rbioarray_flt()
       - rbioarray_corcluster_super() now also outputs a correlation matrix file to the working directory
@@ -43,7 +46,7 @@ Update log
       - DE method "none" added for rbioarray_DE()
       - objTitle argument value now added as prefix to the output file names for rbioarray_DE()
       - A bug fixed for rbioarray_DE() where 1 was set for pcutoff when no significant target found under FDR
-      - Codes cleared up
+      - Codes cleaned up
       - Other bug fixes
 
     0.4.3
