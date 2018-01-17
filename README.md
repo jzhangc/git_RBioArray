@@ -43,7 +43,7 @@ Update log
       - DE method "none" added for rbioarray_DE()
       - objTitle argument value now added as prefix to the output file names for rbioarray_DE()
       - A bug fixed for rbioarray_DE() where 1 was set for pcutoff when no significant target found under FDR
-      - Codes cleared up
+      - Codes cleaned up
       - Other bug fixes
 
     0.4.3
