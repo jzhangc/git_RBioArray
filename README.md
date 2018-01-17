@@ -23,7 +23,7 @@ Installation:
 
 Update log
 
-    0.4.4 (update preview)
+    0.4.4 (Jan.17.2018)
       - Gene repeats processing methods added via argument combineGeneDup for rbioarray_flt()
       - rbioarray_corcluster_super() now also outputs a correlation matrix file to the working directory
       - Additional arguments added to rbioarray_hclust_super() to enhance data compatibility
