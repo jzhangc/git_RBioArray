@@ -305,7 +305,6 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                                      rowLabel = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                      plotWidth = 7, plotHeight = 7){ #DOI: fltered subset data of interest
-
   ## argument check
   if (!dataProbeVar %in% names(dfmDE) | !dataProbeVar %in% names(fltDOI$genes)){
     stop(cat("data probe variable not found in dfmDE or fltDOI"))
@@ -315,7 +314,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   dfm <- data.frame(fltDOI$genes, fltDOI$E)
 
   if (ctrlProbe){
-    if (ctrlTypeVar %in% names(dfmDE)){
+    if (ctrlTypeVar %in% names(dfm)){
       dfm <- dfm[dfm[, ctrlTypeVar] == 0, ] # remove control probes
     } else {
       print(cat("Control probe setting on, but invalid control type variable detected, proceed without removing control probes."))
@@ -333,6 +332,11 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   if (!is.null(FC)){
     pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), dataProbeVar]
     dfm <- dfm[dfm[, dataProbeVar] %in% pb_name_fc, ]
+  }
+
+  ## check the dim
+  if (dim(dfm)[1] < 2){
+    stop("Only one row left after DE filtering. Nothing to cluster.")
   }
 
   ## heatmap

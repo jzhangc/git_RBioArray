@@ -24,7 +24,9 @@ Installation:
 Update log
 
     0.4.5 (feature preview)
-      - Additional argument checking mechanisms added for functions
+      - Additional argument checking mechanisms added for functions:
+          - rbioarray_hcluster_super()
+      - A bug fixed for rbioarray_hcluster_super() where the control variable check screens DE dataframe
     
     0.4.4 (Jan.17.2018)
       - Gene repeats processing methods added via argument combineGeneDup for rbioarray_flt()
