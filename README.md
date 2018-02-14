@@ -24,6 +24,8 @@ Installation:
 Update log
 
     0.4.5 (feature preview)
+      - Pearson correlation plot with p values added to rbioarray_corcluster_super() via argument mode = "sig""
+        - the orignal hcluster version can be set via mode = "hcluster""
       - Additional argument checking mechanisms added for functions:
           - rbioarray_hcluster_super()
       - A bug fixed for rbioarray_hcluster_super() where the control variable check screens DE dataframe

@@ -363,7 +363,11 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       rownames(mtx) <- dfm[, dataProbeVar]
 
       if (!is.null(sampleName)){
-        colnames(mtx) <- sampleName
+        if (length(sampleName) != ncol(mtx)){
+          stop("sampleName variable isn't the same length as the samples.")
+        } else {
+          colnames(mtx) <- sampleName
+        }
       }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
@@ -384,7 +388,11 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       rownames(mtx) <- dfm[, dataProbeVar]
 
       if (!is.null(sampleName)){
-        colnames(mtx) <- sampleName
+        if (length(sampleName) != ncol(mtx)){
+          stop("sampleName variable isn't the same length as the samples.")
+        } else {
+          colnames(mtx) <- sampleName
+        }
       }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
@@ -400,7 +408,11 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
     rownames(mtx) <- dfm[, dataProbeVar]
 
     if (!is.null(sampleName)){
-      colnames(mtx) <- sampleName
+      if (length(sampleName) != ncol(mtx)){
+        stop("sampleName variable isn't the same length as the samples.")
+      } else {
+        colnames(mtx) <- sampleName
+      }
     }
 
     pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
