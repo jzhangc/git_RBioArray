@@ -32,7 +32,7 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
 
 \item{genesymbolVar}{Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 
-\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.}
+\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} or \code{"none"}. Default is \code{"fdr"}.}
 
 \item{fltlist}{Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
 

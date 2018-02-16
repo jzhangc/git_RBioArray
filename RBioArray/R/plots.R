@@ -597,7 +597,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' @param geneName If to only use probes with a gene name. Default is \code{FALSE}.
 #' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
-#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"} and \code{"spikein"}. Default is \code{"fdr"}.
+#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} or \code{"none"}. Default is \code{"fdr"}.
 #' @param fltlist Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
 #' @param design Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.
 #' @param contra Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.
@@ -660,14 +660,15 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
     # set up tmpdfm
     tmpdfm <- m[[n]]
     # set the cutoff
-    if (DE == "fdr"){
+    if (tolower(DE) == "fdr"){
       if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
-        p_threshold <- 1
+        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
+        p_threshold <- q.value
       } else {
         p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
       }
 
-    } else if (DE == "spikein") {
+    } else if (tolower(DE) == "spikein") {
       # check arugments
       if (is.null(fltlist) | is.null(design) | is.null(contra) | is.null(weights)){
         warning(cat("Arguments not complete for \"spikein\" method. Proceed with \"fdr\" instead."))
@@ -695,7 +696,9 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
         ifelse(min(PC$p.value[, cf[n]]) > q.value, p_threshold <- q.value, p_threshold <- min(PC$p.value[, cf[n]]))
       }
 
-    } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
+    } else if (tolower(DE) == "none"){
+      p_threshold <- q.value
+    } else {stop(cat("Please set p value thresholding method, \"fdr\", \"spikein\", or \"none\"."))}
     return(p_threshold)
   }
 

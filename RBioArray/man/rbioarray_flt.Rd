@@ -5,7 +5,7 @@
 \title{rbioarray_flt}
 \usage{
 rbioarray_flt(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
-  percetile = ifelse(ctrlProbe, 0.95, 0.05), combineGeneDup = FALSE,
+  percentile = ifelse(ctrlProbe, 0.95, 0.05), combineGeneDup = FALSE,
   geneSymbolVar = NULL, annot = NULL, parallelComputing = FALSE,
   clusterType = "PSOCK")
 }
@@ -16,6 +16,8 @@ rbioarray_flt(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
 
 \item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
 
+\item{percentile}{The percentile cutoff. When \code{ctrlProbe = TRUE} and muliptle negative control probes are detected, the default is \code{0.95}. When \code{ctrlProbe = FALSE}, default value is \code{0.05}.}
+
 \item{combineGeneDup}{Wether or not to combine gene duplicates (different probe ID) by probe signal variance. Default is \code{FALSE}.}
 
 \item{geneSymbolVar}{Set only when \code{combineGeneDup = TRUE}, the name for variables contained in normlst or annotation dataframe. Default is \code{NULL}.}
@@ -25,8 +27,6 @@ rbioarray_flt(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
 \item{parallelComputing}{Set only when \code{combineGeneDup = TRUE}, if to use parallel computing. Default is \code{FALSE}.}
 
 \item{clusterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
-
-\item{percentile}{The percentile cutoff. When \code{ctrlProbe = TRUE} and muliptle negative control probes are detected, the default is \code{0.95}. When \code{ctrlProbe = FALSE}, default value is \code{0.05}.}
 }
 \value{
 Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
