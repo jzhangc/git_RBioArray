@@ -24,8 +24,14 @@ Installation:
 Update log
 
     0.4.5 (feature preview)
-      - Pearson correlation plot with p values added to rbioarray_corcluster_super() via argument mode = "sig""
-        - the orignal hcluster version can be set via mode = "hcluster"
+      - Correlation p value function cor_pvalue() added
+      - Updates made to rbioarray_corcluster_super()
+        - Pearson correlation significance plot added to rbioarray_corcluster_super() via argument sigPlot = TRUE
+        - Various arguments added for the significance plot
+        - Alpha can be set for the p values via argument cor.sig
+        - The function now outputs a p-value matrix
+        - Output file name to the significant plot is ".sigplot.pdf"
+        - Output file name to the correlation hclust heatmap change to ".corheatmap.pdf"
       - The "none" option added for DE argument for rbioarray_venn_DE()
         - Values for DE options are no longer case sensitive
       - Additional argument checking mechanisms added for functions:
