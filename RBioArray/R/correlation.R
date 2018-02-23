@@ -29,6 +29,7 @@ cor_pvalue <- function(r, n){
 #' @param q.value P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{q.value = 1}.
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
+#' @param method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
 #' @param sigPlot If to generate a significance heatmap. Default is \code{FALSE},
 #' @param cor.sig Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}
 #' @param cor.sigLabelColour Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.
@@ -70,6 +71,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
                                        n_subgroup = NULL,
                                        dfmDE = NULL, FDR = TURE, q.value = 0.05, FC = NULL,
                                        dataProbeVar = NULL,
+                                       method = "pearson",
                                        sigPlot = FALSE, cor.sig = 0.05, cor.sigLabelColour = "red", cor.sigLabelSize = 3,
                                        cor.labelColour = "black", cor.labelSize = 1, cor.labelAngle = 90, cor.keySize = 1,
                                        axisLabel = FALSE, annot = NULL, genesymbolVar = NULL,
@@ -150,7 +152,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
       mtx <- as.matrix(dfm[, s])
       rownames(mtx) <- dfm[, dataProbeVar]
       cormtx <- t(mtx)
-      corcoef <- cor(cormtx[n_subgroup, ], method = "pearson")
+      corcoef <- cor(cormtx[n_subgroup, ], method = method)
       rownames(corcoef) <- axisrow
       colnames(corcoef) <- axisrow
       corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
@@ -185,7 +187,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
       mtx <- as.matrix(dfm[, s])
       rownames(mtx) <- dfm[, dataProbeVar]
       cormtx <- t(mtx)
-      corcoef <- cor(cormtx[n_subgroup, ], method = "pearson")
+      corcoef <- cor(cormtx[n_subgroup, ], method = method)
       corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
       diag(corp) <- NA
 
@@ -216,7 +218,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
     rownames(mtx) <- dfm[, dataProbeVar]
     cormtx <- t(mtx)
 
-    corcoef <- cor(cormtx[n_subgroup, ], method = "pearson")
+    corcoef <- cor(cormtx[n_subgroup, ], method = method)
     corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
     diag(corp) <- NA
 

@@ -6,10 +6,10 @@
 \usage{
 rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
   rmControl = TRUE, n_subgroup = NULL, dfmDE = NULL, FDR = TURE,
-  q.value = 0.05, FC = NULL, dataProbeVar = NULL, sigPlot = FALSE,
-  cor.sig = 0.05, cor.sigLabelColour = "red", cor.sigLabelSize = 3,
-  cor.labelColour = "black", cor.labelSize = 1, cor.labelAngle = 90,
-  cor.keySize = 1, axisLabel = FALSE, annot = NULL,
+  q.value = 0.05, FC = NULL, dataProbeVar = NULL, method = "pearson",
+  sigPlot = FALSE, cor.sig = 0.05, cor.sigLabelColour = "red",
+  cor.sigLabelSize = 3, cor.labelColour = "black", cor.labelSize = 1,
+  cor.labelAngle = 90, cor.keySize = 1, axisLabel = FALSE, annot = NULL,
   genesymbolVar = NULL, mapColour = "PRGn", n_mapColour = 11, ...,
   plotWidth = 7, plotHeight = 7)
 }
@@ -31,6 +31,8 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 \item{FC}{Fold change (FC) filter for the heatmap. Default is \code{NULL}.}
 
 \item{dataProbeVar}{\code{dfmDE} variable name for probe name. Default is \code{NULL}.}
+
+\item{method}{The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.}
 
 \item{sigPlot}{If to generate a significance heatmap. Default is \code{FALSE},}
 

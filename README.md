@@ -27,16 +27,17 @@ Update log
       - Correlation p value function cor_pvalue() added
       - Updates made to rbioarray_corcluster_super()
         - Pearson correlation significance plot added to rbioarray_corcluster_super() via argument sigPlot = TRUE
+        - Spearman correlation method added, controlled via argument method
         - Various arguments added for the significance plot
         - Alpha can be set for the p values via argument cor.sig
         - The function now outputs a p-value matrix
         - Output file name to the significant plot is ".sigplot.pdf"
         - Output file name to the correlation hclust heatmap change to ".corheatmap.pdf"
-      - The "none" option added for DE argument for rbioarray_venn_DE()
+        - The "none" option added for DE argument for rbioarray_venn_DE()
         - Values for DE options are no longer case sensitive
+        - A bug fixed where the control variable check screens DE dataframe
       - Additional argument checking mechanisms added for functions:
-          - rbioarray_hcluster_super()
-      - A bug fixed for rbioarray_hcluster_super() where the control variable check screens DE dataframe
+        - rbioarray_hcluster_super()
       - Other bug fixes
     
     0.4.4 (Jan.17.2018)
@@ -86,11 +87,9 @@ Update log
       - GS functions updated
       - Bug fixes
 
-    0.3.3
+    0.3.2 - 0.3.3
       - Medaka added for rbioGS_sp2hsaEntrez function
       - EntrezGeneID option added for rbioGS_sp2hsaEntrez function
-    
-    0.3.2
       - Bug fixes
     
     0.3.0
@@ -100,11 +99,8 @@ Update log
       - Message display added to the DE functions
       - heatmap and Venn functions updated with correct variable arguments
       - Bug fixes
-   
-    0.2.8 - 0.2.10 
-      - Bug fixes
 
-    0.2.7
+    0.2.7 - 0.2.10
       - Boxplot and Scatter plot functions for GS optimized
       - Bug fixes
     
@@ -117,13 +113,10 @@ Update log
       - Direct loading GS database files functionality added for GS functions
       - Bug fixes
     
-    0.2.4
+    0.2.2 - 0.2.4
       - mmu/rno to hsa entrez ID converesion function overhaul
       - Arguments for input DE data list for GS functions unified as "DElst"
       - Arguments for parallel computing unified for all the relevant functions as "parallelComputing" and "clusterType"
-      - Bug fixes
-
-    0.2.2 - 0.2.3 
       - Bug fixes
 
     0.2.1
@@ -178,11 +171,8 @@ Update log
       - Stand alone GSA and GSA plotting functions added
       - Bug fixes
       
-    0.1.24
+    0.1.23 - 0.1.24
       - All-in-one GSA function re-written
-      - Bug fixes
-      
-    0.1.23
       - Bug fixes
       
     0.1.22
@@ -201,18 +191,12 @@ Update log
       - Preliminary all-in-one GS function added
       - Bug fixes
       
-    0.1.18
+    0.1.17 - 0.1.18
       - GS plotting functions added
       - Bug fixes
       
-    0.1.17
-      - Bug fixes
-      
-    0.1.16
+    0.1.15 - 0.1.16
       - GS function re-written
-      - Bug fixes
-      
-    0.1.15
       - Bug fixes
       
     0.1.14
@@ -223,12 +207,9 @@ Update log
       - Plot section of the array DE function improved
       - Bug fixes
       
-    0.1.12
+    0.1.10 - 0.1.12
       - Log transformation for array functionality added
       - hclust heatmap function added
-      - Bug fixes
-      
-    0.1.10 - 0.1.11
       - Bug fixes
       
     0.1.9
