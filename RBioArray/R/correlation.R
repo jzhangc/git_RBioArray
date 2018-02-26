@@ -207,7 +207,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
             dev.off()
           },
           error = function(err){
-            print("No significance found. Therefore no significance plot generated.")
+            print("No significant correlation found. Therefore no significance plot generated.")
             dev.off()
           }
         )
