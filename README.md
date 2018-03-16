@@ -23,11 +23,6 @@ Installation:
 
 Update log
 
-    0.4.6 (feature preview)
-      - MA plot option added for functions rbioarray_PreProc() and rbioarray_flt()
-      - K-mean cluster function rbioarray_kmean added
-      - Bug fixes
-
     0.4.5 (Mar.16.2018)
       - Correlation p value function cor_pvalue() added
       - Updates made to rbioarray_corcluster_super()
