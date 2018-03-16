@@ -23,7 +23,7 @@ Installation:
 
 Update log
 
-    0.4.5 (feature preview)
+    0.4.5 (Mar.16.2018)
       - Correlation p value function cor_pvalue() added
       - Updates made to rbioarray_corcluster_super()
         - Pearson correlation significance plot added to rbioarray_corcluster_super() via argument sigPlot = TRUE
@@ -40,7 +40,7 @@ Update log
         - rbioarray_hcluster_super()
       - Other bug fixes
     
-    0.4.4 (Jan.17.2018)
+    0.4.4
       - Gene repeats processing methods added via argument combineGeneDup for rbioarray_flt()
       - rbioarray_corcluster_super() now also outputs a correlation matrix file to the working directory
       - Additional arguments added to rbioarray_hclust_super() to enhance data compatibility
