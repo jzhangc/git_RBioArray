@@ -21,9 +21,9 @@ rbioGS_scatter(GSA_list, fileName = "GS_list", ..., plotTitle = NULL,
 
 \item{yLabel}{Y-axis label. Default is \code{"log consensus score"}.}
 
-\item{rankCutoff}{Cutoff value for GS rank line. The input number will be log2 transformed when plotting.}
+\item{rankCutoff}{Cutoff value for GS rank line. The input number will be log2 transformed when plotting. Default is \code{20}.}
 
-\item{pCutoff}{Cutoff value for GS p value line.}
+\item{pCutoff}{Cutoff value for GS p value line. Default is \code{0.05}.}
 
 \item{plotHeight}{Set the height of the plot. Default is \code{150}.}
 }

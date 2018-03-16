@@ -82,7 +82,7 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' fltdata <- rbioarray_flt(normdata)
 #' }
 #' @export
-rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType", percetile = ifelse(ctrlProbe, 0.95, 0.05),
+rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType", percentile = ifelse(ctrlProbe, 0.95, 0.05),
                           combineGeneDup = FALSE, geneSymbolVar = NULL, annot = NULL,
                           parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check key arguments
@@ -123,7 +123,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
       neg <- apply(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
     }
   } else { # no neg control probes, we use the
-    neg <- apply(normlst$E, 2, function(x)quantile(x, p = 0.05)) # 5% percetile of all the data
+    neg <- apply(normlst$E, 2, function(x)quantile(x, p = 0.05)) # 5% percentile of all the data
   }
 
   if (class(normlst) == "list"){

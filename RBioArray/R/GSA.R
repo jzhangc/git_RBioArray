@@ -381,8 +381,8 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
 #' @param GSA_list piano GS results object.
 #' @param fileName Output file name.
 #' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
-#' @param rankCutoff Cutoff value for GS rank line. The input number will be log2 transformed when plotting.
-#' @param pCutoff Cutoff value for GS p value line.
+#' @param rankCutoff Cutoff value for GS rank line. The input number will be log2 transformed when plotting. Default is \code{20}.
+#' @param pCutoff Cutoff value for GS p value line. Default is \code{0.05}.
 #' @param plotTitle Title of the plot. Default is \code{NULL}.
 #' @param xLabel X-axis label. Default is \code{"median p value"}.
 #' @param yLabel Y-axis label. Default is \code{"log consensus score"}.
