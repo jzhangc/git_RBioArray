@@ -299,7 +299,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
   )
 
   out <- merge(outdfm1, outdfm2[, c("group", "p.value")], by = "group", x.all = TRUE)
-  out <- merge(out, tstdfm3[, c("group", "adj.p.value")], x.all = TRUE)
+  out <- merge(out, outdfm3[, c("group", "adj.p.value")], x.all = TRUE)
 
   write.csv(out, file = paste(plotName, ".cor.csv", sep = ""), row.names = FALSE)
 }
