@@ -7,7 +7,7 @@
 rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
   rmControl = TRUE, n_subgroup = NULL, dfmDE = NULL, FDR = TURE,
   DE.sig.p = 0.05, FC = NULL, dataProbeVar = NULL, method = "pearson",
-  sigPlot = FALSE, cor.sig.FDR = FALSE, cor.sig.p = 0.05,
+  sigPlot = FALSE, cor.sig.FDR = FALSE, cor.sig = 0.05,
   cor.sigLabelColour = "red", cor.sigLabelSize = 3,
   cor.labelColour = "black", cor.labelSize = 1, cor.labelAngle = 90,
   cor.keySize = 1, axisLabel = FALSE, annot = NULL,
@@ -39,6 +39,8 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 
 \item{cor.sig.FDR}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
 
+\item{cor.sig}{Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}}
+
 \item{cor.sigLabelColour}{Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.}
 
 \item{cor.sigLabelSize}{Only set when \code{sigPlot = TRUE}, the size for label for the significant pairs. Default is \code{3}.}
@@ -66,8 +68,6 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 \item{plotWidth}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plotHeight}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
-
-\item{cor.sig}{Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}}
 }
 \value{
 A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. If set, the function also outputs a significant value heatmap.
