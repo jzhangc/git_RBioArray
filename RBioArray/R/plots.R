@@ -16,7 +16,7 @@
 #' @param design Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.
 #' @param contra Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.
 #' @param weights Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
-#' @param q.value P value threshold. Only needed for \code{DE = "fdr"} and \code{DE = "spikein"} when calculated p value is larger than q.value. Default is \code{0.05}.
+#' @param sig.p P value threshold. Only needed for \code{DE = "fdr"} and \code{DE = "spikein"} when calculated p value is larger than sig.p. Default is \code{0.05}.
 #' @param FC Fold change threshold. Default is \code{1.5}.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @return The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
@@ -37,7 +37,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
                               annot = NULL,
                               DEdata = NULL, dataProbeVar = "ProbeName",
                               geneName = FALSE, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-                              DE = "fdr", fltlist = NULL, design = NULL, contra = NULL, weights = NULL, q.value = 0.05, FC = 1.5,
+                              DE = "fdr", fltlist = NULL, design = NULL, contra = NULL, weights = NULL, sig.p = 0.05, FC = 1.5,
                               parallelComputing = FALSE){
   ## check the key arguments
   if (is.null(DEdata)){
@@ -75,11 +75,11 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
     tmpdfm <- m[[n]]
     # set the cutoff
     if (tolower(DE) == "fdr"){
-      if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
-        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
-        p_threshold <- q.value
+      if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
+        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
+        p_threshold <- sig.p
       } else {
-        p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
+        p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
       }
 
     } else if (tolower(DE) == "spikein") {
@@ -87,10 +87,10 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
       if (is.null(fltlist) | is.null(design) | is.null(contra) | is.null(weights)){
         warning(cat("Arguments not complete for \"spikein\" method. Proceed with \"fdr\" instead."))
 
-        if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
+        if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
           p_threshold <- 1
         } else {
-          p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
+          p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
         }
 
       } else {
@@ -107,11 +107,11 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
         }
         cf <- names(m)
         PC <- fit[fit$genes$ControlType == 1, ]
-        ifelse(min(PC$p.value[, cf[n]]) > q.value, p_threshold <- q.value, p_threshold <- min(PC$p.value[, cf[n]]))
+        ifelse(min(PC$p.value[, cf[n]]) > sig.p, p_threshold <- sig.p, p_threshold <- min(PC$p.value[, cf[n]]))
       }
 
     } else if (tolower(DE) == "none"){
-      p_threshold <- q.value
+      p_threshold <- sig.p
     } else {stop(cat("Please set p value thresholding method, \"fdr\", \"spikein\", or \"none\"."))}
     return(p_threshold)
   }

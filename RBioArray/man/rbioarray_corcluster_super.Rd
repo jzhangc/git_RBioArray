@@ -6,10 +6,11 @@
 \usage{
 rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
   rmControl = TRUE, n_subgroup = NULL, dfmDE = NULL, FDR = TURE,
-  q.value = 0.05, FC = NULL, dataProbeVar = NULL, method = "pearson",
-  sigPlot = FALSE, cor.sig = 0.05, cor.sigLabelColour = "red",
-  cor.sigLabelSize = 3, cor.labelColour = "black", cor.labelSize = 1,
-  cor.labelAngle = 90, cor.keySize = 1, axisLabel = FALSE, annot = NULL,
+  DE.sig.p = 0.05, FC = NULL, dataProbeVar = NULL, method = "pearson",
+  sigPlot = FALSE, cor.sig.FDR = FALSE, cor.sig.p = 0.05,
+  cor.sigLabelColour = "red", cor.sigLabelSize = 3,
+  cor.labelColour = "black", cor.labelSize = 1, cor.labelAngle = 90,
+  cor.keySize = 1, axisLabel = FALSE, annot = NULL,
   genesymbolVar = NULL, mapColour = "PRGn", n_mapColour = 11, ...,
   plotWidth = 7, plotHeight = 7)
 }
@@ -26,7 +27,7 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 
 \item{FDR}{If to use FDR corrcted p value. Default is \code{TRUE}.}
 
-\item{q.value}{P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{q.value = 1}.}
+\item{DE.sig.p}{P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{DE.sig.p = 1}.}
 
 \item{FC}{Fold change (FC) filter for the heatmap. Default is \code{NULL}.}
 
@@ -36,7 +37,7 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 
 \item{sigPlot}{If to generate a significance heatmap. Default is \code{FALSE},}
 
-\item{cor.sig}{Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}}
+\item{cor.sig.FDR}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
 
 \item{cor.sigLabelColour}{Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.}
 
@@ -65,6 +66,8 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 \item{plotWidth}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plotHeight}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{cor.sig}{Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}}
 }
 \value{
 A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. If set, the function also outputs a significant value heatmap.
@@ -81,7 +84,7 @@ Note that both \code{annot} and \code{genesymbolVar} need to be set to display g
 # n_subgroup = c(1:4) means the correlation uses samples from 1 to 4 (control in this case).
 # The settings can be obtained from the corresponding condition summary object.
 rbioarray_corcluster_super(fltlist = all_nrm, n_subgroup = c(1:4),
-                           dataProbeVar = "gene_id", FDR = TRUE, q.value = 0.02,
+                           dataProbeVar = "gene_id", FDR = TRUE, DE.sig.p = 0.02,
                            dfmDE = all_DE$`conSumPost - conSumPre`,
                            axisLabel = TRUE, genesymbolVar = "gene_name",
                            key.title = "", cexRow = 0.3, cexCol = 0.3, offsetRow = 0.001,

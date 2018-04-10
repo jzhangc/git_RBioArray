@@ -8,7 +8,7 @@ rbioarray_DE(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
   design = NULL, contra = NULL, weights = NULL, ..., plot = TRUE,
   geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
   nGeneSymbol = 5, padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
-  ctrlTypeVar = "ControlType", DE = "fdr", q.value = 0.05,
+  ctrlTypeVar = "ControlType", DE = "fdr", sig.p = 0.05,
   plotTitle = NULL, xLabel = "log2(fold change)",
   yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
   nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
@@ -49,7 +49,7 @@ rbioarray_DE(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
 
 \item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.}
 
-\item{q.value}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
+\item{sig.p}{Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.}
 
 \item{plotTitle}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
@@ -82,7 +82,7 @@ The function outputs a \code{list} object with DE results, a \code{data frame} o
 DE analysis function.
 }
 \details{
-When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{q.value}. When set \code{DE = "none"}, the p cutoff will be \code{q.value}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{sig.p}. When set \code{DE = "none"}, the p cutoff will be \code{sig.p}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 }
 \examples{
 \dontrun{

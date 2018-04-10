@@ -8,7 +8,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
   count_threshold = "none", qc_plot = TRUE, design = NULL,
   contra = NULL, ..., plot = TRUE, geneName = FALSE,
   genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5,
-  padding = 0.5, FC = 1.5, FDR = TRUE, q.value = 0.05, Title = NULL,
+  padding = 0.5, FC = 1.5, FDR = TRUE, sig.p = 0.05, Title = NULL,
   xLabel = "log2(fold change)", yLabel = "-log10(p value)",
   symbolSize = 2, sigColour = "red", nonsigColour = "gray",
   xTxtSize = 10, yTxtSize = 10, plotWidth = 170, plotHeight = 150,
@@ -47,7 +47,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
 
 \item{FDR}{Wether or not using FDR p value correction. Default is \code{TRUE}.}
 
-\item{q.value}{Threshold for the p value. Default is \code{0.05}.}
+\item{sig.p}{Threshold for the p value. Default is \code{0.05}.}
 
 \item{Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
@@ -86,7 +86,7 @@ Sample weights are automatically caluclated during Voom normalization. When \cod
 \dontrun{
 rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_annot = Ann_Count_all[, 1:4], count_threshold = 50,
            design = design, contra = contra,
-           FDR = TRUE, q.value = 0.05,
+           FDR = TRUE, sig.p = 0.05,
            geneName = TRUE, genesymbolVar = "gene_name", topgeneLabel = TRUE, nGeneSymbol = 10)
 }
 }

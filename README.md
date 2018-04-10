@@ -28,6 +28,9 @@ Update log
       - K-mean clustering function rbioarray_kmean() added
       - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
       - Clustering functions separated into cluster.R file
+      - Correlation function rbioarray_corcluster_super() now outputs a summary csv file for the significance test
+      - FDR corretion option added for correlation p values
+      - The "q.value" argument for all the applicable functions changed to "sig.p"
       - Bug fixes
 
     0.4.5 (Mar.16.2018)

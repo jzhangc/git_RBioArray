@@ -17,7 +17,7 @@
 #' @param padding When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
 #' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
 #' @param FDR Wether or not using FDR p value correction. Default is \code{TRUE}.
-#' @param q.value Threshold for the p value. Default is \code{0.05}.
+#' @param sig.p Threshold for the p value. Default is \code{0.05}.
 #' @param Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
@@ -45,7 +45,7 @@
 #' \dontrun{
 #' rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_annot = Ann_Count_all[, 1:4], count_threshold = 50,
 #'            design = design, contra = contra,
-#'            FDR = TRUE, q.value = 0.05,
+#'            FDR = TRUE, sig.p = 0.05,
 #'            geneName = TRUE, genesymbolVar = "gene_name", topgeneLabel = TRUE, nGeneSymbol = 10)
 #' }
 #' @export
@@ -54,7 +54,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
                        design = NULL, contra = NULL,
                        ...,
                        plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
-                       FC = 1.5, FDR = TRUE, q.value = 0.05,
+                       FC = 1.5, FDR = TRUE, sig.p = 0.05,
                        Title = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
                        symbolSize = 2, sigColour = "red", nonsigColour = "gray",
                        xTxtSize = 10, yTxtSize =10,
@@ -106,15 +106,15 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
 
     # set the cutoff
     if (FDR){
-      if (length(which(tmpdfm$adj.P.Val < q.value)) == 0){
-        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
-        pcutoff <- q.value
+      if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
+        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
+        pcutoff <- sig.p
       } else {
-        pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < q.value, ]$P.Value)
+        pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
       }
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
     } else  {
-      pcutoff <- q.value
+      pcutoff <- sig.p
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
     }
 

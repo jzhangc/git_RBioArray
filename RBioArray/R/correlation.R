@@ -26,11 +26,12 @@ cor_pvalue <- function(r, n){
 #' @param n_subgroup A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
 #' @param FDR If to use FDR corrcted p value. Default is \code{TRUE}.
-#' @param q.value P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{q.value = 1}.
+#' @param DE.sig.p P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{DE.sig.p = 1}.
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
 #' @param method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
 #' @param sigPlot If to generate a significance heatmap. Default is \code{FALSE},
+#' @param cor.sig.FDR If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.
 #' @param cor.sig Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}
 #' @param cor.sigLabelColour Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.
 #' @param cor.sigLabelSize Only set when \code{sigPlot = TRUE}, the size for label for the significant pairs. Default is \code{3}.
@@ -58,7 +59,7 @@ cor_pvalue <- function(r, n){
 #' # n_subgroup = c(1:4) means the correlation uses samples from 1 to 4 (control in this case).
 #' # The settings can be obtained from the corresponding condition summary object.
 #' rbioarray_corcluster_super(fltlist = all_nrm, n_subgroup = c(1:4),
-#'                            dataProbeVar = "gene_id", FDR = TRUE, q.value = 0.02,
+#'                            dataProbeVar = "gene_id", FDR = TRUE, DE.sig.p = 0.02,
 #'                            dfmDE = all_DE$`conSumPost - conSumPre`,
 #'                            axisLabel = TRUE, genesymbolVar = "gene_name",
 #'                            key.title = "", cexRow = 0.3, cexCol = 0.3, offsetRow = 0.001,
@@ -69,10 +70,10 @@ cor_pvalue <- function(r, n){
 rbioarray_corcluster_super <- function(plotName = "data",
                                        fltlist = NULL, rmControl = TRUE,
                                        n_subgroup = NULL,
-                                       dfmDE = NULL, FDR = TURE, q.value = 0.05, FC = NULL,
+                                       dfmDE = NULL, FDR = TURE, DE.sig.p = 0.05, FC = NULL,
                                        dataProbeVar = NULL,
                                        method = "pearson",
-                                       sigPlot = FALSE, cor.sig = 0.05, cor.sigLabelColour = "red", cor.sigLabelSize = 3,
+                                       sigPlot = FALSE, cor.sig.FDR = FALSE, cor.sig.p = 0.05, cor.sigLabelColour = "red", cor.sigLabelSize = 3,
                                        cor.labelColour = "black", cor.labelSize = 1, cor.labelAngle = 90, cor.keySize = 1,
                                        axisLabel = FALSE, annot = NULL, genesymbolVar = NULL,
                                        mapColour = "PRGn", n_mapColour = 11, ...,
@@ -116,18 +117,18 @@ rbioarray_corcluster_super <- function(plotName = "data",
   #### dfm subsetting using DE resutls (dfmDE)
   ## p value filter
   if (FDR){
-    if (length(which(dfmDE$adj.P.Val < q.value)) == 0){
-      warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, q.value is applied on raw p.values.")
-      pcutoff <- q.value
+    if (length(which(dfmDE$adj.P.Val < DE.sig.p)) == 0){
+      warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, alpha is applied on raw p.values.")
+      pcutoff <- DE.sig.p
       pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
       dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
     } else {
-      pcutoff <- max(dfmDE[dfmDE$adj.P.Val < q.value, ]$P.Value)
+      pcutoff <- max(dfmDE[dfmDE$adj.P.Val < DE.sig.p, ]$P.Value)
       pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
       dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
     }
   } else {
-    pcutoff <- q.value
+    pcutoff <- DE.sig.p
     pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
     dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
   }
@@ -159,6 +160,9 @@ rbioarray_corcluster_super <- function(plotName = "data",
       diag(corp) <- NA
       rownames(corp) <- axisrow
       colnames(corp) <- axisrow
+      adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
+      rownames(adj_corp) <- rownames(corp)
+      colnames(adj_corp) <- colnames(corp)
 
       pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(corcoef, symm = TRUE, trace = "none",
@@ -166,10 +170,15 @@ rbioarray_corcluster_super <- function(plotName = "data",
       dev.off()
 
       if (sigPlot){
+        if (cor.sig.FDR){  # fdr correction or not
+          sigplotmtx <- adj_corp
+        } else {
+          sigplotmtx <- corp
+        }
         tryCatch(
           {
             pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
-            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = corp, sig.level = cor.sig,
+            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = cor.sig,
                      insig = c("label_sig"), pch.col = cor.sigLabelColour, pch.cex = cor.sigLabelSize,
                      col = brewer.pal(n_mapColour, mapColour),
                      tl.col = cor.labelColour, tl.cex = cor.labelSize, tl.srt = cor.labelAngle, cl.length = 3, cl.cex = cor.keySize)
@@ -190,6 +199,11 @@ rbioarray_corcluster_super <- function(plotName = "data",
       corcoef <- cor(cormtx[n_subgroup, ], method = method)
       corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
       diag(corp) <- NA
+      rownames(corp) <- seq(nrow(corp))
+      colnames(copr) <- seq(ncol(corp))
+      adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
+      rownames(adj_corp) <- rownames(corp)
+      colnames(adj_corp) <- colnames(corp)
 
       pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(corcoef, symm = TRUE, trace = "none",
@@ -197,10 +211,16 @@ rbioarray_corcluster_super <- function(plotName = "data",
       dev.off()
 
       if (sigPlot){
+        if (cor.sig.FDR){  # fdr correction or not
+          sigplotmtx <- adj_corp
+        } else {
+          sigplotmtx <- corp
+        }
+
         tryCatch(
           {
             pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
-            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = corp, sig.level = cor.sig,
+            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = cor.sig,
                      insig = c("label_sig"), pch.col = cor.sigLabelColour, pch.cex = cor.sigLabelSize,
                      col = brewer.pal(n_mapColour, mapColour),
                      tl.col = cor.labelColour, tl.cex = cor.labelSize, tl.srt = cor.labelAngle, cl.length = 3, cl.cex = cor.keySize)
@@ -221,6 +241,11 @@ rbioarray_corcluster_super <- function(plotName = "data",
     corcoef <- cor(cormtx[n_subgroup, ], method = method)
     corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
     diag(corp) <- NA
+    rownames(corp) <- seq(nrow(corp))
+    colnames(copr) <- seq(ncol(corp))
+    adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
+    rownames(adj_corp) <- rownames(corp)
+    colnames(adj_corp) <- colnames(corp)
 
     pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
     heatmap.2(corcoef, symm = TRUE, trace = "none",
@@ -228,10 +253,16 @@ rbioarray_corcluster_super <- function(plotName = "data",
     dev.off()
 
     if (sigPlot){
+      if (cor.sig.FDR){  # fdr correction or not
+        sigplotmtx <- adj_corp
+      } else {
+        sigplotmtx <- corp
+      }
+
       tryCatch(
         {
           pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
-          corrplot(corr = corcoef, method = "color", type = "upper", p.mat = corp, sig.level = cor.sig,
+          corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = cor.sig,
                    insig = c("label_sig"), pch.col = cor.sigLabelColour, pch.cex = cor.sigLabelSize,
                    col = brewer.pal(n_mapColour, mapColour),
                    tl.col = cor.labelColour, tl.cex = cor.labelSize, tl.srt = cor.labelAngle, cl.length = 3, cl.cex = cor.keySize)
@@ -246,6 +277,29 @@ rbioarray_corcluster_super <- function(plotName = "data",
   }
 
   # export correlation matrix
-  write.csv(corcoef, file = paste(plotName, ".cor.csv", sep = ""))
-  write.csv(corp, file = paste(plotName, ".cor.pvalue.csv", sep = ""))
+  outdfm1 <- data.frame(
+    group = paste(rownames(corcoef)[row(corcoef)[upper.tri(corcoef)]], colnames(corcoef)[col(corcoef)[upper.tri(corcoef)]], sep = "_"),
+    row = rownames(corcoef)[row(corcoef)[upper.tri(corcoef)]],
+    col = colnames(corcoef)[col(corcoef)[upper.tri(corcoef)]],
+    coefficient = corcoef[upper.tri(corcoef)]
+  )
+
+  outdfm2 <- data.frame(
+    group = paste(rownames(corp)[row(corp)[upper.tri(corp)]], colnames(corp)[col(corp)[upper.tri(corp)]], sep = "_"),
+    row = rownames(corp)[row(corp)[upper.tri(corp)]],
+    col = colnames(corp)[col(corp)[upper.tri(corp)]],
+    p.value = corp[upper.tri(corp)]
+  )
+
+  outdfm3 <- data.frame(
+    group = paste(rownames(adj_corp)[row(adj_corp)[upper.tri(adj_corp)]], colnames(adj_corp)[col(adj_corp)[upper.tri(adj_corp)]], sep = "_"),
+    row = rownames(adj_corp)[row(adj_corp)[upper.tri(adj_corp)]],
+    col = colnames(adj_corp)[col(adj_corp)[upper.tri(adj_corp)]],
+    adj.p.value = adj_corp[upper.tri(adj_corp)]
+  )
+
+  out <- merge(outdfm1, outdfm2[, c("group", "p.value")], by = "group", x.all = TRUE)
+  out <- merge(out, tstdfm3[, c("group", "adj.p.value")], x.all = TRUE)
+
+  write.csv(out, file = paste(plotName, ".cor.csv", sep = ""), row.names = FALSE)
 }
