@@ -5,13 +5,13 @@
 \title{rbioarray_hcluster_super}
 \usage{
 rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, ctrlProbe = TRUE,
-  ctrlTypeVar = "ControlType", dataProbeVar = "ProbeName", pcutoff = 0.05,
-  FC = 1.5, method = "spikein", fct, sampleName = NULL,
-  colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-  distance = "euclidean", clust = "complete", rowLabel = FALSE,
-  annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+  ctrlTypeVar = "ControlType", dataProbeVar = "ProbeName",
+  DE.sig.method = "none", DE.sig.p = 0.05, FC = 1.5, fct,
+  sampleName = NULL, colGroup = ifelse(length(levels(fct)) < 19,
+  length(levels(fct)), 19), distance = "euclidean", clust = "complete",
+  rowLabel = FALSE, annot = NULL, annotProbeVar = "ProbeName",
+  genesymbolVar = NULL, colColour = "Paired", mapColour = "PRGn",
+  n_mapColour = 11, ..., plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -26,11 +26,11 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, ctrlProbe = TRUE,
 
 \item{dataProbeVar}{\code{dfmDE} variable name for probe name. Default is \code{"ProbeName"}.}
 
-\item{pcutoff}{P value cut off. Default is \code{NULL}.}
+\item{DE.sig.method}{Thresholding method, "fdr", "spikein" or "none. Default is \code{"none"}.}
+
+\item{DE.sig.p}{P value cut off. Default is \code{0.05}.}
 
 \item{FC}{Fold change (FC) filter for the heatmap. Default is \code{NULL}.}
-
-\item{method}{Thresholding method, "fdr", "spikein" or "none. Default is \code{"spikein"}.}
 
 \item{fct}{Input \code{factor} object for samples.}
 
@@ -74,7 +74,7 @@ Note that both \code{annot} and \code{genesymbolVar} need to be set to display g
 \examples{
 \dontrun{
 rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive, dataProbeVar = "ProbeName",
-                         FC = 1.5, pcutoff = 0.0003461,
+                         FC = 1.5, DE.sig.p = 0.0003461,
                          clust = "ward.D2",
                          fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
                          levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),

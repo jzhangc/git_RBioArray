@@ -32,6 +32,8 @@ Update log
       - FDR corretion option added for correlation p values
       - The "q.value" argument for all the applicable functions changed to "sig.p"
       - DE method argument adjusted for rbioarray_hcluster_super()
+      - pcutoff argument for rbioarray_hcluster_super set to "DE.p.sig"
+      - DE argument for rbioarray_DE() adnd rbioarray_venn_DE changed to "sig.method"
       - Bug fixes
 
     0.4.5 (Mar.16.2018)

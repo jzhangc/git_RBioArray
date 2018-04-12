@@ -7,12 +7,12 @@
 rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
   rmControl = TRUE, n_subgroup = NULL, dfmDE = NULL, FDR = TURE,
   DE.sig.p = 0.05, FC = NULL, dataProbeVar = NULL, method = "pearson",
-  sigPlot = FALSE, cor.sig.FDR = FALSE, cor.sig = 0.05,
-  cor.sigLabelColour = "red", cor.sigLabelSize = 3,
-  cor.labelColour = "black", cor.labelSize = 1, cor.labelAngle = 90,
-  cor.keySize = 1, axisLabel = FALSE, annot = NULL,
-  genesymbolVar = NULL, mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+  sigPlot = FALSE, sigPlot.sig.FDR = FALSE, sigPlot.sig = 0.05,
+  sigPlot.sigLabelColour = "red", sigPlot.sigLabelSize = 3,
+  sigPlot.labelColour = "black", sigPlot.labelSize = 1,
+  sigPlot.labelAngle = 90, sigPlot.keySize = 1, axisLabel = FALSE,
+  annot = NULL, genesymbolVar = NULL, mapColour = "PRGn",
+  n_mapColour = 11, ..., plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -37,25 +37,25 @@ rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
 
 \item{sigPlot}{If to generate a significance heatmap. Default is \code{FALSE},}
 
-\item{cor.sig.FDR}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
+\item{sigPlot.sig.FDR}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
 
-\item{cor.sig}{Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}}
+\item{sigPlot.sig}{Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}}
 
-\item{cor.sigLabelColour}{Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.}
+\item{sigPlot.sigLabelColour}{Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.}
 
-\item{cor.sigLabelSize}{Only set when \code{sigPlot = TRUE}, the size for label for the significant pairs. Default is \code{3}.}
+\item{sigPlot.sigLabelSize}{Only set when \code{sigPlot = TRUE}, the size for label for the significant pairs. Default is \code{3}.}
 
-\item{cor.labelColour}{Only set when \code{sigPlot = TRUE}, the significance heatmap axis label colour. Default is \code{"black"}.}
+\item{sigPlot.labelColour}{Only set when \code{sigPlot = TRUE}, the significance heatmap axis label colour. Default is \code{"black"}.}
 
-\item{cor.labelSize}{Only set when \code{sigPlot = TRUE}, the significance heatmap axis label size. Default is \code{1}.}
+\item{sigPlot.labelSize}{Only set when \code{sigPlot = TRUE}, the significance heatmap axis label size. Default is \code{1}.}
 
-\item{cor.labelAngle}{Only set when \code{sigPlot = TRUE}, the significance heatmap axis label angle. Default is \code{90}.}
+\item{sigPlot.labelAngle}{Only set when \code{sigPlot = TRUE}, the significance heatmap axis label angle. Default is \code{90}.}
 
-\item{cor.keySize}{Only set when \code{sigPlot = TRUE}, the significance heatmap colour key size. Default is \code{1}.}
+\item{sigPlot.keySize}{Only set when \code{sigPlot = TRUE}, the significance heatmap colour key size. Default is \code{1}.}
 
 \item{axisLabel}{Whether to display label for both x- and y- axes. Default is \code{FALSE}.}
 
-\item{annot}{The optional annotation matrix. Only needs to be set to display inforamtions for}
+\item{annot}{The optional annotation matrix. Only needs to be set if \code{axisLabel = TRUE} AND if there is no genesymbolVar in the input data.}
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
 

@@ -11,16 +11,16 @@
 #' @param geneName If to only use probes with a gene name. Default is \code{FALSE}.
 #' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
-#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} or \code{"none"}. Default is \code{"fdr"}.
-#' @param fltlist Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
-#' @param design Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.
-#' @param contra Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.
-#' @param weights Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
-#' @param sig.p P value threshold. Only needed for \code{DE = "fdr"} and \code{DE = "spikein"} when calculated p value is larger than sig.p. Default is \code{0.05}.
+#' @param sig.method DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} or \code{"none"}. Default is \code{"fdr"}.
+#' @param fltlist Only needed when \code{sig.method = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
+#' @param design Only needed when \code{sig.method = "spikein"}. Design matrix. Default is \code{NULL}.
+#' @param contra Only needed when \code{sig.method = "spikein"}. Contrast matrix. Default is \code{NULL}.
+#' @param weights Only needed when \code{sig.method = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
+#' @param sig.p P value threshold. Only needed for \code{sig.method = "fdr"} and \code{sig.method = "spikein"} when calculated p value is larger than sig.p. Default is \code{0.05}.
 #' @param FC Fold change threshold. Default is \code{1.5}.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @return The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
-#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{DE = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
+#' @details When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{sig.method = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
 #' @import doParallel
 #' @import foreach
 #' @importFrom limma lmFit eBayes topTable contrasts.fit vennDiagram
@@ -29,7 +29,7 @@
 #' \dontrun{
 #' rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
 #'                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-#'                   DE = "spikein", fltlist = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
+#'                   sig.method = "spikein", fltlist = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
 #'                   parallelComputing = FALSE)
 #' }
 #' @export
@@ -37,7 +37,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
                               annot = NULL,
                               DEdata = NULL, dataProbeVar = "ProbeName",
                               geneName = FALSE, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-                              DE = "fdr", fltlist = NULL, design = NULL, contra = NULL, weights = NULL, sig.p = 0.05, FC = 1.5,
+                              sig.method = "fdr", fltlist = NULL, design = NULL, contra = NULL, weights = NULL, sig.p = 0.05, FC = 1.5,
                               parallelComputing = FALSE){
   ## check the key arguments
   if (is.null(DEdata)){
@@ -74,7 +74,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
     # set up tmpdfm
     tmpdfm <- m[[n]]
     # set the cutoff
-    if (tolower(DE) == "fdr"){
+    if (tolower(sig.method) == "fdr"){
       if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
         warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
         p_threshold <- sig.p
@@ -82,7 +82,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
         p_threshold <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
       }
 
-    } else if (tolower(DE) == "spikein") {
+    } else if (tolower(sig.method) == "spikein") {
       # check arugments
       if (is.null(fltlist) | is.null(design) | is.null(contra) | is.null(weights)){
         warning(cat("Arguments not complete for \"spikein\" method. Proceed with \"fdr\" instead."))
@@ -110,7 +110,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
         ifelse(min(PC$p.value[, cf[n]]) > sig.p, p_threshold <- sig.p, p_threshold <- min(PC$p.value[, cf[n]]))
       }
 
-    } else if (tolower(DE) == "none"){
+    } else if (tolower(sig.method) == "none"){
       p_threshold <- sig.p
     } else {stop(cat("Please set p value thresholding method, \"fdr\", \"spikein\", or \"none\"."))}
     return(p_threshold)

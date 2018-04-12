@@ -276,8 +276,8 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
 #' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
 #' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
-#' @param DE DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.
-#' @param sig.p Only used when DE set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
+#' @param sig.method DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.
+#' @param sig.p Only used when sig.method set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
 #' @param plotTitle Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
@@ -291,7 +291,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
-#' @details When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{sig.p}. When set \code{DE = "none"}, the p cutoff will be \code{sig.p}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @details When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @import ggplot2
 #' @import doParallel
 #' @import foreach
@@ -314,7 +314,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
                          ...,
                          plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
                          FC = 1.5,
-                         ctrlProbe = TRUE, ctrlTypeVar = "ControlType", DE = "fdr", sig.p = 0.05,
+                         ctrlProbe = TRUE, ctrlTypeVar = "ControlType", sig.method = "fdr", sig.p = 0.05,
                          plotTitle = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
                          symbolSize = 2, sigColour = "red", nonsigColour = "gray",
                          xTxtSize = 10, yTxtSize =10,
@@ -335,7 +335,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
   if (is.null(contra)){
     stop("Please set contrast object. Function terminated.\n")
   }
-  if (tolower(DE) == "spikein"){
+  if (tolower(sig.method) == "spikein"){
     if (!ctrlProbe){
       stop(cat("\"spiken\" DE method can only be set when ctrlProbe = TRUE and ctrlTypeVar is properly set. Function terminated.\n"))
     }
@@ -373,16 +373,16 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     }
 
     # set the cutoff
-    if (tolower(DE) == "fdr"){
+    if (tolower(sig.method) == "fdr"){
       if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
         warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
         pcutoff <- sig.p
       } else {
         pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
       }
-    } else if (tolower(DE) == "spikein") {
+    } else if (tolower(sig.method) == "spikein") {
       ifelse(min(PC$p.value[, cf[j]]) > sig.p, pcutoff <- sig.p, pcutoff <- min(PC$p.value[, cf[j]]))
-    } else if (tolower(DE) == "none"){
+    } else if (tolower(sig.method) == "none"){
       pcutoff <- sig.p
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
     cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
@@ -466,7 +466,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     out <- fit
   }
 
-  if (tolower(DE) == "spikein"){ # extract PC stats for spikein method
+  if (tolower(sig.method) == "spikein"){ # extract PC stats for spikein method
     PCntl <- fit[fit$genes[, ctrlTypeVar] == 1, ]
   } else {
     PCntl <- NULL
@@ -535,7 +535,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
       outlist <- mclapply(cf, FUN = function(i){
         tmp <- topTable(out, coef = i, number = Inf, ...)
         tmp$ProbeName <- rownames(tmp)
-        tmp <- merge(tmp, annot, by = "ProbeName")
+        if (!is.null(annot)){ # merge with annotation dataframe
+          tmp <- merge(tmp, annot, by = "ProbeName")
+        }
         return(tmp)
       }, mc.cores = n_cores, mc.preschedule = FALSE)
 
@@ -554,7 +556,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
 
   ## output the DE/fit objects to the environment, as well as the DE csv files into wd
   fitout <- topTable(out, number = Inf)
-  fitout <- merge(fitout, annot, by = "ProbeName")
+  if (!is.null(annot)){ # merge with annotation dataframe
+    fitout <- merge(fitout, annot, by = "ProbeName")
+  }
   assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
   write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)

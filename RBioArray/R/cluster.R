@@ -259,9 +259,9 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 #' @param ctrlProbe Wether or not the data set has control type variable in \code{fltDOI}, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
 #' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
 #' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{"ProbeName"}.
-#' @param pcutoff P value cut off. Default is \code{NULL}.
+#' @param DE.sig.method Thresholding method, "fdr", "spikein" or "none. Default is \code{"none"}.
+#' @param DE.sig.p P value cut off. Default is \code{0.05}.
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
-#' @param method Thresholding method, "fdr", "spikein" or "none. Default is \code{"spikein"}.
 #' @param fct Input \code{factor} object for samples.
 #' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
@@ -284,7 +284,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 #' @examples
 #' \dontrun{
 #' rbioarray_hcluster_super(plotName = "pre_experiVnaive", fltDOI = pre_experiVnaive_super, dfmDE = fltdata_DE$pre_experiVnaive, dataProbeVar = "ProbeName",
-#'                          FC = 1.5, pcutoff = 0.0003461,
+#'                          FC = 1.5, DE.sig.p = 0.0003461,
 #'                          clust = "ward.D2",
 #'                          fct = factor(c("naivepre", "naivepre", "naivepre", "naivepre", "exppre", "exppre", "exppre", "exppre", "exppre"),
 #'                          levels = c("naivepre", "exppre")), trace = "none", srtCol = 30, offsetCol = 0.5, adjCol = c(1, 0),
@@ -297,8 +297,8 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                                      ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
                                      dataProbeVar = "ProbeName",
-                                     pcutoff = 0.05, FC = 1.5,
-                                     method = "spikein",
+                                     DE.sig.method = "none",
+                                     DE.sig.p = 0.05, FC = 1.5,
                                      fct, sampleName = NULL,
                                      colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = "euclidean", clust = "complete",
@@ -321,11 +321,22 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
     }
   }
 
-  if (is.null(pcutoff)){
-    stop("Please set p value threshold.")
+
+  if (tolower(DE.sig.method) == "fdr"){
+    if (length(which(dfmDE$adj.P.Val < DE.sig.p)) == 0){
+      warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, alpha is applied on raw p.values.")
+      pcutoff <- DE.sig.p
+      pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+      dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+    } else {
+      pcutoff <- max(dfmDE[dfmDE$adj.P.Val < DE.sig.p, ]$P.Value)
+      pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+      dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+    }
   } else {
-    ifelse(method == "fdr", pb_name <- dfmDE[dfmDE$adj.P.Val < pcutoff, dataProbeVar], pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar])
-    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ] # the reason to use $ProbeName is because dfm is from fltDOI
+    pcutoff <- DE.sig.p
+    pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
   }
 
   ## set FC filter

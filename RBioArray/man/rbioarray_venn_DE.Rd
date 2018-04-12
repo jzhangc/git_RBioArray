@@ -7,7 +7,7 @@
 rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
   plotHeight = 5, ..., annot = NULL, DEdata = NULL,
   dataProbeVar = "ProbeName", geneName = FALSE,
-  annotProbeVar = "ProbeName", genesymbolVar = NULL, DE = "fdr",
+  annotProbeVar = "ProbeName", genesymbolVar = NULL, sig.method = "fdr",
   fltlist = NULL, design = NULL, contra = NULL, weights = NULL,
   sig.p = 0.05, FC = 1.5, parallelComputing = FALSE)
 }
@@ -32,17 +32,17 @@ rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
 
 \item{genesymbolVar}{Only needed when \code{geneName = TRUE}. The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 
-\item{DE}{DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} or \code{"none"}. Default is \code{"fdr"}.}
+\item{sig.method}{DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} or \code{"none"}. Default is \code{"fdr"}.}
 
-\item{fltlist}{Only needed when \code{DE = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
+\item{fltlist}{Only needed when \code{sig.method = "spikein"}. Filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
 
-\item{design}{Only needed when \code{DE = "spikein"}. Design matrix. Default is \code{NULL}.}
+\item{design}{Only needed when \code{sig.method = "spikein"}. Design matrix. Default is \code{NULL}.}
 
-\item{contra}{Only needed when \code{DE = "spikein"}. Contrast matrix. Default is \code{NULL}.}
+\item{contra}{Only needed when \code{sig.method = "spikein"}. Contrast matrix. Default is \code{NULL}.}
 
-\item{weights}{Only needed when \code{DE = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.}
+\item{weights}{Only needed when \code{sig.method = "spikein"}. Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.}
 
-\item{sig.p}{P value threshold. Only needed for \code{DE = "fdr"} and \code{DE = "spikein"} when calculated p value is larger than sig.p. Default is \code{0.05}.}
+\item{sig.p}{P value threshold. Only needed for \code{sig.method = "fdr"} and \code{sig.method = "spikein"} when calculated p value is larger than sig.p. Default is \code{0.05}.}
 
 \item{FC}{Fold change threshold. Default is \code{1.5}.}
 
@@ -55,13 +55,13 @@ The function outputs a \code{pdf} file for venn diagrams (total, up- and down-re
 Venn diagrame for DE results. Uses \code{vennDiagram()} from \code{limma} package.
 }
 \details{
-When \code{"fdr"} set for DE, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{DE = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{DE = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
+When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{1}. If the arugments for \code{sig.method = "spikein"} are not complete, the function will automatically use \code{"fdr"}.
 }
 \examples{
 \dontrun{
 rbioarray_venn_DE(plotName = "DE", cex = c(1, 2, 2), mar = rep(0.5,4), names = c("control", "stress1", "stress2"),
                   DEdata = fltdata_DE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-                  DE = "spikein", fltlist = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
+                  sig.method = "spikein", fltlist = fltdata, annot = annot, design = design, contra = contra, weights = fltdata$ArrayWeight,
                   parallelComputing = FALSE)
 }
 }

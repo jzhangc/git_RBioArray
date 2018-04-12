@@ -31,16 +31,16 @@ cor_pvalue <- function(r, n){
 #' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
 #' @param method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
 #' @param sigPlot If to generate a significance heatmap. Default is \code{FALSE},
-#' @param cor.sig.FDR If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.
-#' @param cor.sig Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}
-#' @param cor.sigLabelColour Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.
-#' @param cor.sigLabelSize Only set when \code{sigPlot = TRUE}, the size for label for the significant pairs. Default is \code{3}.
-#' @param cor.labelColour Only set when \code{sigPlot = TRUE}, the significance heatmap axis label colour. Default is \code{"black"}.
-#' @param cor.labelSize Only set when \code{sigPlot = TRUE}, the significance heatmap axis label size. Default is \code{1}.
-#' @param cor.labelAngle Only set when \code{sigPlot = TRUE}, the significance heatmap axis label angle. Default is \code{90}.
-#' @param cor.keySize Only set when \code{sigPlot = TRUE}, the significance heatmap colour key size. Default is \code{1}.
+#' @param sigPlot.sig.FDR If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.
+#' @param sigPlot.sig Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}
+#' @param sigPlot.sigLabelColour Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.
+#' @param sigPlot.sigLabelSize Only set when \code{sigPlot = TRUE}, the size for label for the significant pairs. Default is \code{3}.
+#' @param sigPlot.labelColour Only set when \code{sigPlot = TRUE}, the significance heatmap axis label colour. Default is \code{"black"}.
+#' @param sigPlot.labelSize Only set when \code{sigPlot = TRUE}, the significance heatmap axis label size. Default is \code{1}.
+#' @param sigPlot.labelAngle Only set when \code{sigPlot = TRUE}, the significance heatmap axis label angle. Default is \code{90}.
+#' @param sigPlot.keySize Only set when \code{sigPlot = TRUE}, the significance heatmap colour key size. Default is \code{1}.
 #' @param axisLabel Whether to display label for both x- and y- axes. Default is \code{FALSE}.
-#' @param annot The optional annotation matrix. Only needs to be set to display inforamtions for
+#' @param annot The optional annotation matrix. Only needs to be set if \code{axisLabel = TRUE} AND if there is no genesymbolVar in the input data.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
@@ -73,8 +73,9 @@ rbioarray_corcluster_super <- function(plotName = "data",
                                        dfmDE = NULL, FDR = TURE, DE.sig.p = 0.05, FC = NULL,
                                        dataProbeVar = NULL,
                                        method = "pearson",
-                                       sigPlot = FALSE, cor.sig.FDR = FALSE, cor.sig = 0.05, cor.sigLabelColour = "red", cor.sigLabelSize = 3,
-                                       cor.labelColour = "black", cor.labelSize = 1, cor.labelAngle = 90, cor.keySize = 1,
+                                       sigPlot = FALSE, sigPlot.sig.FDR = FALSE, sigPlot.sig = 0.05,
+                                       sigPlot.sigLabelColour = "red", sigPlot.sigLabelSize = 3,
+                                       sigPlot.labelColour = "black", sigPlot.labelSize = 1, sigPlot.labelAngle = 90, sigPlot.keySize = 1,
                                        axisLabel = FALSE, annot = NULL, genesymbolVar = NULL,
                                        mapColour = "PRGn", n_mapColour = 11, ...,
                                        plotWidth = 7, plotHeight = 7){
@@ -166,11 +167,11 @@ rbioarray_corcluster_super <- function(plotName = "data",
 
       pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(corcoef, symm = TRUE, trace = "none",
-                col = brewer.pal(n_mapColour, mapColour), labRow = axisrow, labCol = axisrow, ...)
+                col = brewer.pal(n_mapColour, mapColour), labRow = rownames(corcoef), labCol = colnames(corcoef), ...)
       dev.off()
 
       if (sigPlot){
-        if (cor.sig.FDR){  # fdr correction or not
+        if (sigPlot.sig.FDR){  # fdr correction or not
           sigplotmtx <- adj_corp
         } else {
           sigplotmtx <- corp
@@ -178,10 +179,10 @@ rbioarray_corcluster_super <- function(plotName = "data",
         tryCatch(
           {
             pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
-            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = cor.sig,
-                     insig = c("label_sig"), pch.col = cor.sigLabelColour, pch.cex = cor.sigLabelSize,
+            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = sigPlot.sig,
+                     insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
                      col = brewer.pal(n_mapColour, mapColour),
-                     tl.col = cor.labelColour, tl.cex = cor.labelSize, tl.srt = cor.labelAngle, cl.length = 3, cl.cex = cor.keySize)
+                     tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
             dev.off()
           },
           error = function(err){
@@ -191,7 +192,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
         )
       }
     } else {
-      print("No gene symbol variable or annotation dataframe detected. Proceed without one.")
+      print("No gene symbol variable or annotation dataframe detected. Proceed without them.")
 
       mtx <- as.matrix(dfm[, s])
       rownames(mtx) <- dfm[, dataProbeVar]
@@ -199,19 +200,17 @@ rbioarray_corcluster_super <- function(plotName = "data",
       corcoef <- cor(cormtx[n_subgroup, ], method = method)
       corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
       diag(corp) <- NA
-      rownames(corp) <- seq(nrow(corp))
-      colnames(corp) <- seq(ncol(corp))
       adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
       rownames(adj_corp) <- rownames(corp)
       colnames(adj_corp) <- colnames(corp)
 
       pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(corcoef, symm = TRUE, trace = "none",
-                col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
+                col = brewer.pal(n_mapColour, mapColour), labRow = rownames(corcoef), labCol = colnames(corcoef),...)
       dev.off()
 
       if (sigPlot){
-        if (cor.sig.FDR){  # fdr correction or not
+        if (sigPlot.sig.FDR){  # fdr correction or not
           sigplotmtx <- adj_corp
         } else {
           sigplotmtx <- corp
@@ -220,10 +219,10 @@ rbioarray_corcluster_super <- function(plotName = "data",
         tryCatch(
           {
             pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
-            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = cor.sig,
-                     insig = c("label_sig"), pch.col = cor.sigLabelColour, pch.cex = cor.sigLabelSize,
+            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = sigPlot.sig,
+                     insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
                      col = brewer.pal(n_mapColour, mapColour),
-                     tl.col = cor.labelColour, tl.cex = cor.labelSize, tl.srt = cor.labelAngle, cl.length = 3, cl.cex = cor.keySize)
+                     tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
             dev.off()
           },
           error = function(err){
@@ -241,8 +240,6 @@ rbioarray_corcluster_super <- function(plotName = "data",
     corcoef <- cor(cormtx[n_subgroup, ], method = method)
     corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
     diag(corp) <- NA
-    rownames(corp) <- seq(nrow(corp))
-    colnames(corp) <- seq(ncol(corp))
     adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
     rownames(adj_corp) <- rownames(corp)
     colnames(adj_corp) <- colnames(corp)
@@ -253,7 +250,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
     dev.off()
 
     if (sigPlot){
-      if (cor.sig.FDR){  # fdr correction or not
+      if (sigPlot.sig.FDR){  # fdr correction or not
         sigplotmtx <- adj_corp
       } else {
         sigplotmtx <- corp
@@ -262,10 +259,10 @@ rbioarray_corcluster_super <- function(plotName = "data",
       tryCatch(
         {
           pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
-          corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = cor.sig,
-                   insig = c("label_sig"), pch.col = cor.sigLabelColour, pch.cex = cor.sigLabelSize,
+          corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = sigPlot.sig,
+                   insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
                    col = brewer.pal(n_mapColour, mapColour),
-                   tl.col = cor.labelColour, tl.cex = cor.labelSize, tl.srt = cor.labelAngle, cl.length = 3, cl.cex = cor.keySize)
+                   tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
           dev.off()
         },
         error = function(err){
