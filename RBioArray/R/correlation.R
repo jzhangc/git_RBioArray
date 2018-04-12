@@ -200,7 +200,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
       corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
       diag(corp) <- NA
       rownames(corp) <- seq(nrow(corp))
-      colnames(copr) <- seq(ncol(corp))
+      colnames(corp) <- seq(ncol(corp))
       adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
       rownames(adj_corp) <- rownames(corp)
       colnames(adj_corp) <- colnames(corp)
@@ -242,7 +242,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
     corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
     diag(corp) <- NA
     rownames(corp) <- seq(nrow(corp))
-    colnames(copr) <- seq(ncol(corp))
+    colnames(corp) <- seq(ncol(corp))
     adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
     rownames(adj_corp) <- rownames(corp)
     colnames(adj_corp) <- colnames(corp)
