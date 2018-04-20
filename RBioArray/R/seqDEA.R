@@ -14,9 +14,9 @@
 #' @export
 rbioseq_clr_ilr_transfo <- function(x, offset = 0, mode = "clr", ilr.method.fast = TRUE){
   # data and arguments check
-  if (!is.matrix(x)) stop("x needs to be a matrix")
-  if (any(x == 0) & offset == 0) stop("zero detected in x. set offset to avoid it for ratio transformation")
-  if (!tolower(mode) %in% c("clr", "ilr")) stop("choose the proper transformation mode: \"clr\" or \"ilr\"")
+  if (!is.matrix(x))stop("x needs to be a matrix")
+  if (any(x == 0) & offset == 0)stop("zero detected in x. set offset to avoid it for ratio transformation")
+  if (!tolower(mode) %in% c("clr", "ilr"))stop("choose the proper transformation mode: \"clr\" or \"ilr\"")
 
   # log ratio transformation
   if (tolower(mode) == "clr"){  # clr calculation
