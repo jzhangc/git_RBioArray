@@ -27,13 +27,16 @@ Update log
       - Bayesian biclustering function rbioarray_bbc() added
       - K-mean clustering function rbioarray_kmean() added
       - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
-      - Clustering functions separated into cluster.R file
+      - Centered log transformation and isometric log transformation function rbioseq_clr_ilr_transfo() added
+      - Normalizatin method arugment norm.method added to rbioseq_DE() function
+        - options are: "TMM","RLE","upperquartile","none". NOTE: clr and ilr options to be added in the next release
       - Correlation function rbioarray_corcluster_super() now outputs a summary csv file for the significance test
       - FDR corretion option added for correlation p values
       - The "q.value" argument for all the applicable functions changed to "sig.p"
       - DE method argument adjusted for rbioarray_hcluster_super()
       - pcutoff argument for rbioarray_hcluster_super set to "DE.p.sig"
       - DE argument for rbioarray_DE() adnd rbioarray_venn_DE changed to "sig.method"
+      - Clustering functions separated into cluster.R file
       - Bug fixes
 
     0.4.5 (Mar.16.2018)

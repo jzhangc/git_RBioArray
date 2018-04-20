@@ -1,3 +1,58 @@
+#' @title rbioseq_clr_ilr_transfo
+#'
+#' @description Log ratio tansformation function for read count data.
+#' @param x Input read count data matrix.
+#' @param offset Read count offset value added to avoid zero. Default is \code{0}.
+#' @param mode Log ratio transformation method. Options are "clr" (centered log transformation) and "ilr" (isometric log transformation). Default is \code{"clr"}.
+#' @param ilr.method.fast Useful only when \code{mode = "ilr"}. Default is \code{TRUE}.
+#' @return A data matrix with log ratio transformed values.
+#' @details This funciton is needed as part of the data pre-processing procedure to run LPS-DA analysis featured in \code{RBioFS} package. As per Quinn et al. (2018), NGS data can be considered as compositional data. As such, data must be transformed for usual statistical analysis visualization. Log ratio transfromation serves such purpose. Note that the number of features will be one less when using "ilr" method. It is not to be combined with the other normalization methods featured in the \code{\link{rbioseq_DE}}. Ref: Quinn TP, et al. 2018. Understanding sequencing data as compositions: an outlook and review. Bioinformatics. 2018: 1 - 9.
+#' @examples
+#' \dontrun{
+#' tstX <- rbioseq_clr_ilr_transfo(tstdata, offset = 1, mode = "clr")
+#' }
+#' @export
+rbioseq_clr_ilr_transfo <- function(x, offset = 0, mode = "clr", ilr.method.fast = TRUE){
+  # data and arguments check
+  if (!is.matrix(x)) stop("x needs to be a matrix")
+  if (any(x == 0) & offset == 0) stop("zero detected in x. set offset to avoid it for ratio transformation")
+  if (!tolower(mode) %in% c("clr", "ilr")) stop("choose the proper transformation mode: \"clr\" or \"ilr\"")
+
+  # log ratio transformation
+  if (tolower(mode) == "clr"){  # clr calculation
+    if (dim(x)[2] == 1){
+      cat()
+      out <- list(x.clr = x, gm = rep(1, dim(x)[1]))
+    } else {
+      gm <- apply(x, 1, function(x) exp(mean(log(x + offset))))  # geometric mean = exp(mean(log(X)))
+      clrX = log((x + offset) / (gm))  # clr formula
+      out <- clrX
+    }
+  } else if (tolower(mode) == "ilr"){  # ilr calculation, modified from ilr.transfo function from mixOmics package
+    ilrX = matrix(NA, nrow = nrow(x), ncol = ncol(x) - 1)
+    D = ncol(x)
+    if (ilr.method.fast) {
+      for (i in 1:ncol(ilrX)) {
+        ilrX[, i] = sqrt((D - i)/(D - i + 1)) * log(((apply(as.matrix(x[,
+                                                                        (i + 1):D, drop = FALSE]), 1, prod) + offset)^(1/(D -
+                                                                                                                            i)))/(x[, i] + offset))
+      }
+    } else {
+      for (i in 1:ncol(ilrX)) {
+        ilrX[, i] = sqrt((D - i)/(D - i + 1)) * log(apply(as.matrix(x[,
+                                                                      (i + 1):D]), 1, function(x) {
+                                                                        exp(log(x))
+                                                                      })/(x[, i] + offset) + offset)
+      }
+    }
+    out <- as.matrix(ilrX)
+  }
+
+  return(out)
+}
+
+
+
 #' @title rbioseq_DE
 #'
 #' @description DE analysis function for RNA-seq data, with count filtering functionality.
@@ -5,6 +60,7 @@
 #' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
 #' @param dfm_annot Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
 #' @param count_threshold Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.
+#' @param norm.method Normalization methods.Currently, the none-compositional methods are supported. Options are \code{"TMM","RLE","upperquartile","none"}. Default is \code{"TMM"}. See \code{calcNormFactors} function from  \code{edgeR} pacakge for more.
 #' @param qc_plot Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{TRUE}.
 #' @param design Design matrix. Default is \code{NULL}.
 #' @param contra Contrast matrix. Default is \code{NULL}.
@@ -50,7 +106,9 @@
 #' }
 #' @export
 rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
-                       count_threshold = "none", qc_plot = TRUE,
+                       count_threshold = "none",
+                       norm.method = "TMM",
+                       qc_plot = TRUE,
                        design = NULL, contra = NULL,
                        ...,
                        plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
@@ -80,6 +138,8 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
   if (is.null(contra)){
     stop("Please set contrast object.")
   }
+
+  if (!norm.method )
 
   ## extract coefficients
   cf <- colnames(contra) # extract coefficient
@@ -190,7 +250,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
   }
 
   # for data Voom normalization
-  dgenormf <- calcNormFactors(dge)
+  dgenormf <- calcNormFactors(dge, method = norm.method)
   vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc_plot, normalization = "quantile") # Voom normalization with quality weights
   cat("DONE!\n") # message
 

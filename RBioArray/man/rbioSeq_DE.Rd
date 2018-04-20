@@ -5,8 +5,8 @@
 \title{rbioseq_DE}
 \usage{
 rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
-  count_threshold = "none", qc_plot = TRUE, design = NULL,
-  contra = NULL, ..., plot = TRUE, geneName = FALSE,
+  count_threshold = "none", norm.method = "TMM", qc_plot = TRUE,
+  design = NULL, contra = NULL, ..., plot = TRUE, geneName = FALSE,
   genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5,
   padding = 0.5, FC = 1.5, FDR = TRUE, sig.p = 0.05, Title = NULL,
   xLabel = "log2(fold change)", yLabel = "-log10(p value)",
@@ -22,6 +22,8 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
 \item{dfm_annot}{Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.}
 
 \item{count_threshold}{Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.}
+
+\item{norm.method}{Normalization methods.Currently, the none-compositional methods are supported. Options are \code{"TMM","RLE","upperquartile","none"}. Default is \code{"TMM"}. See \code{calcNormFactors} function from  \code{edgeR} pacakge for more.}
 
 \item{qc_plot}{Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{TRUE}.}
 
