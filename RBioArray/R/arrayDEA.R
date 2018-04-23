@@ -1,6 +1,6 @@
 #' @title rbioarray_PreProc
 #'
-#' @description Data pre-processing function for the
+#' @description Data pre-processing function for the microarary data.
 #' @param rawlist Input data, either a list, \code{EList} or \code{MAList} object.
 #' @param logTrans If to perfom a log transformation on the data or not. Default is \code{FALSE}.
 #' @param logTransMethod If \code{logTrans = TRUE}, set which method to use for the transformation, \code{"log2"} or \code{"log10"}. Default is \code{"log2"}.
