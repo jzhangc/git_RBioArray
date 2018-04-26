@@ -28,6 +28,7 @@ Update log
       - Bayesian biclustering function rbioarray_bbc() added
       - K-mean clustering function rbioarray_kmean() added
       - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
+
     
     (added)
       - Centered log transformation and isometric log transformation function rbioseq_clr_ilr_transfo() added
@@ -40,6 +41,8 @@ Update log
       - pcutoff argument for rbioarray_hcluster_super set to "DE.p.sig"
       - DE argument for rbioarray_DE() adnd rbioarray_venn_DE changed to "sig.method"
       - Clustering functions separated into cluster.R file
+      - Stats variable argument statsVar added to rbioGS_kegg(), so that P value and FC can be used. 
+      - Additional argument check added for rbioGS_kegg()
       - Bug fixes
 
     0.4.5 (Mar.16.2018)

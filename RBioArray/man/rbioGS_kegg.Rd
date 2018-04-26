@@ -4,12 +4,15 @@
 \alias{rbioGS_kegg}
 \title{rbioGS_kegg}
 \usage{
-rbioGS_kegg(dfm, entrezVar = NULL, keggID, suffix, species = "hsa", ...)
+rbioGS_kegg(dfm, entrezVar = NULL, statsVar = "logFC", keggID, suffix,
+  species = "hsa", ...)
 }
 \arguments{
 \item{dfm}{GS dataframe with \code{ENTREZID} and \code{logFC} variables.}
 
 \item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
+
+\item{statsVar}{Name of the stats variable that will be masked on the figure, such as FC, p-value, etc. Default is \code{"logFC"}}
 
 \item{keggID}{Make sure to have quotation marks around the ID number.}
 

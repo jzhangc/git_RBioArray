@@ -476,6 +476,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #' @description Download and generate DE results masked kegg pathway figures, using pathview package
 #' @param dfm GS dataframe with \code{ENTREZID} and \code{logFC} variables.
 #' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
+#' @param statsVar Name of the stats variable that will be masked on the figure, such as FC, p-value, etc. Default is \code{"logFC"}
 #' @param keggID Make sure to have quotation marks around the ID number.
 #' @param suffix Output file name suffix. Make sure to put it in quotation marks.
 #' @param species Set the species. Default is \code{"hsa"}. Visit kegg website for details.
@@ -491,22 +492,26 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #'
 #' }
 #' @export
-rbioGS_kegg <- function(dfm, entrezVar = NULL,
+rbioGS_kegg <- function(dfm, entrezVar = NULL, statsVar = "logFC",
                        keggID, suffix, species = "hsa", ...){
   # check entrez ID variable name
-  if (is.null(entrezVar)){
-    stop("Please provide the name for the Entrez ID variable from the input dataframe")
+  if (is.null(entrezVar) | !entreVar %in% names(dfm)){
+    stop("Entrez ID variable not found in the input dataframe")
+  }
+
+  if (!statsVar %in% names(dfm)){
+    stop("Stats variable not found in the input dataframe.")
   }
 
   # extract the complete case
   working_dfm <- dfm
 
   # prepare objects
-  logFC <- working_dfm$logFC
-  names(logFC) <- working_dfm[, entrezVar]
+  stats_mtx <- working_dfm[, statsVar]
+  names(stats_mtx) <- working_dfm[, entrezVar]
 
   # visualize
-  KEGG <- pathview(gene.data = logFC, pathway.id = keggID, species = species,
+  KEGG <- pathview(gene.data = stats_mtx, pathway.id = keggID, species = species,
                    out.suffix = suffix, keys.align = "y", match.data = FALSE,
                    key.pos = "topright", ...)
 
