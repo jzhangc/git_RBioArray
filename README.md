@@ -28,7 +28,6 @@ Update log
       - Bayesian biclustering function rbioarray_bbc() added
       - K-mean clustering function rbioarray_kmean() added
       - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
-
     
     (added)
       - Centered log transformation and isometric log transformation function rbioseq_clr_ilr_transfo() added
