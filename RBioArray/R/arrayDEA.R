@@ -299,7 +299,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @importFrom limma lmFit eBayes topTable contrasts.fit
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
-#' @importFrom gtable gtable_add_cols gtable_add_grob
+#' @importFrom RBioplot rightside_y
 #' @importFrom ggrepel geom_text_repel
 #' @examples
 #' \dontrun{
@@ -416,19 +416,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     }
 
     grid.newpage()
-    # extract gtable
-    pltgtb <- ggplot_gtable(ggplot_build(plt))
-    # add the right side y axis
-    Aa <- which(pltgtb$layout$name == "axis-l")
-    pltgtb_a <- pltgtb$grobs[[Aa]]
-    axs <- pltgtb_a$children[[2]]
-    axs$widths <- rev(axs$widths)
-    axs$grobs <- rev(axs$grobs)
-    axs$grobs[[1]]$x <- axs$grobs[[1]]$x - unit(1, "npc") + unit(0.08, "cm")
-    Ap <- c(subset(pltgtb$layout, name == "panel", select = t:r))
-    pltgtb <- gtable_add_cols(pltgtb, pltgtb$widths[pltgtb$layout[Aa, ]$l], length(pltgtb$widths) - 1)
-    pltgtb <- gtable_add_grob(pltgtb, axs, Ap$t, length(pltgtb$widths) - 1, Ap$b)
-
+    pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
     # export the file and draw a preview
     ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
            width = plotWidth, height = plotHeight, units = "mm",dpi = 600)

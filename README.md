@@ -42,6 +42,7 @@ Update log
       - Clustering functions separated into cluster.R file
       - Stats variable argument statsVar added to rbioGS_kegg(), so that P value and FC can be used. 
       - Additional argument check added for rbioGS_kegg()
+      - Rightside y-axis now uses a function from RBioplot pakcage, which now is a dependency
       - Bug fixes
 
     0.4.5 (Mar.16.2018)
