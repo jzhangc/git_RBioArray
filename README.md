@@ -39,7 +39,7 @@ Update log
       - Rightside y-axis now uses a function from RBioplot pakcage, which now is a dependency
       - Bug fixes
 
-    0.4.5 (Mar.16.2018)
+    0.4.5
       - Correlation p value function cor_pvalue() added
       - Updates made to rbioarray_corcluster_super()
         - Pearson correlation significance plot added to rbioarray_corcluster_super() via argument sigPlot = TRUE
