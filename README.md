@@ -22,7 +22,7 @@ Installation:
         devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos(), ref = "beta")  
 
 Update log
-
+      
     0.4.6 (4.26.2018)
       - Centered log transformation and isometric log transformation function rbioseq_clr_ilr_transfo() added
       - Normalizatin method arugment norm.method added to rbioseq_DE() function
