@@ -52,7 +52,6 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 0, mode = "clr", ilr.method.fast
 }
 
 
-
 #' @title rbioseq_DE
 #'
 #' @description DE analysis function for RNA-seq data, with count filtering functionality.
