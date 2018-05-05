@@ -21,7 +21,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
 
 \item{dfm_annot}{Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.}
 
-\item{count_threshold}{Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.}
+\item{count_threshold}{Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. Default is \code{"none"}.}
 
 \item{norm.method}{Normalization methods.Currently, the none-compositional methods are supported. Options are \code{"none", "TMM","RLE","upperquartile"}. Default is \code{"TMM"}. See \code{calcNormFactors} function from  \code{edgeR} pacakge for more.}
 

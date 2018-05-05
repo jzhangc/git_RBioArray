@@ -59,7 +59,7 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 0, mode = "clr", ilr.method.fast
 #' @param objTitle Name for the output list. Default is \code{"seq_data"}.
 #' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
 #' @param dfm_annot Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
-#' @param count_threshold Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.
+#' @param count_threshold Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. Default is \code{"none"}.
 #' @param norm.method Normalization methods.Currently, the none-compositional methods are supported. Options are \code{"none", "TMM","RLE","upperquartile"}. Default is \code{"TMM"}. See \code{calcNormFactors} function from  \code{edgeR} pacakge for more.
 #' @param qc_plot Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{TRUE}.
 #' @param design Design matrix. Default is \code{NULL}.
