@@ -23,12 +23,6 @@ Installation:
 
 Update log
 
-    0.4.7 (feature preview)
-    (ICEBOX)
-      - Bayesian biclustering function rbioarray_bbc() added
-      - K-mean clustering function rbioarray_kmean() added
-      - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
-    
     0.4.6 (4.26.2018)
       - Centered log transformation and isometric log transformation function rbioseq_clr_ilr_transfo() added
       - Normalizatin method arugment norm.method added to rbioseq_DE() function

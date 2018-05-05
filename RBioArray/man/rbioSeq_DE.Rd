@@ -23,7 +23,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL, dfm_annot = NULL,
 
 \item{count_threshold}{Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.}
 
-\item{norm.method}{Normalization methods.Currently, the none-compositional methods are supported. Options are \code{"TMM","RLE","upperquartile","none"}. Default is \code{"TMM"}. See \code{calcNormFactors} function from  \code{edgeR} pacakge for more.}
+\item{norm.method}{Normalization methods.Currently, the none-compositional methods are supported. Options are \code{"none", "TMM","RLE","upperquartile"}. Default is \code{"TMM"}. See \code{calcNormFactors} function from  \code{edgeR} pacakge for more.}
 
 \item{qc_plot}{Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{TRUE}.}
 
