@@ -25,12 +25,14 @@ Update log
 
     0.4.7 (feature preview)
     (ICEBOX)
+      - Updates to RNAseq functions:
+        - rbioseq_ImportCount() function added to import HTseq counted files to R environment
+        - pre-processing steps separated from rbioseq_DE() to rbioseq_PreProc()
+        - rboseq_PreProc() featuers multiple raw reads tranformaton and normalization methods
+      
       - New clustering funcions:
         - Bayesian biclustering function rbioarray_bbc()
         - K-mean clustering function rbioarray_kmean()
-        
-      - Updates to RNAseq functions :
-        - pre-processing steps separated from rbioseq_DE() to rbioseq_PreProc()
         
       - Updates to microarray functions:
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()

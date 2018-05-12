@@ -1,6 +1,6 @@
 #' @title rbioseq_clr_ilr_transfo
 #'
-#' @description Log ratio tansformation function for read count data.
+#' @description Log ratio tansformation function for read count data. Row: sample, column: features.
 #' @param x Input read count data matrix.
 #' @param offset Read count offset value added to avoid zero. Default is \code{0}.
 #' @param mode Log ratio transformation method. Options are "clr" (centered log transformation) and "ilr" (isometric log transformation). Default is \code{"clr"}.

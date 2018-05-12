@@ -20,7 +20,7 @@ rbioseq_clr_ilr_transfo(x, offset = 0, mode = "clr",
 A data matrix with log ratio transformed values.
 }
 \description{
-Log ratio tansformation function for read count data.
+Log ratio tansformation function for read count data. Row: sample, column: features.
 }
 \details{
 This funciton is needed as part of the data pre-processing procedure to run LPS-DA analysis featured in \code{RBioFS} package. As per Quinn et al. (2018), NGS data can be considered as compositional data. As such, data must be transformed for usual statistical analysis visualization. Log ratio transfromation serves such purpose. Note that the number of features will be one less when using "ilr" method. It is not to be combined with the other normalization methods featured in the \code{\link{rbioseq_DE}}. Ref: Quinn TP, et al. 2018. Understanding sequencing data as compositions: an outlook and review. Bioinformatics. 2018: 1 - 9.
