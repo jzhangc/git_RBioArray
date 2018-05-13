@@ -25,17 +25,24 @@ Update log
 
     0.4.7 (feature preview)
     (ICEBOX)
-      - Updates to RNAseq functions:
-        - rbioseq_ImportCount() function added to import HTseq counted files to R environment
-        - pre-processing steps separated from rbioseq_DE() to rbioseq_PreProc()
-        - rboseq_PreProc() featuers multiple raw reads tranformaton and normalization methods
-      
       - New clustering funcions:
         - Bayesian biclustering function rbioarray_bbc()
         - K-mean clustering function rbioarray_kmean()
         
+      - Updates to RNAseq functions:
+        - rbioseq_ImportCount() function added to import HTseq counted files to R environment
+        - rbioseq_transform() function added for transforming data for clustering analysis and any feature selection/classcification processes
+        - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
+        - compositional analysis methods added to the limma DE method due to the availability of clr transfromation in rbioseq_transform()
+        - DESeq2-based method added to rbioseq_DE() function
+          - the current understanding is that DESeq2 method contains a compositional analysis mode, see rlog() function from the DESeq2 package
+          - RBioArray implementation of DESeq2 method uses compositional analysis by default
+        
       - Updates to microarray functions:
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
+        
+      - Updates to correlation functions:
+        - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) for NGS compositional data analysis 
         
       - Bug fixes
       
@@ -57,7 +64,7 @@ Update log
       - Bug fixes
       
 
-    0.4.5 (Mar.16.2018)
+    0.4.5
       - Correlation p value function cor_pvalue() added
       - Updates made to rbioarray_corcluster_super()
         - Pearson correlation significance plot added to rbioarray_corcluster_super() via argument sigPlot = TRUE

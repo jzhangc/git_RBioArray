@@ -14,7 +14,7 @@
 #' @export
 rbioseq_clr_ilr_transfo <- function(x, offset = 0, mode = "clr", ilr.method.fast = TRUE){
   # data and arguments check
-  if (!is.matrix(x))stop("x needs to be a matrix")
+  if (!is.matrix(x))stop("x needs to b e a matrix")
   if (any(x == 0) & offset == 0)stop("zero detected in x. set offset to avoid it for ratio transformation")
   if (!tolower(mode) %in% c("clr", "ilr"))stop("choose the proper transformation mode: \"clr\" or \"ilr\"")
 
@@ -25,10 +25,11 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 0, mode = "clr", ilr.method.fast
       out <- list(x.clr = x, gm = rep(1, dim(x)[1]))
     } else {
       gm <- apply(x, 1, function(x) exp(mean(log(x + offset))))  # geometric mean = exp(mean(log(X)))
-      clrX = log((x + offset) / (gm))  # clr formula
+      clrX <- log((x + offset) / (gm))  # clr formula
       out <- clrX
     }
   } else if (tolower(mode) == "ilr"){  # ilr calculation, modified from ilr.transfo function from mixOmics package
+    cat(paste0("ilr mode result in one less variable: ", ncol(x) - 1, " variables left for this dataset upon transformation.\n"))
     ilrX = matrix(NA, nrow = nrow(x), ncol = ncol(x) - 1)
     D = ncol(x)
     if (ilr.method.fast) {
