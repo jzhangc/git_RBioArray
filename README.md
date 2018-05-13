@@ -42,7 +42,7 @@ Update log
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
         
       - Updates to correlation functions:
-        - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) for NGS compositional data analysis 
+        - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) correlation and differential proportionality for NGS compositional data analysis 
         
       - Bug fixes
       
