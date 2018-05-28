@@ -46,6 +46,10 @@ Update log
         
       - Bug fixes
       
+    (ADDED)
+      - updates to microarray functions:
+        - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
+      
       
     0.4.6 (4.26.2018)
       - Centered log transformation and isometric log transformation function rbioseq_clr_ilr_transfo() added
