@@ -410,8 +410,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = labrow, ...)
       dev.off()
-
-      print("Probes with no gene names are removed.")
+      cat("Probes with no gene names are removed.")
     }
 
   } else {

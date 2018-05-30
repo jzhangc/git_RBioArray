@@ -4,10 +4,11 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
-  design = NULL, contra = NULL, weights = NULL, ..., plot = TRUE,
-  geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
-  nGeneSymbol = 5, padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
+rbioarray_DE(objTitle = "data_filtered", output.mode = "probe.all",
+  fltlist = NULL, annot = NULL, design = NULL, contra = NULL,
+  weights = NULL, ..., plot = TRUE, geneName = FALSE,
+  genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5,
+  padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
   ctrlTypeVar = "ControlType", sig.method = "fdr", sig.p = 0.05,
   plotTitle = NULL, xLabel = "log2(fold change)",
   yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
@@ -16,6 +17,8 @@ rbioarray_DE(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
+
+\item{output.mode}{Csv file output mode. Options are \code{"probe.all"}, \code{"probe.sig"}, \code{"geneName.all"} and \code{"geneName.sig"}. Default is \code{"probe.all"}. See details below.}
 
 \item{fltlist}{filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.}
 
@@ -82,7 +85,13 @@ The function outputs a \code{list} object with DE results, a \code{data frame} o
 DE analysis function.
 }
 \details{
-When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}.
+When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}.
+Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols,
+all the probes without a gene symbol will be removed.
+
+The \code{output.mode} argument only affacts output csv files and also not for F test results. This means DE and DE F test resutls for all probes will always be stored to the R environment.
+And F test results for all probes will always be exported as csv file to the working directory.
 }
 \examples{
 \dontrun{

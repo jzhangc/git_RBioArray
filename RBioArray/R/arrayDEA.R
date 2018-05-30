@@ -261,6 +261,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #'
 #' @description DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
+#' @param output.mode Csv file output mode. Options are \code{"probe.all"}, \code{"probe.sig"}, \code{"geneName.all"} and \code{"geneName.sig"}. Default is \code{"probe.all"}. See details below.
 #' @param fltlist filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
 #' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.
 #' @param design Design matrix. Default is \code{NULL}.
@@ -291,7 +292,14 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
-#' @details When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @details When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}.
+#' When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}.
+#' Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols,
+#' all the probes without a gene symbol will be removed.
+#'
+#' The \code{output.mode} argument only affacts output csv files and also not for F test results. This means DE and DE F test resutls for all probes will always be stored to the R environment.
+#' And F test results for all probes will always be exported as csv file to the working directory.
+#'
 #' @import ggplot2
 #' @import doParallel
 #' @import foreach
@@ -309,7 +317,8 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #'              DE = "spikein")
 #' }
 #' @export
-rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
+rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
+                         fltlist = NULL, annot = NULL,
                          design = NULL, contra = NULL, weights = NULL,
                          ...,
                          plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
@@ -346,6 +355,10 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     }
   }
 
+  if (!output.mode %in% c("probe.all", "probe.sig", "geneName.all", "geneName.sig")) {
+    stop("output.mode should be one of \"probe.all\", \"probe.sig\", \"geneName.all\" or \"geneName.sig\".")
+  }
+
   ## extract coefficients
   cf <- colnames(contra) # extract coefficient
   # set an empty matrix for exporting the threolding summery
@@ -356,21 +369,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
   ## temp func for plotting
   # i: outlist (object) listed below
   tmpfunc <- function(i, j, PC = NULL){
-    # set the data frame
-    if (geneName){
-      if (!genesymbolVar %in% names(i[[j]])){
-        stop(cat("Invalid gene symbol variable"))
-      }
-
-      if (!is.null(genesymbolVar)){
-        tmpdfm <- i[[j]][complete.cases(i[[j]][, genesymbolVar]), ]
-      } else {
-        warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
-        tmpdfm <- i[[j]]
-      }
-    } else {
-      tmpdfm <- i[[j]]
-    }
+    # import DE data
+    tmpdfm <- i[[j]]
 
     # set the cutoff
     if (tolower(sig.method) == "fdr"){
@@ -385,11 +385,27 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     } else if (tolower(sig.method) == "none"){
       pcutoff <- sig.p
     } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
-    cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
+
+    # set the data frame
+    if (geneName){
+      if (!genesymbolVar %in% names(tmpdfm)){
+        stop(cat("Invalid gene symbol variable"))
+      }
+
+      if (!is.null(genesymbolVar)){
+        pltdfm <- tmpdfm[complete.cases(tmpdfm[, genesymbolVar]), ]
+      } else {
+        warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
+        pltdfm <- tmpdfm
+      }
+    } else {
+      pltdfm <- tmpdfm
+    }
+    cutoff <- as.factor(abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff)
 
     # plot
     loclEnv <- environment()
-    plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
+    plt <- ggplot(pltdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
       geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
       scale_color_manual(values = c(nonsigColour, sigColour)) +
       ggtitle(plotTitle) +
@@ -408,7 +424,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
             axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
 
     if (topgeneLabel){
-      tmpfltdfm <- tmpdfm[abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff, ]
+      tmpfltdfm <- pltdfm[abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff, ]
       tmpfltdfm <- tmpfltdfm[order(tmpfltdfm$P.Value), ]
       plt <- plt + geom_text_repel(data = head(tmpfltdfm, n = nGeneSymbol),
                                    aes(x = logFC, y = -log10(P.Value), label = head(tmpfltdfm, n = nGeneSymbol)[, genesymbolVar]),
@@ -421,6 +437,19 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
            width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
     grid.draw(pltgtb) # preview
+
+    # save DE results files
+    if (output.mode == "probe.all"){
+      outdfm <- tmpdfm
+    } else if (output.mode == "probe.sig"){
+      # below: make sure to use all probes, i.e.tmpdfm
+      outdfm <- tmpdfm[which(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff), ]
+    } else if (output.mode == "geneName.all"){
+      outdfm <- pltdfm
+    } else {
+      outdfm <- pltdfm[which(as.logical(cutoff)), ]  # it is ok to use cutoff straigtly here
+    }
+    write.csv(outdfm, file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
 
     # dump the info to the threshold dataframe
     if (length(levels(cutoff)) == 1){
@@ -446,7 +475,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
     fit <- contrasts.fit(fit, contrasts = contra)
     fit <- eBayes(fit)
   }
-  cat("DONE!\n") # message
+  cat("Done!\n") # message
 
   if (ctrlProbe){
     out <- fit[fit$genes[, ctrlTypeVar] == 0, ] # remove control probes
@@ -462,84 +491,61 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
 
   ## output and plotting
   if(!parallelComputing){
+    cat("Plotting and exporting files...") # message
     # compile resutls into a list
     outlist <- lapply(cf, function(i){
       tmp <- topTable(out, coef = i, number = Inf, ...)
       tmp$ProbeName <- rownames(tmp)
       if (!is.null(annot)){ # merge with annotation dataframe
-        tmp <- merge(tmp, annot, by = "ProbeName")
+        tmp <- merge(tmp, annot, by = "ProbeName", all.x = TRUE)
       }
       return(tmp)
     })
-
     names(outlist) <- cf
-    # write DE results into files
-    lapply(1:length(cf), function(j){
-      write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
-    })
 
     # volcano plot and output summary
     if (plot){
       threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
     }
+    cat("Done!\n") # message
   } else { ## parallel computing
+    cat("Plotting and exporting files...") # message
     # check the cluster type
     if (clusterType != "PSOCK" & clusterType != "FORK"){
       stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
     }
 
-    # set up cpu cores
+    # set up cpu cores and cluster
     n_cores <- detectCores() - 1
+    cl <- makeCluster(n_cores, type = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
 
-    if (clusterType == "PSOCK"){ # all OS types
-      # set up cpu cluster
-      cl <- makeCluster(n_cores, type = "PSOCK")
-      registerDoParallel(cl)
-      on.exit(stopCluster(cl)) # close connect when exiting the function
-
-      outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
-        tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        if (!is.null(annot)){ # merge with annotation dataframe
-          tmp <- merge(tmp, annot, by = "ProbeName")
-        }
-        return(tmp)
+    outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
+      tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
+      tmp$ProbeName <- rownames(tmp)
+      if (!is.null(annot)){ # merge with annotation dataframe
+        tmp <- merge(tmp, annot, by = "ProbeName")
       }
-      names(outlist) <- cf
+      return(tmp)
+    }
+    names(outlist) <- cf
 
-      # write DE results into files
-      foreach(j = 1: length(cf)) %dopar% {
-        write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
-      }
-
-      # volcano plot and output summary
-      if (plot){
+    # volcano plot and output summary
+    if (plot){
+      if (clusterType == "PSOCK"){
         threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
-                                       .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
-          tmpfunc(i = outlist, j = j, PC = PCntl)
-        }
-      }
-    } else { # macOS and Unix-like systems
-      outlist <- mclapply(cf, FUN = function(i){
-        tmp <- topTable(out, coef = i, number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        if (!is.null(annot)){ # merge with annotation dataframe
-          tmp <- merge(tmp, annot, by = "ProbeName")
-        }
-        return(tmp)
-      }, mc.cores = n_cores, mc.preschedule = FALSE)
-
-      names(outlist) <- cf
-      # write DE results into files
-      mclapply(1:length(cf), FUN = function(j){
-        write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
-      }, mc.cores = n_cores, mc.preschedule = FALSE)
-
-      # volcano plot and output summary
-      if (plot){
-        threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
+                                       .packages = c("limma", "ggplot2", "gtable", "grid", "ggrepel", "RBioplot")) %dopar% {
+                                         tmpfunc(i = outlist, j = j, PC = PCntl)
+                                       }
+      } else {
+        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
+                                       .packages = c("limma", "ggplot2", "gtable", "grid", "ggrepel", "RBioplot")) %do% {
+                                         tmpfunc(i = outlist, j = j, PC = PCntl)
+                                       }
       }
     }
+    cat("Done!\n") # message
   }
 
   ## output the DE/fit objects to the environment, as well as the DE csv files into wd
@@ -552,8 +558,27 @@ rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NUL
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
   write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
 
-  ## message
+  ## messages
   if (geneName & !is.null(genesymbolVar)){
-    print("Probes without a gene symbol are removed from the volcano plots")
+    cat("Probes without a gene symbol are removed from the volcano plots.\n")
+  }
+
+  if (output.mode == "probe.all") cat("DE results for all probes exported into csv files. \n")
+  if (output.mode == "probe.sig") cat("DE results for significant probes regardless of gene name saved to csv files. \n")
+  if (output.mode == "geneName.all") {
+    if (!geneName){
+      cat("geneName = FALSE, DE results for all probes saved to csv files,
+                                           even with output.mode = \"geneName.all\"\n")
+    } else {
+      cat("DE results for probes with gene name saved to csv files. \n")
+    }
+  }
+  if (output.mode == "geneName.sig") {
+    if (!geneName){
+      cat("geneName = FALSE, DE results for significant probes regardless of gene name saved to csv files,
+                                           even with output.mode = \"geneName.sig\"\n")
+    } else {
+      cat("DE results for significant probes with gene name saved to csv files. \n")
+    }
   }
 }

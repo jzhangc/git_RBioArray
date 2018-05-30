@@ -48,6 +48,8 @@ Update log
       
     (ADDED)
       - updates to microarray functions:
+        - rbioarray_DE() now has the options to produce csv files for either (i) all probes, (ii) significant probes, (iii) all probes with gene name, (iv) significant probes with gene name. However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings. 
+        - rbioarray_DE() with the "FORK" cluster module re-written for foreach style parallel computing
         - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
       
       
