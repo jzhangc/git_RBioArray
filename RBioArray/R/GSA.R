@@ -495,7 +495,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 rbioGS_kegg <- function(dfm, entrezVar = NULL, statsVar = "logFC",
                        keggID, suffix, species = "hsa", ...){
   # check entrez ID variable name
-  if (is.null(entrezVar) | !entreVar %in% names(dfm)){
+  if (is.null(entrezVar) | !entrezVar %in% names(dfm)){
     stop("Entrez ID variable not found in the input dataframe")
   }
 
