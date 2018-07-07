@@ -305,7 +305,6 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @import foreach
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
 #' @importFrom limma lmFit eBayes topTable contrasts.fit
-#' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom RBioplot rightside_y
 #' @importFrom ggrepel geom_text_repel

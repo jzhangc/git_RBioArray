@@ -43,11 +43,13 @@ Update log
         
       - Updates to correlation functions:
         - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) correlation and differential proportionality for NGS compositional data analysis 
+        - the formatting from diagonal matrix to a 2D table functionality now a separate function
       
     (ADDED)
       - updates to microarray functions:
         - rbioarray_DE() now has the options to produce csv files for either 
-        (i) all probes, (ii) significant probes, 
+        (i) all probes, 
+        (ii) significant probes, 
         (iii) all probes with gene name, 
         (iv) significant probes with gene name. 
         However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings. 
