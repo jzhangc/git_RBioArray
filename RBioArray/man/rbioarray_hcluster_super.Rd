@@ -4,14 +4,15 @@
 \alias{rbioarray_hcluster_super}
 \title{rbioarray_hcluster_super}
 \usage{
-rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE, ctrlProbe = TRUE,
-  ctrlTypeVar = "ControlType", dataProbeVar = "ProbeName",
-  DE.sig.method = "none", DE.sig.p = 0.05, FC = 1.5, fct,
-  sampleName = NULL, colGroup = ifelse(length(levels(fct)) < 19,
-  length(levels(fct)), 19), distance = "euclidean", clust = "complete",
-  rowLabel = FALSE, annot = NULL, annotProbeVar = "ProbeName",
-  genesymbolVar = NULL, colColour = "Paired", mapColour = "PRGn",
-  n_mapColour = 11, ..., plotWidth = 7, plotHeight = 7)
+rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
+  ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
+  dataProbeVar = "ProbeName", DE.sig.method = "none",
+  DE.sig.p = 0.05, FC = 1.5, fct, sampleName = NULL,
+  colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+  distance = "euclidean", clust = "complete", rowLabel = FALSE,
+  annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
+  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+  plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}

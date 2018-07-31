@@ -4,13 +4,13 @@
 \alias{rbioseq_hcluster}
 \title{rbioseq_hcluster}
 \usage{
-rbioseq_hcluster(plotName = "data", dfm_count = NULL, dfm_annot = NULL,
-  geneidVar = "gene_id", count_threshold = "none", design = NULL,
-  qc_plot = FALSE, n = "all", sampleName = NULL, fct = NULL,
-  colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-  distance = "euclidean", clust = "complete", colColour = "Paired",
-  mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
-  plotHeight = 7)
+rbioseq_hcluster(plotName = "data", dfm_count = NULL,
+  dfm_annot = NULL, geneidVar = "gene_id", count_threshold = "none",
+  design = NULL, qc_plot = FALSE, n = "all", sampleName = NULL,
+  fct = NULL, colGroup = ifelse(length(levels(fct)) < 19,
+  length(levels(fct)), 19), distance = "euclidean", clust = "complete",
+  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+  plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}

@@ -55,6 +55,8 @@ Update log
         However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings. 
         - rbioarray_DE() with the "FORK" cluster module re-written for foreach style parallel computing
         - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
+        
+      - Wording adjustment for clearer documentation
       
       - Bug fixes
       

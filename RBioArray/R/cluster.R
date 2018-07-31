@@ -12,8 +12,8 @@
 #' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
 #' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
 #' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
-#' @param fct Input \code{factor} object for samples.
-#' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
+#' @param fct Input \code{factor} object for sample groupping labels.
+#' @param sampleName A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.

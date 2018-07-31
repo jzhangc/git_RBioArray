@@ -12,8 +12,9 @@ rbioarray_DE(objTitle = "data_filtered", output.mode = "probe.all",
   ctrlTypeVar = "ControlType", sig.method = "fdr", sig.p = 0.05,
   plotTitle = NULL, xLabel = "log2(fold change)",
   yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
-  nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10, plotWidth = 170,
-  plotHeight = 150, parallelComputing = FALSE, clusterType = "PSOCK")
+  nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10,
+  plotWidth = 170, plotHeight = 150, parallelComputing = FALSE,
+  clusterType = "PSOCK")
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}

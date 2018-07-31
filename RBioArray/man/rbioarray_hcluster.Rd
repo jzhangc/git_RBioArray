@@ -8,10 +8,11 @@ rbioarray_hcluster(plotName = "data", fltlist = NULL,
   dataProbeVar = "ProbeName", genesymbolOnly = FALSE, annot = NULL,
   annotProbeVar = "ProbeName", genesymbolVar = NULL, n = "all",
   rmControl = TRUE, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
-  sampleName = NULL, fct = NULL, colGroup = ifelse(length(levels(fct)) <
-  19, length(levels(fct)), 19), distance = "euclidean", clust = "complete",
-  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+  sampleName = NULL, fct = NULL,
+  colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+  distance = "euclidean", clust = "complete", colColour = "Paired",
+  mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
+  plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -36,9 +37,9 @@ rbioarray_hcluster(plotName = "data", fltlist = NULL,
 
 \item{ctrlTypeVar}{Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.}
 
-\item{sampleName}{A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.}
+\item{sampleName}{A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.}
 
-\item{fct}{Input \code{factor} object for samples.}
+\item{fct}{Input \code{factor} object for sample groupping labels.}
 
 \item{colGroup}{Colour group, numeric or dependent on \code{fct}.}
 

@@ -320,7 +320,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
                          fltlist = NULL, annot = NULL,
                          design = NULL, contra = NULL, weights = NULL,
                          ...,
-                         plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
+                         plot = TRUE,
+                         geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
                          FC = 1.5,
                          ctrlProbe = TRUE, ctrlTypeVar = "ControlType", sig.method = "fdr", sig.p = 0.05,
                          plotTitle = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
@@ -496,7 +497,8 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
       tmp <- topTable(out, coef = i, number = Inf, ...)
       tmp$ProbeName <- rownames(tmp)
       if (!is.null(annot)){ # merge with annotation dataframe
-        tmp <- merge(tmp, annot, by = "ProbeName", all.x = TRUE)
+        # tmp <- merge(tmp, annot, by = "ProbeName", all.x = TRUE)
+        tmp <- merge(tmp, annot, all.x = TRUE)
       }
       return(tmp)
     })

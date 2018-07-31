@@ -4,10 +4,11 @@
 \alias{rbioGS}
 \title{rbioGS}
 \usage{
-rbioGS(GS = NULL, GSfile = NULL, idVar = NULL, method_p = c("fisher",
-  "stouffer", "reporter", "tailStrength", "wilcoxon"), pVar = NULL,
-  logFCVar = NULL, method_t = c("page", "gsea", "maxmean"), tVar = NULL,
-  ..., parallelComputing = FALSE, clusterType = "PSOCK")
+rbioGS(GS = NULL, GSfile = NULL, idVar = NULL,
+  method_p = c("fisher", "stouffer", "reporter", "tailStrength",
+  "wilcoxon"), pVar = NULL, logFCVar = NULL, method_t = c("page",
+  "gsea", "maxmean"), tVar = NULL, ..., parallelComputing = FALSE,
+  clusterType = "PSOCK")
 }
 \arguments{
 \item{GS}{pre-loaded gene set objects. Default is \code{NULL}.}

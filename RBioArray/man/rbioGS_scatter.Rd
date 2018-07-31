@@ -6,7 +6,8 @@
 \usage{
 rbioGS_scatter(GSA_list, fileName = "GS_list", ..., plotTitle = NULL,
   xLabel = "median p value", yLabel = "log consensus score",
-  rankCutoff = 20, pCutoff = 0.05, plotWidth = 170, plotHeight = 150)
+  rankCutoff = 20, pCutoff = 0.05, plotWidth = 170,
+  plotHeight = 150)
 }
 \arguments{
 \item{GSA_list}{piano GS results object.}
