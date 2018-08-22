@@ -45,6 +45,10 @@ Update log
         - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) correlation and differential proportionality for NGS compositional data analysis 
         - the formatting from diagonal matrix to a 2D table functionality now a separate function
       
+      - Other update
+        - Functions updated for R Notebook/Markdown compatibility
+        - Dependency ggplot2 now requires version 3.0.0
+      
     (ADDED)
       - updates to microarray functions:
         - rbioarray_DE() now has the options to produce csv files for either 
