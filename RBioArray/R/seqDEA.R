@@ -2,17 +2,24 @@
 #'
 #' @description Log ratio tansformation function for read count data. Row: sample, column: features.
 #' @param x Input read count data matrix.
-#' @param offset Read count offset value added to avoid zero. Default is \code{0}.
+#' @param offset Read count offset value added to avoid zero. Default is \code{1}.
 #' @param mode Log ratio transformation method. Options are "clr" (centered log transformation) and "ilr" (isometric log transformation). Default is \code{"clr"}.
 #' @param ilr.method.fast Useful only when \code{mode = "ilr"}. Default is \code{TRUE}.
 #' @return A data matrix with log ratio transformed values.
-#' @details This funciton is needed as part of the data pre-processing procedure to run LPS-DA analysis featured in \code{RBioFS} package. As per Quinn et al. (2018), NGS data can be considered as compositional data. As such, data must be transformed for usual statistical analysis visualization. Log ratio transfromation serves such purpose. Note that the number of features will be one less when using "ilr" method. It is not to be combined with the other normalization methods featured in the \code{\link{rbioseq_DE}}. Ref: Quinn TP, et al. 2018. Understanding sequencing data as compositions: an outlook and review. Bioinformatics. 2018: 1 - 9.
+#' @details This funciton is needed as part of the data pre-processing procedure to run multivariate and machine learning analysis featured in \code{RBioFS} package.
+#'
+#'          As per Quinn et al. (2018), NGS data can be considered as compositional data. As such, data must be transformed for usual statistical analysis and visualization.
+#'          Log ratio transfromation serves such purpose. Note that the number of features will be one less when using "ilr" method.
+#'
+#'          It is not to be combined with the other normalization methods featured in the \code{\link{rbioseq_DE}}.
+#'
+#'          Ref: Quinn TP, et al. 2018. Understanding sequencing data as compositions: an outlook and review. Bioinformatics. 2018: 1 - 9.
 #' @examples
 #' \dontrun{
 #' tstX <- rbioseq_clr_ilr_transfo(tstdata, offset = 1, mode = "clr")
 #' }
 #' @export
-rbioseq_clr_ilr_transfo <- function(x, offset = 0, mode = "clr", ilr.method.fast = TRUE){
+rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast = TRUE){
   # data and arguments check
   if (!is.matrix(x))stop("x needs to b e a matrix")
   if (any(x == 0) & offset == 0)stop("zero detected in x. set offset to avoid it for ratio transformation")

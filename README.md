@@ -28,16 +28,14 @@ Update log
       - New clustering funcions:
         - Bayesian biclustering function rbioarray_bbc()
         - K-mean clustering function rbioarray_kmean()
+      
+      - Updates to microarray functions:
+        - rbioarray_DE() re-written with Object-Oriented-Programming (OOP) elements - using S3 classes
         
       - Updates to RNAseq functions:
         - rbioseq_ImportCount() function added to import HTseq counted files to R environment
-        - rbioseq_transform() function added for transforming data for clustering analysis and any feature selection/classcification processes
         - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
-        - compositional analysis methods added to the limma DE method due to the availability of clr transfromation in rbioseq_transform()
-        - DESeq2-based method added to rbioseq_DE() function
-          - the current understanding is that DESeq2 method contains a compositional analysis mode, see rlog() function from the DESeq2 package
-          - RBioArray implementation of DESeq2 method uses compositional analysis by default
-        
+
       - Updates to microarray functions:
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
         
@@ -50,15 +48,20 @@ Update log
         - Dependency ggplot2 now requires version 3.0.0
       
     (ADDED)
-      - updates to microarray functions:
+      - Updates to microarray functions:
         - rbioarray_DE() now has the options to produce csv files for either 
         (i) all probes, 
         (ii) significant probes, 
         (iii) all probes with gene name, 
         (iv) significant probes with gene name. 
-        However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings. 
+        However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings
         - rbioarray_DE() with the "FORK" cluster module re-written for foreach style parallel computing
         - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
+      
+      - Updates to RNAseq functions:
+        - rbioseq_transform() function added for transforming data for clustering analysis and any feature selection/classcification processes
+        - rbioseq_DE() re-written with OOP elements - using S3 classes
+        - rbioseq_DE() now has export options like the new rbioarray_DE() function (see above)
         
       - Wording adjustment for clearer documentation
       
