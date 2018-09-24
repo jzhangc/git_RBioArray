@@ -4,13 +4,13 @@
 \alias{rbioseq_clr_ilr_transfo}
 \title{rbioseq_clr_ilr_transfo}
 \usage{
-rbioseq_clr_ilr_transfo(x, offset = 0, mode = "clr",
+rbioseq_clr_ilr_transfo(x, offset = 1, mode = "clr",
   ilr.method.fast = TRUE)
 }
 \arguments{
 \item{x}{Input read count data matrix.}
 
-\item{offset}{Read count offset value added to avoid zero. Default is \code{0}.}
+\item{offset}{Read count offset value added to avoid zero. Default is \code{1}.}
 
 \item{mode}{Log ratio transformation method. Options are "clr" (centered log transformation) and "ilr" (isometric log transformation). Default is \code{"clr"}.}
 
@@ -23,7 +23,14 @@ A data matrix with log ratio transformed values.
 Log ratio tansformation function for read count data. Row: sample, column: features.
 }
 \details{
-This funciton is needed as part of the data pre-processing procedure to run LPS-DA analysis featured in \code{RBioFS} package. As per Quinn et al. (2018), NGS data can be considered as compositional data. As such, data must be transformed for usual statistical analysis visualization. Log ratio transfromation serves such purpose. Note that the number of features will be one less when using "ilr" method. It is not to be combined with the other normalization methods featured in the \code{\link{rbioseq_DE}}. Ref: Quinn TP, et al. 2018. Understanding sequencing data as compositions: an outlook and review. Bioinformatics. 2018: 1 - 9.
+This funciton is needed as part of the data pre-processing procedure to run multivariate and machine learning analysis featured in \code{RBioFS} package.
+
+         As per Quinn et al. (2018), NGS data can be considered as compositional data. As such, data must be transformed for usual statistical analysis and visualization.
+         Log ratio transfromation serves such purpose. Note that the number of features will be one less when using "ilr" method.
+
+         It is not to be combined with the other normalization methods featured in the \code{\link{rbioseq_DE}}.
+
+         Ref: Quinn TP, et al. 2018. Understanding sequencing data as compositions: an outlook and review. Bioinformatics. 2018: 1 - 9.
 }
 \examples{
 \dontrun{

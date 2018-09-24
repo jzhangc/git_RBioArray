@@ -99,7 +99,8 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast
 #' @import doParallel
 #' @import foreach
 #' @importFrom parallel detectCores makeCluster stopCluster mclapply
-#' @importFrom limma lmFit eBayes topTable contrasts.fit
+#' @importFrom limma lmFit eBayes topTable contrasts.fit voomWithQualityWeights
+#' @importFrom edgeR DGEList calcNormFactors
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom ggrepel geom_text_repel

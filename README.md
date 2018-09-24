@@ -31,6 +31,7 @@ Update log
       
       - Updates to microarray functions:
         - rbioarray_DE() re-written with Object-Oriented-Programming (OOP) elements - using S3 classes
+            - sig function to produce "rbioarray_sig" object
         
       - Updates to RNAseq functions:
         - rbioseq_ImportCount() function added to import HTseq counted files to R environment
@@ -59,9 +60,15 @@ Update log
         - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
       
       - Updates to RNAseq functions:
-        - rbioseq_transform() function added for transforming data for clustering analysis and any feature selection/classcification processes
+        - rbioseq_clr_ilr_transfo() function added for transforming data for clustering analysis and any feature selection/classcification processes
         - rbioseq_DE() re-written with OOP elements - using S3 classes
-        - rbioseq_DE() now has export options like the new rbioarray_DE() function (see above)
+          - rnaseq_de function to produce "rbioseq_de" object
+          - sig function to produce "rbioseq_sig" object
+        - S3 print method for "rbioseq_de" object
+        - rbioseq_DE() now has export options:
+          (i) all features, 
+          (ii) features with a annotation name, 
+          (iv) significant features with or without annotation name depending on the setting for argument "gene_symbol". 
         
       - Wording adjustment for clearer documentation
       
