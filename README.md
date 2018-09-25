@@ -36,9 +36,15 @@ Update log
       - Updates to RNAseq functions:
         - rbioseq_ImportCount() function added to import HTseq counted files to R environment
         - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
+        - New DE function added
 
       - Updates to microarray functions:
+        - S3 object "rbioarray_preproc" add to the function: rbioarray_PreProc()
+          - S3 print function for "rbioarray_preproc" object
+        - S3 object "rbioarray_filter" add to the function: rbioarray_flt()
+          - S3 print function for "rbioarray_filter" object
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
+        - New DE function added
         
       - Updates to correlation functions:
         - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) correlation and differential proportionality for NGS compositional data analysis 
@@ -49,15 +55,17 @@ Update log
         - Dependency ggplot2 now requires version 3.0.0
       
     (ADDED)
+      - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() and rbioseq_DE() are now considered as "legacy" functions. However, they are still functional
+      
       - Updates to microarray functions:
+        - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
         - rbioarray_DE() now has the options to produce csv files for either 
-        (i) all probes, 
-        (ii) significant probes, 
-        (iii) all probes with gene name, 
-        (iv) significant probes with gene name. 
+          (i) all probes, 
+          (ii) significant probes, 
+          (iii) all probes with gene name, 
+          (iv) significant probes with gene name. 
         However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings
         - rbioarray_DE() with the "FORK" cluster module re-written for foreach style parallel computing
-        - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
       
       - Updates to RNAseq functions:
         - rbioseq_clr_ilr_transfo() function added for transforming data for clustering analysis and any feature selection/classcification processes
