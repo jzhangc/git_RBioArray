@@ -4,10 +4,13 @@
 \alias{rnaseq_de.mir_count}
 \title{Title rnaseq_de.default}
 \usage{
-\method{rnaseq_de}{mir_count}(object, ...)
+\method{rnaseq_de}{mir_count}(object, filter.threshold.min.count = 10,
+  ...)
 }
 \arguments{
 \item{object}{A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.}
+
+\item{filter.threshold.min.count}{Minimum count for the smallest library for filter thresholding. Default is \code{10}.}
 
 \item{...}{Additional arguments for \code{\link{rnaseq_de.defuault}}.}
 }

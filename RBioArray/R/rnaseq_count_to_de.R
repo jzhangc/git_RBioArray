@@ -24,12 +24,13 @@ rnaseq_de <- function(object, ...){
 #'
 #' @description The \code{rnaseq_de} function for \code{seq_de.mir_count} object from \code{RBioMIR} object.
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.
+#' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
 #' @param ... Additional arguments for \code{\link{rnaseq_de.defuault}}.
 #'
 #' @export
-rnaseq_de.mir_count <- function(object, ...){
+rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, ...){
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
-                           filter.threshold.cpm.count = 0.5 * min(object$sample_library_sizes) / 1000000,
+                           filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
                            ...)
   return(out)
 }
@@ -42,13 +43,24 @@ rnaseq_de.mir_count <- function(object, ...){
 #' @param y Target (e.g. genes) annotation matrix or vector.
 #' @param y.gene_id.var.name Variable name for gene (i.e. target) identification. Default is \code{"genes"}.
 #' @param y.gene_symbol.var.name Variable name for gene (i.e. target) symbols. Default is \code{"genes"}.
-#' @param filter.threshold.cpm.count Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
+#' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param annot.group Set only when \code{filter.threshold.min.sample} is not \code{NULL}, Sample group annotation object. Can be a \code{factor} or \code{vector} object.
 #' @param between.genes.norm.method Between gene normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param qc.plot QC plot for the input read counts
+#' @details \code{filter.threshold.cpm.count} uses CPM (counts per million) as the basis for filtering. The rule of thumb is to filter reads independently from the groupping information.
+#'
+#' The default is based on the paper by Chen et al (2016):
+#' 10~15 counts per library, which translate to 10~15/L with L being the smallest library size in millions.
+#' Therefore, if using 10 as an example, the above becomes 10 / min(library_sizes) / 1000000
+#'
+#' Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
+#' using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
+#'
+#'
+#'
 #' @return A \code{rbioseq_de} object. The items of the object are following:
 #'
 #' \code{filter_results}
@@ -70,7 +82,7 @@ rnaseq_de.mir_count <- function(object, ...){
 rnaseq_de.default <- function(x, y = NULL,
                               y.gene_id.var.name = "genes",
                               y.gene_symbol.var.name = "genes",
-                              filter.threshold.cpm.count = "none",
+                              filter.threshold.cpm = "none",
                               filter.threshold.min.sample = NULL, annot.group = NULL,
                               between.genes.norm.method = "TMM",
                               design, contra, qc.plot = TRUE){
@@ -130,12 +142,12 @@ rnaseq_de.default <- function(x, y = NULL,
   cat("Data filtering and normalization...") # message
   dge <- DGEList(counts = x, genes = y)
 
-  if (filter.threshold.cpm.count != "none"){ # set the count threshold for filtering
-    isexpr <- rowSums(cpm(dge$counts) > filter.threshold.cpm.count) >= filter.threshold.min.sample  # cpm threshold, cite the paper
+  if (filter.threshold.cpm != "none"){ # set the count threshold for filtering
+    isexpr <- rowSums(cpm(dge$counts) > filter.threshold.cpm) >= filter.threshold.min.sample  # cpm threshold, cite the paper
     dge <- dge[isexpr, , keep.lib.size = FALSE] # filtering
     flt_summary <- as.numeric(table(isexpr))
     names(flt_summary) <- c("filtered", "remaning")
-    filter_results <- list(filter_threshold_cpm = filter.threshold.cpm.count,
+    filter_results <- list(filter_threshold_cpm = filter.threshold.cpm,
                            filter_threshold_min_sample = filter.threshold.min.sample,
                            filter_summary = flt_summary)
   } else {

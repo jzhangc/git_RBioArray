@@ -5,8 +5,7 @@
 \title{Title rnaseq_de.default}
 \usage{
 \method{rnaseq_de}{default}(x, y = NULL, y.gene_id.var.name = "genes",
-  y.gene_symbol.var.name = "genes",
-  filter.threshold.cpm.count = "none",
+  y.gene_symbol.var.name = "genes", filter.threshold.cpm = "none",
   filter.threshold.min.sample = NULL, annot.group = NULL,
   between.genes.norm.method = "TMM", design, contra, qc.plot = TRUE)
 }
@@ -19,7 +18,7 @@
 
 \item{y.gene_symbol.var.name}{Variable name for gene (i.e. target) symbols. Default is \code{"genes"}.}
 
-\item{filter.threshold.cpm.count}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}
+\item{filter.threshold.cpm}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}
 
 \item{filter.threshold.min.sample}{Minimum number of samples meeting the count threshold. Default is \code{NULL}.}
 
@@ -50,4 +49,14 @@ A \code{rbioseq_de} object. The items of the object are following:
 }
 \description{
 The default \code{rnaseq_de} function
+}
+\details{
+\code{filter.threshold.cpm.count} uses CPM (counts per million) as the basis for filtering. The rule of thumb is to filter reads independently from the groupping information.
+
+The default is based on the paper by Chen et al (2016):
+10~15 counts per library, which translate to 10~15/L with L being the smallest library size in millions.
+Therefore, if using 10 as an example, the above becomes 10 / min(library_sizes) / 1000000
+
+Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
+using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
 }
