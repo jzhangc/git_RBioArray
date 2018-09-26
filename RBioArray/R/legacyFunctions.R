@@ -1,6 +1,6 @@
 #' @title rbioseq_DE
 #'
-#' @description DE analysis function for RNA-seq data, with count filtering functionality.
+#' @description Legacy function. DE analysis function for RNA-seq data, with count filtering functionality.
 #' @param objTitle Name for the output list. Default is \code{"seq_data"}.
 #' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
 #' @param dfm_annot Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
@@ -280,7 +280,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
 
 #' @title rbioarray_DE
 #'
-#' @description DE analysis function.
+#' @description Legacy function. DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
 #' @param output.mode Csv file output mode. Options are \code{"probe.all"}, \code{"probe.sig"}, \code{"geneName.all"} and \code{"geneName.sig"}. Default is \code{"probe.all"}. See details below.
 #' @param fltlist filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
