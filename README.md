@@ -58,7 +58,7 @@ Update log
         - rbioseq_import_gtf() function to import and parse gtf/gff annotation files
         - rbioseq_import_count() function added to import read count files (e.g. HTseq-count files) to R environment. The function outputs an "rbioseq_count" object
         - rbioseq_clr_ilr_transfo() function added for transforming data for clustering analysis and any feature selection/classcification processes
-        - New RNAseq differential expressin function with OOP elements - using S3 classes
+        - New RNAseq differential expressin function rbioseq_de_analysis() with OOP elements - using S3 classes
           - The fnction has export options:
             (i) all features, 
             (ii) features with a annotation name, 
