@@ -240,19 +240,19 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   cat("Done!\n")
   if (export.mode == "all") {
     for (i in seq(length(input.de.list))) {  # use the input DE dataframes
-      cat(paste0("Exporting signifiance test results to file: ", export.name, "_", names(input.de.list)[i], "_de_all.csv..."))
+      cat(paste0("Exporting all DE results for all genes/probes/features to file: ", export.name, "_", names(input.de.list)[i], "_de_all.csv..."))
       write.csv(file = paste0(export.name, "_", names(input.de.list)[i], "_de_all.csv"), input.de.list[[i]], row.names = FALSE)
       cat("Done!\n")
     }
   } else if (export.mode == "all.gene_symbol") {  # use the subsetted DE dataframes
     for (i in seq(length(input.de.list))) {
-      cat(paste0("Exporting signifiance test results to file: ", export.name, "_", names(de_list)[i], "_de_gene_symbol.csv..."))
+      cat(paste0("Exporting all results for genes/probes/features with a symbol to file: ", export.name, "_", names(de_list)[i], "_de_gene_symbol.csv..."))
       write.csv(file = paste0(export.name, "_", names(de_list)[i], "_de_gene_symbol.csv"), de_list[[i]], row.names = FALSE)
       cat("Done!\n")
     }
   } else if (export.mode == "sig") {
     for (i in seq(length(input.de.list))) {
-      cat(paste0("Exporting signifiance test results to file: ", export.name, "_", names(de_list)[i], ifelse(gene_symbol, "_sig_gene_symbol.csv...", "_sig.csv...")))
+      cat(paste0("Exporting only the significantly changes to file: ", export.name, "_", names(de_list)[i], ifelse(gene_symbol, "_sig_gene_symbol.csv...", "_sig.csv...")))
       write.csv(file = paste0(export.name, "_", names(de_list)[i], ifelse(gene_symbol, "_sig_gene_symbol.csv", "_sig.csv")), sig_out_list[[i]], row.names = FALSE)
       cat("Done!\n")
     }
