@@ -28,13 +28,13 @@ sig <- function(object, ...){
 #' @param ... Additional arguments for \code{\link{sig.defuault}}.
 #'
 #' @export
-sig.rbioseq_de <- function(object, export.name = NULL){
+sig.rbioseq_de <- function(object, export.name = NULL, ...){
   if (is.null(export.name)){
     export.name = deparse(substitute(object))
   }
 
   sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$gene_symbol_var_name,
-              input.Fstats.matrix = object$F_stats, experiment = "RNAseq", export.name = export.name)
+              input.Fstats.matrix = object$F_stats, experiment = "RNAseq", export.name = export.name, ...)
 }
 
 

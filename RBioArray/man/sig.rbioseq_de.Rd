@@ -4,7 +4,7 @@
 \alias{sig.rbioseq_de}
 \title{Title sig.rbioseq_de}
 \usage{
-\method{sig}{rbioseq_de}(object, export.name = NULL)
+\method{sig}{rbioseq_de}(object, export.name = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.}
