@@ -264,7 +264,7 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
 print.rbioseq_count <- function(x, ...){
   cat("RNAseq raw reads processing summary:\n")
   cat("\n")
-  cat(paste0(" Total number of mRNA: ", ifelse(x$GTF_annotation, nrow(x$genes), length(x$genes)), "\n"))
+  cat(paste0(" Total number of genomic features: ", ifelse(x$GTF_annotation, nrow(x$genes), length(x$genes)), "\n"))
   cat("\n")
   cat(paste0(" Files read: ", "\n"))
   cat(paste0(" ", x$files_processed, collapse = "\n"))
