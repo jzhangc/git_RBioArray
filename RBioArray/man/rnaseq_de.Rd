@@ -7,9 +7,9 @@
 rnaseq_de(object, ...)
 }
 \arguments{
-\item{object}{Object containing expression values. Currently the function supports \code{rbioseq_count} and from \code{RBioMIR} pacakge.}
+\item{object}{Object containing expression values. Currently the function supports \code{rbioseq_count} and \code{mir_count} from \code{RBioMIR} pacakge.}
 
-\item{...}{Additional argument for the plot settings, see details.}
+\item{...}{Additional arguments for corresponding S3 class methods.}
 }
 \value{
 A differential expression result object.

@@ -23,7 +23,7 @@ Installation:
 
 Update log
 
-    0.4.7 (feature preview)
+    0.5.0 (feature preview)
     (ICEBOX)
       - New clustering funcions:
         - Bayesian biclustering function rbioarray_bbc()
@@ -39,9 +39,9 @@ Update log
 
       - Updates to microarray functions:
         - S3 object "rbioarray_preproc" add to the function: rbioarray_PreProc()
-          - S3 print function for "rbioarray_preproc" object
+          - S3 print function for "rbioarray_preproc" class
         - S3 object "rbioarray_filter" add to the function: rbioarray_flt()
-          - S3 print function for "rbioarray_filter" object
+          - S3 print function for "rbioarray_filter" class
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
         - New DE function added
         
@@ -54,10 +54,21 @@ Update log
         - Dependency ggplot2 now requires version 3.0.0
       
     (ADDED)
-      - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() and rbioseq_DE() are now considered as "legacy" functions. However, they are still functional
+      - New RNAseq functions
+        - rbioseq_import_gtf() function to import and parse gtf/gff annotation files
+        - rbioseq_import_count() function added to import read count files (e.g. HTseq-count files) to R environment. The function outputs an "rbioseq_count" object
+        - rbioseq_clr_ilr_transfo() function added for transforming data for clustering analysis and any feature selection/classcification processes
+        - New RNAseq differential expressin function with OOP elements - using S3 classes
+          - The fnction has export options:
+            (i) all features, 
+            (ii) features with a annotation name, 
+            (iv) significant features with or without annotation name depending on the setting for argument "gene_symbol".
+        - rnaseq_de function added and produces "rbioseq_de" object. The function inlcudes methods for the following classes: "rbioseq_count", "mir_count"
+        - Significance test function added and produces "sig" object
+        - S3 print methods added for the classes: "rbioseq_de", "rbioseq_count", "sig"
       
       - Updates to microarray functions:
-        - To keep things consistent with limma's Elist, the "target" component list output changed to "targets"
+        - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility.
         - rbioarray_DE() now has the options to produce csv files for either 
           (i) all probes, 
           (ii) significant probes, 
@@ -65,21 +76,14 @@ Update log
           (iv) significant probes with gene name. 
         However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings
         - rbioarray_DE() with the "FORK" cluster module re-written for foreach style parallel computing
+        - To keep things consistent with limma's Elist, the "target" component list output changed to "targets" for all microarray functions
       
       - Updates to RNAseq functions:
-        - rbioseq_clr_ilr_transfo() function added for transforming data for clustering analysis and any feature selection/classcification processes
-        - rbioseq_import_gtf() function to import and parse gtf/gff annotation files
-        - rbioseq_import_count() function added to import read count files (e.g. HTseq-count files) to R environment
-        - rbioseq_DE() re-written with OOP elements - using S3 classes
-          - rnaseq_de function to produce "rbioseq_de" object
-          - sig function to produce "rbioseq_sig" object
-        - S3 print method for "rbioseq_de" object
-        - rbioseq_DE() now has export options:
-          (i) all features, 
-          (ii) features with a annotation name, 
-          (iv) significant features with or without annotation name depending on the setting for argument "gene_symbol". 
+        - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility.
         
       - Wording adjustment for clearer documentation
+      
+      - Version bumped to 0.5.0
       
       - Bug fixes
       

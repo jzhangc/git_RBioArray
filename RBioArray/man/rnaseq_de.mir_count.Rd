@@ -15,5 +15,5 @@
 \item{...}{Additional arguments for \code{\link{rnaseq_de.defuault}}.}
 }
 \description{
-The \code{rnaseq_de} function for \code{seq_de.mir_count} object from \code{RBioMIR} object.
+The \code{rnaseq_de} function for \code{mir_count} object from \code{RBioMIR} object.
 }

@@ -1,8 +1,8 @@
 #' Title rnaseq_de
 #'
 #' @description Generic RNAseq differential expression analysis function
-#' @param object Object containing expression values. Currently the function supports \code{rbioseq_count} and from \code{RBioMIR} pacakge.
-#' @param ... Additional argument for the plot settings, see details.
+#' @param object Object containing expression values. Currently the function supports \code{rbioseq_count} and \code{mir_count} from \code{RBioMIR} pacakge.
+#' @param ... Additional arguments for corresponding S3 class methods.
 #' @return A differential expression result object.
 #' @examples
 #'
@@ -22,7 +22,7 @@ rnaseq_de <- function(object, ...){
 
 #' Title rnaseq_de.mir_count
 #'
-#' @description The \code{rnaseq_de} function for \code{seq_de.mir_count} object from \code{RBioMIR} object.
+#' @description The \code{rnaseq_de} function for \code{mir_count} object from \code{RBioMIR} object.
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.
 #' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
 #' @param ... Additional arguments for \code{\link{rnaseq_de.defuault}}.
@@ -30,6 +30,23 @@ rnaseq_de <- function(object, ...){
 #' @export
 rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, ...){
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
+                           filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
+                           ...)
+  return(out)
+}
+
+
+#' Title rnaseq_de.rbioseq_count
+#'
+#' @description The \code{rnaseq_de} function for \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
+#' @param object A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
+#' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
+#' @param ... Additional arguments for \code{\link{rnaseq_de.defuault}}.
+#'
+#' @export
+rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, ...){
+  out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
+                           y.gene_id.var.name = "gene_id", y.gene_symbol.var.name = "gene_name",
                            filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
                            ...)
   return(out)
@@ -115,10 +132,14 @@ rnaseq_de.default <- function(x, y = NULL,
   }
 
   if (is.null(filter.threshold.min.sample)) {
-    if (!is.null(dim(annot.group))) {
+    if (is.null(annot.group)) {
       stop("When filter.threshold.min.sample = NULL, annot.group needs to be set and can only be a vector or factor object.")
     } else if (!is.factor(annot.group)) {
-      annot.group <- factor(annot.group, levels = unique(annot.group))
+      if (!is.null(dim(annot.group))) {
+        stop("annot.group needs to be a vector or factor object.")
+      } else {
+        annot.group <- factor(annot.group, levels = unique(annot.group))
+      }
     }
     filter.threshold.min.sample <- min(table(annot.group))
   }
