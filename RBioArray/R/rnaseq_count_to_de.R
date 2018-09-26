@@ -62,7 +62,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, ...
 #' @param y.gene_symbol.var.name Variable name for gene (i.e. target) symbols. Default is \code{"genes"}.
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
-#' @param annot.group Set only when \code{filter.threshold.min.sample} is not \code{NULL}, Sample group annotation object. Can be a \code{factor} or \code{vector} object.
+#' @param annot.group Set only when \code{filter.threshold.min.sample} is not \code{NULL}, sample group annotation object. Can be a \code{factor} or \code{vector} object.
 #' @param between.genes.norm.method Between gene normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.

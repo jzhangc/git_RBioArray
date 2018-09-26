@@ -22,7 +22,7 @@
 
 \item{filter.threshold.min.sample}{Minimum number of samples meeting the count threshold. Default is \code{NULL}.}
 
-\item{annot.group}{Set only when \code{filter.threshold.min.sample} is not \code{NULL}, Sample group annotation object. Can be a \code{factor} or \code{vector} object.}
+\item{annot.group}{Set only when \code{filter.threshold.min.sample} is not \code{NULL}, sample group annotation object. Can be a \code{factor} or \code{vector} object.}
 
 \item{between.genes.norm.method}{Between gene normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
 

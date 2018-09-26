@@ -5,9 +5,10 @@
 \title{rbioseq_import_count}
 \usage{
 rbioseq_import_count(path = getwd(), species = NULL,
-  target.annot.file = NULL, gtf.matrix = NULL, raw.file.ext = ".txt",
-  raw.file.sep = "", raw.file.source = "htseq-count",
-  parallelComputing = FALSE, clusterType = "FORK")
+  target.annot.file = NULL, sample_groups.var.name = NULL,
+  gtf.matrix = NULL, raw.file.ext = ".txt", raw.file.sep = "",
+  raw.file.source = "htseq-count", parallelComputing = FALSE,
+  clusterType = "FORK")
 }
 \arguments{
 \item{path}{Path to raw files. Default is the system working directory.}
@@ -15,6 +16,8 @@ rbioseq_import_count(path = getwd(), species = NULL,
 \item{species}{Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".}
 
 \item{target.annot.file}{Annotation file describing filenames and targets, and should be in \code{csv} format.}
+
+\item{sample_groups.var.name}{Sample group annotation variable name in the \code{target.annot.file}.}
 
 \item{gtf.matrix}{Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.}
 
@@ -35,7 +38,9 @@ Outputs a \code{rbioseq_count} object with merged read counts from mutliple file
 
          \code{sample_library_sizes}
 
-         \code{targets}: Sample annotation
+         \code{targets}: Sample annotation matrix
+
+         \code{sample_groups}: Factor object for sample group annotation
 
          \code{genes}: The associated feature names. The use of "gene" here is in a generic sense.
 
@@ -57,7 +62,8 @@ When \code{raw.file.source = "htseq-count"}, the function will cut off the last 
 \dontrun{
 mrna_count <- rbioseq_import_count(path = "~/dataset/",
                                    species = "hsa",
-                                   target.annot.file = "target.csv", gtf.matrix = gtf,
+                                   target.annot.file = "target.csv", sample_groups.var.name = "condition",
+                                   gtf.matrix = gtf,
                                    raw.file.ext = ".out", raw.file.sep = "",
                                    raw.file.source = "htseq-count",
                                    parallelComputing = TRUE, clusterType = "FORK")

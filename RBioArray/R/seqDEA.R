@@ -132,6 +132,7 @@ rbioseq_import_gtf <- function(file){
 #' @param path Path to raw files. Default is the system working directory.
 #' @param species Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".
 #' @param target.annot.file Annotation file describing filenames and targets, and should be in \code{csv} format.
+#' @param sample_groups.var.name Sample group annotation variable name in the \code{target.annot.file}.
 #' @param gtf.matrix Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
 #' @param raw.file.ext Raw file extention. Default is \code{".txt"}.
 #' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
@@ -145,7 +146,9 @@ rbioseq_import_gtf <- function(file){
 #'
 #'          \code{sample_library_sizes}
 #'
-#'          \code{targets}: Sample annotation
+#'          \code{targets}: Sample annotation matrix
+#'
+#'          \code{sample_groups}: Factor object for sample group annotation
 #'
 #'          \code{genes}: The associated feature names. The use of "gene" here is in a generic sense.
 #'
@@ -164,30 +167,37 @@ rbioseq_import_gtf <- function(file){
 #' \dontrun{
 #' mrna_count <- rbioseq_import_count(path = "~/dataset/",
 #'                                    species = "hsa",
-#'                                    target.annot.file = "target.csv", gtf.matrix = gtf,
+#'                                    target.annot.file = "target.csv", sample_groups.var.name = "condition",
+#'                                    gtf.matrix = gtf,
 #'                                    raw.file.ext = ".out", raw.file.sep = "",
 #'                                    raw.file.source = "htseq-count",
 #'                                    parallelComputing = TRUE, clusterType = "FORK")
 #' }
 #' @export
 rbioseq_import_count <- function(path = getwd(), species = NULL,
-                                 target.annot.file = NULL, gtf.matrix = NULL,
+                                 target.annot.file = NULL, sample_groups.var.name = NULL,
+                                 gtf.matrix = NULL,
                                  raw.file.ext = ".txt", raw.file.sep = "", raw.file.source = "htseq-count",
                                  parallelComputing = FALSE, clusterType = "FORK"){
   ## check argument
   if (is.null(target.annot.file)){  # check and load target (sample) annotation
-    tgt <- NULL
+    stop("Please provide a target annotation file for target.annot.file arugment.")
   } else {
     target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
     target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
     if (target.annot_ext != "csv") {
-      cat("target.annot.file is not in csv format. Proceed without using the file.\n")
-      tgt <- NULL
+      stop("target.annot.file is not in csv format.")
     } else {
       cat("Loading target annotation file...")
       tgt <- read.csv(file = target.annot.file, header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
       cat("Done!\n")
     }
+  }
+
+  if (!sample_groups.var.name %in% names(tgt)){
+    stop("Sample group annotation variable not found in the target annotation file.")
+  } else {
+    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
   }
 
   ## load files
@@ -250,6 +260,7 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
   out <- list(raw_read_count = counts,
               sample_library_sizes = lib_size,
               targets = tgt,
+              sample_groups = sample.groups,
               genes = features,
               count_source = raw.file.source,
               GTF_annotation = ifelse(is.null(gtf.matrix), FALSE, TRUE),
