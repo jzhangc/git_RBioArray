@@ -20,7 +20,7 @@ rnaseq_de <- function(object, ...){
 }
 
 
-#' Title rnaseq_de.default
+#' Title rnaseq_de.mir_count
 #'
 #' @description The \code{rnaseq_de} function for \code{seq_de.mir_count} object from \code{RBioMIR} object.
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.

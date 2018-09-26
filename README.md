@@ -34,7 +34,6 @@ Update log
             - sig function to produce "rbioarray_sig" object
         
       - Updates to RNAseq functions:
-        - rbioseq_ImportCount() function added to import HTseq counted files to R environment
         - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
         - New DE function added
 
@@ -69,6 +68,8 @@ Update log
       
       - Updates to RNAseq functions:
         - rbioseq_clr_ilr_transfo() function added for transforming data for clustering analysis and any feature selection/classcification processes
+        - rbioseq_import_gtf() function to import and parse gtf/gff annotation files
+        - rbioseq_import_count() function added to import read count files (e.g. HTseq-count files) to R environment
         - rbioseq_DE() re-written with OOP elements - using S3 classes
           - rnaseq_de function to produce "rbioseq_de" object
           - sig function to produce "rbioseq_sig" object

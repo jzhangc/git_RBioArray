@@ -19,7 +19,8 @@
 #' normdata <- rbioarray_PreProc(mydata)
 #' }
 #' @export
-rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2", logTransObjT = "data", logTransParallelComputing = FALSE,
+rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2",
+                              logTransObjT = "data", logTransParallelComputing = FALSE,
                               bgMethod = "auto", normMethod = "quantile", ...){
   if (class(rawlist) == "list"){
     ## log transform  or not
@@ -82,7 +83,8 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 #' fltdata <- rbioarray_flt(normdata)
 #' }
 #' @export
-rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType", percentile = ifelse(ctrlProbe, 0.95, 0.05),
+rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
+                          percentile = ifelse(ctrlProbe, 0.95, 0.05),
                           combineGeneDup = FALSE, geneSymbolVar = NULL, annot = NULL,
                           parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check key arguments
