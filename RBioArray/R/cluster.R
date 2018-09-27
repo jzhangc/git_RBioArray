@@ -181,7 +181,6 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
                              distance = "euclidean", clust = "complete",
                              colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                              plotWidth = 7, plotHeight = 7){
-
   ## chekc variables
   if (is.null(dfm_count) | is.null(dfm_annot) | class(dfm_count) != "data.frame" | class(dfm_annot) != "data.frame"){
     stop(cat("Please provide the read count and annotation dataframes. Please also make sure the type as data.frame. Function terminated.\n"))

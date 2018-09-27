@@ -54,13 +54,13 @@ rbioseq_de_analysis(raw.file.path, raw.file.ext = ".txt",
 \value{
 Outputs the following objects:
 
-\code{rbioseq_count}: non small RNA RNA-seq read count object
+        \code{rbioseq_count}: non small RNA RNA-seq read count object
 
-\code{rbioseq_de}: RNAseq DE results object
+        \code{rbioseq_de}: RNAseq DE results object
 
-\code{sig}: RNAseq DE significant analysis results object.
+        \code{sig}: RNAseq DE significant analysis results object.
 
-The function also outputs \code{csv} files containing
+        The function also outputs \code{csv} files containing
 }
 \description{
 All-in-one wrapper for RNAseq differential expression (DE) analysis, i.e. from read count files to volcano plots.
@@ -68,9 +68,10 @@ All-in-one wrapper for RNAseq differential expression (DE) analysis, i.e. from r
 \details{
 When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
 
-For more on the classes \code{rbioseq_count}, \code{rbioseq_de} and \code{sig}, see the help pages for functions \code{\link{rbioseq_import_count}}, \code{\link{rnaseq_de}} and \code{\link{sig}}, respectively.
+         For more on the classes \code{rbioseq_count}, \code{rbioseq_de} and \code{sig}, see the help pages for functions \code{\link{rbioseq_import_count}}, \code{\link{rnaseq_de}} and \code{\link{sig}}, respectively.
 
-The function is not suitable for small RNA RNAseq analysis, e.g. miRNA analysis. For miRNA analysis, it is advised to use \code{RBioMIR} pacakge in conjunction with functions \code{\link{rnaseq_de}} and \code{\link{sig}} from the current pacakge.
+         The function is not suitable for small RNA RNAseq analysis, e.g. miRNA analysis. For miRNA analysis,
+         it is advised to use \code{RBioMIR} pacakge in conjunction with functions \code{\link{rnaseq_de}} and \code{\link{sig}} from the current pacakge.
 }
 \examples{
 \dontrun{

@@ -35,17 +35,17 @@
 \value{
 A \code{rbioseq_de} object. The items of the object are following:
 
-\code{filter_results}
+        \code{filter_results}
 
-\code{normalization_results}
+        \code{normalization_results}
 
-\code{gene_id_var_name}
+        \code{gene_id_var_name}
 
-\code{gene_symbol_var_name}
+        \code{gene_symbol_var_name}
 
-\code{F_stats}
+        \code{F_stats}
 
-\code{DE_results}
+        \code{DE_results}
 }
 \description{
 The default \code{rnaseq_de} function
@@ -53,10 +53,10 @@ The default \code{rnaseq_de} function
 \details{
 \code{filter.threshold.cpm.count} uses CPM (counts per million) as the basis for filtering. The rule of thumb is to filter reads independently from the groupping information.
 
-The default is based on the paper by Chen et al (2016):
-10~15 counts per library, which translate to 10~15/L with L being the smallest library size in millions.
-Therefore, if using 10 as an example, the above becomes 10 / min(library_sizes) / 1000000
+         The default is based on the paper by Chen et al (2016):
+         10~15 counts per library, which translate to 10~15/L with L being the smallest library size in millions.
+         Therefore, if using 10 as an example, the above becomes 10 / min(library_sizes) / 1000000
 
-Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
-using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
+         Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
+         using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
 }

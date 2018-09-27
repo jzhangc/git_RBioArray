@@ -67,23 +67,23 @@ sig.rbioseq_de <- function(object, export.name = NULL, ...){
 #' @param plot.Height The height of the figure for the final output figure file. Default is \code{150}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
 #' @return Signifiance test results as \code{csv} files to the working directory, as well as a \code{sig} object to the environment.
-#' The \code{sig} object contains the following items;
+#'         The \code{sig} object contains the following items;
 #'
-#' \code{significant_change_summary}
+#'         \code{significant_change_summary}
 #'
-#' \code{export.mode}
+#'         \code{export.mode}
 #'
-#' \code{signifianct_change_results}: this only contains significantly changed genes.
+#'         \code{signifianct_change_results}: this only contains significantly changed genes.
 #'
-#' \code{experiment}
+#'         \code{experiment}
 #'
 #' @details Explanation for \code{export.mode} options:
 #'
-#' \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
+#'         \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
 #'
-#' \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
+#'         \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
 #'
-#' \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
+#'         \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
 #'
 #' @import ggplot2
 #' @importFrom RBioplot rightside_y

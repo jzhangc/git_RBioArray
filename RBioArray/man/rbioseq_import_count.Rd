@@ -57,6 +57,8 @@ Data pre-processing for RNA-seq read count files.
 }
 \details{
 When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
+
+         For \code{target.annot.file}, the argument doesn't accept full file path. The function will only seek the file under working directory. So, the file should be placed under working directory.
 }
 \examples{
 \dontrun{
