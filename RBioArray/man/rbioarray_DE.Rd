@@ -83,7 +83,7 @@ rbioarray_DE(objTitle = "data_filtered", output.mode = "probe.all",
 The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 }
 \description{
-DE analysis function.
+Legacy function. DE analysis function.
 }
 \details{
 When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}.

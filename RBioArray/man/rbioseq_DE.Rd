@@ -80,7 +80,7 @@ rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL,
 The function outputs a \code{dataframe} object with filtered and normalized readcounts, a \code{list} object with DE results, a \code{dataframe} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 }
 \description{
-DE analysis function for RNA-seq data, with count filtering functionality.
+Legacy function. DE analysis function for RNA-seq data, with count filtering functionality.
 }
 \details{
 Sample weights are automatically caluclated during Voom normalization. When \code{count_threshold = 0}, the function will filter out all the genomic features with a total read count 0. When there is no significant genes or probes identified under \code{FDR = TRUE}, the function conducts DE analysis without p value correction and outputs an warning. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Additionally, when set to display gene symbols, all the features without a gene symbol will be removed.
