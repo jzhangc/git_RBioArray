@@ -38,7 +38,6 @@ Update log
         
       - Updates to RNAseq functions:
         - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
-        - New DE function added
 
       - Updates to microarray functions:
         - S3 object "rbioarray_preproc" add to the function: rbioarray_PreProc()
