@@ -1,3 +1,150 @@
+#' @title rbioarray_rlist
+#'
+#' @description Function to constuct \code{rlist} class object from microarary and annotation data. The \code{rlist} object is the starting point for all microarray data analysis.
+#' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
+#' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
+#' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
+#' @param gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
+#' @param gene.annot.gene_id.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.
+#' @param gene.annot.gene_symbol.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.
+#' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
+#' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
+#' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
+#' @details The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+#'
+#'          The optional annotation data frame \code{gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
+#'          It is noted that \code{gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
+#'          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
+#'          The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+#'
+#'          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rlist} class contains many common elements from \code{Elist} class.
+#'
+#' @return A \code{rlist} object. The \code{rlist} class contains the following items:
+#'
+#'         \code{E}: raw expression (i.e. hybridization signal)
+#'
+#'         \code{raw_file.gene_annotation.var_name}
+#'
+#'         \code{raw_file.gene_id.var_name}
+#'
+#'         \code{gene_display_name_used}: if the gene display name is extracted from \code{gene.annot.dataframe}.
+#'
+#'         \code{genes_annotation.gene_id.var_name}
+#'
+#'         \code{genes_annotation.gene_symbol.var_name}
+#'
+#'         \code{targets}: the sample annotation data frame.
+#'
+#'         \code{sample_groups}
+#'
+#' @examples
+#' \dontrun{
+#' raw_list <- rbioarray_rlist(raw.dataframe = raw, raw.annot.var.name = c("PROBE_ID","ILMN_GENE"), raw.gene_id.var.name = "PROBE_ID",
+#'                             gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
+#'                             target.annot.file = "sample_index_end6.csv", sample_groups.var.name = "time_point")
+#' }
+#' @export
+rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
+                            gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
+                            target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL){
+  ## check arguments and set up variables
+  # raw data
+  if (is.null(dim(raw.dataframe)))
+    stop("raw.matrix has to be a data.frame, with rows for genes/probes/genomic features, columns for samples.")
+  if (is.null(raw.annot.var.name) || is.null(raw.gene_id.var.name))
+    stop("Please set raw.annot.var.name AND raw.gene_id.var.name arguments.")
+  if (!raw.annot.var.name %in% names(raw.dataframe)  || !raw.gene_id.var.name %in% names(raw.dataframe))
+    stop("Annoation variables (i.e. columns) and/or the gene_id variable (i.e. column) not found in raw.dataframe")
+
+  # gene annotation
+  if (is.null(gene.annot.dataframe)){  # check and load gene annoation
+    cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information. \n")
+    gene.annot.dataframe <- raw.dataframe[, raw.annot.var.name]
+    gene.annot.gene_id.var.name <- raw.gene_id.var.name
+    gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
+    gene.symbol <- FALSE
+  } else {
+    if (!is.data.frame(gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
+    if (nrow(gene.annot.dataframe) < nrow(raw.dataframe)) stop("gene.annot.dataframe has less record than the raw.dataframe") # check size
+    if (is.null(gene.annot.gene_id.var.name) || is.null(gene.annot.gene_symbol.var.name)) {
+      stop("Please set gene.annot.gene_id.var.name AND gene.annot.gene_symbol.var.name arguments according to gene.annot")
+    } else if (!gene.annot.gene_id.var.name %in% names(gene.annot.dataframe) || !gene.annot.gene_symbol.var.name %in% names(gene.annot.dataframe)) {
+      stop("Gene ID variable and/or gene symbol variable not found in gene.annot")
+    } else {
+      gene.symbol <- TRUE
+    }
+  }
+
+  # target annotation
+  if (is.null(target.annot.file)){  # check and load target (sample) annotation
+    stop("Please provide a target annotation file for target.annot.file arugment.")
+  } else {
+    target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
+    target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
+    if (target.annot_ext != "csv") {
+      stop("target.annot.file is not in csv format.")
+    } else {
+      cat("Loading target annotation file...")
+      tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
+      cat("Done!\n")
+    }
+  }
+  if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
+  if (!sample_groups.var.name %in% names(tgt)){
+    stop("Sample group annotation variable not found in the target annotation file.")
+  } else {
+    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
+  }
+
+  # additional variables
+  raw_dfm <- raw.dataframe
+  genes_annot_dfm <- gene.annot.dataframe
+
+  ## Set up the information
+  cat("Constructing rlist...")
+  # merge gene annotation with raw dataframe
+  raw_dfm$merge_id <- raw_dfm[, raw.gene_id.var.name]
+  genes_annot_dfm$merge_id <- genes_annot_dfm[, gene.annot.gene_id.var.name]
+  merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
+  all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm)))  # all annotation variable names
+
+  # Set up output E matrix
+  E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns
+
+  # set up output annotation information
+  genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
+
+  ## output
+  out <- list(E = E,
+              raw_file.gene_annotation.var_name = raw.annot.var.name,
+              raw_file.gene_id.var_name = raw.gene_id.var.name,
+              genes = genes,
+              gene_display_name_used = gene.symbol,
+              genes_annotation.gene_id.var_name = gene.annot.gene_id.var.name,
+              genes_annotation.gene_symbol.var_name = gene.annot.gene_symbol.var.name,
+              targets = tgt,
+              sample_groups = sample.groups)
+  class(out) <- "rbioarray_rlist"
+  cat("Done!\n")
+  cat("\n")
+  cat(paste0("The resulted rlist contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), " samples for ", length(unique(sample.groups)), " groups."))
+  return(out)
+}
+
+
+#' @export
+print.rlist <- function(x, ...){
+  cat("---- rlist information ----\n")
+  cat(paste0("Number of genes/probes/genomic features: ", nrow(x$E), "\n"))
+  cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
+  cat(paste0("Groups: "))
+  cat(paste0(levels(x$sample_groups)))
+  cat("\n\n")
+  cat(paste0("Gene display name from annotation information: ", ifelse(x$gene_display_name_used, "Available\n", "Unavailable\n")))
+  cat("\n")
+}
+
+
 #' @title rbioarray_PreProc
 #'
 #' @description Data pre-processing function for the microarary data.

@@ -29,9 +29,12 @@ Update log
         - Bayesian biclustering function rbioarray_bbc()
         - K-mean clustering function rbioarray_kmean()
       
-      - Updates to microarray functions:
-        - rbioarray_DE() re-written with Object-Oriented-Programming (OOP) elements - using S3 classes
-            - sig function to produce "rbioarray_sig" object
+      - New microarray functions:
+        - New DE analysis function added: rbioarray_de_analysis()
+          - The fnction has export options:
+            (i) all features, 
+            (ii) features with a annotation name, 
+            (iv) significant features with or without annotation name depending on the setting for argument "gene_symbol".
         
       - Updates to RNAseq functions:
         - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
@@ -39,9 +42,9 @@ Update log
 
       - Updates to microarray functions:
         - S3 object "rbioarray_preproc" add to the function: rbioarray_PreProc()
-          - S3 print function for "rbioarray_preproc" class
+          - S3 print function for "rbioarray_plist" class
         - S3 object "rbioarray_filter" add to the function: rbioarray_flt()
-          - S3 print function for "rbioarray_filter" class
+          - S3 print function for "rbioarray_flist" class
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
         - New DE function added
         
@@ -66,9 +69,15 @@ Update log
         - rnaseq_de function added and produces "rbioseq_de" object. The function inlcudes methods for the following classes: "rbioseq_count", "mir_count"
         - Significance test function added and produces "sig" object
         - S3 print methods added for the classes: "rbioseq_de", "rbioseq_count", "sig"
+        
+      - New microarray functions
+        - Function to import and produce a raw data class "rbioarray_rlist"
+        - S3 print method for "rlist" class
       
       - Updates to microarray functions:
-        - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility.
+        - Due to the overhual of microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility
+        
+      - Updates to legacy functions:
         - rbioarray_DE() now has the options to produce csv files for either 
           (i) all probes, 
           (ii) significant probes, 

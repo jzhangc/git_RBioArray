@@ -58,7 +58,24 @@ Data pre-processing for RNA-seq read count files.
 \details{
 When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
 
-         For \code{target.annot.file}, the argument doesn't accept full file path. The function will only seek the file under working directory. So, the file should be placed under working directory.
+         For \code{target.annot.file}, the argument doesn't accept full file path.
+         The function will only seek the file under working directory. So, the file should be placed under working directory.
+
+         Since the HTSeq-count program uses GTF/GFF annotation file for read couting,
+         the results will always contain "\code{gene_id}" as the gene identification item.
+         Therefore, when and \code{count_source = "htseq-count"} and \code{gtf.matrix} is set,
+         the rest of the GTF/GFF information is merged into the \code{genes} item in the resulting \code{rbioseq_count} class object.
+
+         The items from GTF/GFF information are as following:
+
+         \code{gene_name}
+
+         \code{gene_type}
+
+         \code{chromosome}
+
+         Since the current HTSeq-count setting is to examine genes, NOT transcript, the \code{transcript_id} item will not be used.
+         Transcript assessment will be added through future updates.
 }
 \examples{
 \dontrun{
