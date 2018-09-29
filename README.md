@@ -46,8 +46,7 @@ Update log
         - S3 object "rbioarray_filter" add to the function: rbioarray_flt()
           - S3 print function for "rbioarray_flist" class
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
-        - New DE function added
-        
+
       - Updates to correlation functions:
         - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) correlation and differential proportionality for NGS compositional data analysis 
         - the formatting from diagonal matrix to a 2D table functionality now a separate function
