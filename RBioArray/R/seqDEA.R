@@ -326,6 +326,7 @@ print.rbioseq_count <- function(x, ...){
 #' @param FDR If to use FDR correction for p values. Default is \code{TRUE}.
 #' @param export.name Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.
 #' @param export.mode Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"}, \code{"sig"}. Default is \code{"all"}. See details.
+#' @param ... Additional arguments for \code{\link{sig}} function.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
