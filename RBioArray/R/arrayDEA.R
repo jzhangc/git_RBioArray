@@ -124,7 +124,7 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
               genes_annotation.gene_symbol.var_name = gene.annot.gene_symbol.var.name,
               targets = tgt,
               sample_groups = sample.groups)
-  class(out) <- "rbioarray_rlist"
+  class(out) <- "rlist"
   cat("Done!\n")
   cat("\n")
   cat(paste0("The resulted rlist contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), " samples for ", length(unique(sample.groups)), " groups."))
