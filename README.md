@@ -23,29 +23,11 @@ Installation:
 
 Update log
 
-    0.5.0 (feature preview)
-    (ICEBOX)
+    0.5.1 (feature roadmap)
       - New clustering funcions:
         - Bayesian biclustering function rbioarray_bbc()
         - K-mean clustering function rbioarray_kmean()
       
-      - New microarray functions:
-        - New DE analysis function added: rbioarray_de_analysis()
-          - The fnction has export options:
-            (i) all features, 
-            (ii) features with a annotation name, 
-            (iv) significant features with or without annotation name depending on the setting for argument "gene_symbol".
-        
-      - Updates to RNAseq functions:
-        - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
-
-      - Updates to microarray functions:
-        - S3 object "rbioarray_preproc" add to the function: rbioarray_PreProc()
-          - S3 print function for "rbioarray_plist" class
-        - S3 object "rbioarray_filter" add to the function: rbioarray_flt()
-          - S3 print function for "rbioarray_flist" class
-        - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
-
       - Updates to correlation functions:
         - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) correlation and differential proportionality for NGS compositional data analysis 
         - the formatting from diagonal matrix to a 2D table functionality now a separate function
@@ -53,6 +35,23 @@ Update log
       - Other update
         - Functions updated for R Notebook/Markdown compatibility
         - Dependency ggplot2 now requires version 3.0.0
+    
+
+    0.5.0
+    (ICEBOX)
+      - New microarray functions:
+        - Function rbioarray_filter() for filtering data from "rbioarray_plist". The function produces an "rbioarray_flist" class object
+        - New DE analysis function added: rbioarray_de_analysis()
+          - The fnction has export options:
+            (i) all features, 
+            (ii) features with a annotation name, 
+            (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol".
+        
+      - Updates to RNAseq functions:
+        - rbioseq_hcluster() function re-written with rbioseq_transform() function incorporated
+
+      - Updates to legacy functions:
+        - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()
       
     (ADDED)
       - New RNAseq functions
@@ -69,10 +68,16 @@ Update log
         - S3 print methods added for the classes: "rbioseq_de", "rbioseq_count", "sig"
         
       - New microarray functions
-        - Function to import and produce a raw data class "rbioarray_rlist"
-        - S3 print method for "rlist" class
+        - Function rbioarray_rlist() to import and produce a raw data class "rbioarray_rlist"
+        - Function rbioarray_transfo_normalize() for log transforming and normalizing raw data from "rbioarray_rlist", "EList" or "MAList". The function produces an "rbioarray_plist" class object
+        - S3 print method for "rbioarray_rlist", "rbioarray_plist", "rbioarray_flist" classes
+
+      - Updates to RNAseq functions:
+        - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility.
       
       - Updates to microarray functions:
+        - Due to incorporating OOP functions, rbioarray_PreProc() is now considered as a "legacy function". However, it is still functional for compatibility
+        - Due to incorporating OOP functions, rbioarray_flt() is now considered as a "legacy function". However, it is still functional for compatibility
         - Due to the overhual of microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility
         
       - Updates to legacy functions:
@@ -84,9 +89,6 @@ Update log
         However, DE reuslts for all probes will be exported to the R environment regardless of these settings. Similarly, F stats is also always exported to the working directory and the R environment regardless of these settings
         - rbioarray_DE() with the "FORK" cluster module re-written for foreach style parallel computing
         - To keep things consistent with limma's Elist, the "target" component list output changed to "targets" for all microarray functions
-      
-      - Updates to RNAseq functions:
-        - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility.
         
       - Wording adjustment for clearer documentation
       

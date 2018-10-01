@@ -60,7 +60,6 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast
 }
 
 
-
 #' Title rbioseq_import_gtf
 #'
 #' @description Import GTF/GFF files
@@ -140,7 +139,7 @@ rbioseq_import_gtf <- function(file){
 #' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
 #' @param raw.file.source Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
-#' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param cluterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
 #'
 #'          For \code{target.annot.file}, the argument doesn't accept full file path.

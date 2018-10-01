@@ -30,7 +30,7 @@ rbioarray_rlist(raw.dataframe, raw.annot.var.name = NULL,
 \item{sample_groups.var.name}{The variable name for sample groupping information from \code{target.annot.file}.}
 }
 \value{
-A \code{rlist} object. The \code{rlist} class contains the following items:
+A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the following items:
 
         \code{E}: raw expression (i.e. hybridization signal)
 
@@ -49,7 +49,7 @@ A \code{rlist} object. The \code{rlist} class contains the following items:
         \code{sample_groups}
 }
 \description{
-Function to constuct \code{rlist} class object from microarary and annotation data. The \code{rlist} object is the starting point for all microarray data analysis.
+Function to constuct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
 }
 \details{
 The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
@@ -59,7 +59,7 @@ The word "gene" used in argument names and output item names is in its broader m
          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
          The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
 
-         To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rlist} class contains many common elements from \code{Elist} class.
+         To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 }
 \examples{
 \dontrun{

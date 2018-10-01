@@ -45,6 +45,8 @@ rbioseq_de_analysis(raw.file.path, raw.file.ext = ".txt",
 
 \item{export.mode}{Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"}, \code{"sig"}. Default is \code{"all"}. See details.}
 
+\item{...}{Additional arguments for \code{\link{sig}} function.}
+
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
 
 \item{filter.threshold.cpm}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}

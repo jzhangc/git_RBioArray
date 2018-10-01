@@ -29,7 +29,7 @@ rbioseq_import_count(path = getwd(), species = NULL,
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
 
-\item{cluterType}{clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+\item{cluterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 Outputs a \code{rbioseq_count} object with merged read counts from mutliple files, with annotation. The \code{rbioseq_count} object contains the following:
