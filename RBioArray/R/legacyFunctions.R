@@ -867,18 +867,3 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
     }
   }
 }
-
-
-#' @export
-print.rbioarray_plist <- function(x, ...){
-  cat("---- rbioarray_plist information ----\n")
-  cat(paste0("Log transformation: ", ifelse(x$extra_E_data$log_transformation, TRUE, FALSE), "\n"))
-  cat(paste0("Background correction method: ", x$background_correction_method, "\n"))
-  cat(paste0("Between-sample normalization method: ", x$between_sample_normalization_method))
-  cat("\n\n")
-  cat(paste0("Number of genes/probes/genomic features: ", nrow(x$E), "\n"))
-  cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
-  cat(paste0("Groups: "))
-  cat(paste0(levels(x$sample_groups)))
-  cat("\n")
-}
