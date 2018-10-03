@@ -32,7 +32,7 @@ A \code{rbioarray_flist} class, including the following core items:
 
         \code{filter_results}: a list containing \code{neg_control_used}, \code{filter_percentile}, \code{filter_threshold_min_sample}, and \code{filter_summary}
 
-        Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
+        Additionally, \code{rbioarray_flist} object will include additional items from the input \code{rbioarray_plist} object.
 }
 \description{
 Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.

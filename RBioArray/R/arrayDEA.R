@@ -299,6 +299,7 @@ rbioarray_transfo_normalize.default <- function(E,
       # set up cpu cluster
       n_cores <- detectCores() - 1
       cl <- makeCluster(n_cores, type = logTransfo.cluterType)
+      registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
       # log transform
       transfo_E_mtx <- foreach(i = E, .combine = "c") %dopar% {
@@ -382,7 +383,7 @@ print.rbioarray_plist <- function(x, ...){
 #'
 #'         \code{filter_results}: a list containing \code{neg_control_used}, \code{filter_percentile}, \code{filter_threshold_min_sample}, and \code{filter_summary}
 #'
-#'         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
+#'         Additionally, \code{rbioarray_flist} object will include additional items from the input \code{rbioarray_plist} object.
 #'
 #' @import doParallel
 #' @import foreach
