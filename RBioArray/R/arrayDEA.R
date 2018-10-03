@@ -510,3 +510,17 @@ rbioarray_filter_combine <- function(object,
   cat("Done!\n")
   return(out)
 }
+
+
+#' @export
+print.rbioarray_flist <- function(x, ...){
+  cat("---- rbioarray_flist information ----\n")
+  cat(paste0("Number of genes/probes/genomic features upon filtering: ", nrow(x$E), "\n"))
+  cat(paste0("Number of genes/probes/genomic features before filtering: ", nrow(x$extra_E_data$original_E), "\n"))
+  cat(paste0("Gene duplicates combined: ", ifelse(x$gene_duplicates_combined, TRUE, FALSE), "\n"))
+  cat("\n")
+  cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
+  cat(paste0("Groups: "))
+  cat(paste0(levels(x$sample_groups)))
+  cat("\n")
+}

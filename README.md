@@ -62,7 +62,7 @@ Update log
           - The fnction has export options:
             (i) all features, 
             (ii) features with a annotation name, 
-            (iv) significant features with or without annotation name depending on the setting for argument "gene_symbol".
+            (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol".
         - rnaseq_de function added and produces "rbioseq_de" object. The function inlcudes methods for the following classes: "rbioseq_count", "mir_count"
         - Significance test function added and produces "sig" object
         - S3 print methods added for the classes: "rbioseq_de", "rbioseq_count", "sig"
