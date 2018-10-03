@@ -5,12 +5,15 @@
 \title{Title rnaseq_de.rbioseq_count}
 \usage{
 \method{rnaseq_de}{rbioseq_count}(object,
-  filter.threshold.min.count = 10, ...)
+  filter.threshold.min.count = 10, filter.threshold.min.sample = NULL,
+  ...)
 }
 \arguments{
 \item{object}{A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.}
 
 \item{filter.threshold.min.count}{Minimum count for the smallest library for filter thresholding. Default is \code{10}.}
+
+\item{filter.threshold.min.sample}{Minimum number of samples meeting the count threshold. Default is \code{NULL}.}
 
 \item{...}{Additional arguments for \code{\link{rnaseq_de.defuault}}.}
 }

@@ -35,7 +35,7 @@
 \value{
 A \code{rbioseq_de} object. The items of the object are following:
 
-        \code{filter_results}
+        \code{filter_results}: a list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample} and \code{filter_summary}
 
         \code{normalization_results}
 

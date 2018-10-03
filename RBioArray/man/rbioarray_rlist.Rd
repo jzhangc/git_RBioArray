@@ -7,7 +7,11 @@
 rbioarray_rlist(raw.dataframe, raw.annot.var.name = NULL,
   raw.gene_id.var.name = NULL, gene.annot.dataframe = NULL,
   gene.annot.gene_id.var.name = NULL,
-  gene.annot.gene_symbol.var.name = NULL, target.annot.file = NULL,
+  gene.annot.gene_symbol.var.name = NULL,
+  gene.annot.control_type.var.name = NULL,
+  gene.annot.control_type.val.pos = 1,
+  gene.annot.control_type.val.neg = -1,
+  gene.annot.control_type.val.exp = 0, target.annot.file = NULL,
   target.annot.file.path = getwd(), sample_groups.var.name = NULL)
 }
 \arguments{
@@ -22,6 +26,14 @@ rbioarray_rlist(raw.dataframe, raw.annot.var.name = NULL,
 \item{gene.annot.gene_id.var.name}{Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.}
 
 \item{gene.annot.gene_symbol.var.name}{Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.}
+
+\item{gene.annot.control_type.var.name}{Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.}
+
+\item{gene.annot.control_type.val.pos}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.}
+
+\item{gene.annot.control_type.val.neg}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.}
+
+\item{gene.annot.control_type.val.exp}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.}
 
 \item{target.annot.file}{File name for the target (i.e. sample) annotation \code{.csv} file.}
 
@@ -43,6 +55,8 @@ A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the f
         \code{genes_annotation.gene_id.var_name}
 
         \code{genes_annotation.gene_symbol.var_name}
+
+        \code{gene_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 
         \code{targets}: the sample annotation data frame.
 

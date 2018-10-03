@@ -387,7 +387,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 
   if (!class(normlst) == "list" & combineGeneDup){
     if(is.null(annot)){
-      stop(cat("Since combineGeneDup = TRUE and norlst is an Elist objects, please set annotation dataframe for annot argument.
+      stop(cat("Since combineGeneDup = TRUE and normlst is not an Elist object, please set annotation dataframe for annot argument.
                Function terminated.\n"))
     }
     if (!"ProbeName" %in% names(annot)){
@@ -396,7 +396,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
     if (!geneSymbolVar %in% names(annot)){
       stop(cat("Make sure to name the variable containing gene symbols in annotation data.frame. Function terminated.\n"))
     }
-    }
+  }
 
   ## extract the 95% percentile of the negative control signals
   if (ctrlProbe){ # if there are neg control probes
@@ -406,7 +406,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
       neg <- apply(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
     }
   } else { # no neg control probes, we use the
-    neg <- apply(normlst$E, 2, function(x)quantile(x, p = 0.05)) # 5% percentile of all the data
+    neg <- apply(normlst$E, 2, function(x)quantile(x, p = percentile)) # 5% percentile of all the data
   }
 
   if (class(normlst) == "list"){

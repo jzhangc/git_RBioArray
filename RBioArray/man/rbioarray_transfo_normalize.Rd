@@ -7,12 +7,12 @@
 rbioarray_transfo_normalize(object, ...)
 }
 \arguments{
-\item{object}{Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.}
+\item{object}{Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.}
 
 \item{...}{Additional arguments for corresponding S3 class methods.}
 }
 \value{
-A \code{rbioarray_plist} class object with the following core items:
+A \code{rbioarray_plist} class object with the following items:
 
         \code{E}: Processed expression matrix
 
@@ -22,10 +22,7 @@ A \code{rbioarray_plist} class object with the following core items:
 
         \code{extra_E_data}: A list with original (i.e. raw) expression matrix and, if applicable, log transformed expression matrix
 
-        Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist}, \code{EList} or \code{MAList} object.
-
-        When the input \code{object} is \code{EList} or \code{MAList}, the output will inherit those classes,
-        in addition to being a \code{rbioarray_plist} class object.
+        Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
 }
 \description{
 Generic data log transformation and nomalization function for microarray.

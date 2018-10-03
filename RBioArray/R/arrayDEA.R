@@ -7,6 +7,10 @@
 #' @param gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
 #' @param gene.annot.gene_id.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.
 #' @param gene.annot.gene_symbol.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.
+#' @param gene.annot.control_type.var.name Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.
+#' @param gene.annot.control_type.val.pos Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.
+#' @param gene.annot.control_type.val.neg Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.
+#' @param gene.annot.control_type.val.exp Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.
 #' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
 #' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
 #' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
@@ -33,6 +37,8 @@
 #'
 #'         \code{genes_annotation.gene_symbol.var_name}
 #'
+#'         \code{gene_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
+#'
 #'         \code{targets}: the sample annotation data frame.
 #'
 #'         \code{sample_groups}
@@ -46,6 +52,8 @@
 #' @export
 rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
                             gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
+                            gene.annot.control_type.var.name = NULL,
+                            gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
                             target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL){
   ## check arguments and set up variables
   # raw data
@@ -58,7 +66,7 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
 
   # gene annotation
   if (is.null(gene.annot.dataframe)){  # check and load gene annoation
-    cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information. \n")
+    cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.dataframe <- raw.dataframe[, raw.annot.var.name]
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
     gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
@@ -66,12 +74,34 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
   } else {
     if (!is.data.frame(gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
     if (nrow(gene.annot.dataframe) < nrow(raw.dataframe)) stop("gene.annot.dataframe has less record than the raw.dataframe") # check size
-    if (is.null(gene.annot.gene_id.var.name) || is.null(gene.annot.gene_symbol.var.name)) {
+
+    if (is.null(gene.annot.gene_id.var.name) || is.null(gene.annot.gene_symbol.var.name)) { # gene id and symbol variables
       stop("Please set gene.annot.gene_id.var.name AND gene.annot.gene_symbol.var.name arguments according to gene.annot")
     } else if (!gene.annot.gene_id.var.name %in% names(gene.annot.dataframe) || !gene.annot.gene_symbol.var.name %in% names(gene.annot.dataframe)) {
-      stop("Gene ID variable and/or gene symbol variable not found in gene.annot")
+      stop("Gene ID variable and/or gene symbol variable not found in gene.annot.dataframe")
     } else {
       gene.symbol <- TRUE
+    }
+
+    if (!is.null(gene.annot.control_type.var.name)) {  # optional control_type variable
+      if (!gene.annot.control_type.var.name %in% names(gene.annot.dataframe)) {
+        cat("The set control type variable not found in gene.annot.dataframe. Proceed without using it.\n")
+        gene.annot.control_type = NULL
+      } else {
+        control_type.values <- unique(gene.annot.dataframe[, gene.annot.control_type.var.name])
+        input.control_type.values <- c(gene.annot.control_type.val.pos, gene.annot.control_type.val.neg, gene.annot.control_type.val.exp)
+        if (all(input.control_type.values %in% control_type.values)){
+          gene.annot.control_type = list(control_type.var_name = gene.annot.control_type.var.name,
+                                         pos_type.value = gene.annot.control_type.val.pos,
+                                         neg_type.value = gene.annot.control_type.val.neg,
+                                         exp_type.value = gene.annot.control_type.val.exp)
+        } else {
+          cat("Input probe control type values not found in the gene control type variable from gene.annot.dataframe. Proceed without using them.\n")
+          gene.annot.control_type = NULL
+        }
+      }
+    } else {
+      gene.annot.control_type = NULL
     }
   }
 
@@ -122,6 +152,7 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
               gene_display_name_used = gene.symbol,
               genes_annotation.gene_id.var_name = gene.annot.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = gene.annot.gene_symbol.var.name,
+              gene_annotation.control_type = gene.annot.control_type,
               targets = tgt,
               sample_groups = sample.groups)
   class(out) <- "rbioarray_rlist"
@@ -148,11 +179,11 @@ print.rbioarray_rlist <- function(x, ...){
 #' Title rbioarray_transfo_normalize
 #'
 #' @description Generic data log transformation and nomalization function for microarray.
-#' @param object Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
+#' @param object Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 #'          The \code{Elist} and \code{MAList} classes are from the dependent \code{limma} package.
-#' @return A \code{rbioarray_plist} class object with the following core items:
+#' @return A \code{rbioarray_plist} class object with the following items:
 #'
 #'         \code{E}: Processed expression matrix
 #'
@@ -162,10 +193,7 @@ print.rbioarray_rlist <- function(x, ...){
 #'
 #'         \code{extra_E_data}: A list with original (i.e. raw) expression matrix and, if applicable, log transformed expression matrix
 #'
-#'         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist}, \code{EList} or \code{MAList} object.
-#'
-#'         When the input \code{object} is \code{EList} or \code{MAList}, the output will inherit those classes,
-#'         in addition to being a \code{rbioarray_plist} class object.
+#'         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
 #'
 #' @examples
 #'
@@ -179,7 +207,7 @@ print.rbioarray_rlist <- function(x, ...){
 #' @export
 rbioarray_transfo_normalize <- function(object, ...){
   ## check arguments
-  if (!class(object) %in% c("rbioarray_rlist", "EList", "MAList")) stop("The input object needs to be either a \"rlist\", \"EList\" or \"MAList\"")
+  if (class(object) != "rbioarray_rlist") stop("The input object needs to be either a \"rlist\", \"EList\" or \"MAList\"")
 
   ## use method
   UseMethod("rbioarray_transfo_normalize", object)
@@ -270,7 +298,7 @@ rbioarray_transfo_normalize.default <- function(E,
     } else {  # parallel computing
       # set up cpu cluster
       n_cores <- detectCores() - 1
-      cl <- makeCluster(n_cores, type = "PSOCK")
+      cl <- makeCluster(n_cores, type = logTransfo.cluterType)
       on.exit(stopCluster(cl)) # close connect when exiting the function
       # log transform
       transfo_E_mtx <- foreach(i = E, .combine = "c") %dopar% {
@@ -326,4 +354,158 @@ print.rbioarray_plist <- function(x, ...){
   cat(paste0("Groups: "))
   cat(paste0(levels(x$sample_groups)))
   cat("\n")
+}
+
+
+#' Title rbioarray_filter_combine
+#'
+#' @description Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.
+#' @param object Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.
+#' @param filter.percentile The percentile threshold for filtering. Default is \code{0.05}. See details for more.
+#' @param filter.threshold.min.sample Minimum number of samples meeting the filtering threshold. Default is \code{NULL}. See details for more.
+#' @param combine.gene.duplicate If to combine different transcripts from the same gene/genomic feature. Default is \code{FALSE}. See details for more.
+#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @details For \code{filter.percentile},
+#'
+#'          For \code{filter.threshold.min.sample}
+#'
+#'          When \code{combine.gene.duplicate = TRUE}
+#'
+#' @return A \code{rbioarray_flist} class, including the following core items:
+#'
+#'         \code{E}
+#'
+#'         \code{genes}
+#'
+#'         \code{gene_duplicates_combined}: either \code{TRUE} or \code{FALSE}
+#'
+#'         \code{filter_results}: a list containing \code{neg_control_used}, \code{filter_percentile}, \code{filter_threshold_min_sample}, and \code{filter_summary}
+#'
+#'         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
+#'
+#' @import doParallel
+#' @import foreach
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom limma avereps
+#' @export
+rbioarray_filter_combine <- function(object,
+                                     filter.percentile = 0.05,
+                                     filter.threshold.min.sample = NULL,
+                                     combine.gene.duplicate = FALSE,
+                                     parallelComputing = FALSE, clusterType = "PSOCK"){
+  ## check arguments
+  if (!"rbioarray_plist" %in% class(object)) stop("The input object needs to be, but not exclusive to, rbioarray_plist class.")
+
+  ## filter
+  cat("Filtering low expresson genes/probes/genomic features...")
+  # set negative/low expression threshold
+  if (!is.null(object$gene_annotation.control_type)){ # 0.95 percentile of all negative control values
+    cat("Gene control type variable detected in the input object. The filter.percentile argument value reset to 0.95.\n")
+    filter.percentile = 0.95
+    control_type.var.name = object$gene_annotation.control_type$genes_annotation.control_type.var_name
+    control_type.neg.value = object$gene_annotation.control_type$gene.annot.control_type.val.neg
+
+    if (class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric"){ # if there is only one entry in the neg values
+      neg <- object$E[object$genes[, control_type.var.name] == control_type.neg.value, ] # no 95% percentile required as only one neg entry
+    } else {
+      neg <- apply(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ], 2, function(x)quantile(x, p = filter.percentile)) # neg95
+    }
+    neg_control_used = TRUE
+  } else {
+    neg <- apply(object$E, 2, function(x)quantile(x, p = filter.percentile)) # 5% percentile of all the data
+    neg_control_used = FALSE
+  }
+
+  # low expression cuttoff set at at least 10% hihger than the neg
+  LE_cutoff <- matrix(1.1 * neg, nrow(object$E), ncol(object$E), byrow = TRUE)
+  # set filtering matrix
+  if (is.null(filter.threshold.min.sample)) {
+    filter.threshold.min.sample <- min(table(object$sample_groups))
+  }
+  isexpr <- rowSums(object$E > LE_cutoff) >= filter.threshold.min.sample
+  flt_summary <- as.numeric(table(isexpr))
+  names(flt_summary) <- c("filtered", "remaning")
+
+  # filter
+  flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
+  flt_genes <- object$genes[isexpr, ]
+  cat("Done!\n")
+
+  ## averaging technical replicates
+  cat("Averaging technical replicates...")
+  flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
+  flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), ])
+  cat("Done!\n")
+
+  ## combine duplicate genes if set
+  if (combine.gene.duplicate) {
+    if (length(flt_genes_avg[, object$genes_annotation.gene_id.var_name]) != length(unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]))) {
+      if (object$gene_display_name_used){
+        cat("Combining gene duplicates (i.e. different transcripts belonging to the same gene)...")
+        if (!parallelComputing) {
+          combGeneProbe <- foreach(i = unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]), .combine = "c") %do% {
+            tmp <- flt_E_avg[which(flt_genes_avg[,object$genes_annotation.gene_symbol.var_name] %in% i), ]
+            if (is.null(dim(tmp))){
+              out <- var(tmp)
+            } else {
+              out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+                var(as.numeric(tmp[j, ]))
+              }
+            }
+            out <- data.frame(flt_genes_avg[which(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name] %in% i), ], var = out)
+            out[which(out$var %in% max(out$var)), object$genes_annotation.gene_id.var_name]
+          }
+        } else {
+          n_cores <- detectCores() - 1
+          cl <- makeCluster(n_cores, type = clusterType, outfile = "")
+          registerDoParallel(cl) # part of doParallel package
+          on.exit(stopCluster(cl)) # close connect when exiting the function
+
+          combGeneProbe <- foreach(i = unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]), .combine = "c", .packages = "foreach") %dopar% {
+            tmp <- flt_E_avg[which(flt_genes_avg[,object$genes_annotation.gene_symbol.var_name] %in% i), ]
+            if (is.null(dim(tmp))){
+              out <- var(tmp)
+            } else {
+              out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+                var(as.numeric(tmp[j, ]))
+              }
+            }
+            out <- data.frame(flt_genes_avg[which(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name] %in% i), ], var = out)
+            out[which(out$var %in% max(out$var)), object$genes_annotation.gene_id.var_name]
+          }
+        }
+        out_E <- flt_E_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
+        out_genes <- flt_genes_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
+        cat("Done!\n")
+      } else {
+        cat("\n")
+        cat("Gene symbol not used in the input object. Proceed without combining gene duplicates.\n")
+        out_E <- flt_E_avg
+        out_genes <- flt_genes_avg
+      }
+    } else {
+      cat("Number of transcripts same as number of genes, no need to combine.\n")
+      out_E <- flt_E_avg
+      out_genes <- flt_genes_avg
+    }
+  } else {
+    out_E <- flt_E_avg
+    out_genes <- flt_genes_avg
+  }
+
+  ## output
+  cat("Constucting rbioarray_flist...")
+  filter.results <- list(neg_control_used = neg_control_used,
+                         filter_percentile = filter.percentile,
+                         filter_threshold_min_sample = filter.threshold.min.sample,
+                         filter_summary = flt_summary)
+  out <- list(E = out_E,
+              genes = out_genes,
+              gene_duplicates_combined = combine.gene.duplicate,
+              filter_results = filter.results)
+  out <- append(out, object[!names(object) %in% c("E", "genes")])
+  class(out) <- "rbioarray_flist"
+  cat("Done!\n")
+  return(out)
 }

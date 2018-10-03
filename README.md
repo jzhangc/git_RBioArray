@@ -44,7 +44,7 @@ Update log
         - New DE analysis function added: rbioarray_de_analysis()
           - The fnction has export options:
             (i) all features, 
-            (ii) features with a annotation name, 
+            (ii) features with an annotation name, 
             (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol".
         
       - Updates to RNAseq functions:
@@ -69,7 +69,8 @@ Update log
         
       - New microarray functions
         - Function rbioarray_rlist() to import and produce a raw data class "rbioarray_rlist"
-        - Function rbioarray_transfo_normalize() for log transforming and normalizing raw data from "rbioarray_rlist", "EList" or "MAList". The function produces an "rbioarray_plist" class object
+        - Function rbioarray_transfo_normalize() for log transforming and normalizing raw data from "rbioarray_rlist". The function produces an "rbioarray_plist" class object
+        - Function rbioarray_filter_combine() for filtering, averaging and (if set) combining transcripts from the same gene/genomic feature. The function produces an "rbioarray_flist" object
         - S3 print method for "rbioarray_rlist", "rbioarray_plist", "rbioarray_flist" classes
 
       - Updates to RNAseq functions:

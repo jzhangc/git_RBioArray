@@ -25,13 +25,23 @@ rnaseq_de <- function(object, ...){
 #' @description The \code{rnaseq_de} function for \code{mir_count} object from \code{RBioMIR} object.
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.
 #' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
+#' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param ... Additional arguments for \code{\link{rnaseq_de.defuault}}.
 #'
 #' @export
-rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, ...){
+rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
+  ## set minimum sample number
+  if (is.null(filter.threshold.min.sample)) {
+    annot.group <- object$sample_groups
+  } else {
+    annot.group <- NULL
+  }
+
+  ## contruct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
                            filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
-                           ...)
+                           filter.threshold.min.sample = filter.threshold.min.sample,
+                           annot.group = annot.group, ...)
   return(out)
 }
 
@@ -41,14 +51,24 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, ...){
 #' @description The \code{rnaseq_de} function for \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
 #' @param object A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
 #' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
+#' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param ... Additional arguments for \code{\link{rnaseq_de.defuault}}.
 #'
 #' @export
-rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, ...){
+rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
+  ## set minimum sample number
+  if (is.null(filter.threshold.min.sample)) {
+    annot.group <- object$sample_groups
+  } else {
+    annot.group <- NULL
+  }
+
+  ## contruct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
                            y.gene_id.var.name = "gene_id", y.gene_symbol.var.name = "gene_name",
                            filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
-                           ...)
+                           filter.threshold.min.sample = filter.threshold.min.sample,
+                           annot.group = annot.group, ...)
   return(out)
 }
 
@@ -78,7 +98,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, ...
 #'
 #' @return A \code{rbioseq_de} object. The items of the object are following:
 #'
-#'         \code{filter_results}
+#'         \code{filter_results}: a list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample} and \code{filter_summary}
 #'
 #'         \code{normalization_results}
 #'
