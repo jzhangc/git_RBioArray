@@ -280,7 +280,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
 
 #' @title rbioarray_PreProc
 #'
-#' @description Data pre-processing function for the microarary data.
+#' @description Legacy function. Data pre-processing function for the microarary data.
 #' @param rawlist Input data, either a list, \code{EList} or \code{MAList} object.
 #' @param logTrans If to perfom a log transformation on the data or not. Default is \code{FALSE}.
 #' @param logTransMethod If \code{logTrans = TRUE}, set which method to use for the transformation, \code{"log2"} or \code{"log10"}. Default is \code{"log2"}.
@@ -346,7 +346,7 @@ rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2"
 
 #' @title rbioarray_flt
 #'
-#' @description data filter function based on spike-in negative control.
+#' @description Legacy function. Data filter function based on spike-in negative control.
 #' @param normlst Normalized data, either a list, \code{EList} or \code{MAList} object.
 #' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
 #' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.

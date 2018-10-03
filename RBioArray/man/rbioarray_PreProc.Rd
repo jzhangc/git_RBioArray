@@ -29,7 +29,7 @@ rbioarray_PreProc(rawlist, logTrans = FALSE, logTransMethod = "log2",
 Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values. If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
 }
 \description{
-Data pre-processing function for the microarary data.
+Legacy function. Data pre-processing function for the microarary data.
 }
 \examples{
 \dontrun{

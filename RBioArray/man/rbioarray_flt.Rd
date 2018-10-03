@@ -32,7 +32,7 @@ rbioarray_flt(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
 Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
 }
 \description{
-data filter function based on spike-in negative control.
+Legacy function. Data filter function based on spike-in negative control.
 }
 \details{
 When ctrlProbe is present, the retained probes are the ones with expression value above 10 percent of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10 percent higher than the 5 percentile of total expression values are retained by default. When \code{combineGeneDup = TRUE}, the probe with the highest variance in signal will be retained for the gene of interest.
