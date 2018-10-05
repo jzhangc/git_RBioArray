@@ -122,7 +122,6 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
 
   # gene annotation
   if (!is.null(gene.annot.dataframe)){  # check and load gene annoation
-
     if (!is.data.frame(gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
     # if (nrow(gene.annot.dataframe) < nrow(raw.dataframe)) stop("gene.annot.dataframe has less record than the raw.dataframe") # check size
 
@@ -177,7 +176,6 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     # set up output annotation information
     genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
     genes <- genes[, !names(genes) %in% "merge_id"]
-
   } else {
     cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
@@ -209,7 +207,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
   }
 
   # variable names to remove
-  if (!is.null(gene.annot.rm.var.name) && !gene.annot.rm.var.name %in% names(object$genes)) {
+  if (!is.null(gene.annot.rm.var.name) && !gene.annot.rm.var.name %in% names(genes)) {
     cat("gene.annot.rm.var.name not found in gene annation. Proceed without using it")
     gene.annot.rm.var.name <- NULL
   }
