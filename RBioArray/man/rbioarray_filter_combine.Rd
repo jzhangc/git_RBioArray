@@ -2,11 +2,12 @@
 % Please edit documentation in R/arrayDEA.R
 \name{rbioarray_filter_combine}
 \alias{rbioarray_filter_combine}
-\title{Title rbioarray_filter_combine}
+\title{rbioarray_filter_combine}
 \usage{
 rbioarray_filter_combine(object, filter.percentile = 0.05,
-  filter.threshold.min.sample = NULL, combine.gene.duplicate = FALSE,
-  parallelComputing = FALSE, clusterType = "PSOCK")
+  filter.threshold.min.sample = NULL, gene.annot.rm.var.name = NULL,
+  combine.gene.duplicate = FALSE, parallelComputing = FALSE,
+  clusterType = "PSOCK")
 }
 \arguments{
 \item{object}{Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.}

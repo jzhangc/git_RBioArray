@@ -4,47 +4,17 @@
 \alias{rbioarray_rlist}
 \title{rbioarray_rlist}
 \usage{
-rbioarray_rlist(raw.dataframe, raw.annot.var.name = NULL,
-  raw.gene_id.var.name = NULL, gene.annot.dataframe = NULL,
-  gene.annot.gene_id.var.name = NULL,
-  gene.annot.gene_symbol.var.name = NULL,
-  gene.annot.control_type.var.name = NULL,
-  gene.annot.control_type.val.pos = 1,
-  gene.annot.control_type.val.neg = -1,
-  gene.annot.control_type.val.exp = 0, target.annot.file = NULL,
-  target.annot.file.path = getwd(), sample_groups.var.name = NULL)
+rbioarray_rlist(object, ...)
 }
 \arguments{
-\item{raw.dataframe}{Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.}
-
-\item{raw.annot.var.name}{A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.}
-
-\item{raw.gene_id.var.name}{Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.}
-
-\item{gene.annot.dataframe}{Optional annotation data frame for gene/probe/genomic feature annotation.}
-
-\item{gene.annot.gene_id.var.name}{Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.}
-
-\item{gene.annot.gene_symbol.var.name}{Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.}
-
-\item{gene.annot.control_type.var.name}{Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.}
-
-\item{gene.annot.control_type.val.pos}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.}
-
-\item{gene.annot.control_type.val.neg}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.}
-
-\item{gene.annot.control_type.val.exp}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.}
-
-\item{target.annot.file}{File name for the target (i.e. sample) annotation \code{.csv} file.}
-
-\item{target.annot.file.path}{The directory for \code{target.annot.file}. Default is \code{getwd()}.}
-
-\item{sample_groups.var.name}{The variable name for sample groupping information from \code{target.annot.file}.}
+\item{object}{Input object.}
 }
 \value{
 A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the following items:
 
-        \code{E}: raw expression (i.e. hybridization signal)
+        \code{E}: raw expression matrix (i.e. hybridization signal)
+
+        \code{E_background}: background signal marix if applicable
 
         \code{raw_file.gene_annotation.var_name}
 
@@ -58,6 +28,9 @@ A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the f
 
         \code{gene_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 
+        \code{gene_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
+                                                   This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
+
         \code{targets}: the sample annotation data frame.
 
         \code{sample_groups}
@@ -66,17 +39,21 @@ A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the f
 Function to constuct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
 }
 \details{
-The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
-
-         The optional annotation data frame \code{gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
-         It is noted that \code{gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
-         Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
-         The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+When \code{object} is missing, the default fuction is used - make sure to pass all the arguments.
 
          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 }
 \examples{
 \dontrun{
+\\code{# ElistRaw}
+rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", gene.annot.dataframe = annot,
+                         gene.annot.gene_id.var.name = "ProbeName", gene.annot.gene_symbol.var.name = "Gene.Symbol",
+                         gene.annot.control_type.var.name = "ControlType", gene.annot.control_type.val.pos = 1,
+                         gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
+                         target.annot.file = "Targets.csv", target.annot.file.path = getwd(),
+                         sample_groups.var.name = "Group")
+
+\\code{# non-EListRaw}
 raw_list <- rbioarray_rlist(raw.dataframe = raw, raw.annot.var.name = c("PROBE_ID","ILMN_GENE"), raw.gene_id.var.name = "PROBE_ID",
                             gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
                             target.annot.file = "sample_index_end6.csv", sample_groups.var.name = "time_point")

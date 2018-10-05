@@ -1,6 +1,6 @@
-#' Title rnaseq_de
+#' @title rnaseq_de
 #'
-#' @description Generic RNAseq differential expression analysis function
+#' @description Generic RNAseq statistical analysis function
 #' @param object Object containing expression values. Currently the function supports \code{rbioseq_count} and \code{mir_count} from \code{RBioMIR} pacakge.
 #' @param ... Additional arguments for corresponding S3 class methods.
 #' @return A differential expression result object.
@@ -20,7 +20,7 @@ rnaseq_de <- function(object, ...){
 }
 
 
-#' Title rnaseq_de.mir_count
+#' @title rnaseq_de.mir_count
 #'
 #' @description The \code{rnaseq_de} function for \code{mir_count} object from \code{RBioMIR} object.
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.
@@ -46,7 +46,7 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
 }
 
 
-#' Title rnaseq_de.rbioseq_count
+#' @title rnaseq_de.rbioseq_count
 #'
 #' @description The \code{rnaseq_de} function for \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
 #' @param object A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
@@ -73,10 +73,10 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 }
 
 
-#' Title rnaseq_de.default
+#' @title rnaseq_de.default
 #'
-#' @description The default \code{rnaseq_de} function
-#' @param x Input read count matrix, with rows for genes and columns for RNA samples
+#' @description The default \code{rnaseq_de} function that performs statistical analysis for RNAseq data.
+#' @param x Input read count matrix, with rows for genes and columns for RNA samples.
 #' @param y Target (e.g. genes) annotation matrix or vector.
 #' @param y.gene_id.var.name Variable name for gene (i.e. target) identification. Default is \code{"genes"}.
 #' @param y.gene_symbol.var.name Variable name for gene (i.e. target) symbols. Default is \code{"genes"}.
@@ -109,6 +109,8 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'         \code{F_stats}
 #'
 #'         \code{DE_results}
+#'
+#'         \code{comparisons}
 #'
 #' @importFrom limma lmFit eBayes topTable contrasts.fit voomWithQualityWeights
 #' @importFrom edgeR DGEList calcNormFactors
@@ -217,7 +219,8 @@ rnaseq_de.default <- function(x, y = NULL,
               gene_id_var_name = y.gene_id.var.name,
               gene_symbol_var_name = y.gene_symbol.var.name,
               F_stats = f_stats,
-              DE_results = de_list)
+              DE_results = de_list,
+              comparisons = cf)
   class(out) <- "rbioseq_de"
   return(out)
 }
@@ -238,6 +241,6 @@ print.rbioseq_de <- function(x, ...){
   cat(paste0("\tBetween-samples: ", x$normalization_method$between_samples, "\n"))
   cat("\n")
   cat("Comparisons assessed: \n")
-  cat(paste0("\t", names(x$DE_results), "\n"))
+  cat(paste0("\t", x$comparisons, "\n"))
   cat("\n")
 }

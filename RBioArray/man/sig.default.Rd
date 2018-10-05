@@ -2,7 +2,7 @@
 % Please edit documentation in R/sig_test.R
 \name{sig.default}
 \alias{sig.default}
-\title{Title sig.default}
+\title{sig.default}
 \usage{
 \method{sig}{default}(input.de.list, input.gene_symbol.var.name,
   input.Fstats.matrix, experiment = NULL, FC = 1.5, alpha = 0.05,

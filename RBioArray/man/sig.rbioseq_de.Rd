@@ -2,7 +2,7 @@
 % Please edit documentation in R/sig_test.R
 \name{sig.rbioseq_de}
 \alias{sig.rbioseq_de}
-\title{Title sig.rbioseq_de}
+\title{sig.rbioseq_de}
 \usage{
 \method{sig}{rbioseq_de}(object, export.name = NULL, ...)
 }

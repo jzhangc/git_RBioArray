@@ -2,17 +2,19 @@
 % Please edit documentation in R/arrayDEA.R
 \name{rbioarray_transfo_normalize.default}
 \alias{rbioarray_transfo_normalize.default}
-\title{Title rbioarray_transfo_normalize.default}
+\title{rbioarray_transfo_normalize.default}
 \usage{
-\method{rbioarray_transfo_normalize}{default}(E, logTransfo = FALSE,
-  logTransfo.method = "log2", logTransfo.gene.annot = NULL,
-  logTransfo.export.name = "data",
+\method{rbioarray_transfo_normalize}{default}(E, E.background = NULL,
+  logTransfo = FALSE, logTransfo.method = "log2",
+  logTransfo.gene.annot = NULL, logTransfo.export.name = "data",
   logTransfo.parallelComputing = FALSE, logTransfo.cluterType = "FORK",
   bgc.method = "auto", between.sample.norm.method = "quantile",
   between.sample.weight.design = NULL, ...)
 }
 \arguments{
 \item{E}{Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.}
+
+\item{E.background}{A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.}
 
 \item{logTransfo}{If to perfom a log tranformation on the expresson data prior to background correction and beetween-sample normalization. Default is \code{FALSE}.}
 

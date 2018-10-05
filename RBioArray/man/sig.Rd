@@ -2,7 +2,7 @@
 % Please edit documentation in R/sig_test.R
 \name{sig}
 \alias{sig}
-\title{Title sig}
+\title{sig}
 \usage{
 sig(object, ...)
 }

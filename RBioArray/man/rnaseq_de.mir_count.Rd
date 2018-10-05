@@ -2,7 +2,7 @@
 % Please edit documentation in R/rnaseq_count_to_de.R
 \name{rnaseq_de.mir_count}
 \alias{rnaseq_de.mir_count}
-\title{Title rnaseq_de.mir_count}
+\title{rnaseq_de.mir_count}
 \usage{
 \method{rnaseq_de}{mir_count}(object, filter.threshold.min.count = 10,
   filter.threshold.min.sample = NULL, ...)

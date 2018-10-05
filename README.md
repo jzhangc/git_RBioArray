@@ -69,6 +69,7 @@ Update log
         
       - New microarray functions
         - Function rbioarray_rlist() to import and produce a raw data class "rbioarray_rlist"
+          - The function also supports "EListRaw" class objects from limma package
         - Function rbioarray_transfo_normalize() for log transforming and normalizing raw data from "rbioarray_rlist". The function produces an "rbioarray_plist" class object
         - Function rbioarray_filter_combine() for filtering, averaging and (if set) combining transcripts from the same gene/genomic feature. The function produces an "rbioarray_flist" object
         - S3 print method for "rbioarray_rlist", "rbioarray_plist", "rbioarray_flist" classes

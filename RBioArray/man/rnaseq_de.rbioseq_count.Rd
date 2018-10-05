@@ -2,7 +2,7 @@
 % Please edit documentation in R/rnaseq_count_to_de.R
 \name{rnaseq_de.rbioseq_count}
 \alias{rnaseq_de.rbioseq_count}
-\title{Title rnaseq_de.rbioseq_count}
+\title{rnaseq_de.rbioseq_count}
 \usage{
 \method{rnaseq_de}{rbioseq_count}(object,
   filter.threshold.min.count = 10, filter.threshold.min.sample = NULL,

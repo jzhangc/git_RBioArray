@@ -1,4 +1,4 @@
-#' Title sig
+#' @title sig
 #'
 #' @description Generic significance test function
 #' @param object Object containing DE inforamtion. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.
@@ -20,7 +20,7 @@ sig <- function(object, ...){
 }
 
 
-#' Title sig.rbioseq_de
+#' @title sig.rbioseq_de
 #'
 #' @description The \code{sig} function for \code{rbioseq_de} object from \code{\link{rnaseq_de}} function.
 #' @param object A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.
@@ -38,7 +38,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, ...){
 }
 
 
-#' Title sig.default
+#' @title sig.default
 #'
 #' @description The default \code{sig} function.
 #' @param input.de.list  Input list cantaining DE dataframes for each comparison.

@@ -1,31 +1,16 @@
 #' @title rbioarray_rlist
 #'
 #' @description Function to constuct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
-#' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
-#' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
-#' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
-#' @param gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
-#' @param gene.annot.gene_id.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.
-#' @param gene.annot.gene_symbol.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.
-#' @param gene.annot.control_type.var.name Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.
-#' @param gene.annot.control_type.val.pos Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.
-#' @param gene.annot.control_type.val.neg Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.
-#' @param gene.annot.control_type.val.exp Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.
-#' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
-#' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
-#' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
-#' @details The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
-#'
-#'          The optional annotation data frame \code{gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
-#'          It is noted that \code{gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
-#'          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
-#'          The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+#' @param object Input object.
+#' @details When \code{object} is missing, the default fuction is used - make sure to pass all the arguments.
 #'
 #'          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 #'
 #' @return A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the following items:
 #'
-#'         \code{E}: raw expression (i.e. hybridization signal)
+#'         \code{E}: raw expression matrix (i.e. hybridization signal)
+#'
+#'         \code{E_background}: background signal marix if applicable
 #'
 #'         \code{raw_file.gene_annotation.var_name}
 #'
@@ -39,22 +24,93 @@
 #'
 #'         \code{gene_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 #'
+#'         \code{gene_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
+#'                                                    This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
+#'
 #'         \code{targets}: the sample annotation data frame.
 #'
 #'         \code{sample_groups}
 #'
 #' @examples
 #' \dontrun{
+#' \code{# ElistRaw}
+#' rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", gene.annot.dataframe = annot,
+#'                          gene.annot.gene_id.var.name = "ProbeName", gene.annot.gene_symbol.var.name = "Gene.Symbol",
+#'                          gene.annot.control_type.var.name = "ControlType", gene.annot.control_type.val.pos = 1,
+#'                          gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
+#'                          target.annot.file = "Targets.csv", target.annot.file.path = getwd(),
+#'                          sample_groups.var.name = "Group")
+#'
+#' \code{# non-EListRaw}
 #' raw_list <- rbioarray_rlist(raw.dataframe = raw, raw.annot.var.name = c("PROBE_ID","ILMN_GENE"), raw.gene_id.var.name = "PROBE_ID",
 #'                             gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
 #'                             target.annot.file = "sample_index_end6.csv", sample_groups.var.name = "time_point")
 #' }
 #' @export
-rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
-                            gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
-                            gene.annot.control_type.var.name = NULL,
-                            gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
-                            target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL){
+rbioarray_rlist <- function(object, ...){
+  ## processing
+  if (missing(object)) {
+    rlist <- rbioarray_rlist.default(...)
+    return(rlist)
+  } else {
+    UseMethod("rbioarray_rlist", object)
+  }
+}
+
+#' @title rbioarray_rlist.EListRaw
+#'
+#' @description The \code{rbioarrary_rlist} function for \code{EListRaw} class
+#' @param object A input \code{EListRaw} class object from \code{limma} package
+#' @param ... Additional argument for the default function.
+#' @export
+rbioarray_rlist.EListRaw <- function(object, ...){
+  ## set up variables
+  raw.dataframe <- data.frame(object$genes, object$E, stringsAsFactors = FALSE, check.names = FALSE)
+  raw.background.signal.matrix <- object$Eb
+  raw.annot.var.name <- names(object$genes)
+
+  ## processing
+  rlist <- rbioarray_rlist.default(raw.dataframe = raw.dataframe, raw.background.signal.matrix = raw.background.signal.matrix,
+                                   raw.annot.var.name = raw.annot.var.name, ...)
+
+  return(rlist)
+}
+
+#' @title rbioarray_rlist.default
+#'
+#' @description The default \code{rbioarrary_rlist} function.
+#' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
+#' @param raw.background.signal.matrix A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
+#' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
+#' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
+#' @param gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
+#' @param gene.annot.gene_id.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.
+#' @param gene.annot.gene_symbol.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.
+#' @param gene.annot.control_type.var.name Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.
+#' @param gene.annot.control_type.val.pos Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.
+#' @param gene.annot.control_type.val.neg Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.
+#' @param gene.annot.control_type.val.exp Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.
+#' @param gene.annot.rm.var.name Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.
+#' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
+#' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
+#' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
+#' @details The \code{raw.background.signal.matrix} is usefual when processing a \code{EListRaw} class object from \code{limma} package.
+#'
+#'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+#'
+#'          The optional annotation data frame \code{gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
+#'          It is noted that \code{gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
+#'          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
+#'          The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+#'
+#' @export
+rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix = NULL,
+                                    raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
+                                    gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
+                                    gene.annot.control_type.var.name = NULL,
+                                    gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
+                                    gene.annot.rm.var.name = NULL,
+                                    target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL){
   ## check arguments and set up variables
   # raw data
   if (is.null(dim(raw.dataframe)))
@@ -65,15 +121,10 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
     stop("Annoation variables (i.e. columns) and/or the gene_id variable (i.e. column) not found in raw.dataframe")
 
   # gene annotation
-  if (is.null(gene.annot.dataframe)){  # check and load gene annoation
-    cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
-    gene.annot.dataframe <- raw.dataframe[, raw.annot.var.name]
-    gene.annot.gene_id.var.name <- raw.gene_id.var.name
-    gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
-    gene.symbol <- FALSE
-  } else {
+  if (!is.null(gene.annot.dataframe)){  # check and load gene annoation
+
     if (!is.data.frame(gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
-    if (nrow(gene.annot.dataframe) < nrow(raw.dataframe)) stop("gene.annot.dataframe has less record than the raw.dataframe") # check size
+    # if (nrow(gene.annot.dataframe) < nrow(raw.dataframe)) stop("gene.annot.dataframe has less record than the raw.dataframe") # check size
 
     if (is.null(gene.annot.gene_id.var.name) || is.null(gene.annot.gene_symbol.var.name)) { # gene id and symbol variables
       stop("Please set gene.annot.gene_id.var.name AND gene.annot.gene_symbol.var.name arguments according to gene.annot")
@@ -83,69 +134,89 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
       gene.symbol <- TRUE
     }
 
-    if (!is.null(gene.annot.control_type.var.name)) {  # optional control_type variable
-      if (!gene.annot.control_type.var.name %in% names(gene.annot.dataframe)) {
-        cat("The set control type variable not found in gene.annot.dataframe. Proceed without using it.\n")
-        gene.annot.control_type = NULL
+    # target annotation
+    if (is.null(target.annot.file)){  # check and load target (sample) annotation
+      stop("Please provide a target annotation file for target.annot.file arugment.")
+    } else {
+      target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
+      target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
+      if (target.annot_ext != "csv") {
+        stop("target.annot.file is not in csv format.")
       } else {
-        control_type.values <- unique(gene.annot.dataframe[, gene.annot.control_type.var.name])
-        input.control_type.values <- c(gene.annot.control_type.val.pos, gene.annot.control_type.val.neg, gene.annot.control_type.val.exp)
-        if (all(input.control_type.values %in% control_type.values)){
-          gene.annot.control_type = list(control_type.var_name = gene.annot.control_type.var.name,
-                                         pos_type.value = gene.annot.control_type.val.pos,
-                                         neg_type.value = gene.annot.control_type.val.neg,
-                                         exp_type.value = gene.annot.control_type.val.exp)
-        } else {
-          cat("Input probe control type values not found in the gene control type variable from gene.annot.dataframe. Proceed without using them.\n")
-          gene.annot.control_type = NULL
-        }
+        cat("Loading target annotation file...")
+        tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
+        cat("Done!\n")
       }
+    }
+    if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
+    if (!sample_groups.var.name %in% names(tgt)){
+      stop("Sample group annotation variable not found in the target annotation file.")
     } else {
+      sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
+    }
+
+    # additional variables
+    raw_dfm <- raw.dataframe
+    genes_annot_dfm <- gene.annot.dataframe
+
+    ## Set up the information
+    cat("Constructing rlist...")
+    # merge gene annotation with raw dataframe
+    raw_dfm$merge_id <- raw_dfm[, raw.gene_id.var.name]
+    genes_annot_dfm$merge_id <- genes_annot_dfm[, gene.annot.gene_id.var.name]
+    merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm, all.x = TRUE)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
+    all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm)))  # all annotation variable names
+
+    # Set up output E matrix
+    E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns
+    if (!is.null(raw.background.signal.matrix) && dim(raw.background.signal.matrix) != dim(E)) {
+      cat("The dimension of raw.background.signal.matrix not the same as the expressoin matrix. Proceed without using it. ")
+      raw.background.signal.matrix <- NULL
+    }
+
+    # set up output annotation information
+    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
+    genes <- genes[, !names(genes) %in% "merge_id"]
+
+  } else {
+    cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
+    gene.annot.gene_id.var.name <- raw.gene_id.var.name
+    gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
+    genes <- raw.dataframe[, raw.annot.var.name]
+    gene.symbol <- FALSE
+  }
+
+  # optional control_type variable
+  if (!is.null(gene.annot.control_type.var.name)) {
+    if (!gene.annot.control_type.var.name %in% names(genes)) {
+      cat("The set control type variable not found in gene.annot.dataframe. Proceed without using it.\n")
       gene.annot.control_type = NULL
-    }
-  }
-
-  # target annotation
-  if (is.null(target.annot.file)){  # check and load target (sample) annotation
-    stop("Please provide a target annotation file for target.annot.file arugment.")
-  } else {
-    target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
-    target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
-    if (target.annot_ext != "csv") {
-      stop("target.annot.file is not in csv format.")
     } else {
-      cat("Loading target annotation file...")
-      tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
-      cat("Done!\n")
+      control_type.values <- unique(genes[, gene.annot.control_type.var.name])
+      input.control_type.values <- c(gene.annot.control_type.val.pos, gene.annot.control_type.val.neg, gene.annot.control_type.val.exp)
+      if (all(input.control_type.values %in% control_type.values)){
+        gene.annot.control_type = list(control_type.var_name = gene.annot.control_type.var.name,
+                                       pos_type.value = gene.annot.control_type.val.pos,
+                                       neg_type.value = gene.annot.control_type.val.neg,
+                                       exp_type.value = gene.annot.control_type.val.exp)
+      } else {
+        cat("Input probe control type values not found in the gene control type variable from gene annotation. Proceed without using them.\n")
+        gene.annot.control_type = NULL
+      }
     }
-  }
-  if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
-  if (!sample_groups.var.name %in% names(tgt)){
-    stop("Sample group annotation variable not found in the target annotation file.")
   } else {
-    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
+    gene.annot.control_type = NULL
   }
 
-  # additional variables
-  raw_dfm <- raw.dataframe
-  genes_annot_dfm <- gene.annot.dataframe
-
-  ## Set up the information
-  cat("Constructing rlist...")
-  # merge gene annotation with raw dataframe
-  raw_dfm$merge_id <- raw_dfm[, raw.gene_id.var.name]
-  genes_annot_dfm$merge_id <- genes_annot_dfm[, gene.annot.gene_id.var.name]
-  merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
-  all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm)))  # all annotation variable names
-
-  # Set up output E matrix
-  E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns
-
-  # set up output annotation information
-  genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
+  # variable names to remove
+  if (!is.null(gene.annot.rm.var.name) && !gene.annot.rm.var.name %in% names(object$genes)) {
+    cat("gene.annot.rm.var.name not found in gene annation. Proceed without using it")
+    gene.annot.rm.var.name <- NULL
+  }
 
   ## output
   out <- list(E = E,
+              E_background = raw.background.signal.matrix,
               raw_file.gene_annotation.var_name = raw.annot.var.name,
               raw_file.gene_id.var_name = raw.gene_id.var.name,
               genes = genes,
@@ -153,6 +224,7 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
               genes_annotation.gene_id.var_name = gene.annot.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = gene.annot.gene_symbol.var.name,
               gene_annotation.control_type = gene.annot.control_type,
+              gene_annotation.to_remove.var.name = gene.annot.rm.var.name,
               targets = tgt,
               sample_groups = sample.groups)
   class(out) <- "rbioarray_rlist"
@@ -165,6 +237,7 @@ rbioarray_rlist <- function(raw.dataframe, raw.annot.var.name = NULL, raw.gene_i
 
 #' @export
 print.rbioarray_rlist <- function(x, ...){
+  cat("\n")
   cat("---- rbioarray_rlist information ----\n")
   cat(paste0("Number of genes/probes/genomic features: ", nrow(x$E), "\n"))
   cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
@@ -176,13 +249,16 @@ print.rbioarray_rlist <- function(x, ...){
 }
 
 
-#' Title rbioarray_transfo_normalize
+#' @title rbioarray_transfo_normalize
 #'
 #' @description Generic data log transformation and nomalization function for microarray.
 #' @param object Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
-#'          The \code{Elist} and \code{MAList} classes are from the dependent \code{limma} package.
+#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.#'
+#'
+#'          When the \code{rbioarray_rlist} object generated from \code{EListRaw} as the input, make sure not to perform log transformation (i.e. set \code{logTransfo = FALSE}),
+#'          as the \code{EListRaw} object has already been transformed.
+#'
 #' @return A \code{rbioarray_plist} class object with the following items:
 #'
 #'         \code{E}: Processed expression matrix
@@ -207,7 +283,7 @@ print.rbioarray_rlist <- function(x, ...){
 #' @export
 rbioarray_transfo_normalize <- function(object, ...){
   ## check arguments
-  if (class(object) != "rbioarray_rlist") stop("The input object needs to be either a \"rlist\", \"EList\" or \"MAList\"")
+  if (class(object) != "rbioarray_rlist") stop("The input object needs to be \"rbioarray_rlist\" class.\"")
 
   ## use method
   UseMethod("rbioarray_transfo_normalize", object)
@@ -226,7 +302,7 @@ rbioarray_transfo_normalize <- function(object, ...){
 #' @export
 rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
   ## processing
-  default_out <- rbioarray_transfo_normalize.default(E = object$E,
+  default_out <- rbioarray_transfo_normalize.default(E = object$E, E.background = object$E_background,
                                                      logTransfo.gene.annot = object$genes[, object$raw_file.gene_annotation.var_name],
                                                      logTransfo.export.name = deparse(substitute(object)),
                                                      between.sample.weight.design = design, ...)
@@ -240,10 +316,11 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
 }
 
 
-#' Title rbioarray_transfo_normalize.default
+#' @title rbioarray_transfo_normalize.default
 #'
 #' @description \code{\link{rbioarray_transfo_normalize}} for \code{rbioarray_rlist} class object.
 #' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.
+#' @param E.background A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
 #' @param logTransfo If to perfom a log tranformation on the expresson data prior to background correction and beetween-sample normalization. Default is \code{FALSE}.
 #' @param logTransfo.method Set only when \code{logTransfo = TRUE},
 #' @param logTransfo.gene.annot Set only when \code{logTransfo = TRUE},
@@ -262,7 +339,7 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
 #' @export
-rbioarray_transfo_normalize.default <- function(E,
+rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
                                                 logTransfo = FALSE, logTransfo.method = "log2", logTransfo.gene.annot = NULL,
                                                 logTransfo.export.name = "data",
                                                 logTransfo.parallelComputing = FALSE, logTransfo.cluterType = "FORK",
@@ -323,10 +400,11 @@ rbioarray_transfo_normalize.default <- function(E,
   ## normalization
   cat("\n")
   cat("Background correction: \n")
-  BgC <- backgroundCorrect.matrix(E_mtx, method = bgc.method, ...) #background correction
+  BgC <- backgroundCorrect.matrix(E = E_mtx, Eb = E.background, method = bgc.method, ...) #background correction
+  cat("Done!\n")
   cat("\n")
   cat(paste0("Data normalization using ", between.sample.norm.method, " method..."))
-  Norm <- suppressMessages(normalizeBetweenArrays(BgC, between.sample.norm.method)) # quantile normalization
+  Norm <- normalizeBetweenArrays(BgC, between.sample.norm.method) # quantile normalization
   Wgt <- arrayWeights(Norm, design = between.sample.weight.design) # array weight
   cat("Done!\n")
 
@@ -345,6 +423,7 @@ rbioarray_transfo_normalize.default <- function(E,
 
 #' @export
 print.rbioarray_plist <- function(x, ...){
+  cat("\n")
   cat("---- rbioarray_plist information ----\n")
   cat(paste0("Log transformation: ", ifelse(x$extra_E_data$log_transformation, TRUE, FALSE), "\n"))
   cat(paste0("Background correction method: ", x$background_correction_method, "\n"))
@@ -358,7 +437,7 @@ print.rbioarray_plist <- function(x, ...){
 }
 
 
-#' Title rbioarray_filter_combine
+#' @title rbioarray_filter_combine
 #'
 #' @description Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.
 #' @param object Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.
@@ -393,19 +472,19 @@ print.rbioarray_plist <- function(x, ...){
 rbioarray_filter_combine <- function(object,
                                      filter.percentile = 0.05,
                                      filter.threshold.min.sample = NULL,
+                                     gene.annot.rm.var.name = NULL,
                                      combine.gene.duplicate = FALSE,
                                      parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check arguments
   if (!"rbioarray_plist" %in% class(object)) stop("The input object needs to be, but not exclusive to, rbioarray_plist class.")
 
   ## filter
-  cat("Filtering low expresson genes/probes/genomic features...")
   # set negative/low expression threshold
   if (!is.null(object$gene_annotation.control_type)){ # 0.95 percentile of all negative control values
     cat("Gene control type variable detected in the input object. The filter.percentile argument value reset to 0.95.\n")
     filter.percentile = 0.95
-    control_type.var.name = object$gene_annotation.control_type$genes_annotation.control_type.var_name
-    control_type.neg.value = object$gene_annotation.control_type$gene.annot.control_type.val.neg
+    control_type.var.name = object$gene_annotation.control_type$control_type.var_name
+    control_type.neg.value = object$gene_annotation.control_type$neg_type.value
 
     if (class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric"){ # if there is only one entry in the neg values
       neg <- object$E[object$genes[, control_type.var.name] == control_type.neg.value, ] # no 95% percentile required as only one neg entry
@@ -418,6 +497,7 @@ rbioarray_filter_combine <- function(object,
     neg_control_used = FALSE
   }
 
+  cat("Filtering low expresson genes/probes/genomic features...")
   # low expression cuttoff set at at least 10% hihger than the neg
   LE_cutoff <- matrix(1.1 * neg, nrow(object$E), ncol(object$E), byrow = TRUE)
   # set filtering matrix
@@ -430,7 +510,7 @@ rbioarray_filter_combine <- function(object,
 
   # filter
   flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-  flt_genes <- object$genes[isexpr, ]
+  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$gene_annotation.to_remove.var.name]
   cat("Done!\n")
 
   ## averaging technical replicates
@@ -443,10 +523,10 @@ rbioarray_filter_combine <- function(object,
   if (combine.gene.duplicate) {
     if (length(flt_genes_avg[, object$genes_annotation.gene_id.var_name]) != length(unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]))) {
       if (object$gene_display_name_used){
-        cat("Combining gene duplicates (i.e. different transcripts belonging to the same gene)...")
+        cat("Combining gene duplicates (i.e. different transcripts belonging to the same gene/genomic feature)...")
         if (!parallelComputing) {
           combGeneProbe <- foreach(i = unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]), .combine = "c") %do% {
-            tmp <- flt_E_avg[which(flt_genes_avg[,object$genes_annotation.gene_symbol.var_name] %in% i), ]
+            tmp <- flt_E_avg[which(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name] %in% i), ]
             if (is.null(dim(tmp))){
               out <- var(tmp)
             } else {
@@ -478,7 +558,7 @@ rbioarray_filter_combine <- function(object,
         }
         out_E <- flt_E_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
         out_genes <- flt_genes_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
-        cat("Done!\n")
+        cat("Done! Records without a gene symbol have been automatically removed. \n")
       } else {
         cat("\n")
         cat("Gene symbol not used in the input object. Proceed without combining gene duplicates.\n")
@@ -514,13 +594,85 @@ rbioarray_filter_combine <- function(object,
 
 #' @export
 print.rbioarray_flist <- function(x, ...){
+  cat("\n")
   cat("---- rbioarray_flist information ----\n")
-  cat(paste0("Number of genes/probes/genomic features upon filtering: ", nrow(x$E), "\n"))
-  cat(paste0("Number of genes/probes/genomic features before filtering: ", nrow(x$extra_E_data$original_E), "\n"))
+  cat(paste0("Number of genes/probes/genomic features upon filtering/averaging/combing: ", nrow(x$E), "\n"))
+  cat(paste0("Original number of genes/probes/genomic features: ", nrow(x$extra_E_data$original_E), "\n"))
   cat(paste0("Gene duplicates combined: ", ifelse(x$gene_duplicates_combined, TRUE, FALSE), "\n"))
   cat("\n")
   cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
   cat(paste0("Groups: "))
   cat(paste0(levels(x$sample_groups)))
+  cat("\n")
+}
+
+#' @title microarray_de
+#'
+#' @description Function that performs statistical analysis for microarray data from \code{rbioarray_flist} class object.
+#' @param object The input \code{rbioarray_flist} object.
+#' @param contra contra Contrast matrix.
+#' @return A \code{rbioarray_de} class object with DE results, containing the following core items:
+#'
+#'         \code{F_stats}
+#'
+#'         \code{DE_results}: a list containing the DE results
+#'
+#'         \code{comparisons}
+#'
+#'         Additionally, the \code{rbioarray_de} includes additional items from the input \code{rbioarray_flist} object.
+#'
+#' @importFrom limma lmFit eBayes topTable contrasts.fit
+#' @examples
+#' \dontrun{
+#'
+#' de_list <- microarray_de(object = filtered_list, contra = contra)
+#'
+#' }
+#' @export
+microarray_de <- function(object, contra){
+  cat("Constructing rbioarray_de object...")
+  ## argument check
+  if (class(object) != "rbioarray_flist") stop("The input object needs to be a \"rbioarray_flist\" class.")
+
+  ## variable initation
+  cf <- colnames(contra)
+
+  ## fitting
+  fit <- lmFit(object$E, design = object$design, weights = object$ArrayWeight)
+  fit <- contrasts.fit(fit, contrasts = contra)
+  fit <- eBayes(fit)
+
+  ## output
+  f_stats <- topTable(fit, number = Inf)
+  f_stats[, object$genes_annotation.gene_id.var_name] <- rownames(f_stats)
+  f_stats <- merge(f_stats, object$genes)
+
+  de_list <- vector(mode = "list", length(cf))
+  de_list[] <- foreach(i = seq(length(cf))) %do% {
+    de_dfm <- topTable(fit = fit, coef = cf[i], number = Inf)
+    de_dfm[, object$genes_annotation.gene_id.var_name] <- rownames(de_dfm)
+    de_dfm <- merge(de_dfm, object$genes)
+    de_dfm
+  }
+  names(de_list) <- cf
+
+  out <- list(F_stats = f_stats,
+              DE_results = de_list,
+              comparisons = cf)
+  out <- append(out, object[!names(object) %in% c("E", "genes", "extra_E_data")])
+  class(out) <- "rbioarray_de"
+  cat("Done!\n")
+
+  return(out)
+}
+
+
+#' @export
+print.rbioarray_de <- function(x, ...){
+  cat("\n")
+  cat("--- Microarray gene differential expression analysis ---\n")
+  cat("\n")
+  cat("Comparisons assessed: \n")
+  cat(paste0("\t", x$comparisons, "\n"))
   cat("\n")
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/rnaseq_count_to_de.R
 \name{rnaseq_de.default}
 \alias{rnaseq_de.default}
-\title{Title rnaseq_de.default}
+\title{rnaseq_de.default}
 \usage{
 \method{rnaseq_de}{default}(x, y = NULL, y.gene_id.var.name = "genes",
   y.gene_symbol.var.name = "genes", filter.threshold.cpm = "none",
@@ -10,7 +10,7 @@
   between.genes.norm.method = "TMM", design, contra, qc.plot = TRUE)
 }
 \arguments{
-\item{x}{Input read count matrix, with rows for genes and columns for RNA samples}
+\item{x}{Input read count matrix, with rows for genes and columns for RNA samples.}
 
 \item{y}{Target (e.g. genes) annotation matrix or vector.}
 
@@ -46,9 +46,11 @@ A \code{rbioseq_de} object. The items of the object are following:
         \code{F_stats}
 
         \code{DE_results}
+
+        \code{comparisons}
 }
 \description{
-The default \code{rnaseq_de} function
+The default \code{rnaseq_de} function that performs statistical analysis for RNAseq data.
 }
 \details{
 \code{filter.threshold.cpm.count} uses CPM (counts per million) as the basis for filtering. The rule of thumb is to filter reads independently from the groupping information.

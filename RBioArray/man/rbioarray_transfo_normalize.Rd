@@ -2,7 +2,7 @@
 % Please edit documentation in R/arrayDEA.R
 \name{rbioarray_transfo_normalize}
 \alias{rbioarray_transfo_normalize}
-\title{Title rbioarray_transfo_normalize}
+\title{rbioarray_transfo_normalize}
 \usage{
 rbioarray_transfo_normalize(object, ...)
 }
@@ -28,8 +28,10 @@ A \code{rbioarray_plist} class object with the following items:
 Generic data log transformation and nomalization function for microarray.
 }
 \details{
-The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
-         The \code{Elist} and \code{MAList} classes are from the dependent \code{limma} package.
+The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.#'
+
+         When the \code{rbioarray_rlist} object generated from \code{EListRaw} as the input, make sure not to perform log transformation (i.e. set \code{logTransfo = FALSE}),
+         as the \code{EListRaw} object has already been transformed.
 }
 \examples{
 

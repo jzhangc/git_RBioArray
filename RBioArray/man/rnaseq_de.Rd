@@ -2,7 +2,7 @@
 % Please edit documentation in R/rnaseq_count_to_de.R
 \name{rnaseq_de}
 \alias{rnaseq_de}
-\title{Title rnaseq_de}
+\title{rnaseq_de}
 \usage{
 rnaseq_de(object, ...)
 }
@@ -15,7 +15,7 @@ rnaseq_de(object, ...)
 A differential expression result object.
 }
 \description{
-Generic RNAseq differential expression analysis function
+Generic RNAseq statistical analysis function
 }
 \examples{
 
