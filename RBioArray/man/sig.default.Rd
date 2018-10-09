@@ -5,15 +5,16 @@
 \title{sig.default}
 \usage{
 \method{sig}{default}(input.de.list, input.gene_symbol.var.name,
-  input.Fstats.matrix, experiment = NULL, FC = 1.5, alpha = 0.05,
-  FDR = TRUE, gene_symbol = TRUE, export.name = NULL,
-  export.mode = "all", plot = TRUE, plot.top.gene = FALSE,
-  plot.top.gene.n = 5, plot.top.gene.padding = 0.5,
-  plot.Title = NULL, plot.xLabel = "log2(fold change)",
-  plot.yLabel = "-log10(p value)", plot.symbolSize = 2,
-  plot.sigColour = "red", plot.nonsigColour = "gray",
-  plot.xTxtSize = 10, plot.yTxtSize = 10, plot.Width = 170,
-  plot.Height = 150)
+  input.Fstats.matrix, input.gene_annotation.control_type = NULL,
+  input.fit = NULL, experiment = NULL, FC = 1.5, alpha = 0.05,
+  p.val.correction.method = "fdr", gene_symbol = TRUE,
+  export.name = NULL, export.mode = "all", plot = TRUE,
+  plot.top.gene = FALSE, plot.top.gene.n = 5,
+  plot.top.gene.padding = 0.5, plot.Title = NULL,
+  plot.xLabel = "log2(fold change)", plot.yLabel = "-log10(p value)",
+  plot.symbolSize = 2, plot.sigColour = "red",
+  plot.nonsigColour = "gray", plot.xTxtSize = 10, plot.yTxtSize = 10,
+  plot.Width = 170, plot.Height = 150)
 }
 \arguments{
 \item{input.de.list}{Input list cantaining DE dataframes for each comparison.}
@@ -22,19 +23,23 @@
 
 \item{input.Fstats.matrix}{Input dataframe containing F stats}
 
+\item{input.gene_annotation.control_type}{Functinal only when \code{p.val.correction.method = "spikein"}, the \code{gene_annotation.control_type} element from the input \code{rbioarray_flist} class object.}
+
+\item{input.fit}{Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object}
+
 \item{experiment}{Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".}
 
 \item{FC}{Threshold for fold change. Default is \code{1.5}.}
 
 \item{alpha}{Threshold for p values. Default is \code{0.05}.}
 
-\item{FDR}{If to use FDR correction for p values. Default is \code{TRUE}.}
+\item{p.val.correction.method}{A character string describing the p value correction method used for significant test.}
 
 \item{gene_symbol}{If to apply gene symbols in the plot and exported results. Default is \code{TRUE}.}
 
 \item{export.name}{Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.}
 
-\item{export.mode}{Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"}, \code{"sig"}. Default is \code{"all"}. See details.}
+\item{export.mode}{Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"} and \code{"sig"}. Default is \code{"all"}. See details.}
 
 \item{plot}{If to plot volcano plot. Default is \code{TRUE}.}
 
@@ -70,13 +75,14 @@
 Signifiance test results as \code{csv} files to the working directory, as well as a \code{sig} object to the environment.
         The \code{sig} object contains the following items;
 
-        \code{significant_change_summary}
+        \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
+                                           i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
 
         \code{export.mode}
 
-        \code{signifianct_change_results}: this only contains significantly changed genes.
-
         \code{experiment}
+
+        \code{signifianct_change_results}: this only contains significantly changed genes.
 }
 \description{
 The default \code{sig} function.
@@ -89,4 +95,8 @@ Explanation for \code{export.mode} options:
         \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
 
         \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
+
+        \code{p_val.correction.method}
+
+        The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
 }

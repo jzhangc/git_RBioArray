@@ -132,42 +132,22 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     } else {
       gene.symbol <- TRUE
     }
-
-    # target annotation
-    if (is.null(target.annot.file)){  # check and load target (sample) annotation
-      stop("Please provide a target annotation file for target.annot.file arugment.")
-    } else {
-      target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
-      target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
-      if (target.annot_ext != "csv") {
-        stop("target.annot.file is not in csv format.")
-      } else {
-        cat("Loading target annotation file...")
-        tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
-        cat("Done!\n")
-      }
-    }
-    if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
-    if (!sample_groups.var.name %in% names(tgt)){
-      stop("Sample group annotation variable not found in the target annotation file.")
-    } else {
-      sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
-    }
-
     # additional variables
     raw_dfm <- raw.dataframe
     genes_annot_dfm <- gene.annot.dataframe
 
     ## Set up the information
-    cat("Constructing rlist...")
     # merge gene annotation with raw dataframe
+    raw_dfm$row_id <- as.integer(rownames(raw_dfm))  # used to make sure the same order as the background matrix for EListRaw
     raw_dfm$merge_id <- raw_dfm[, raw.gene_id.var.name]
     genes_annot_dfm$merge_id <- genes_annot_dfm[, gene.annot.gene_id.var.name]
     merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm, all.x = TRUE)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
-    all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm)))  # all annotation variable names
+    merged_raw_gene_annot_dfm <- merged_raw_gene_annot_dfm[order(merged_raw_gene_annot_dfm$row_id), ]  # restore the original order
+    all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm), "row_id"))  # all annotation variable names
 
     # Set up output E matrix
     E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns
+    rownames(E) <- NULL
     if (!is.null(raw.background.signal.matrix) && dim(raw.background.signal.matrix) != dim(E)) {
       cat("The dimension of raw.background.signal.matrix not the same as the expressoin matrix. Proceed without using it. ")
       raw.background.signal.matrix <- NULL
@@ -175,13 +155,34 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
 
     # set up output annotation information
     genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
-    genes <- genes[, !names(genes) %in% "merge_id"]
+    genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]
   } else {
     cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
     gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
     genes <- raw.dataframe[, raw.annot.var.name]
     gene.symbol <- FALSE
+  }
+
+  # target annotation
+  if (is.null(target.annot.file)){  # check and load target (sample) annotation
+    stop("Please provide a target annotation file for target.annot.file arugment.")
+  } else {
+    target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
+    target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
+    if (target.annot_ext != "csv") {
+      stop("target.annot.file is not in csv format.")
+    } else {
+      cat("Loading target annotation file...")
+      tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
+      cat("Done!\n")
+    }
+  }
+  if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
+  if (!sample_groups.var.name %in% names(tgt)){
+    stop("Sample group annotation variable not found in the target annotation file.")
+  } else {
+    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
   }
 
   # optional control_type variable
@@ -213,6 +214,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
   }
 
   ## output
+  cat("Constructing rlist...")
   out <- list(E = E,
               E_background = raw.background.signal.matrix,
               raw_file.gene_annotation.var_name = raw.annot.var.name,
@@ -252,20 +254,33 @@ print.rbioarray_rlist <- function(x, ...){
 #' @description Generic data log transformation and nomalization function for microarray.
 #' @param object Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.#'
+#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 #'
-#'          When the \code{rbioarray_rlist} object generated from \code{EListRaw} as the input, make sure not to perform log transformation (i.e. set \code{logTransfo = FALSE}),
-#'          as the \code{EListRaw} object has already been transformed.
+#'          The expression matrix will be normalized and then log2 tranformed for output.
+#'
+#'          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
+#'          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
+#'          However, when input is \code{matrix}, it assumes the data has already been log2 tranformed, meaning normalization will
+#'          be done AFTER log2 transformation.
+#'             After comparision, these two methods will NOT produce the same results for the same expression data:
+#'          In other words, applying \code{normalizeBetweenArrays} directly to log2 transformed E matrix is NOT the same as apply the function
+#'          to the \code{EListRaw} that contains E.
+#'             In fact, when using \code{"quantile"} method, applying \code{normalizeBetweenArrays} to log2 transformed E matrix is the
+#'          same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
+#'          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is appled BEFORE
+#'          \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
+#'
+#'
 #'
 #' @return A \code{rbioarray_plist} class object with the following items:
 #'
-#'         \code{E}: Processed expression matrix
+#'         \code{E}: Normalized and then log2 transformed expression matrix
 #'
 #'         \code{design}: Microrray experiment sample design matrix
 #'
 #'         \code{ArrayWeight}
 #'
-#'         \code{extra_E_data}: A list with original (i.e. raw) expression matrix and, if applicable, log transformed expression matrix
+#'         \code{original_E}: Original E matrix from the input \code{rbioarray_rlist}.
 #'
 #'         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
 #'
@@ -301,8 +316,6 @@ rbioarray_transfo_normalize <- function(object, ...){
 rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
   ## processing
   default_out <- rbioarray_transfo_normalize.default(E = object$E, E.background = object$E_background,
-                                                     logTransfo.gene.annot = object$genes[, object$raw_file.gene_annotation.var_name],
-                                                     logTransfo.export.name = deparse(substitute(object)),
                                                      between.sample.weight.design = design, ...)
   ## output
   cat("\n")
@@ -319,28 +332,17 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
 #' @description \code{\link{rbioarray_transfo_normalize}} for \code{rbioarray_rlist} class object.
 #' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.
 #' @param E.background A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
-#' @param logTransfo If to perfom a log tranformation on the expresson data prior to background correction and beetween-sample normalization. Default is \code{FALSE}.
-#' @param logTransfo.method Set only when \code{logTransfo = TRUE},
-#' @param logTransfo.gene.annot Set only when \code{logTransfo = TRUE},
-#' @param logTransfo.export.name Set only when \code{logTransfo = TRUE}, file name prefix for  the \code{csv} file containing log transformed data.
-#' @param logTransfo.parallelComputing Set only when \code{logTransfo = TRUE}, if to use parallel computing for the transformation or not. Default is \code{FALSE}.
-#' @param logTransfo.cluterType Set only when \code{logTransfo = TRUE} and \code{logTransfo.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param bgc.method Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
 #' @param between.sample.norm.method Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
 #' @param between.sample.weight.design Microarray experiment sample design matrix for beteween sample weight calculation.
-#' @param ... Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.
+#' @param ... Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+#'          ADD the fact that \code{normalizeBetweenArrays} function is where \code{limma} log transforms data.
 #' @return A list with the core items for a \code{rbioarray_plist} class.
-#' @import doParallel
-#' @import foreach
-#' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
 #' @export
 rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
-                                                logTransfo = FALSE, logTransfo.method = "log2", logTransfo.gene.annot = NULL,
-                                                logTransfo.export.name = "data",
-                                                logTransfo.parallelComputing = FALSE, logTransfo.cluterType = "FORK",
                                                 bgc.method = "auto", between.sample.norm.method = "quantile",
                                                 between.sample.weight.design = NULL, ...){
   ## check arguments
@@ -350,59 +352,49 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
   if (is.null(between.sample.weight.design)) stop("Please provide the microarray design matrix for between.sample.weight.design argument.")
 
   ## pre-processing
-  ## log transform  or not
-  transfo_E_mtx <- NULL
-  if (logTransfo){  # log transform
-    cat(paste0("Data ", logTransfo.method, " tranformation..."))
-    # additional argument check
-    if (!logTransfo.method %in% c("log2", "log10")) stop("Argument logTransfo.method needs to be set with either \"log2\" or \"log10\" exactly.")
-
-    if (is.null(logTransfo.gene.annot)) {
-      stop("Please provide logTransfo.gene.annot when logTransfo = TRUE.")
-    } else {
-      if (is.null(dim(logTransfo.gene.annot))){
-        if (length(logTransfo.gene.annot) != nrow(E)) stop("logTransfo.gene.annot vector length not same as row number of E")
-      } else {
-        if (nrow(logTransfo.gene.annot) != nrow(E)) stop("Row number of logTransfo.gene.annot matrix/data frame not the same length as the row number of E")
-      }
-    }
-
-    # log2 transformation
-    if (!logTransfo.parallelComputing){
-      transfo_E_mtx <- apply(E, c(1,2), FUN = ifelse(logTransfo.method == "log10", log10, log2))
-    } else {  # parallel computing
-      # set up cpu cluster
-      n_cores <- detectCores() - 1
-      cl <- makeCluster(n_cores, type = logTransfo.cluterType)
-      registerDoParallel(cl) # part of doParallel package
-      on.exit(stopCluster(cl)) # close connect when exiting the function
-      # log transform
-      transfo_E_mtx <- foreach(i = E, .combine = "c") %dopar% {
-        out <- apply(i, c(1,2), FUN = ifelse(logTransfo.method == "log10", log10, log2))
-        out
-      }
-      transfo_E_mtx <- matrix(data = transfo_E_mtx, nrow = nrow(E), ncol = ncol(E))
-      colnames(transfo_E_mtx) <- colnames(E)
-    }
-    E_mtx <- transfo_E_mtx
-    cat("Done!\n")
-
-    # store and export log transformed data into a csv file if applicable
-    cat(paste0("The log transformed data saved to file: ", logTransfo.export.name, "_log_transformed.csv\n"))
-    logTransfo_out <- data.frame(logTransfo.gene.annot, transfo_E_mtx)
-    write.csv(logTransfo_out, file = paste0(logTransfo.export.name, "_log_transformed.csv"), row.names = FALSE)
-  } else {
-    E_mtx <- E
-  }
+  cat("Background correction: \n")
+  E_bgc <- backgroundCorrect.matrix(E = E, Eb = E.background, method = bgc.method, ...) #background correction
+  cat("Done!\n")
+  # cat("\n")
+  #
+  # ## log transform  or not
+  # transfo_E_mtx <- NULL
+  # if (logTransfo){  # log transform
+  #   cat(paste0("Data ", logTransfo.method, " tranformation..."))
+  #   # additional argument check
+  #   if (!logTransfo.method %in% c("log2", "log10")) stop("Argument logTransfo.method needs to be set with either \"log2\" or \"log10\" exactly.")
+  #
+  #   if (is.null(logTransfo.gene.annot)) {
+  #     stop("Please provide logTransfo.gene.annot when logTransfo = TRUE.")
+  #   } else {
+  #     if (is.null(dim(logTransfo.gene.annot))){
+  #       if (length(logTransfo.gene.annot) != nrow(E)) stop("logTransfo.gene.annot vector length not same as row number of E")
+  #     } else {
+  #       if (nrow(logTransfo.gene.annot) != nrow(E)) stop("Row number of logTransfo.gene.annot matrix/data frame not the same length as the row number of E")
+  #     }
+  #   }
+  #
+  #   # log2 transformation
+  #   if (logTransfo.method == "log2"){
+  #     transfo_E_mtx <- log2(E_bgc)
+  #   } else {
+  #     transfo_E_mtx <- log10(E_bgc)
+  #   }
+  #   E_mtx <- transfo_E_mtx
+  #   cat("Done!\n")
+  #
+  #   # store and export log transformed data into a csv file if applicable
+  #   cat(paste0("The log transformed data saved to file: ", logTransfo.export.name, "_log_transformed.csv\n"))
+  #   logTransfo_out <- data.frame(logTransfo.gene.annot, transfo_E_mtx)
+  #   write.csv(logTransfo_out, file = paste0(logTransfo.export.name, "_log_transformed.csv"), row.names = FALSE)
+  # } else {
+  #   E_mtx <- E_bgc
+  # }
 
   ## normalization
   cat("\n")
-  cat("Background correction: \n")
-  BgC <- backgroundCorrect.matrix(E = E_mtx, Eb = E.background, method = bgc.method, ...) #background correction
-  cat("Done!\n")
-  cat("\n")
   cat(paste0("Data normalization using ", between.sample.norm.method, " method..."))
-  Norm <- normalizeBetweenArrays(BgC, between.sample.norm.method) # quantile normalization
+  Norm <- log2(normalizeBetweenArrays(E_bgc, between.sample.norm.method)) # quantile normalization
   Wgt <- arrayWeights(Norm, design = between.sample.weight.design) # array weight
   cat("Done!\n")
 
@@ -412,9 +404,7 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
                       ArrayWeight = Wgt,
                       background_correction_method = bgc.method,
                       between_sample_normalization_method = between.sample.norm.method,
-                      extra_E_data = list(log_transformation = logTransfo,
-                                          original_E = E,
-                                          log_transfo_E = transfo_E_mtx))
+                      original_E = E)
   return(default_out)
 }
 
@@ -617,6 +607,8 @@ print.rbioarray_flist <- function(x, ...){
 #'
 #'         \code{comparisons}
 #'
+#'         \code{fit}: the limma fitted DE object as a reference
+#'
 #'         Additionally, the \code{rbioarray_de} includes additional items from the input \code{rbioarray_flist} object.
 #'
 #' @importFrom limma lmFit eBayes topTable contrasts.fit
@@ -639,6 +631,7 @@ microarray_de <- function(object, contra){
   fit <- lmFit(object$E, design = object$design, weights = object$ArrayWeight)
   fit <- contrasts.fit(fit, contrasts = contra)
   fit <- eBayes(fit)
+  fit$genes <- object$genes
 
   ## output
   f_stats <- topTable(fit, number = Inf)
@@ -656,8 +649,9 @@ microarray_de <- function(object, contra){
 
   out <- list(F_stats = f_stats,
               DE_results = de_list,
-              comparisons = cf)
-  out <- append(out, object[!names(object) %in% c("E", "genes", "extra_E_data")])
+              comparisons = cf,
+              fit = fit)
+  out <- append(out, object[!names(object) %in% c("E", "genes", "extra_E_data", "raw_file.gene_annotation.var_name", "raw_file.gene_id.var_name")])
   class(out) <- "rbioarray_de"
   cat("Done!\n")
 

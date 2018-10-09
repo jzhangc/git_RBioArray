@@ -14,13 +14,13 @@ rbioarray_transfo_normalize(object, ...)
 \value{
 A \code{rbioarray_plist} class object with the following items:
 
-        \code{E}: Processed expression matrix
+        \code{E}: Normalized and then log2 transformed expression matrix
 
         \code{design}: Microrray experiment sample design matrix
 
         \code{ArrayWeight}
 
-        \code{extra_E_data}: A list with original (i.e. raw) expression matrix and, if applicable, log transformed expression matrix
+        \code{original_E}: Original E matrix from the input \code{rbioarray_rlist}.
 
         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
 }
@@ -28,10 +28,21 @@ A \code{rbioarray_plist} class object with the following items:
 Generic data log transformation and nomalization function for microarray.
 }
 \details{
-The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.#'
+The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 
-         When the \code{rbioarray_rlist} object generated from \code{EListRaw} as the input, make sure not to perform log transformation (i.e. set \code{logTransfo = FALSE}),
-         as the \code{EListRaw} object has already been transformed.
+         The expression matrix will be normalized and then log2 tranformed for output.
+
+         A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
+         The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
+         However, when input is \code{matrix}, it assumes the data has already been log2 tranformed, meaning normalization will
+         be done AFTER log2 transformation.
+            After comparision, these two methods will NOT produce the same results for the same expression data:
+         In other words, applying \code{normalizeBetweenArrays} directly to log2 transformed E matrix is NOT the same as apply the function
+         to the \code{EListRaw} that contains E.
+            In fact, when using \code{"quantile"} method, applying \code{normalizeBetweenArrays} to log2 transformed E matrix is the
+         same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
+         Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is appled BEFORE
+         \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
 }
 \examples{
 

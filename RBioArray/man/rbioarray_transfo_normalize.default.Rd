@@ -5,9 +5,6 @@
 \title{rbioarray_transfo_normalize.default}
 \usage{
 \method{rbioarray_transfo_normalize}{default}(E, E.background = NULL,
-  logTransfo = FALSE, logTransfo.method = "log2",
-  logTransfo.gene.annot = NULL, logTransfo.export.name = "data",
-  logTransfo.parallelComputing = FALSE, logTransfo.cluterType = "FORK",
   bgc.method = "auto", between.sample.norm.method = "quantile",
   between.sample.weight.design = NULL, ...)
 }
@@ -16,25 +13,13 @@
 
 \item{E.background}{A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.}
 
-\item{logTransfo}{If to perfom a log tranformation on the expresson data prior to background correction and beetween-sample normalization. Default is \code{FALSE}.}
-
-\item{logTransfo.method}{Set only when \code{logTransfo = TRUE},}
-
-\item{logTransfo.gene.annot}{Set only when \code{logTransfo = TRUE},}
-
-\item{logTransfo.export.name}{Set only when \code{logTransfo = TRUE}, file name prefix for  the \code{csv} file containing log transformed data.}
-
-\item{logTransfo.parallelComputing}{Set only when \code{logTransfo = TRUE}, if to use parallel computing for the transformation or not. Default is \code{FALSE}.}
-
-\item{logTransfo.cluterType}{Set only when \code{logTransfo = TRUE} and \code{logTransfo.parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
-
 \item{bgc.method}{Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.}
 
 \item{between.sample.norm.method}{Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.}
 
 \item{between.sample.weight.design}{Microarray experiment sample design matrix for beteween sample weight calculation.}
 
-\item{...}{Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.}
+\item{...}{Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.}
 }
 \value{
 A list with the core items for a \code{rbioarray_plist} class.
@@ -45,4 +30,5 @@ A list with the core items for a \code{rbioarray_plist} class.
 \details{
 The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+         ADD the fact that \code{normalizeBetweenArrays} function is where \code{limma} log transforms data.
 }

@@ -63,7 +63,7 @@ rbioarray_hcluster(plotName = "data", fltlist = NULL,
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 }
 \description{
-Wrapper for hierarchical clustering analysis and heatmap visualization.
+Legacy function. Wrapper for hierarchical clustering analysis and heatmap visualization.
 }
 \examples{
 \dontrun{

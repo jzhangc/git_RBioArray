@@ -20,6 +20,8 @@ A \code{rbioarray_de} class object with DE results, containing the following cor
 
         \code{comparisons}
 
+        \code{fit}: the limma fitted DE object as a reference
+
         Additionally, the \code{rbioarray_de} includes additional items from the input \code{rbioarray_flist} object.
 }
 \description{

@@ -51,7 +51,7 @@ rbioseq_hcluster(plotName = "data", dfm_count = NULL,
 A heatmap based on hierarchical clustering analysis in \code{pdf} format
 }
 \description{
-Wrapper for hierarchical clustering analysis and heatmap visualization for RNA seq data.
+Legacy function. Wrapper for hierarchical clustering analysis and heatmap visualization for RNA seq data.
 }
 \details{
 The data filtering and normalization functions are also included in the function.

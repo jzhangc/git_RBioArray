@@ -1,6 +1,6 @@
 #' @title rbioarray_hcluster
 #'
-#' @description Wrapper for hierarchical clustering analysis and heatmap visualization.
+#' @description Legacy function. Wrapper for hierarchical clustering analysis and heatmap visualization.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltlist Input filtered data, either a list, \code{EList} or \code{MAList} object.
 #' @param dataProbeVar \code{fltlist} variable name for probe name. Default is \code{"ProbeName"}.
@@ -77,7 +77,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
     stop(cat("Please provide filtered input data. Function terminated.\n"))
   }
   if (is.null(fct)){
-    stop(cat("Please provide smaple index with argument fct. Function terminated.\nFunction terminated.\n"))
+    stop(cat("Please provide sample index with argument fct. Function terminated.\nFunction terminated.\n"))
   }
   if (rmControl){
     if (!ctrlProbe){
@@ -145,7 +145,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
 
 #' @title rbioseq_hcluster
 #'
-#' @description Wrapper for hierarchical clustering analysis and heatmap visualization for RNA seq data.
+#' @description Legacy function. Wrapper for hierarchical clustering analysis and heatmap visualization for RNA seq data.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
 #' @param dfm_annot Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
@@ -251,7 +251,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 
 #' @title rbioarray_hcluster_super
 #'
-#' @description Wrapper for supervised hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
+#' @description Legacy function. Wrapper for supervised hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltDOI Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).

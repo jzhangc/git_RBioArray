@@ -67,7 +67,7 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
 A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
 }
 \description{
-Wrapper for supervised hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
+Legacy function. Wrapper for supervised hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
 }
 \details{
 Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.

@@ -289,7 +289,11 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
 #' @param bgMethod Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
 #' @param normMethod Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
 #' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
-#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values. If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
+#' @details The function does not use design matrix for array weight calculation.
+#'          Therefore, the DE analysis based on the output from this function will yeild slightly different resutls from the \code{\link{rbioarray_filter_combine}}.
+#'
+#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values.
+#'         If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
 #' @import doParallel
 #' @import foreach
 #' @importFrom parallel detectCores makeCluster stopCluster
@@ -577,12 +581,13 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}.
-#' When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}.
-#' Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols,
-#' all the probes without a gene symbol will be removed.
 #'
-#' The \code{output.mode} argument only affacts output csv files and also not for F test results. This means DE and DE F test resutls for all probes will always be stored to the R environment.
-#' And F test results for all probes will always be exported as csv file to the working directory.
+#'          When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}.
+#'          Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols,
+#'          all the probes without a gene symbol will be removed.
+#'
+#'          The \code{output.mode} argument only affacts output csv files and also not for F test results. This means DE and DE F test resutls for all probes will always be stored to the R environment.
+#'          And F test results for all probes will always be exported as csv file to the working directory.
 #'
 #' @import ggplot2
 #' @import doParallel
@@ -866,4 +871,289 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
       cat("DE results for significant probes with gene name saved to csv files. \n")
     }
   }
+}
+
+
+#' @title rbioarray_corcluster_super
+#'
+#' @description Legacy function. Wrapper for supervised (or unsupervised) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
+#' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
+#' @param fltlist Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
+#' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
+#' @param n_subgroup A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.
+#' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
+#' @param FDR If to use FDR corrcted p value. Default is \code{TRUE}.
+#' @param DE.sig.p P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{DE.sig.p = 1}.
+#' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
+#' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
+#' @param method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
+#' @param sigPlot If to generate a significance heatmap. Default is \code{FALSE},
+#' @param sigPlot.sig.FDR If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.
+#' @param sigPlot.sig Only set when \code{sigPlot = TRUE}, the alpha value for correlation p value. Default is \code{0.05}
+#' @param sigPlot.sigLabelColour Only set when \code{sigPlot = TRUE}, the colour for label for the significant pairs. Default is \code{"red"}.
+#' @param sigPlot.sigLabelSize Only set when \code{sigPlot = TRUE}, the size for label for the significant pairs. Default is \code{3}.
+#' @param sigPlot.labelColour Only set when \code{sigPlot = TRUE}, the significance heatmap axis label colour. Default is \code{"black"}.
+#' @param sigPlot.labelSize Only set when \code{sigPlot = TRUE}, the significance heatmap axis label size. Default is \code{1}.
+#' @param sigPlot.labelAngle Only set when \code{sigPlot = TRUE}, the significance heatmap axis label angle. Default is \code{90}.
+#' @param sigPlot.keySize Only set when \code{sigPlot = TRUE}, the significance heatmap colour key size. Default is \code{1}.
+#' @param axisLabel Whether to display label for both x- and y- axes. Default is \code{FALSE}.
+#' @param annot The optional annotation matrix. Only needs to be set if \code{axisLabel = TRUE} AND if there is no genesymbolVar in the input data.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
+#' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
+#' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
+#' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @details Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
+#' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. If set, the function also outputs a significant value heatmap.
+#' @import corrplot
+#' @import foreach
+#' @importFrom gplots heatmap.2
+#' @importFrom RColorBrewer brewer.pal
+#' @examples
+#' \dontrun{
+#'
+#' # n_subgroup = c(1:4) means the correlation uses samples from 1 to 4 (control in this case).
+#' # The settings can be obtained from the corresponding condition summary object.
+#' rbioarray_corcluster_super(fltlist = all_nrm, n_subgroup = c(1:4),
+#'                            dataProbeVar = "gene_id", FDR = TRUE, DE.sig.p = 0.02,
+#'                            dfmDE = all_DE$`conSumPost - conSumPre`,
+#'                            axisLabel = TRUE, genesymbolVar = "gene_name",
+#'                            key.title = "", cexRow = 0.3, cexCol = 0.3, offsetRow = 0.001,
+#'                            offsetCol = 0.001, margins = c(4, 4))
+#'
+#' }
+#' @export
+rbioarray_corcluster_super <- function(plotName = "data",
+                                       fltlist = NULL, rmControl = TRUE,
+                                       n_subgroup = NULL,
+                                       dfmDE = NULL, FDR = TURE, DE.sig.p = 0.05, FC = NULL,
+                                       dataProbeVar = NULL,
+                                       method = "pearson",
+                                       sigPlot = FALSE, sigPlot.sig.FDR = FALSE, sigPlot.sig = 0.05,
+                                       sigPlot.sigLabelColour = "red", sigPlot.sigLabelSize = 3,
+                                       sigPlot.labelColour = "black", sigPlot.labelSize = 1, sigPlot.labelAngle = 90, sigPlot.keySize = 1,
+                                       axisLabel = FALSE, annot = NULL, genesymbolVar = NULL,
+                                       mapColour = "PRGn", n_mapColour = 11, ...,
+                                       plotWidth = 7, plotHeight = 7){
+  #### test variables
+  if (is.null(fltlist)){
+    stop(cat("Please set processed data object via fltlist. Function terminated.\n"))
+  }
+
+  if (is.null(dfmDE)){
+    stop(cat("Please set DE object via dfmDE. Function terminated.\n"))
+  }
+
+  if (is.null(dataProbeVar)){
+    stop(cat("Please set unique genomic feature ID via dataProbeVar. Function terminated.\n"))
+  }
+
+
+  if (is.null(n_subgroup)){
+    stop(cat("Please set the index for phenotype group via n_subgroup. Function terminated.\n"))
+  }
+
+  if (rmControl){
+    if (!"ControlType" %in% names(fltlist$genes)){
+      stop(cat("make sure to have/name ControlType variable in the fltlist"))
+    }
+  }
+
+  #### fiter and normalization
+  vmwt <- fltlist
+  dfm <- data.frame(vmwt$genes, vmwt$E)
+
+  if (rmControl){ # remove control
+    dfm <- dfm[dfm$ControlType == 0, ]
+  }
+
+  if (!is.null(annot)){
+    dfm <- merge(annot[, c(dataProbeVar, genesymbolVar)], dfm, by = dataProbeVar, all.y = TRUE)
+  }
+
+  #### dfm subsetting using DE resutls (dfmDE)
+  ## p value filter
+  if (FDR){
+    if (length(which(dfmDE$adj.P.Val < DE.sig.p)) == 0){
+      warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, alpha is applied on raw p.values.")
+      pcutoff <- DE.sig.p
+      pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+      dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+    } else {
+      pcutoff <- max(dfmDE[dfmDE$adj.P.Val < DE.sig.p, ]$P.Value)
+      pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+      dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+    }
+  } else {
+    pcutoff <- DE.sig.p
+    pb_name <- dfmDE[dfmDE$P.Value < pcutoff, dataProbeVar]
+    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name, ]
+  }
+
+  ## set FC filter, if applicable
+  if (!is.null(FC)){
+    pb_name_fc <- dfmDE[abs(dfmDE$logFC) >= log2(FC), dataProbeVar]
+    dfm <- dfm[dfm[, dataProbeVar] %in% pb_name_fc, ]
+  }
+
+  #### heatmap
+  ogNcol <- dim(vmwt$E)[2] # original numbers of col
+  annoNcol <- dim(dfm)[2] # numbers of col with annotation
+  s <- (annoNcol - ogNcol + 1):annoNcol # extract only the data by removing the annotation columns
+
+  if (axisLabel){
+    if (!is.null(genesymbolVar) & !is.null(annot)){
+      dfm <- dfm[complete.cases(dfm[, genesymbolVar]), ]
+      axisrow <- dfm[, genesymbolVar]
+      print("Probes with no gene names are removed.")
+
+      mtx <- as.matrix(dfm[, s])
+      rownames(mtx) <- dfm[, dataProbeVar]
+      cormtx <- t(mtx)
+      corcoef <- cor(cormtx[n_subgroup, ], method = method)
+      rownames(corcoef) <- axisrow
+      colnames(corcoef) <- axisrow
+      corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
+      diag(corp) <- NA
+      rownames(corp) <- axisrow
+      colnames(corp) <- axisrow
+      adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
+      rownames(adj_corp) <- rownames(corp)
+      colnames(adj_corp) <- colnames(corp)
+
+      pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      heatmap.2(corcoef, symm = TRUE, trace = "none",
+                col = brewer.pal(n_mapColour, mapColour), labRow = rownames(corcoef), labCol = colnames(corcoef), ...)
+      dev.off()
+
+      if (sigPlot){
+        if (sigPlot.sig.FDR){  # fdr correction or not
+          sigplotmtx <- adj_corp
+        } else {
+          sigplotmtx <- corp
+        }
+        tryCatch(
+          {
+            pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
+            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = sigPlot.sig,
+                     insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
+                     col = brewer.pal(n_mapColour, mapColour),
+                     tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
+            dev.off()
+          },
+          error = function(err){
+            print("No significance found. Therefore no significance plot generated.")
+            dev.off()
+          }
+        )
+      }
+    } else {
+      print("No gene symbol variable or annotation dataframe detected. Proceed without them.")
+
+      mtx <- as.matrix(dfm[, s])
+      rownames(mtx) <- dfm[, dataProbeVar]
+      cormtx <- t(mtx)
+      corcoef <- cor(cormtx[n_subgroup, ], method = method)
+      corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
+      diag(corp) <- NA
+      adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
+      rownames(adj_corp) <- rownames(corp)
+      colnames(adj_corp) <- colnames(corp)
+
+      pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      heatmap.2(corcoef, symm = TRUE, trace = "none",
+                col = brewer.pal(n_mapColour, mapColour), labRow = rownames(corcoef), labCol = colnames(corcoef),...)
+      dev.off()
+
+      if (sigPlot){
+        if (sigPlot.sig.FDR){  # fdr correction or not
+          sigplotmtx <- adj_corp
+        } else {
+          sigplotmtx <- corp
+        }
+
+        tryCatch(
+          {
+            pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
+            corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = sigPlot.sig,
+                     insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
+                     col = brewer.pal(n_mapColour, mapColour),
+                     tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
+            dev.off()
+          },
+          error = function(err){
+            print("No significant correlation found. Therefore no significance plot generated.")
+            dev.off()
+          }
+        )
+      }
+    }
+  } else {
+    mtx <- as.matrix(dfm[, s])
+    rownames(mtx) <- dfm[, dataProbeVar]
+    cormtx <- t(mtx)
+
+    corcoef <- cor(cormtx[n_subgroup, ], method = method)
+    corp <- foreach(i = corcoef, .combine = "cbind") %do% cor_pvalue(i, n = nrow(cormtx[n_subgroup, ])) # p value matrix
+    diag(corp) <- NA
+    adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
+    rownames(adj_corp) <- rownames(corp)
+    colnames(adj_corp) <- colnames(corp)
+
+    pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
+    heatmap.2(corcoef, symm = TRUE, trace = "none",
+              col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
+    dev.off()
+
+    if (sigPlot){
+      if (sigPlot.sig.FDR){  # fdr correction or not
+        sigplotmtx <- adj_corp
+      } else {
+        sigplotmtx <- corp
+      }
+
+      tryCatch(
+        {
+          pdf(file = paste(plotName, "_corheatmap.sigplot.pdf", sep = ""), width = plotWidth, height = plotHeight)
+          corrplot(corr = corcoef, method = "color", type = "upper", p.mat = sigplotmtx, sig.level = sigPlot.sig,
+                   insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
+                   col = brewer.pal(n_mapColour, mapColour),
+                   tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
+          dev.off()
+        },
+        error = function(err){
+          print("No significance found. Therefore no significance plot generated.")
+          dev.off()
+        }
+      )
+    }
+  }
+
+  # export correlation matrix
+  outdfm1 <- data.frame(
+    group = paste(rownames(corcoef)[row(corcoef)[upper.tri(corcoef)]], colnames(corcoef)[col(corcoef)[upper.tri(corcoef)]], sep = "_"),
+    row = rownames(corcoef)[row(corcoef)[upper.tri(corcoef)]],
+    col = colnames(corcoef)[col(corcoef)[upper.tri(corcoef)]],
+    coefficient = corcoef[upper.tri(corcoef)]
+  )
+
+  outdfm2 <- data.frame(
+    group = paste(rownames(corp)[row(corp)[upper.tri(corp)]], colnames(corp)[col(corp)[upper.tri(corp)]], sep = "_"),
+    row = rownames(corp)[row(corp)[upper.tri(corp)]],
+    col = colnames(corp)[col(corp)[upper.tri(corp)]],
+    p.value = corp[upper.tri(corp)]
+  )
+
+  outdfm3 <- data.frame(
+    group = paste(rownames(adj_corp)[row(adj_corp)[upper.tri(adj_corp)]], colnames(adj_corp)[col(adj_corp)[upper.tri(adj_corp)]], sep = "_"),
+    row = rownames(adj_corp)[row(adj_corp)[upper.tri(adj_corp)]],
+    col = colnames(adj_corp)[col(adj_corp)[upper.tri(adj_corp)]],
+    adj.p.value = adj_corp[upper.tri(adj_corp)]
+  )
+
+  out <- merge(outdfm1, outdfm2[, c("group", "p.value")], by = "group", x.all = TRUE)
+  out <- merge(out, outdfm3[, c("group", "adj.p.value")], x.all = TRUE)
+
+  write.csv(out, file = paste(plotName, ".cor.csv", sep = ""), row.names = FALSE)
 }

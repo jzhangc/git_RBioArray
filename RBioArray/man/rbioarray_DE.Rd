@@ -87,12 +87,13 @@ Legacy function. DE analysis function.
 }
 \details{
 When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}.
-When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}.
-Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols,
-all the probes without a gene symbol will be removed.
 
-The \code{output.mode} argument only affacts output csv files and also not for F test results. This means DE and DE F test resutls for all probes will always be stored to the R environment.
-And F test results for all probes will always be exported as csv file to the working directory.
+         When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}.
+         Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols,
+         all the probes without a gene symbol will be removed.
+
+         The \code{output.mode} argument only affacts output csv files and also not for F test results. This means DE and DE F test resutls for all probes will always be stored to the R environment.
+         And F test results for all probes will always be exported as csv file to the working directory.
 }
 \examples{
 \dontrun{

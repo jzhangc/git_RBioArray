@@ -26,10 +26,15 @@ rbioarray_PreProc(rawlist, logTrans = FALSE, logTransMethod = "log2",
 \item{...}{arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.}
 }
 \value{
-Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values. If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
+Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values.
+        If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
 }
 \description{
 Legacy function. Data pre-processing function for the microarary data.
+}
+\details{
+The function does not use design matrix for array weight calculation.
+         Therefore, the DE analysis based on the output from this function will yeild slightly different resutls from the \code{\link{rbioarray_filter_combine}}.
 }
 \examples{
 \dontrun{

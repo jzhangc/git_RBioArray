@@ -25,16 +25,52 @@ sig <- function(object, ...){
 #' @description The \code{sig} function for \code{rbioseq_de} object from \code{\link{rnaseq_de}} function.
 #' @param object A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.
 #' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
+#' @param p.val.correction.method A character string describing the p value correction method used for significant test. Options are \code{"fdr"} and \code{"none"}. Default is \code{"fdr"}.
 #' @param ... Additional arguments for \code{\link{sig.defuault}}.
 #'
 #' @export
-sig.rbioseq_de <- function(object, export.name = NULL, ...){
+sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method = "fdr",...){
+  ## check argument
+  if (!tolower(p.val.correction.method) %in% c("fdr", "none")) stop("The argument sig.method needs to \"fdr\" or \"none\"")
   if (is.null(export.name)){
     export.name = deparse(substitute(object))
   }
 
+  ## processing
   sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$gene_symbol_var_name,
-              input.Fstats.matrix = object$F_stats, experiment = "RNAseq", export.name = export.name, ...)
+              input.Fstats.matrix = object$F_stats, experiment = "RNAseq", export.name = export.name,
+              p.val.correction.method = p.val.correction.method, ...)
+}
+
+
+#' @title sig.rbioarray_de
+#'
+#' @description The \code{sig} function for \code{rbioarray_de} object from \code{\link{microarray_de}} function.
+#' @param object A \code{rbioarray_de} object \code{\link{microarray_de}} function.
+#' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
+#' @param p.val.correction.method A character string describing the p value correction method used for significant test. Options are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}.
+#' @param ... Additional arguments for \code{\link{sig.defuault}}.
+#'
+#' @export
+sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.name = NULL, ...){
+  ## check arguments
+  if (!tolower(p.val.correction.method) %in% c("spikein", "fdr", "none")) stop("The argument sig.method needs to be one of \"spikein\", \"fdr\" or \"none\"")
+  if (tolower(p.val.correction.method) == "spikein") {
+    if (object$gene_duplicates_combined) {
+      cat("Gene duplicates combined, automatically set p.val.correction.method = \"fdr\".\n")
+      p.val.correction.method <- "fdr"
+    }
+  }
+  if (is.null(export.name)){
+    export.name = deparse(substitute(object))
+  }
+
+  ## processing
+  sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$genes_annotation.gene_symbol.var_name,
+              input.Fstats.matrix = object$F_stats, input.gene_annotation.control_type = object$gene_annotation.control_type,
+              input.fit = object$fit,
+              experiment = "Microarray", export.name = export.name,
+              p.val.correction.method = p.val.correction.method, ...)
 }
 
 
@@ -44,13 +80,15 @@ sig.rbioseq_de <- function(object, export.name = NULL, ...){
 #' @param input.de.list  Input list cantaining DE dataframes for each comparison.
 #' @param input.gene_symbol.var.name Input gene sysmbol variable name from teh DE dataframes.
 #' @param input.Fstats.matrix Input dataframe containing F stats
+#' @param input.gene_annotation.control_type Functinal only when \code{p.val.correction.method = "spikein"}, the \code{gene_annotation.control_type} element from the input \code{rbioarray_flist} class object.
+#' @param input.fit Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object
 #' @param experiment Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".
 #' @param FC Threshold for fold change. Default is \code{1.5}.
 #' @param alpha Threshold for p values. Default is \code{0.05}.
-#' @param FDR If to use FDR correction for p values. Default is \code{TRUE}.
+#' @param p.val.correction.method A character string describing the p value correction method used for significant test.
 #' @param gene_symbol If to apply gene symbols in the plot and exported results. Default is \code{TRUE}.
 #' @param export.name Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.
-#' @param export.mode Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"}, \code{"sig"}. Default is \code{"all"}. See details.
+#' @param export.mode Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"} and \code{"sig"}. Default is \code{"all"}. See details.
 #' @param plot If to plot volcano plot. Default is \code{TRUE}.
 #' @param plot.top.gene If to display the top gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
 #' @param plot.top.gene.n When \code{plot.top.gene = TRUE}, to set how many genes to display. Default is \code{5}.
@@ -66,17 +104,6 @@ sig.rbioseq_de <- function(object, export.name = NULL, ...){
 #' @param plot.Width The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plot.Height The height of the figure for the final output figure file. Default is \code{150}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
-#' @return Signifiance test results as \code{csv} files to the working directory, as well as a \code{sig} object to the environment.
-#'         The \code{sig} object contains the following items;
-#'
-#'         \code{significant_change_summary}
-#'
-#'         \code{export.mode}
-#'
-#'         \code{signifianct_change_results}: this only contains significantly changed genes.
-#'
-#'         \code{experiment}
-#'
 #' @details Explanation for \code{export.mode} options:
 #'
 #'         \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
@@ -85,6 +112,22 @@ sig.rbioseq_de <- function(object, export.name = NULL, ...){
 #'
 #'         \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
 #'
+#'         \code{p_val.correction.method}
+#'
+#'         The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
+#'
+#' @return Signifiance test results as \code{csv} files to the working directory, as well as a \code{sig} object to the environment.
+#'         The \code{sig} object contains the following items;
+#'
+#'         \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
+#'                                            i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
+#'
+#'         \code{export.mode}
+#'
+#'         \code{experiment}
+#'
+#'         \code{signifianct_change_results}: this only contains significantly changed genes.
+#'
 #' @import ggplot2
 #' @importFrom RBioplot rightside_y
 #' @importFrom grid grid.newpage grid.draw
@@ -92,8 +135,11 @@ sig.rbioseq_de <- function(object, export.name = NULL, ...){
 #'
 #' @export
 sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.matrix,
+                        input.gene_annotation.control_type = NULL,
+                        input.fit = NULL,
                         experiment = NULL,
-                        FC = 1.5, alpha = 0.05, FDR = TRUE, gene_symbol = TRUE,
+                        FC = 1.5, alpha = 0.05, p.val.correction.method = "fdr",
+                        gene_symbol = TRUE,
                         export.name = NULL, export.mode = "all",
                         plot = TRUE,
                         plot.top.gene = FALSE, plot.top.gene.n = 5,  plot.top.gene.padding = 0.5,
@@ -101,11 +147,24 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                         plot.symbolSize = 2, plot.sigColour = "red", plot.nonsigColour = "gray",
                         plot.xTxtSize = 10, plot.yTxtSize = 10, plot.Width = 170, plot.Height = 150){
   ## check arguments
+  if (p.val.correction.method == "spikein") {
+    if (is.null(input.gene_annotation.control_type)){
+      cat("No control probes found in the input object when p.val.correction.method = \"spikein\", automatically reset sig.method to \"fdr\".\n")
+      cat("\n")
+      p.val.correction.method <- "fdr"
+    } else {
+      PCntl <- input.fit[input.fit$genes[, input.gene_annotation.control_type$control_type.var_name] == input.gene_annotation.control_type$pos_type.value, ]
+    }
+  }
   if (is.null(export.name)) stop("export.name is needed.")
-  if (!export.mode %in% c("all", "all.gene_symbol", "sig", "sig.gene_sybmol")) {
-    stop("export.mode should be one of \"all\", \"all.gene_symbol\", \"sig\", and \"sig.gene_symbol\"")
+  if (!export.mode %in% c("all", "all.gene_symbol", "sig", "sig.gene_symbol")) {
+    stop("export.mode should be one of \"all\", \"all.gene_symbol\", \"sig\"")
   }
   if (is.null(names(input.de.list))) names(input.de.list) <- seq(length(input.de.list))
+  if (!gene_symbol && plot.top.gene) {
+    cat("NOTE: plot.top.gene automatically set to FALSE when gene_symbol = FALSE.\n")
+    plot.top.gene = FALSE
+  }
 
   ## sig test
   # set up data.frames
@@ -132,7 +191,11 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   for (i in seq(length(input.de.list))) {
     sig_dfm <- de_list[[i]]
     # cut off
-    if (FDR){
+    if (p.val.correction.method == "spikein"){
+      ifelse(min(PCntl$p.value[, names(input.de.list)[i]]) > alpha, pcutoff <- alpha, pcutoff <- min(PCntl$p.value[, names(input.de.list)[i]]))
+      cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff)
+      fdr.stats <- "spikein"
+    } else if (p.val.correction.method == "fdr") {
       if (length(which(sig_dfm$adj.P.Val < alpha)) == 0){
         cat(paste0("No FDR corrected p-values found less than alpha for the comparison: ", names(input.de.list)[i],
                    ". \nPlease consider using another thresholding method. For now, alpha is applied to the raw p.values.\n"))
@@ -143,11 +206,12 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
         fdr.stats <- TRUE
       }
       cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff)
-    } else  {
+    } else {
       pcutoff <- alpha
       fdr.stats <- FALSE
       cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff)
     }
+
     cutoff_list[[i]] <- cutoff
 
     # store pcutoffs
@@ -226,6 +290,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   out <- list(significant_change_summary = sig_summary_mtx,
               export.mode = export.mode,
               significant_change_results = sig_out_list,
+              p_val.correction.method = p.val.correction.method,
               experiment = experiment)
   class(out) <- "sig"
   assign(paste0(export.name, "_sig"), out, envir = .GlobalEnv)

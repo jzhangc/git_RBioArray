@@ -190,7 +190,8 @@ rnaseq_de.default <- function(x, y = NULL,
     names(flt_summary) <- c("filtered", "remaning")
     filter_results <- list(filter_threshold_cpm = filter.threshold.cpm,
                            filter_threshold_min_sample = filter.threshold.min.sample,
-                           filter_summary = flt_summary)
+                           filter_summary = flt_summary,
+                           filtered_counts = dge)
   } else {
     filter_results <- NULL
   }

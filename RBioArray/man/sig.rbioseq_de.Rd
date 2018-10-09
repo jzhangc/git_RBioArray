@@ -4,12 +4,15 @@
 \alias{sig.rbioseq_de}
 \title{sig.rbioseq_de}
 \usage{
-\method{sig}{rbioseq_de}(object, export.name = NULL, ...)
+\method{sig}{rbioseq_de}(object, export.name = NULL,
+  p.val.correction.method = "fdr", ...)
 }
 \arguments{
 \item{object}{A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.}
 
 \item{export.name}{Optional name used for output objects to the environment and directory. Default is \code{NULL}.}
+
+\item{p.val.correction.method}{A character string describing the p value correction method used for significant test. Options are \code{"fdr"} and \code{"none"}. Default is \code{"fdr"}.}
 
 \item{...}{Additional arguments for \code{\link{sig.defuault}}.}
 }
