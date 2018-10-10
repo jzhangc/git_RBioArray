@@ -42,6 +42,8 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
                            filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
                            filter.threshold.min.sample = filter.threshold.min.sample,
                            annot.group = annot.group, ...)
+  out <- append(out, object[c("targets", "sample_groups")])
+  class(out) <- "rbioseq_de"
   return(out)
 }
 
@@ -69,6 +71,8 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
                            filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
                            filter.threshold.min.sample = filter.threshold.min.sample,
                            annot.group = annot.group, ...)
+  out <- append(out, object[c("targets", "sample_groups")])
+  class(out) <- "rbioseq_de"
   return(out)
 }
 
@@ -96,11 +100,15 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'          Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
 #'          using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
 #'
-#' @return A \code{rbioseq_de} object. The items of the object are following:
+#' @return A list containing core elements of a \code{rbioseq_de} class. The items of a \code{rbioseq_de} class are following:
 #'
-#'         \code{filter_results}: a list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample} and \code{filter_summary}
+#'         \code{filter_results}: A list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample}, \code{filter_summary} and \code{filtered_counts}.
+#'                                Note: \code{filtered_counts} is a \code{DGEList} class from \code{edgeR} package.
 #'
 #'         \code{normalization_results}
+#'
+#'         \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
+#'                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.
 #'
 #'         \code{gene_id_var_name}
 #'
@@ -111,6 +119,10 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'         \code{DE_results}
 #'
 #'         \code{comparisons}
+#'
+#'         \code{targets}: sample annotation data frame
+#'
+#'         \code{sample_groups}
 #'
 #' @importFrom limma lmFit eBayes topTable contrasts.fit voomWithQualityWeights
 #' @importFrom edgeR DGEList calcNormFactors
@@ -217,12 +229,12 @@ rnaseq_de.default <- function(x, y = NULL,
 
   out <- list(filter_results = filter_results,
               normalization_method = list(between_genes = between.genes.norm.method, between_samples = "voom"),
+              normalized_data = vmwt,
               gene_id_var_name = y.gene_id.var.name,
               gene_symbol_var_name = y.gene_symbol.var.name,
               F_stats = f_stats,
               DE_results = de_list,
               comparisons = cf)
-  class(out) <- "rbioseq_de"
   return(out)
 }
 

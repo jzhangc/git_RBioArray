@@ -1157,3 +1157,255 @@ rbioarray_corcluster_super <- function(plotName = "data",
 
   write.csv(out, file = paste(plotName, ".cor.csv", sep = ""), row.names = FALSE)
 }
+
+
+#' @title rbioarray_hcluster
+#'
+#' @description Legacy function. Wrapper for hierarchical clustering analysis and heatmap visualization.
+#' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
+#' @param fltlist Input filtered data, either a list, \code{EList} or \code{MAList} object.
+#' @param dataProbeVar \code{fltlist} variable name for probe name. Default is \code{"ProbeName"}.
+#' @param genesymbolOnly Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
+#' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
+#' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
+#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{genesymbolVar = TRUE}. Default is \code{NULL}.
+#' @param rmControl Set only when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set,  whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.
+#' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
+#' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
+#' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
+#' @param fct Input \code{factor} object for sample groupping labels.
+#' @param sampleName A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.
+#' @param colGroup Colour group, numeric or dependent on \code{fct}.
+#' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
+#' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
+#' @param colColour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
+#' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
+#' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
+#' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
+#' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
+#' @importFrom gplots heatmap.2
+#' @importFrom RColorBrewer brewer.pal
+#' @examples
+#' \dontrun{
+#'
+#' # standard usage
+#' rbioarray_hcluster(fltlist = normdata, n = 500, fct = conSum, trace = "none", srtCol = 45,
+#' offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5,
+#' key.xlab = "Normalized expression value", key.ylab = "Probe count")
+#'
+#' # for non microarray or RNAseq data sets
+#' ###### unsupervised heatmap ######
+#' ## load the file
+#' raw <- read.csv(file = "all_data.csv", na.strings = " ", stringsAsFactors = FALSE, check.names = FALSE)
+#'
+#' ## build the index
+#' idx <- raw[, 1:2] # extract the sample information
+#'
+#' conSum <- factor(idx$Condition, levels = unique(idx$Condition)) # extract the factor
+#'
+#' # create the input data for RBioArray pacakge
+#' rawT <- t(raw[, -(1:2)])
+#' colnames(rawT) <- idx$SampleID
+#' rawT <- apply(rawT, c(1,2), FUN = log2) # log2 tranforamtion
+#' inputlist <- list(E = as.matrix(rawT),
+#'                   genes = data.frame(GeneNames = rownames(rawT), ControlType = rep(0, length(rownames(rawT))),
+#'                   stringsAsFactors = FALSE), targets = idx)
+#'
+#' rbioarray_hcluster(plotName = "all", fltlist = inputlist, dataProbeVar = "GeneNames", n = "all", rmControl = FALSE, fct = conSum,
+#'                    trace = "none",
+#'                    distance = "euclidean", clust = "complete", colColour = "Paired",
+#'                    mapColour = "RdBu", n_mapColour = 11,
+#'                    srtCol = 30, offsetCol = 0, labRow = inputlist$genes$GeneNames,
+#'                    key.title = "", keysize = 1.5, cexCol = 0.9, cexRow = 0.6,
+#'                    key.xlab = "Log expression value", key.ylab = "miRNA count",
+#'                    plotWidth = 10, plotHeight = 10)
+#'
+#' }
+#' @export
+rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar = "ProbeName",
+                               genesymbolOnly = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
+                               n = "all",
+                               rmControl = TRUE, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
+                               sampleName = NULL,
+                               fct = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+                               distance = "euclidean", clust = "complete",
+                               colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+                               plotWidth = 7, plotHeight = 7){
+  ## chekc arguments
+  if (is.null(fltlist)){
+    stop(cat("Please provide filtered input data. Function terminated.\n"))
+  }
+  if (is.null(fct)){
+    stop(cat("Please provide sample index with argument fct. Function terminated.\nFunction terminated.\n"))
+  }
+  if (rmControl){
+    if (!ctrlProbe){
+      stop(cat("rmControl can only be set TRUE when ctrlProbe = TRUE. Function terminated.\n"))
+    } else {
+      if (!ctrlTypeVar %in% names(fltlist$genes)){
+        stop(cat("ctrlTypeVar not found. Function terminated.\n"))
+      }
+    }
+  }
+
+  ## set up dis and cluster functions
+  distfunc <- function(x)dist(x, method = distance)
+  clustfunc <- function(x)hclust(x, method = clust)
+
+  ## prepare dfm for clustering
+  dfm <- data.frame(fltlist$genes, fltlist$E, check.names = FALSE)
+
+  if (rmControl){ # remove control
+    dfm <- dfm[dfm[, ctrlTypeVar] == 0, ]
+  }
+
+  if (n != "all"){ # subset
+    dfm <- dfm[1:n, ]
+  }
+
+  ## set ColSideColors
+  col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:(ncol(dfm) - ncol(fltlist$E)))])))
+
+  colG <- cutree(col_cluster, colGroup) # column group
+  colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
+
+  ## prepare mtx for plotting
+  dfm2 <- dfm
+  if (genesymbolOnly){ # remove probes without gene symbol or not
+    if (is.null(annot) | is.null(genesymbolVar)){
+      warning("No annotation object or gene sybmol variable detected. Cluster will proceed with all probes.")
+      dfm2 <- dfm2
+      mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E)))]) # remove annotation info. same as below.
+      rownames(mtx) <- dfm2[, dataProbeVar]
+    } else {
+      geneSymbl <- annot[annot[, annotProbeVar] %in% dfm2[, dataProbeVar], ][, genesymbolVar]
+      dfm2$geneSymbol <- geneSymbl
+      dfm2 <- dfm2[complete.cases(dfm2), ] # remove probes withnout a gene symbol
+      mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E) -1), ncol(dfm2))])
+      rownames(mtx) <- dfm2[, "geneSymbol"] # row names are now gene symbols. note that the variable name is geneSymbol, NOT the argument value.
+    }
+  } else {
+    dfm2 <- dfm2
+    mtx <- as.matrix(dfm2[, -c(1:(ncol(dfm2) - ncol(fltlist$E)))])
+    rownames(mtx) <- dfm2[, dataProbeVar]
+  }
+
+  if (!is.null(sampleName)){
+    colnames(mtx) <- sampleName
+  }
+
+  ## heatmap
+  # draw heatmap
+  pdf(file = paste(plotName, "_heatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
+  heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+            col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+  dev.off()
+}
+
+
+#' @title rbioseq_hcluster
+#'
+#' @description Legacy function. Wrapper for hierarchical clustering analysis and heatmap visualization for RNA seq data.
+#' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
+#' @param dfm_count Dataframe contains the feature read counts, with rows as genomic featues (or genes) and column as samples. Default is \code{NULL}.
+#' @param dfm_annot Dataframe contains the gene annotation information, with rows as genmic features and columns as annotation variables. The row lengths of this dataframe should be the same as \code{dfm_count}.
+#' @param count_threshold Read count threshold. No filtering will be applied when set \code{"none"}. Otherwise, a numeric number can be set as the minimum read count for filtering. DDefault is \code{"none"}.
+#' @param qc_plot Wether or not to produce a QC plot upon filtering, normalization and weight calculation. Default is \code{FALSE}.
+#' @param n Number of genes to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
+#' @param fct Input \code{factor} object for samples. Default is \code{NULL}.
+#' @param sampleName A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.
+#' @param colGroup Colour group, numeric or dependent on \code{fct}.
+#' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
+#' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
+#' @param colColour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
+#' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
+#' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
+#' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
+#' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format
+#' @details The data filtering and normalization functions are also included in the function.
+#' @importFrom gplots heatmap.2
+#' @importFrom RColorBrewer brewer.pal
+#' @examples
+#' \dontrun{
+#'
+#' # standard usage
+#'
+#' }
+#' @export
+rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NULL, geneidVar = "gene_id",
+                             count_threshold = "none", design = NULL, qc_plot = FALSE,
+                             n = "all", sampleName = NULL,
+                             fct = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+                             distance = "euclidean", clust = "complete",
+                             colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+                             plotWidth = 7, plotHeight = 7){
+  ## chekc variables
+  if (is.null(dfm_count) | is.null(dfm_annot) | class(dfm_count) != "data.frame" | class(dfm_annot) != "data.frame"){
+    stop(cat("Please provide the read count and annotation dataframes. Please also make sure the type as data.frame. Function terminated.\n"))
+  }
+
+  if (is.null(design)){
+    stop(cat("Please provide design matrix. Function terminated.\n"))
+  }
+
+  if (is.null(fct)){
+    stop(cat("Please provide smaple index with argument fct. Function terminated.\n"))
+  }
+
+  ## set up dis and cluster functions
+  distfunc <- function(x)dist(x, method = distance)
+  clustfunc <- function(x)hclust(x, method = clust)
+
+  ## clustering analysis and colour setup
+  # normalization and filtering
+  cat("Data filtering and normalization...") # message
+  dge <- DGEList(counts = dfm_count, genes = dfm_annot)
+
+  if (count_threshold != "none"){ # set the count threshold for filtering
+    count_s <- rowSums(dge$counts) # thresholdd
+    isexpr <- count_s > count_threshold
+
+    dge <- dge[isexpr, , keep.lib.size = FALSE] # filtering
+  }
+
+  # for data Voom normalization
+  dgenormf <- calcNormFactors(dge)
+  vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc_plot, normalization = "quantile") # Voom normalization with quality weights
+  cat("DONE!\n") # message
+
+
+  # cluster and colour
+  col_cluster <- clustfunc(distfunc(t(vmwt$E)))
+  colG <- cutree(col_cluster, colGroup) # column group
+  colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
+
+  ## prepare mtx for plotting
+  ## prepare dfm for clustering
+  dfm_E <- vmwt$E
+  dfm_A <- vmwt$genes
+
+  if (n != "all"){ # subset
+    dfm_E <- dfm_E[1:n, ]
+    dfm_A <- dfm_A[1:n, ]
+  }
+
+  mtx <- as.matrix(dfm_E)
+  rownames(mtx) <- dfm_A[, geneidVar]
+
+  if (!is.null(sampleName)){
+    colnames(mtx) <- sampleName
+  } else {
+    colnames(mtx) <- colnames(vmwt$E)
+  }
+
+  ## heatmap
+  # draw heatmap
+  pdf(file = paste(plotName, "_heatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
+  heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+            col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+  dev.off()
+}

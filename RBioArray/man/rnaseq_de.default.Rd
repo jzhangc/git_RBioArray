@@ -33,11 +33,15 @@
 \item{qc.plot}{QC plot for the input read counts}
 }
 \value{
-A \code{rbioseq_de} object. The items of the object are following:
+A list containing core elements of a \code{rbioseq_de} class. The items of a \code{rbioseq_de} class are following:
 
-        \code{filter_results}: a list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample} and \code{filter_summary}
+        \code{filter_results}: A list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample}, \code{filter_summary} and \code{filtered_counts}.
+                               Note: \code{filtered_counts} is a \code{DGEList} class from \code{edgeR} package.
 
         \code{normalization_results}
+
+        \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
+                                Note: The \code{targets} is NOT the same as the \code{targets} outside.
 
         \code{gene_id_var_name}
 
@@ -48,6 +52,10 @@ A \code{rbioseq_de} object. The items of the object are following:
         \code{DE_results}
 
         \code{comparisons}
+
+        \code{targets}: sample annotation data frame
+
+        \code{sample_groups}
 }
 \description{
 The default \code{rnaseq_de} function that performs statistical analysis for RNAseq data.

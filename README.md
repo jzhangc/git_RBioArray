@@ -48,9 +48,8 @@ Update log
             (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol".
             
       - New cluster functions
-        - rbioarray_unsupervised_hcluster
-        - rbioarray_supervised_hcluster
-        - rbioarray_corcluster
+        - rbio_supervised_hcluster
+        - rbio_corcluster
 
       - Updates to GS functions:
         - All GS functions are now compatible with the S3 class objects from DE analysis 
@@ -79,6 +78,9 @@ Update log
         - Function rbioarray_transfo_normalize() for log transforming and normalizing raw data from "rbioarray_rlist". The function produces an "rbioarray_plist" class object
         - Function rbioarray_filter_combine() for filtering, averaging and (if set) combining transcripts from the same gene/genomic feature. The function produces an "rbioarray_flist" object
         - S3 print method for "rbioarray_rlist", "rbioarray_plist", "rbioarray_flist" classes
+
+      - New cluster functions
+        - rbio_unsupervised_hcluster, supporting "rbioarray_flist" and "rbioseq_de" classes
 
       - Updates to RNAseq functions:
         - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility.
