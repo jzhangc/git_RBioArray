@@ -48,7 +48,6 @@ Update log
             (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol".
             
       - New cluster functions
-        - rbio_supervised_hcluster
         - rbio_corcluster
 
       - Updates to GS functions:
@@ -80,7 +79,8 @@ Update log
         - S3 print method for "rbioarray_rlist", "rbioarray_plist", "rbioarray_flist" classes
 
       - New cluster functions
-        - rbio_unsupervised_hcluster, supporting "rbioarray_flist" and "rbioseq_de" classes
+        - rbio_unsupervised_hcluster, with "rbioarray_flist" and "rbioseq_de" classes as input
+        - rbio_supervised_hcluster, with "sig" class as input
 
       - Updates to RNAseq functions:
         - Due to the overhual of RNAseq and microarray DE functions, rbioarray_DE() is now considered as a "legacy function". However, it is still functional for compatibility.

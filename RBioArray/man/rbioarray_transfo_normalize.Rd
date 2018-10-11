@@ -20,7 +20,7 @@ A \code{rbioarray_plist} class object with the following items:
 
         \code{ArrayWeight}
 
-        \code{original_E}: Original E matrix from the input \code{rbioarray_rlist}.
+        \code{raw_data}: A list including original E matrix and background matrix from the input \code{rbioarray_rlist}.
 
         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
 }

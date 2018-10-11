@@ -43,9 +43,9 @@ A list containing core elements of a \code{rbioseq_de} class. The items of a \co
         \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.
 
-        \code{gene_id_var_name}
+        \code{genes_annotation.gene_id.var_name}
 
-        \code{gene_symbol_var_name}
+        \code{genes_annotation.gene_symbol.var_name}
 
         \code{F_stats}
 

@@ -110,9 +110,9 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'         \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
 #'                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.
 #'
-#'         \code{gene_id_var_name}
+#'         \code{genes_annotation.gene_id.var_name}
 #'
-#'         \code{gene_symbol_var_name}
+#'         \code{genes_annotation.gene_symbol.var_name}
 #'
 #'         \code{F_stats}
 #'
@@ -230,8 +230,8 @@ rnaseq_de.default <- function(x, y = NULL,
   out <- list(filter_results = filter_results,
               normalization_method = list(between_genes = between.genes.norm.method, between_samples = "voom"),
               normalized_data = vmwt,
-              gene_id_var_name = y.gene_id.var.name,
-              gene_symbol_var_name = y.gene_symbol.var.name,
+              genes_annotation.gene_id.var_name = y.gene_id.var.name,
+              genes_annotation.gene_symbol.var_name = y.gene_symbol.var.name,
               F_stats = f_stats,
               DE_results = de_list,
               comparisons = cf)

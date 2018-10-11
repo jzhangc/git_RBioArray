@@ -5,8 +5,10 @@
 \title{rbio_unsupervised_hcluster.default}
 \usage{
 \method{rbio_unsupervised_hcluster}{default}(E, genes, input.sample_gourps,
-  n = "all", rm.control = FALSE, input.gene_annotation.control_type,
-  gene_symbol.only = FALSE, input.genes_annotation.gene_symbol.var_name,
+  n = "all", rm.control = FALSE, input.genes_annotation.control_type,
+  gene_symbol.only = FALSE,
+  input.genes_annotation.gene_symbol.var_name = NULL,
+  input.genes_annotation.gene_id.var_name = NULL,
   sample_id.vector = NULL, distance = "euclidean",
   clust = "complete", col.colour = "Paired", map.colour = "PRGn",
   n.map.colour = 11, ..., export.name = NULL, plot.width = 7,
@@ -23,11 +25,13 @@
 
 \item{rm.control}{Whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.}
 
-\item{input.gene_annotation.control_type}{Only set when \code{rm.control = TRUE}, input control type variable annotation list.}
+\item{input.genes_annotation.control_type}{Only set when \code{rm.control = TRUE}, input control type variable annotation list.}
 
 \item{gene_symbol.only}{Whether or not to remove probes without gene symbol. Default is \code{FALSE}.}
 
 \item{input.genes_annotation.gene_symbol.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.}
+
+\item{input.genes_annotation.gene_id.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.}
 
 \item{sample_id.vector}{A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.}
 

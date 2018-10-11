@@ -22,9 +22,9 @@
 #'
 #'         \code{genes_annotation.gene_symbol.var_name}
 #'
-#'         \code{gene_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
+#'         \code{genes_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 #'
-#'         \code{gene_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
+#'         \code{genes_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
 #'                                                    This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
 #'
 #'         \code{targets}: the sample annotation data frame.
@@ -223,8 +223,8 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
               gene_display_name_used = gene.symbol,
               genes_annotation.gene_id.var_name = gene.annot.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = gene.annot.gene_symbol.var.name,
-              gene_annotation.control_type = gene.annot.control_type,
-              gene_annotation.to_remove.var.name = gene.annot.rm.var.name,
+              genes_annotation.control_type = gene.annot.control_type,
+              genes_annotation.to_remove.var.name = gene.annot.rm.var.name,
               targets = tgt,
               sample_groups = sample.groups)
   class(out) <- "rbioarray_rlist"
@@ -280,7 +280,7 @@ print.rbioarray_rlist <- function(x, ...){
 #'
 #'         \code{ArrayWeight}
 #'
-#'         \code{original_E}: Original E matrix from the input \code{rbioarray_rlist}.
+#'         \code{raw_data}: A list including original E matrix and background matrix from the input \code{rbioarray_rlist}.
 #'
 #'         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
 #'
@@ -320,7 +320,7 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
   ## output
   cat("\n")
   cat("Constructing rbioarray_plist...")
-  out <- append(default_out, object[!names(object) %in% "E"])
+  out <- append(default_out, object[!names(object) %in% c("E", "E_background")])
   class(out) <- "rbioarray_plist"
   cat("Done!\n\n")
   return(out)
@@ -399,12 +399,13 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
   cat("Done!\n")
 
   ## output
+  raw.data <- list(original_E = E, original_background = E.background)
   default_out <- list(E = Norm,
                       design = between.sample.weight.design,
                       ArrayWeight = Wgt,
                       background_correction_method = bgc.method,
                       between_sample_normalization_method = between.sample.norm.method,
-                      original_E = E)
+                      raw_data = raw.data)
   return(default_out)
 }
 
@@ -413,7 +414,6 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
 print.rbioarray_plist <- function(x, ...){
   cat("\n")
   cat("---- rbioarray_plist information ----\n")
-  cat(paste0("Log transformation: ", ifelse(x$extra_E_data$log_transformation, TRUE, FALSE), "\n"))
   cat(paste0("Background correction method: ", x$background_correction_method, "\n"))
   cat(paste0("Between-sample normalization method: ", x$between_sample_normalization_method))
   cat("\n\n")
@@ -442,9 +442,9 @@ print.rbioarray_plist <- function(x, ...){
 #'
 #' @return A \code{rbioarray_flist} class, including the following core items:
 #'
-#'         \code{E}
+#'         \code{E}: filtered (and if set, combined) expression matrix
 #'
-#'         \code{genes}
+#'         \code{genes}: gene annotation with same row number as E
 #'
 #'         \code{gene_duplicates_combined}: either \code{TRUE} or \code{FALSE}
 #'
@@ -468,11 +468,11 @@ rbioarray_filter_combine <- function(object,
 
   ## filter
   # set negative/low expression threshold
-  if (!is.null(object$gene_annotation.control_type)){ # 0.95 percentile of all negative control values
+  if (!is.null(object$genes_annotation.control_type)){ # 0.95 percentile of all negative control values
     cat("Gene control type variable detected in the input object. The filter.percentile argument value reset to 0.95.\n")
     filter.percentile = 0.95
-    control_type.var.name = object$gene_annotation.control_type$control_type.var_name
-    control_type.neg.value = object$gene_annotation.control_type$neg_type.value
+    control_type.var.name = object$genes_annotation.control_type$control_type.var_name
+    control_type.neg.value = object$genes_annotation.control_type$neg_type.value
 
     if (class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric"){ # if there is only one entry in the neg values
       neg <- object$E[object$genes[, control_type.var.name] == control_type.neg.value, ] # no 95% percentile required as only one neg entry
@@ -498,7 +498,7 @@ rbioarray_filter_combine <- function(object,
 
   # filter
   flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$gene_annotation.to_remove.var.name]
+  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name]
   cat("Done!\n")
 
   ## averaging technical replicates
@@ -609,6 +609,8 @@ print.rbioarray_flist <- function(x, ...){
 #'
 #'         \code{fit}: the limma fitted DE object as a reference
 #'
+#'         \code{input_data}: input E matrix and genes data frame from rbioarray_flist object
+#'
 #'         Additionally, the \code{rbioarray_de} includes additional items from the input \code{rbioarray_flist} object.
 #'
 #' @importFrom limma lmFit eBayes topTable contrasts.fit
@@ -647,11 +649,14 @@ microarray_de <- function(object, contra){
   }
   names(de_list) <- cf
 
+  flist_data <- list(E = object$E, genes = object$genes)
+
   out <- list(F_stats = f_stats,
               DE_results = de_list,
               comparisons = cf,
-              fit = fit)
-  out <- append(out, object[!names(object) %in% c("E", "genes", "extra_E_data", "raw_file.gene_annotation.var_name", "raw_file.gene_id.var_name")])
+              fit = fit,
+              input_data = flist_data)
+  out <- append(out, object[!names(object) %in% c("E", "genes", "raw_data", "raw_file.genes_annotation.var_name", "raw_file.gene_id.var_name")])
   class(out) <- "rbioarray_de"
   cat("Done!\n")
 

@@ -5,8 +5,12 @@
 \title{sig.default}
 \usage{
 \method{sig}{default}(input.de.list, input.gene_symbol.var.name,
-  input.Fstats.matrix, input.gene_annotation.control_type = NULL,
-  input.fit = NULL, experiment = NULL, FC = 1.5, alpha = 0.05,
+  input.Fstats.matrix, input.E = NULL, input.genes = NULL,
+  input.genes_annotation.control_type = NULL,
+  input.genes_annotation.gene_id.var_name = NULL,
+  input.genes_annotation.gene_symbol.var_name = NULL,
+  input.targets = NULL, input.sample_groups = NULL, input.fit = NULL,
+  experiment = NULL, FC = 1.5, alpha = 0.05,
   p.val.correction.method = "fdr", gene_symbol = TRUE,
   export.name = NULL, export.mode = "all", plot = TRUE,
   plot.top.gene = FALSE, plot.top.gene.n = 5,
@@ -21,9 +25,21 @@
 
 \item{input.gene_symbol.var.name}{Input gene sysmbol variable name from teh DE dataframes.}
 
-\item{input.Fstats.matrix}{Input dataframe containing F stats}
+\item{input.Fstats.matrix}{Input dataframe containing F stats.}
 
-\item{input.gene_annotation.control_type}{Functinal only when \code{p.val.correction.method = "spikein"}, the \code{gene_annotation.control_type} element from the input \code{rbioarray_flist} class object.}
+\item{input.E}{Input expression matrix. Can be either \code{input_data} from \code{rbioarray_de} object or \code{filter_results} from \code{rbioseq_de} object.}
+
+\item{input.genes}{Input gene annotation matrix. Can be either from \code{rbioarray_de} object or from \code{rbioseq_de} object.}
+
+\item{input.genes_annotation.control_type}{Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.}
+
+\item{input.genes_annotation.gene_id.var_name}{Variable name for probe/gene/genomic features identification.}
+
+\item{input.genes_annotation.gene_symbol.var_name}{Variable name for probe/gene/genomic features display name, e.g. gene symbols.}
+
+\item{input.targets}{The \code{targets} element from from \code{rbioarray_de} or \code{rbioseq_de} classes objects.}
+
+\item{input.sample_groups}{Sample group factor object, from \code{samep_groups} element from \code{rbioarray_de} or \code{rbioseq_de} classes objects.}
 
 \item{input.fit}{Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object}
 
@@ -71,19 +87,6 @@
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 }
-\value{
-Signifiance test results as \code{csv} files to the working directory, as well as a \code{sig} object to the environment.
-        The \code{sig} object contains the following items;
-
-        \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
-                                           i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
-
-        \code{export.mode}
-
-        \code{experiment}
-
-        \code{signifianct_change_results}: this only contains significantly changed genes.
-}
 \description{
 The default \code{sig} function.
 }
@@ -99,4 +102,6 @@ Explanation for \code{export.mode} options:
         \code{p_val.correction.method}
 
         The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
+
+        The \code{input.E} and \code{input.genes} are only used for output, not part of the sig processing.
 }

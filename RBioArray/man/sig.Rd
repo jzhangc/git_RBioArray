@@ -12,7 +12,24 @@ sig(object, ...)
 \item{...}{Additional arguments for corresponding S3 class methods.}
 }
 \value{
-A differential expression result object.
+Signifiance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
+
+        The \code{sig} object contains the following items;
+
+        \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
+                                           i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
+
+        \code{export.mode}
+
+        \code{experiment}
+
+        \code{signifianct_change_results}: this only contains significantly changed genes.
+
+        \code{genes_annotation.gene_id.var_name}
+
+        \code{genes_annotation.gene_symbol.var_name}
+
+        \code{input_data}: expression data matrix and gene annotation data frame from either \code{rbioarray_de} or \code{rbioseq_de} objects.
 }
 \description{
 Generic significance test function

@@ -3,7 +3,25 @@
 #' @description Generic significance test function
 #' @param object Object containing DE inforamtion. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @return A differential expression result object.
+#' @return Signifiance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
+#'
+#'         The \code{sig} object contains the following items;
+#'
+#'         \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
+#'                                            i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
+#'
+#'         \code{export.mode}
+#'
+#'         \code{experiment}
+#'
+#'         \code{signifianct_change_results}: this only contains significantly changed genes.
+#'
+#'         \code{genes_annotation.gene_id.var_name}
+#'
+#'         \code{genes_annotation.gene_symbol.var_name}
+#'
+#'         \code{input_data}: expression data matrix and gene annotation data frame from either \code{rbioarray_de} or \code{rbioseq_de} objects.
+#'
 #' @examples
 #'
 #' \dontrun{
@@ -37,8 +55,15 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
   }
 
   ## processing
-  sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$gene_symbol_var_name,
-              input.Fstats.matrix = object$F_stats, experiment = "RNAseq", export.name = export.name,
+  sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$genes_annotation.gene_symbol.var_name,
+              input.Fstats.matrix = object$F_stats,
+              input.E = object$filter_results$filtered_counts$counts,
+              input.genes = object$filter_results$filtered_counts$genes,
+              input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+              input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+              input.targets = object$targets,
+              input.sample_groups = object$sample_groups,
+              experiment = "rnaseq", export.name = export.name,
               p.val.correction.method = p.val.correction.method, ...)
 }
 
@@ -67,9 +92,14 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 
   ## processing
   sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$genes_annotation.gene_symbol.var_name,
-              input.Fstats.matrix = object$F_stats, input.gene_annotation.control_type = object$gene_annotation.control_type,
+              input.Fstats.matrix = object$F_stats, input.E = object$input_data$E, input.genes = object$input_data$genes,
+              input.genes_annotation.control_type = object$genes_annotation.control_type,
+              input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+              input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+              input.targets = object$targets,
+              input.sample_groups = object$sample_groups,
               input.fit = object$fit,
-              experiment = "Microarray", export.name = export.name,
+              experiment = "microarray", export.name = export.name,
               p.val.correction.method = p.val.correction.method, ...)
 }
 
@@ -79,8 +109,14 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 #' @description The default \code{sig} function.
 #' @param input.de.list  Input list cantaining DE dataframes for each comparison.
 #' @param input.gene_symbol.var.name Input gene sysmbol variable name from teh DE dataframes.
-#' @param input.Fstats.matrix Input dataframe containing F stats
-#' @param input.gene_annotation.control_type Functinal only when \code{p.val.correction.method = "spikein"}, the \code{gene_annotation.control_type} element from the input \code{rbioarray_flist} class object.
+#' @param input.Fstats.matrix Input dataframe containing F stats.
+#' @param input.E Input expression matrix. Can be either \code{input_data} from \code{rbioarray_de} object or \code{filter_results} from \code{rbioseq_de} object.
+#' @param input.genes Input gene annotation matrix. Can be either from \code{rbioarray_de} object or from \code{rbioseq_de} object.
+#' @param input.genes_annotation.control_type Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.
+#' @param input.genes_annotation.gene_id.var_name Variable name for probe/gene/genomic features identification.
+#' @param input.genes_annotation.gene_symbol.var_name Variable name for probe/gene/genomic features display name, e.g. gene symbols.
+#' @param input.targets The \code{targets} element from from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
+#' @param input.sample_groups Sample group factor object, from \code{samep_groups} element from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
 #' @param input.fit Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object
 #' @param experiment Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".
 #' @param FC Threshold for fold change. Default is \code{1.5}.
@@ -116,17 +152,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 #'
 #'         The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
 #'
-#' @return Signifiance test results as \code{csv} files to the working directory, as well as a \code{sig} object to the environment.
-#'         The \code{sig} object contains the following items;
-#'
-#'         \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
-#'                                            i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
-#'
-#'         \code{export.mode}
-#'
-#'         \code{experiment}
-#'
-#'         \code{signifianct_change_results}: this only contains significantly changed genes.
+#'         The \code{input.E} and \code{input.genes} are only used for output, not part of the sig processing.
 #'
 #' @import ggplot2
 #' @importFrom RBioplot rightside_y
@@ -135,7 +161,11 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 #'
 #' @export
 sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.matrix,
-                        input.gene_annotation.control_type = NULL,
+                        input.E = NULL, input.genes = NULL,
+                        input.genes_annotation.control_type = NULL,
+                        input.genes_annotation.gene_id.var_name = NULL,
+                        input.genes_annotation.gene_symbol.var_name = NULL,
+                        input.targets = NULL, input.sample_groups = NULL,
                         input.fit = NULL,
                         experiment = NULL,
                         FC = 1.5, alpha = 0.05, p.val.correction.method = "fdr",
@@ -148,12 +178,12 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                         plot.xTxtSize = 10, plot.yTxtSize = 10, plot.Width = 170, plot.Height = 150){
   ## check arguments
   if (p.val.correction.method == "spikein") {
-    if (is.null(input.gene_annotation.control_type)){
+    if (is.null(input.genes_annotation.control_type)){
       cat("No control probes found in the input object when p.val.correction.method = \"spikein\", automatically reset sig.method to \"fdr\".\n")
       cat("\n")
       p.val.correction.method <- "fdr"
     } else {
-      PCntl <- input.fit[input.fit$genes[, input.gene_annotation.control_type$control_type.var_name] == input.gene_annotation.control_type$pos_type.value, ]
+      PCntl <- input.fit[input.fit$genes[, input.genes_annotation.control_type$control_type.var_name] == input.genes_annotation.control_type$pos_type.value, ]
     }
   }
   if (is.null(export.name)) stop("export.name is needed.")
@@ -184,7 +214,6 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   colnames(sig_summary_mtx) <- c("comparisons", "raw.p.value.threshold", "fold.change.threshold", "alpha", "FDR", "True", "False")
 
   pcutoff_vector <- vector(length = length(input.de.list))
-
   cutoff_list <- vector(mode = "list", length = length(input.de.list))
   names(cutoff_list) <- names(input.de.list)
 
@@ -287,11 +316,20 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   }
   names(sig_out_list) <- names(input.de.list)
 
+  input.data <- list(E = input.E, genes = input.genes,
+                     input.genes_annotation.control_type = input.genes_annotation.control_type,
+                     input.genes_annotation.gene_id.var_name = input.genes_annotation.gene_id.var_name,
+                     input.genes_annotation.gene_symbol.var_name = input.genes_annotation.gene_symbol.var_name,
+                     targets = input.targets,
+                     sample_groups = input.sample_groups)
+
   out <- list(significant_change_summary = sig_summary_mtx,
+              thresholding_summary = cutoff_list,
               export.mode = export.mode,
               significant_change_results = sig_out_list,
               p_val.correction.method = p.val.correction.method,
-              experiment = experiment)
+              experiment = experiment,
+              input_data = input.data)
   class(out) <- "sig"
   assign(paste0(export.name, "_sig"), out, envir = .GlobalEnv)
 

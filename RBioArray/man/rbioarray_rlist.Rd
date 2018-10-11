@@ -26,9 +26,9 @@ A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the f
 
         \code{genes_annotation.gene_symbol.var_name}
 
-        \code{gene_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
+        \code{genes_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 
-        \code{gene_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
+        \code{genes_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
                                                    This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
 
         \code{targets}: the sample annotation data frame.
