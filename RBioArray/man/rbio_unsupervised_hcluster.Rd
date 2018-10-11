@@ -17,14 +17,27 @@ A pdf file containing a heatmap for unsupervised hierarchical clustering analysi
 \description{
 Generic unsupersived hierarchical clustering function.
 }
+\details{
+Since the function depends on the \code{heatmap.2} function from \code{gplots} package,
+         arguments can be passed directly, as seen in the examples below.
+}
 \examples{
 
 \dontrun{
-# rbioarray_flist class
+# rbioarray_flist class input
 rbio_unsupervised_hcluster(object = flist, rm.control = TRUE, n = 500, gene_symbol.only = TRUE,
                            sample_id.var.name = "SampleName", srtCol = 90, offsetCol = 0, labRow = FALSE,
                            key.title = "", cexCol = 0.7, trace = "none",
                            keysize = 1.5, key.xlab = "Normalized expression level", key.ylab = "Probe count")
+
+# rbioseq_de class input
+rbio_unsupervised_hcluster(object = mrna_de, n = "all",
+                           sample_id.var.name = "condition", srtCol = 90, offsetCol = 0, labRow = FALSE,
+                           key.title = "", cexCol = 0.7, trace = "none",
+                           keysize = 1.5, key.xlab = "CLR transformed counts", key.ylab = "mRNA count")
+
+
+
 }
 
 }
