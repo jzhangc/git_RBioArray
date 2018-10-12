@@ -20,7 +20,7 @@ Generic RNAseq statistical analysis function
 \examples{
 
 \dontrun{
-rnaseq_de(object = mrnaseq)
+rnaseq_de(object = mrnaseq, design = design, contra = contra)
 }
 
 }

@@ -7,7 +7,7 @@
 #' @examples
 #'
 #' \dontrun{
-#' rnaseq_de(object = mrnaseq)
+#' rnaseq_de(object = mrnaseq, design = design, contra = contra)
 #' }
 #'
 #' @export
@@ -30,12 +30,8 @@ rnaseq_de <- function(object, ...){
 #'
 #' @export
 rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
-  ## set minimum sample number
-  if (is.null(filter.threshold.min.sample)) {
-    annot.group <- object$sample_groups
-  } else {
-    annot.group <- NULL
-  }
+  ## for setting up comparison groups info and minimum sample number
+  annot.group <- object$sample_groups
 
   ## contruct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
@@ -58,12 +54,8 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
 #'
 #' @export
 rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
-  ## set minimum sample number
-  if (is.null(filter.threshold.min.sample)) {
-    annot.group <- object$sample_groups
-  } else {
-    annot.group <- NULL
-  }
+  ## for setting up comparison groups info and minimum sample number
+  annot.group <- object$sample_groups
 
   ## contruct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
@@ -86,7 +78,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #' @param y.gene_symbol.var.name Variable name for gene (i.e. target) symbols. Default is \code{"genes"}.
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
-#' @param annot.group Set only when \code{filter.threshold.min.sample} is not \code{NULL}, sample group annotation object. Can be a \code{factor} or \code{vector} object.
+#' @param annot.group Ssample group annotation object. Can be a \code{factor} or \code{vector} object.
 #' @param between.genes.norm.method Between gene normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
@@ -118,7 +110,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'
 #'         \code{DE_results}
 #'
-#'         \code{comparisons}
+#'         \code{comparisons}: a list with comparisons and comparison levles
 #'
 #'         \code{targets}: sample annotation data frame
 #'
@@ -190,6 +182,11 @@ rnaseq_de.default <- function(x, y = NULL,
 
   ## extract coefficients
   cf <- colnames(contra) # extract coefficient
+  contra_levels <- vector(mode = "list", length = length(cf))
+  contra_levels[] <- foreach(i = seq(length(cf))) %do% {
+    rownames(contra)[which(contra[, i] != 0)]
+  }
+  names(contra_levels) <- cf
 
   ## DE
   cat("Data filtering and normalization...") # message
@@ -226,6 +223,7 @@ rnaseq_de.default <- function(x, y = NULL,
   de_list <- vector(mode = "list", length(cf))
   de_list[] <- foreach(i = seq(length(cf))) %do% topTable(fit = fit, coef = cf[i], number = Inf)
   names(de_list) <- cf
+  comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
   out <- list(filter_results = filter_results,
               normalization_method = list(between_genes = between.genes.norm.method, between_samples = "voom"),
@@ -234,7 +232,7 @@ rnaseq_de.default <- function(x, y = NULL,
               genes_annotation.gene_symbol.var_name = y.gene_symbol.var.name,
               F_stats = f_stats,
               DE_results = de_list,
-              comparisons = cf)
+              comparisons = comparisons)
   return(out)
 }
 
@@ -254,6 +252,6 @@ print.rbioseq_de <- function(x, ...){
   cat(paste0("\tBetween-samples: ", x$normalization_method$between_samples, "\n"))
   cat("\n")
   cat("Comparisons assessed: \n")
-  cat(paste0("\t", x$comparisons, "\n"))
+  cat(paste0("\t", x$comparisons$comparisons, "\n"))
   cat("\n")
 }

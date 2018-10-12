@@ -4,7 +4,7 @@
 \alias{rbio_unsupervised_hcluster.default}
 \title{rbio_unsupervised_hcluster.default}
 \usage{
-\method{rbio_unsupervised_hcluster}{default}(E, genes, input.sample_gourps,
+\method{rbio_unsupervised_hcluster}{default}(E, genes, input.sample_groups,
   n = "all", rm.control = FALSE, input.genes_annotation.control_type,
   gene_symbol.only = FALSE,
   input.genes_annotation.gene_symbol.var_name = NULL,
@@ -19,7 +19,7 @@
 
 \item{genes}{Annotation data frame for genes/probes/genomic features.}
 
-\item{input.sample_gourps}{Input \code{factor} object for sample groupping labels.}
+\item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
 
 \item{n}{Number of genes/probes/genomic features to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
 

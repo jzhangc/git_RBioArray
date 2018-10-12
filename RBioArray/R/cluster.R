@@ -64,7 +64,7 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
                                      input.genes_annotation.control_type = object$genes_annotation.control_type,
                                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
-                                     input.sample_gourps = object$sample_groups,
+                                     input.sample_groups = object$sample_groups,
                                      sample_id.vector = sample_id.vector, export.name = export.name, ...)
 }
 
@@ -103,7 +103,7 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
                                      input.genes_annotation.control_type = NULL,
                                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
-                                     input.sample_gourps = object$sample_groups,
+                                     input.sample_groups = object$sample_groups,
                                      sample_id.vector = sample_id.vector, export.name = export.name, rm.control = FALSE, ...)
 }
 
@@ -113,7 +113,7 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 #' @description Default unsupersived hierarchical clustering function.
 #' @param E Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.
 #' @param genes Annotation data frame for genes/probes/genomic features.
-#' @param input.sample_gourps Input \code{factor} object for sample groupping labels.
+#' @param input.sample_groups Input \code{factor} object for sample groupping labels.
 #' @param n Number of genes/probes/genomic features to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
 #' @param rm.control Whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.
 #' @param input.genes_annotation.control_type Only set when \code{rm.control = TRUE}, input control type variable annotation list.
@@ -134,7 +134,7 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
 #' @export
-rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_gourps, n = "all",
+rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n = "all",
                                                rm.control = FALSE, input.genes_annotation.control_type,
                                                gene_symbol.only = FALSE,
                                                input.genes_annotation.gene_symbol.var_name = NULL,
@@ -161,8 +161,8 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_gourps, n 
     stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
 
   ## variables
-  if(length(levels(input.sample_gourps)) <= 19) {
-    colGroup <- length(levels(input.sample_gourps))
+  if(length(levels(input.sample_groups)) <= 19) {
+    colGroup <- length(levels(input.sample_groups))
   } else {
     cat("The sample groups exceed the maximum allowed colour group number (19). Proceed with 19.\n\n")
     colGroup <- 19
@@ -212,7 +212,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_gourps, n 
 #'
 #' @description Supersived hierarchical clustering function.
 #' @param object Input \code{sig} class object.
-#' @param input.sample_gourps Input \code{factor} object for sample groupping labels.
+#' @param input.sample_groups Input \code{factor} object for sample groupping labels.
 #' @param gene_symbol.only Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
 #' @param input.genes_annotation.gene_symbol.var_name Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.
 #' @param input.genes_annotation.gene_id.var_name Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.
@@ -253,6 +253,12 @@ rbio_supervised_hcluster <- function(object,
   if (!tolower(clust) %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
     stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
 
+  # check contrast levels against sample groups
+  contra_levels_all <- unique(foreach(i = 1:length(object$input_data$comparisons$comparison_levels), .combine = "c") %do% {
+    object$input_data$comparisons$comparison_levels[[i]]
+  })
+  if (!all(contra_levels_all %in% unique(levels(object$input_data$sample_groups)))) stop("Contrast levels not matching sample groups. Please check the input.")
+
   ## variables
   if (object$experiment == "rnaseq"){
     cat("CLR transformation of filtered RNAseq count data...")
@@ -265,14 +271,15 @@ rbio_supervised_hcluster <- function(object,
   input.genes_annotation.gene_symbol.var_name = object$input_data$input.genes_annotation.gene_symbol.var_name
   input.genes_annotation.gene_id.var_name = object$input_data$input.genes_annotation.gene_id.var_name
   export.name <- deparse(substitute(object))
-  input.sample_gourps <- object$input_data$sample_groups
+  input.sample_groups <- object$input_data$sample_groups
   input.genes_annotation.control_type <- object$input_data$input.genes_annotation.control_type
-  comparisons <- names(object$thresholding_summary)
+  comparisons <- object$input_data$comparisons$comparisons
+  comparison_levels <- object$input_data$comparisons$comparison_levels
   thresholding_summary <- object$thresholding_summary
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
 
-  if(length(levels(input.sample_gourps)) <= 19) {
-    colGroup <- length(levels(input.sample_gourps))
+  if(length(levels(input.sample_groups)) <= 19) {
+    colGroup <- length(levels(input.sample_groups))
   } else {
     cat("The sample groups exceed the maximum allowed colour group number (19). Proceed with 19.\n\n")
     colGroup <- 19
@@ -311,6 +318,7 @@ rbio_supervised_hcluster <- function(object,
     plt_dfm <- dfm[as.logical(thresholding_summary[[i]]), ]
     plt_mtx <- as.matrix(plt_dfm[, !names(plt_dfm) %in% names(genes)])
     colnames(plt_mtx) <- sample_id.vector
+    plt_mtx <- plt_mtx[, which(input.sample_groups %in% comparison_levels[[i]])]  # subsetting samples for the comparison levels
     row.lab <- plt_dfm[, row.lab.var_name]
 
     ## set ColSideColors

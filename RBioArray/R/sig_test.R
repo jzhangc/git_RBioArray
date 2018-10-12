@@ -63,6 +63,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
               input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
               input.targets = object$targets,
               input.sample_groups = object$sample_groups,
+              input.comparisons = object$comparisons,
               experiment = "rnaseq", export.name = export.name,
               p.val.correction.method = p.val.correction.method, ...)
 }
@@ -98,6 +99,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
               input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
               input.targets = object$targets,
               input.sample_groups = object$sample_groups,
+              input.comparisons = object$comparisons,
               input.fit = object$fit,
               experiment = "microarray", export.name = export.name,
               p.val.correction.method = p.val.correction.method, ...)
@@ -117,6 +119,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 #' @param input.genes_annotation.gene_symbol.var_name Variable name for probe/gene/genomic features display name, e.g. gene symbols.
 #' @param input.targets The \code{targets} element from from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
 #' @param input.sample_groups Sample group factor object, from \code{samep_groups} element from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
+#' @param input.comparisons Input comparisons from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
 #' @param input.fit Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object
 #' @param experiment Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".
 #' @param FC Threshold for fold change. Default is \code{1.5}.
@@ -165,7 +168,8 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                         input.genes_annotation.control_type = NULL,
                         input.genes_annotation.gene_id.var_name = NULL,
                         input.genes_annotation.gene_symbol.var_name = NULL,
-                        input.targets = NULL, input.sample_groups = NULL,
+                        input.targets = NULL,
+                        input.sample_groups = NULL, input.comparisons = NULL,
                         input.fit = NULL,
                         experiment = NULL,
                         FC = 1.5, alpha = 0.05, p.val.correction.method = "fdr",
@@ -321,7 +325,8 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                      input.genes_annotation.gene_id.var_name = input.genes_annotation.gene_id.var_name,
                      input.genes_annotation.gene_symbol.var_name = input.genes_annotation.gene_symbol.var_name,
                      targets = input.targets,
-                     sample_groups = input.sample_groups)
+                     sample_groups = input.sample_groups,
+                     comparisons = input.comparisons)
 
   out <- list(significant_change_summary = sig_summary_mtx,
               thresholding_summary = cutoff_list,

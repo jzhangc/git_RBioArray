@@ -605,7 +605,7 @@ print.rbioarray_flist <- function(x, ...){
 #'
 #'         \code{DE_results}: a list containing the DE results
 #'
-#'         \code{comparisons}
+#'         \code{comparisons}: a list with comparisons and comparison levles
 #'
 #'         \code{fit}: the limma fitted DE object as a reference
 #'
@@ -628,6 +628,11 @@ microarray_de <- function(object, contra){
 
   ## variable initation
   cf <- colnames(contra)
+  contra_levels <- vector(mode = "list", length = length(cf))
+  contra_levels[] <- foreach(i = seq(length(cf))) %do% {
+    rownames(contra)[which(contra[, i] != 0)]
+  }
+  names(contra_levels) <- cf
 
   ## fitting
   fit <- lmFit(object$E, design = object$design, weights = object$ArrayWeight)
@@ -650,10 +655,11 @@ microarray_de <- function(object, contra){
   names(de_list) <- cf
 
   flist_data <- list(E = object$E, genes = object$genes)
+  comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
   out <- list(F_stats = f_stats,
               DE_results = de_list,
-              comparisons = cf,
+              comparisons = comparisons,
               fit = fit,
               input_data = flist_data)
   out <- append(out, object[!names(object) %in% c("E", "genes", "raw_data", "raw_file.genes_annotation.var_name", "raw_file.gene_id.var_name")])
@@ -670,6 +676,6 @@ print.rbioarray_de <- function(x, ...){
   cat("--- Microarray gene differential expression analysis ---\n")
   cat("\n")
   cat("Comparisons assessed: \n")
-  cat(paste0("\t", x$comparisons, "\n"))
+  cat(paste0("\t", x$comparisons$comparisons, "\n"))
   cat("\n")
 }

@@ -30,7 +30,7 @@ rbio_supervised_hcluster(object, gene_symbol.only = FALSE,
 
 \item{plot.height}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
 
-\item{input.sample_gourps}{Input \code{factor} object for sample groupping labels.}
+\item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
 
 \item{input.genes_annotation.gene_symbol.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.}
 

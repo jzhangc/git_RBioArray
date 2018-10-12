@@ -18,7 +18,7 @@ A \code{rbioarray_de} class object with DE results, containing the following cor
 
         \code{DE_results}: a list containing the DE results
 
-        \code{comparisons}
+        \code{comparisons}: a list with comparisons and comparison levles
 
         \code{fit}: the limma fitted DE object as a reference
 
