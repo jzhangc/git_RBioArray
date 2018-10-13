@@ -44,3 +44,6 @@ A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 \description{
 Supersived hierarchical clustering function.
 }
+\details{
+Unlink the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
+}

@@ -5,15 +5,11 @@
 \title{sig.default}
 \usage{
 \method{sig}{default}(input.de.list, input.gene_symbol.var.name,
-  input.Fstats.matrix, input.E = NULL, input.genes = NULL,
-  input.genes_annotation.control_type = NULL,
-  input.genes_annotation.gene_id.var_name = NULL,
-  input.genes_annotation.gene_symbol.var_name = NULL,
-  input.targets = NULL, input.sample_groups = NULL,
-  input.comparisons = NULL, input.fit = NULL, experiment = NULL,
-  FC = 1.5, alpha = 0.05, p.val.correction.method = "fdr",
-  gene_symbol = TRUE, export.name = NULL, export.mode = "all",
-  plot = TRUE, plot.top.gene = FALSE, plot.top.gene.n = 5,
+  input.Fstats.matrix, input.genes_annotation.control_type = NULL,
+  input.fit = NULL, experiment = NULL, FC = 1.5, alpha = 0.05,
+  p.val.correction.method = "fdr", gene_symbol = TRUE,
+  export.name = NULL, export.mode = "all", plot = TRUE,
+  plot.top.gene = FALSE, plot.top.gene.n = 5,
   plot.top.gene.padding = 0.5, plot.Title = NULL,
   plot.xLabel = "log2(fold change)", plot.yLabel = "-log10(p value)",
   plot.symbolSize = 2, plot.sigColour = "red",
@@ -23,25 +19,11 @@
 \arguments{
 \item{input.de.list}{Input list cantaining DE dataframes for each comparison.}
 
-\item{input.gene_symbol.var.name}{Input gene sysmbol variable name from teh DE dataframes.}
+\item{input.gene_symbol.var.name}{Input gene sysmbol variable name from the DE dataframes.}
 
 \item{input.Fstats.matrix}{Input dataframe containing F stats.}
 
-\item{input.E}{Input expression matrix. Can be either \code{input_data} from \code{rbioarray_de} object or \code{filter_results} from \code{rbioseq_de} object.}
-
-\item{input.genes}{Input gene annotation matrix. Can be either from \code{rbioarray_de} object or from \code{rbioseq_de} object.}
-
 \item{input.genes_annotation.control_type}{Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.}
-
-\item{input.genes_annotation.gene_id.var_name}{Variable name for probe/gene/genomic features identification.}
-
-\item{input.genes_annotation.gene_symbol.var_name}{Variable name for probe/gene/genomic features display name, e.g. gene symbols.}
-
-\item{input.targets}{The \code{targets} element from from \code{rbioarray_de} or \code{rbioseq_de} classes objects.}
-
-\item{input.sample_groups}{Sample group factor object, from \code{samep_groups} element from \code{rbioarray_de} or \code{rbioseq_de} classes objects.}
-
-\item{input.comparisons}{Input comparisons from \code{rbioarray_de} or \code{rbioseq_de} classes objects.}
 
 \item{input.fit}{Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object}
 

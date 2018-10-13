@@ -21,5 +21,6 @@ A pdf file containing a heatmap for unsupervised hierarchical clustering analysi
 \code{rbio_unsupervised_hcluster} function for \code{rbioseq_de} class object.
 }
 \details{
-Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
+The function uses filtered count data, as opposed to normalized data.
+         Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 }

@@ -219,9 +219,11 @@ rnaseq_de.default <- function(x, y = NULL,
   cat("DONE!\n") # message
 
   ## output
-  f_stats <- topTable(fit, number = Inf)
+  # below: set sort.by = "none" for both f_stats and de_list to preserve the order, for supervsied clustering analysis.
+  # specifically, it is for constructing threshoding vector used for subsetting E matrix,
+  f_stats <- topTable(fit, number = Inf, sort.by = "none")
   de_list <- vector(mode = "list", length(cf))
-  de_list[] <- foreach(i = seq(length(cf))) %do% topTable(fit = fit, coef = cf[i], number = Inf)
+  de_list[] <- foreach(i = seq(length(cf))) %do% topTable(fit = fit, coef = cf[i], number = Inf, sort.by = "none")
   names(de_list) <- cf
   comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 

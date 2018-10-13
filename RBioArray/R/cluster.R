@@ -75,7 +75,8 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
 #' @param object Input object in \code{rbioseq_de} class.
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @details Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
+#' @details The function uses filtered count data, as opposed to normalized data.
+#'          Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 #' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @export
 rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = NULL, ...){
@@ -225,6 +226,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @details Unlink the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
@@ -260,13 +262,7 @@ rbio_supervised_hcluster <- function(object,
   if (!all(contra_levels_all %in% unique(levels(object$input_data$sample_groups)))) stop("Contrast levels not matching sample groups. Please check the input.")
 
   ## variables
-  if (object$experiment == "rnaseq"){
-    cat("CLR transformation of filtered RNAseq count data...")
-    E <- rbioseq_clr_ilr_transfo(object$input_data$E, offset = 1, mode = "clr")
-    cat("Done!\n\n")
-  } else {
-    E <- object$input_data$E
-  }
+  E <- object$input_data$norm_E
   genes <- object$input_data$genes
   input.genes_annotation.gene_symbol.var_name = object$input_data$input.genes_annotation.gene_symbol.var_name
   input.genes_annotation.gene_id.var_name = object$input_data$input.genes_annotation.gene_id.var_name

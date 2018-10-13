@@ -21,6 +21,8 @@
 #'         \code{genes_annotation.gene_symbol.var_name}
 #'
 #'         \code{input_data}: expression data matrix and gene annotation data frame from either \code{rbioarray_de} or \code{rbioseq_de} objects.
+#'                            For \code{rbioarray_de} class, it is filtered and normalized data, i.e. input_data$norm_E
+#'                            For \code{rbioreq_de} class, it is both filtered (not normalized), i.e. input_data$filtered_E, and filtered + normalized data input_data$norm_E
 #'
 #' @examples
 #'
@@ -55,17 +57,24 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
   }
 
   ## processing
-  sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$genes_annotation.gene_symbol.var_name,
-              input.Fstats.matrix = object$F_stats,
-              input.E = object$filter_results$filtered_counts$counts,
-              input.genes = object$filter_results$filtered_counts$genes,
-              input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
-              input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
-              input.targets = object$targets,
-              input.sample_groups = object$sample_groups,
-              input.comparisons = object$comparisons,
-              experiment = "rnaseq", export.name = export.name,
-              p.val.correction.method = p.val.correction.method, ...)
+  out <- sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$genes_annotation.gene_symbol.var_name,
+                     input.Fstats.matrix = object$F_stats,
+                     experiment = "rnaseq", export.name = export.name,
+                     p.val.correction.method = p.val.correction.method, ...)
+
+  input.data <- list(filtered_E = object$filter_results$filtered_counts$counts,
+                     norm_E = object$normalized_data$E,
+                     genes = object$filter_results$filtered_counts$genes,
+                     input.genes_annotation.control_type = NULL,
+                     input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+                     input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+                     targets = object$targets,
+                     sample_groups = object$sample_groups,
+                     comparisons = object$comparisons)
+
+  out$input_data <- input.data
+  class(out) <- "sig"
+  return(out)
 }
 
 
@@ -92,17 +101,25 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
   }
 
   ## processing
-  sig.default(input.de.list = object$DE_results, input.gene_symbol.var.name = object$genes_annotation.gene_symbol.var_name,
-              input.Fstats.matrix = object$F_stats, input.E = object$input_data$E, input.genes = object$input_data$genes,
-              input.genes_annotation.control_type = object$genes_annotation.control_type,
-              input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
-              input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
-              input.targets = object$targets,
-              input.sample_groups = object$sample_groups,
-              input.comparisons = object$comparisons,
-              input.fit = object$fit,
-              experiment = "microarray", export.name = export.name,
-              p.val.correction.method = p.val.correction.method, ...)
+  out <- sig.default(input.de.list = object$DE_results,
+                     input.gene_symbol.var.name = object$genes_annotation.gene_symbol.var_name,
+                     input.Fstats.matrix = object$F_stats,
+                     input.genes_annotation.control_type = object$genes_annotation.control_type,
+                     input.fit = object$fit,
+                     experiment = "microarray", export.name = export.name,
+                     p.val.correction.method = p.val.correction.method, ...)
+
+  input.data <- list(norm_E = object$input_data$E, filtered_E = NULL, genes = object$input_data$genes,
+                     input.genes_annotation.control_type = object$genes_annotation.control_type,
+                     input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+                     input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+                     targets = object$targets,
+                     sample_groups = object$sample_groups,
+                     comparisons = object$comparisons)
+
+  out$input_data <- input.data
+  class(out) <- "sig"
+  return(out)
 }
 
 
@@ -110,22 +127,15 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 #'
 #' @description The default \code{sig} function.
 #' @param input.de.list  Input list cantaining DE dataframes for each comparison.
-#' @param input.gene_symbol.var.name Input gene sysmbol variable name from teh DE dataframes.
 #' @param input.Fstats.matrix Input dataframe containing F stats.
-#' @param input.E Input expression matrix. Can be either \code{input_data} from \code{rbioarray_de} object or \code{filter_results} from \code{rbioseq_de} object.
-#' @param input.genes Input gene annotation matrix. Can be either from \code{rbioarray_de} object or from \code{rbioseq_de} object.
 #' @param input.genes_annotation.control_type Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.
-#' @param input.genes_annotation.gene_id.var_name Variable name for probe/gene/genomic features identification.
-#' @param input.genes_annotation.gene_symbol.var_name Variable name for probe/gene/genomic features display name, e.g. gene symbols.
-#' @param input.targets The \code{targets} element from from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
-#' @param input.sample_groups Sample group factor object, from \code{samep_groups} element from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
-#' @param input.comparisons Input comparisons from \code{rbioarray_de} or \code{rbioseq_de} classes objects.
 #' @param input.fit Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object
+#' @param gene_symbol If to apply gene symbols in the plot and exported results. Default is \code{TRUE}.
+#' @param input.gene_symbol.var.name Input gene sysmbol variable name from the DE dataframes.
 #' @param experiment Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".
 #' @param FC Threshold for fold change. Default is \code{1.5}.
 #' @param alpha Threshold for p values. Default is \code{0.05}.
 #' @param p.val.correction.method A character string describing the p value correction method used for significant test.
-#' @param gene_symbol If to apply gene symbols in the plot and exported results. Default is \code{TRUE}.
 #' @param export.name Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.
 #' @param export.mode Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"} and \code{"sig"}. Default is \code{"all"}. See details.
 #' @param plot If to plot volcano plot. Default is \code{TRUE}.
@@ -164,12 +174,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 #'
 #' @export
 sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.matrix,
-                        input.E = NULL, input.genes = NULL,
                         input.genes_annotation.control_type = NULL,
-                        input.genes_annotation.gene_id.var_name = NULL,
-                        input.genes_annotation.gene_symbol.var_name = NULL,
-                        input.targets = NULL,
-                        input.sample_groups = NULL, input.comparisons = NULL,
                         input.fit = NULL,
                         experiment = NULL,
                         FC = 1.5, alpha = 0.05, p.val.correction.method = "fdr",
@@ -320,23 +325,13 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   }
   names(sig_out_list) <- names(input.de.list)
 
-  input.data <- list(E = input.E, genes = input.genes,
-                     input.genes_annotation.control_type = input.genes_annotation.control_type,
-                     input.genes_annotation.gene_id.var_name = input.genes_annotation.gene_id.var_name,
-                     input.genes_annotation.gene_symbol.var_name = input.genes_annotation.gene_symbol.var_name,
-                     targets = input.targets,
-                     sample_groups = input.sample_groups,
-                     comparisons = input.comparisons)
-
   out <- list(significant_change_summary = sig_summary_mtx,
               thresholding_summary = cutoff_list,
               export.mode = export.mode,
               significant_change_results = sig_out_list,
               p_val.correction.method = p.val.correction.method,
-              experiment = experiment,
-              input_data = input.data)
+              experiment = experiment)
   class(out) <- "sig"
-  assign(paste0(export.name, "_sig"), out, envir = .GlobalEnv)
 
   ## export
   cat("\n")
@@ -365,6 +360,9 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
       cat("Done!\n")
     }
   }
+
+  ## return data
+  return(out)
 }
 
 

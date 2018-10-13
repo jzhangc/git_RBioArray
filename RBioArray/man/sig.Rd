@@ -30,6 +30,8 @@ Signifiance test results as \code{csv} files and volcano plots to the working di
         \code{genes_annotation.gene_symbol.var_name}
 
         \code{input_data}: expression data matrix and gene annotation data frame from either \code{rbioarray_de} or \code{rbioseq_de} objects.
+                           For \code{rbioarray_de} class, it is filtered and normalized data, i.e. input_data$norm_E
+                           For \code{rbioreq_de} class, it is both filtered (not normalized), i.e. input_data$filtered_E, and filtered + normalized data input_data$norm_E
 }
 \description{
 Generic significance test function

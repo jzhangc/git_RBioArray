@@ -641,13 +641,15 @@ microarray_de <- function(object, contra){
   fit$genes <- object$genes
 
   ## output
-  f_stats <- topTable(fit, number = Inf)
+  f_stats <- topTable(fit, number = Inf, sort.by = "none")
   f_stats[, object$genes_annotation.gene_id.var_name] <- rownames(f_stats)
   f_stats <- merge(f_stats, object$genes)
 
   de_list <- vector(mode = "list", length(cf))
   de_list[] <- foreach(i = seq(length(cf))) %do% {
-    de_dfm <- topTable(fit = fit, coef = cf[i], number = Inf)
+    # below: set sort.by = "none" to preserve the order, for supervsied clustering analysis.
+    # specifically, it is for constructing threshoding vector used for subsetting E matrix,
+    de_dfm <- topTable(fit = fit, coef = cf[i], number = Inf, sort.by = "none")
     de_dfm[, object$genes_annotation.gene_id.var_name] <- rownames(de_dfm)
     de_dfm <- merge(de_dfm, object$genes)
     de_dfm

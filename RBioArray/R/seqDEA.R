@@ -397,9 +397,12 @@ rbioseq_de_analysis <- function(raw.file.path, raw.file.ext = ".txt", raw.file.s
                   filter.threshold.min.sample = filter.threshold.min.sample,
                   annot.group = annot.group)
   # export
-  assign(paste0(export.name, "_de"), count, envir = .GlobalEnv)
+  assign(paste0(export.name, "_de"), de, envir = .GlobalEnv)
   cat("\n\n")
 
   ## sig analysis
-  sig(object = de, alpha = alpha, FC = FC, FDR = FDR, export.name = export.name, export.mode = export.mode, ...)
+  sig <- sig(object = de, alpha = alpha, FC = FC, FDR = FDR, export.name = export.name, export.mode = export.mode, ...)
+
+  # export
+  assign(paste0(export.name, "_sig"), sig, envir = .GlobalEnv)
 }
