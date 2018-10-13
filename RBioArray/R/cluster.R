@@ -250,9 +250,9 @@ rbio_supervised_hcluster <- function(object,
     sample_id.vector <- seq(ncol(object$input_data$E))
   }
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
-  if (!tolower(distance) %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+  if (!distance %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
     stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
-  if (!tolower(clust) %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
+  if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
     stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
 
   # check contrast levels against sample groups
