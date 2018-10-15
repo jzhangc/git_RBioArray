@@ -12,7 +12,7 @@
 
 \item{sample_id.var.name}{Variable name for sample identification, typically from \code{object$target}.}
 
-\item{...}{Additional arguments for corresponding S3 class methods.}
+\item{...}{Additional arguments for the default method.}
 }
 \value{
 A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.

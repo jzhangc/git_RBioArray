@@ -41,7 +41,7 @@ rbio_unsupervised_hcluster <- function(object, ...){
 #' @description \code{rbio_unsupervised_hcluster} function for \code{rbioarray_flist} class object.
 #' @param object Input object in \code{rbioarray_flist} class.
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
-#' @param ... Additional arguments for corresponding S3 class methods.
+#' @param ... Additional arguments for the default method.
 #' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @export
 rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.name = NULL, ...){
@@ -74,7 +74,7 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
 #' @description \code{rbio_unsupervised_hcluster} function for \code{rbioseq_de} class object.
 #' @param object Input object in \code{rbioseq_de} class.
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
-#' @param ... Additional arguments for corresponding S3 class methods.
+#' @param ... Additional arguments for the default method.
 #' @details The function uses filtered count data, as opposed to normalized data.
 #'          Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 #' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.

@@ -6,12 +6,11 @@
 \usage{
 rbio_supervised_corcluster(object, gene_symbol.only = FALSE,
   cor.method = "pearson", map.colour = "PRGn", n.map.colour = 11,
-  ..., heatmap.axis.label = FALSE, heatmap.width = 7,
-  heatmap.height = 7, sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
-  sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
-  sigplot.labelColour = "black", sigplot.labelSize = 1,
-  sigplot.labelAngle = 90, sigplot.keySize = 1, sigplot.width = 7,
-  sigplot.height = 7)
+  ..., heatmap.width = 7, heatmap.height = 7, sigplot.adj.p = FALSE,
+  sigplot.alpha = 0.05, sigplot.sigLabelColour = "red",
+  sigplot.sigLabelSize = 3, sigplot.labelColour = "black",
+  sigplot.labelSize = 1, sigplot.labelAngle = 90,
+  sigplot.keySize = 1, sigplot.width = 7, sigplot.height = 7)
 }
 \arguments{
 \item{object}{Input \code{sig} class object.}
@@ -25,8 +24,6 @@ rbio_supervised_corcluster(object, gene_symbol.only = FALSE,
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
 
 \item{...}{Additional arguments for \code{heatmap.2} function from \code{gplots} package.}
-
-\item{heatmap.axis.label}{Whether to display label for both x- and y- axes. Default is \code{FALSE}.}
 
 \item{heatmap.width}{Width for correlation heatmap. Unit is \code{inch}. Default is \code{7}.}
 
@@ -70,7 +67,7 @@ The function takes \code{sig} class object. It behaves in the following ways:
 \dontrun{
 rbio_supervised_corcluster(object = sig_input, gene_symbol.only = TRUE, cor.method = "pearson",
                            map.colour = "PRGn", n.map.colour = 11,
-                           heatmap.axis.label = TRUE, heatmap.width = 7, heatmap.height = 7,
+                           heatmap.width = 7, heatmap.height = 7,
                            sigplot.adj.p = FALSE, sigplot.alpha = 0.05, sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
                            sigplot.labelColour = "black", sigplot.labelSize = 1, sigplot.labelAngle = 90, sigplot.keySize = 1,
                            sigplot.width = 7, sigplot.height = 7)

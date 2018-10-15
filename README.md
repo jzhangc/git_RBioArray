@@ -46,9 +46,6 @@ Update log
             (i) all features, 
             (ii) features with an annotation name, 
             (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol".
-            
-      - New cluster functions
-        - rbio_unsupervised_corcluster
 
       - Updates to GS functions:
         - All GS functions are now compatible with the S3 class objects from DE analysis 
@@ -81,6 +78,7 @@ Update log
       - New cluster functions
         - rbio_unsupervised_hcluster, with "rbioarray_flist" and "rbioseq_de" classes as input
         - rbio_supervised_hcluster, with "sig" class as input
+        - rbio_unsupervised_corcluster, with "rbioarray_de" and "rbioseq_de" classes as input 
         - rbio_supervised_corcluster, with "sig" class as input
 
       - Updates to RNAseq functions:

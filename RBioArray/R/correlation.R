@@ -18,6 +18,284 @@ cor_pvalue <- function(r, n){
 }
 
 
+#' @title rbio_unsupervised_corcluster
+#'
+#' @description Generic unsupersived correlation clustering function.
+#' @param object Input object in either \code{rbioseq_de} or \code{rbioarray_de} class.
+#' @param ... Additional arguments for corresponding S3 class methods.
+#' @details It behaves in the following ways:
+#'          1. heatmap uses \code{heatmap.2} function from \code{gplots} package.
+#'          2. significance plot uses \code{corrplot} package
+#'
+#'          Since the function depends on the \code{heatmap.2} function from \code{gplots} package for heatmap,
+#'          arguments can be passed directly, as seen in the examples below.
+#'
+#' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+#' @examples
+#'
+#' \dontrun{
+#' # rbioarray_de class input
+#'
+#' # rbioseq_de class input
+#'
+#' }
+#'
+#' @export
+rbio_unsupervised_corcluster <- function(object, ...){
+  ## check arguments
+  if (!class(object) %in% c("rbioarray_de", "rbioseq_de")) stop("The input object needs to be either \"rbioarray_de\" or \"rbioseq_de\" class object.")
+
+  ## use methods
+  UseMethod("rbio_unsupervised_corcluster", object)
+}
+
+
+#' @title rbio_unsupervised_corcluster.rbioarray_de
+#'
+#' @description \code{rbio_unsupervised_corcluster} function for \code{rbioarray_de} class object.
+#' @param object Input object in \code{rbioarray_de} class.
+#' @param ... Additional arguments for the default method.
+#' @export
+rbio_unsupervised_corcluster.rbioarray_de <- function(object, ...){
+  ## variables
+  export.name <- deparse(substitute(object))
+
+  ## use methods
+  rbio_unsupervised_corcluster.default(E = object$input_data$E, genes = object$input_data$genes,
+                                       input.genes_annotation.control_type = object$genes_annotation.control_type,
+                                       input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+                                       input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+                                       input.sample_groups = object$sample_groups,
+                                       input.comparisons = object$comparisons,
+                                       export.name = export.name, ...)
+}
+
+
+#' @title rbio_unsupervised_corcluster.rbioseq_de
+#'
+#' @description \code{rbio_unsupervised_corcluster} function for \code{rbioseq_de} class object.
+#' @param object Input object in \code{rbioseq_de} class.
+#' @param ... Additional arguments for the default method.
+#' @details The function uses filtered count data, as opposed to normalized data.
+#'          Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
+#' @export
+rbio_unsupervised_corcluster.rbioarray_de <- function(object, sample_id.var.name = NULL, ...){
+  ## variables
+  export.name <- deparse(substitute(object))
+  # transform
+  cat("CLR transformation of filtered RNAseq count data...")
+  E_transfo <- rbioseq_clr_ilr_transfo(object$filter_results$filtered_counts$counts, offset = 1, mode = "clr")  # clr tranformation
+  cat("Done!\n")
+
+  ## use methods
+  rbio_unsupervised_corcluster.default(E = E_transfo, genes = object$filter_results$filtered_counts$genes,
+                  input.genes_annotation.control_type = NULL,
+                  input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+                  input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+                  input.sample_groups = object$sample_groups,
+                  input.comparisons = object$comparisons,
+                  export.name = export.name, ...)
+}
+
+
+#' @title rbio_unsupervised_corcluster.default
+#'
+#' @description Default unsupersived correlation clustering function.
+#' @param E Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.
+#' @param genes Annotation data frame for genes/probes/genomic features.
+#' @param input.sample_groups Input \code{factor} object for sample groupping labels.
+#' @param n Number of genes/probes/genomic features to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.
+#' @param rm.control Whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.
+#' @param input.genes_annotation.control_type Only set when \code{rm.control = TRUE}, input control type variable annotation list.
+#' @param gene_symbol.only Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
+#' @param input.genes_annotation.gene_symbol.var_name Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.
+#' @param input.genes_annotation.gene_id.var_name Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.
+#' @param export.name File name for the export \code{pdf} plot file.
+#' @param cor.method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
+#' @param map.colour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
+#' @param n.map.colour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
+#' @param heatmap.axis.label Whether to display label for both x- and y- axes. Default is \code{FALSE}.
+#' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
+#' @param heatmap.width Width for correlation heatmap. Unit is \code{inch}. Default is \code{7}.
+#' @param heatmap.height Height for correlation heatmap. Unit is \code{inch}. Default is \code{7}.
+#' @param sigplot.adj.p If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.
+#' @param sigplot.alpha The alpha value for correlation p value. Default is \code{0.05}
+#' @param sigplot.sigLabelColour The colour for label for the significant pairs. Default is \code{"red"}.
+#' @param sigplot.sigLabelSize The size for label for the significant pairs. Default is \code{3}.
+#' @param sigplot.labelColour The significance heatmap axis label colour. Default is \code{"black"}.
+#' @param sigplot.labelSize The significance heatmap axis label size. Default is \code{1}.
+#' @param sigplot.labelAngle The significance heatmap axis label angle. Default is \code{90}.
+#' @param sigplot.keySize The significance heatmap colour key size. Default is \code{1}.
+#' @param sigplot.width Width for correlation significance plot. Unit is \code{inch}. Default is \code{7}.
+#' @param sigplot.height Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.
+#' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
+#' @import corrplot
+#' @import foreach
+#' @importFrom gplots heatmap.2
+#' @importFrom RColorBrewer brewer.pal
+#' @export
+rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, n = "all",
+                                                 input.comparisons = NULL,
+                                                 rm.control = FALSE, input.genes_annotation.control_type,
+                                                 gene_symbol.only = FALSE,
+                                                 input.genes_annotation.gene_symbol.var_name = NULL,
+                                                 input.genes_annotation.gene_id.var_name = NULL,
+                                                 map.colour = "PRGn", n.map.colour = 11, ...,
+                                                 export.name = NULL,
+                                                 heatmap.axis.label = FALSE, heatmap.width = 7, heatmap.height = 7,
+                                                 sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
+                                                 sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
+                                                 sigplot.labelColour = "black", sigplot.labelSize = 1, sigplot.labelAngle = 90, sigplot.keySize = 1,
+                                                 sigplot.width = 7, sigplot.height = 7){
+  ## check arguments
+  if (n != "all" && n %% 1 != 0) stop("Argument n needs to be either \"all\" or an integer number.")
+  if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
+  if (rm.control && is.null(input.genes_annotation.control_type)) {
+    cat("Argument input.genes_annotation.control_type is NULL when rm.control = TRUE, automatically set rm.control = FALSE.\n\n")
+    rm.control <- FALSE
+  }
+  if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(genes)) {
+    cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
+    gene_symbol.only <- FALSE
+  }
+  if (missing(export.name) || is.null(export.name)) stop("Please set value for argument export.name.")
+
+  # check contrast levels against sample groups
+  contra_levels_all <- unique(foreach(i = 1:length(input.comparisons$comparison_levels), .combine = "c") %do% {
+    input.comparisons$comparison_levels[[i]]
+  })
+  if (!all(contra_levels_all %in% unique(levels(input.sample_groups)))) stop("Contrast levels not matching sample groups. Please check the input.")
+
+  ## variables
+  row.lab.var_name <- input.genes_annotation.gene_id.var_name
+
+  ## prepare dfm for clustering
+  dfm <- data.frame(genes, E, check.names = FALSE)
+
+  if (rm.control){ # remove control
+    dfm <- dfm[dfm[, input.genes_annotation.control_type$control_type.var_name] == input.genes_annotation.control_type$exp_type.value, ]
+  }
+  if (gene_symbol.only) {
+    dfm <- dfm[complete.cases(dfm[, input.genes_annotation.gene_symbol.var_name]),]
+    row.lab.var_name <- input.genes_annotation.gene_symbol.var_name
+  }
+  if (n != "all"){ # subset
+    dfm <- dfm[1:n, ]
+  }
+
+  mtx <- as.matrix(dfm[, !names(dfm) %in% names(genes)])
+  row.lab <- dfm[, row.lab.var_name]
+  if (!heatmap.axis.label){
+    heatmap.labRow <- NULL
+    heatmap.labCol <- NULL
+  } else {
+    heatmap.labRow <- row.lab
+    heatmap.labCol <- row.lab
+  }
+
+  ## cluster
+  cat(paste0("Unsupervised correlation analysis method: ", cor.method, "\n"))
+  cat(paste0("Genes/Probes/Genomic features assessed: first ", n, "\n"))
+  cat("-------------------\n")
+  corcoef_list <- vector(mode = "list", length = length(contra_levels_all))
+  corp_list <- vector(mode = "list", length = length(contra_levels_all))
+  adj_corp_list <- vector(mode = "list", length = length(contra_levels_all))
+  cor_names_vector <- vector(length = length(contra_levels_all))
+  for (i in seq(length(contra_levels_all))) {
+    cor_sample_level <- contra_levels_all[i]
+    cor_mtx <- mtx[, which(input.sample_groups %in% cor_sample_level)]
+    cor_mtx <- t(cor_mtx)
+    corcoef <- cor(cor_mtx, method = cor.method)
+    rownames(corcoef) <- row.lab
+    colnames(corcoef) <- row.lab
+    corp <- foreach(m = corcoef, .combine = "cbind") %do% cor_pvalue(m, n = nrow(cor_mtx)) # p value matrix
+    diag(corp) <- NA
+    adj_corp <- matrix(p.adjust(corp, method = "fdr"), nrow = nrow(corp), byrow = T)  # fdr
+    rownames(adj_corp) <- rownames(corp)
+    colnames(adj_corp) <- colnames(corp)
+    corname <- cor_sample_level
+
+    cat(paste0("Correlation heatmap saved to file: ", cor_sample_level, "_cor.unsuper.heatmap.pdf..."))
+    pdf(file = paste0(cor_sample_level, "_cor.unsuper.heatmap.pdf"), width = heatmap.width, height = heatmap.width)
+    heatmap.2(corcoef, symm = TRUE, trace = "none",
+              col = brewer.pal(n.map.colour, map.colour), labRow = heatmap.labRow, labCol = heatmap.labCol,
+              ...)
+    dev.off()
+    cat("Done!\n")
+
+    corcoef_list[[i]] <- corcoef
+    corp_list[[i]] <- corp
+    adj_corp_list[[i]] <- adj_corp
+    cor_names_vector[i] <- corname
+  }
+  names(corcoef_list) <- cor_names_vector
+  names(corp_list) <- cor_names_vector
+  names(adj_corp_list) <- cor_names_vector
+
+  # sig plot
+  if (sigplot.adj.p) {
+    sigplot.corp_list <- adj_corp_list
+  } else {
+    sigplot.corp_list <- corp_list
+  }
+
+  cat("\n")
+  for (i in seq(length(corcoef_list))) {
+    tryCatch(
+      {
+        pdf(file = paste(names(corcoef_list)[i], "_cor.unsuper.sigplot.pdf", sep = ""), width = sigplot.width, height = sigplot.height)
+        corrplot(corr = corcoef_list[[i]], method = "color", type = "upper", p.mat = sigplot.corp_list[[i]], sig.level = sigplot.alpha,
+                 insig = c("label_sig"), pch.col = sigplot.sigLabelColour, pch.cex = sigplot.sigLabelSize,
+                 col = brewer.pal(n.map.colour, map.colour),
+                 tl.col = sigplot.labelColour, tl.cex = sigplot.labelSize, tl.srt = sigplot.labelAngle, cl.length = 3, cl.cex = sigplot.keySize)
+        cat(paste0("Correlation significance plot saved to file: ", names(corcoef_list)[i], "_cor.unsuper.sigplot.pdf..."))
+        dev.off()
+        cat("Done!\n")
+      },
+      error = function(err){
+        cat(paste0("No significant correlation found for ", names(corcoef_list)[i], ". ", "Therefore no significance plot generated.\n"))
+        dev.off()
+      }
+    )
+  }
+
+  # csv export
+  cat("\n")
+  for (i in seq(length(corcoef_list))) {
+    out_corcoef <- corcoef_list[[i]]
+    out_corp <- corp_list[[i]]
+    out_adj_corp <- adj_corp_list[[i]]
+    outdfm1 <- data.frame(
+      group = paste(rownames(out_corcoef)[row(out_corcoef)[upper.tri(out_corcoef)]], colnames(out_corcoef)[col(out_corcoef)[upper.tri(out_corcoef)]], sep = "_"),
+      row = rownames(out_corcoef)[row(out_corcoef)[upper.tri(out_corcoef)]],
+      col = colnames(out_corcoef)[col(out_corcoef)[upper.tri(out_corcoef)]],
+      coefficient = out_corcoef[upper.tri(out_corcoef)]
+    )
+
+    outdfm2 <- data.frame(
+      group = paste(rownames(out_corp)[row(out_corp)[upper.tri(out_corp)]], colnames(out_corp)[col(out_corp)[upper.tri(out_corp)]], sep = "_"),
+      row = rownames(out_corp)[row(out_corp)[upper.tri(out_corp)]],
+      col = colnames(out_corp)[col(out_corp)[upper.tri(out_corp)]],
+      p.value = out_corp[upper.tri(out_corp)]
+    )
+
+    outdfm3 <- data.frame(
+      group = paste(rownames(out_adj_corp)[row(out_adj_corp)[upper.tri(out_adj_corp)]], colnames(out_adj_corp)[col(out_adj_corp)[upper.tri(out_adj_corp)]], sep = "_"),
+      row = rownames(out_adj_corp)[row(out_adj_corp)[upper.tri(out_adj_corp)]],
+      col = colnames(out_adj_corp)[col(out_adj_corp)[upper.tri(out_adj_corp)]],
+      adj.p.value = out_adj_corp[upper.tri(out_adj_corp)]
+    )
+
+    out <- merge(outdfm1, outdfm2[, c("group", "p.value")], by = "group", x.all = TRUE)
+    out <- merge(out, outdfm3[, c("group", "adj.p.value")], x.all = TRUE)
+
+    cat(paste0("Correlation analysis results saved to file: ", names(corcoef_list)[i], ".cor.unsuper.csv..."))
+    write.csv(out, file = paste0(names(corcoef_list)[i], ".cor.unsuper.csv"), row.names = FALSE)
+    cat("Done!\n")
+  }
+}
+
+
 #' @title rbio_supervised_corcluster
 #'
 #' @description Supervised correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
@@ -26,7 +304,6 @@ cor_pvalue <- function(r, n){
 #' @param cor.method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
 #' @param map.colour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n.map.colour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
-#' @param heatmap.axis.label Whether to display label for both x- and y- axes. Default is \code{FALSE}.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param heatmap.width Width for correlation heatmap. Unit is \code{inch}. Default is \code{7}.
 #' @param heatmap.height Height for correlation heatmap. Unit is \code{inch}. Default is \code{7}.
@@ -55,7 +332,7 @@ cor_pvalue <- function(r, n){
 #' \dontrun{
 #' rbio_supervised_corcluster(object = sig_input, gene_symbol.only = TRUE, cor.method = "pearson",
 #'                            map.colour = "PRGn", n.map.colour = 11,
-#'                            heatmap.axis.label = TRUE, heatmap.width = 7, heatmap.height = 7,
+#'                            heatmap.width = 7, heatmap.height = 7,
 #'                            sigplot.adj.p = FALSE, sigplot.alpha = 0.05, sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
 #'                            sigplot.labelColour = "black", sigplot.labelSize = 1, sigplot.labelAngle = 90, sigplot.keySize = 1,
 #'                            sigplot.width = 7, sigplot.height = 7)
@@ -65,7 +342,7 @@ rbio_supervised_corcluster <- function(object,
                                        gene_symbol.only = FALSE,
                                        cor.method = "pearson",
                                        map.colour = "PRGn", n.map.colour = 11, ...,
-                                       heatmap.axis.label = FALSE, heatmap.width = 7, heatmap.height = 7,
+                                       heatmap.width = 7, heatmap.height = 7,
                                        sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
                                        sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
                                        sigplot.labelColour = "black", sigplot.labelSize = 1, sigplot.labelAngle = 90, sigplot.keySize = 1,
@@ -178,7 +455,7 @@ rbio_supervised_corcluster <- function(object,
                  insig = c("label_sig"), pch.col = sigplot.sigLabelColour, pch.cex = sigplot.sigLabelSize,
                  col = brewer.pal(n.map.colour, map.colour),
                  tl.col = sigplot.labelColour, tl.cex = sigplot.labelSize, tl.srt = sigplot.labelAngle, cl.length = 3, cl.cex = sigplot.keySize)
-        cat(paste0("Correlation significance plot saved to file: ", names(corcoef_list)[i], "_cor.sig.pdf..."))
+        cat(paste0("Correlation significance plot saved to file: ", names(corcoef_list)[i], "_cor.sigplot.pdf..."))
         dev.off()
         cat("Done!\n")
       },
