@@ -6,17 +6,17 @@
 \usage{
 \method{rbio_unsupervised_corcluster}{default}(E, genes,
   input.sample_groups, n = "all", input.comparisons = NULL,
-  rm.control = FALSE, input.genes_annotation.control_type,
-  gene_symbol.only = FALSE,
+  cor.method = "pearson", rm.control = FALSE,
+  input.genes_annotation.control_type, gene_symbol.only = FALSE,
   input.genes_annotation.gene_symbol.var_name = NULL,
   input.genes_annotation.gene_id.var_name = NULL, map.colour = "PRGn",
   n.map.colour = 11, ..., export.name = NULL,
   heatmap.axis.label = FALSE, heatmap.width = 7, heatmap.height = 7,
-  sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
+  sigplot = FALSE, sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
   sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
   sigplot.labelColour = "black", sigplot.labelSize = 1,
-  sigplot.labelAngle = 90, sigplot.keySize = 1, sigplot.width = 7,
-  sigplot.height = 7)
+  sigplot.labelAngle = 90, sigplot.keySize = 1, sigplot.mar = c(5, 4,
+  4, 2) + 0.1, sigplot.width = 7, sigplot.height = 7)
 }
 \arguments{
 \item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}
@@ -26,6 +26,8 @@
 \item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
 
 \item{n}{Number of genes/probes/genomic features to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
+
+\item{cor.method}{The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.}
 
 \item{rm.control}{Whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.}
 
@@ -51,6 +53,8 @@
 
 \item{heatmap.height}{Height for correlation heatmap. Unit is \code{inch}. Default is \code{7}.}
 
+\item{sigplot}{If to show significance plot. Default is \code{FALSE}.}
+
 \item{sigplot.adj.p}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
 
 \item{sigplot.alpha}{The alpha value for correlation p value. Default is \code{0.05}}
@@ -67,11 +71,11 @@
 
 \item{sigplot.keySize}{The significance heatmap colour key size. Default is \code{1}.}
 
+\item{sigplot.mar}{The A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. The default is c(5, 4, 4, 2) + 0.1.}
+
 \item{sigplot.width}{Width for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{sigplot.height}{Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
-
-\item{cor.method}{The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.}
 }
 \value{
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.

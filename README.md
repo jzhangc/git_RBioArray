@@ -32,6 +32,10 @@ Update log
         - rbioarray_corcluster_super() now supports VLR (Log-Ratio Variance) correlation and differential proportionality for NGS compositional data analysis 
         - the formatting from diagonal matrix to a 2D table functionality now a separate function
         
+      - Updates to GS functions:
+        - All GS functions are now compatible with the S3 class objects from DE analysis 
+        - S3 classes implemented to the GS functions
+        
       - Revamp GS functions
       
       - Other update
@@ -46,10 +50,6 @@ Update log
             (i) all features, 
             (ii) features with an annotation name, 
             (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol".
-
-      - Updates to GS functions:
-        - All GS functions are now compatible with the S3 class objects from DE analysis 
-        - S3 classes implemented to the GS functions
         
       - Updates to legacy functions:
         - MA plot option added for functions rbioarray_flt() and rbioarray_PreProc()

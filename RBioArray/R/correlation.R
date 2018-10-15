@@ -30,14 +30,43 @@ cor_pvalue <- function(r, n){
 #'          Since the function depends on the \code{heatmap.2} function from \code{gplots} package for heatmap,
 #'          arguments can be passed directly, as seen in the examples below.
 #'
-#' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+#' @return PDF files for unsupervsied correlation heatmap and if set, significance plot. Also CSV files containing unsupervised correlation analysis results.
+#'
+#'         It is generally not recommend to perform correlation analysis on the huge number of genes/probes/genomic features - extremely time consuming.
 #' @examples
 #'
 #' \dontrun{
 #' # rbioarray_de class input
+#' rbio_unsupervised_corcluster(object = delist, n = 50, cor.method = "pearson",
+#'                              rm.control = TRUE,
+#'                              gene_symbol.only = TRUE,
+#'                              map.colour = "PRGn", n.map.colour = 11,
+#'                              heatmap.axis.label = FALSE,
+#'                              cexCol = 0.6, cexRow = 0.6, margins = c(8, 8), key.title = NA,
+#'                              heatmap.width = 7, heatmap.height = 7,
+#'                              sigplot = TRUE,
+#'                              sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
+#'                              sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 1,
+#'                              sigplot.labelColour = "black", sigplot.labelSize = 0.6, sigplot.labelAngle = 90,
+#'                              sigplot.keySize = 1,
+#'                              sigplot.mar = c(1.25, 1, 1, 0.5),
+#'                              sigplot.width = 7, sigplot.height = 7)
 #'
 #' # rbioseq_de class input
-#'
+#' rbio_unsupervised_corcluster(object = mrna_de, n = 50, cor.method = "pearson",
+#'                              rm.control = TRUE,
+#'                              gene_symbol.only = TRUE,
+#'                              map.colour = "PRGn", n.map.colour = 11,
+#'                              heatmap.axis.label = FALSE,
+#'                              cexCol = 0.6, cexRow = 0.6, margins = c(8, 8), key.title = NA,
+#'                              heatmap.width = 7, heatmap.height = 7,
+#'                              sigplot = TRUE,
+#'                              sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
+#'                              sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 1,
+#'                              sigplot.labelColour = "black", sigplot.labelSize = 0.6, sigplot.labelAngle = 90,
+#'                              sigplot.keySize = 1,
+#'                              sigplot.mar = c(1.25, 1, 1, 0.5),
+#'                              sigplot.width = 7, sigplot.height = 7)
 #' }
 #'
 #' @export
@@ -79,7 +108,7 @@ rbio_unsupervised_corcluster.rbioarray_de <- function(object, ...){
 #' @details The function uses filtered count data, as opposed to normalized data.
 #'          Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 #' @export
-rbio_unsupervised_corcluster.rbioarray_de <- function(object, sample_id.var.name = NULL, ...){
+rbio_unsupervised_corcluster.rbioseq_de <- function(object, sample_id.var.name = NULL, ...){
   ## variables
   export.name <- deparse(substitute(object))
   # transform
@@ -118,6 +147,7 @@ rbio_unsupervised_corcluster.rbioarray_de <- function(object, sample_id.var.name
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param heatmap.width Width for correlation heatmap. Unit is \code{inch}. Default is \code{7}.
 #' @param heatmap.height Height for correlation heatmap. Unit is \code{inch}. Default is \code{7}.
+#' @param sigplot If to show significance plot. Default is \code{FALSE}.
 #' @param sigplot.adj.p If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.
 #' @param sigplot.alpha The alpha value for correlation p value. Default is \code{0.05}
 #' @param sigplot.sigLabelColour The colour for label for the significant pairs. Default is \code{"red"}.
@@ -126,6 +156,7 @@ rbio_unsupervised_corcluster.rbioarray_de <- function(object, sample_id.var.name
 #' @param sigplot.labelSize The significance heatmap axis label size. Default is \code{1}.
 #' @param sigplot.labelAngle The significance heatmap axis label angle. Default is \code{90}.
 #' @param sigplot.keySize The significance heatmap colour key size. Default is \code{1}.
+#' @param sigplot.mar The A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. The default is c(5, 4, 4, 2) + 0.1.
 #' @param sigplot.width Width for correlation significance plot. Unit is \code{inch}. Default is \code{7}.
 #' @param sigplot.height Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
@@ -136,6 +167,7 @@ rbio_unsupervised_corcluster.rbioarray_de <- function(object, sample_id.var.name
 #' @export
 rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, n = "all",
                                                  input.comparisons = NULL,
+                                                 cor.method = "pearson",
                                                  rm.control = FALSE, input.genes_annotation.control_type,
                                                  gene_symbol.only = FALSE,
                                                  input.genes_annotation.gene_symbol.var_name = NULL,
@@ -143,9 +175,11 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
                                                  map.colour = "PRGn", n.map.colour = 11, ...,
                                                  export.name = NULL,
                                                  heatmap.axis.label = FALSE, heatmap.width = 7, heatmap.height = 7,
+                                                 sigplot = FALSE,
                                                  sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
                                                  sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
                                                  sigplot.labelColour = "black", sigplot.labelSize = 1, sigplot.labelAngle = 90, sigplot.keySize = 1,
+                                                 sigplot.mar = c(5, 4, 4, 2) + 0.1,
                                                  sigplot.width = 7, sigplot.height = 7){
   ## check arguments
   if (n != "all" && n %% 1 != 0) stop("Argument n needs to be either \"all\" or an integer number.")
@@ -158,6 +192,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
     cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
     gene_symbol.only <- FALSE
   }
+  if (!cor.method %in% c("pearson", "spearman")) stop("Argument cor.method needs to be \"pearson\" or \"spearman\".")
   if (missing(export.name) || is.null(export.name)) stop("Please set value for argument export.name.")
 
   # check contrast levels against sample groups
@@ -185,17 +220,17 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
 
   mtx <- as.matrix(dfm[, !names(dfm) %in% names(genes)])
   row.lab <- dfm[, row.lab.var_name]
-  if (!heatmap.axis.label){
-    heatmap.labRow <- NULL
-    heatmap.labCol <- NULL
-  } else {
+  if (heatmap.axis.label){
     heatmap.labRow <- row.lab
     heatmap.labCol <- row.lab
+  } else {
+    heatmap.labRow <- NA
+    heatmap.labCol <- NA
   }
 
   ## cluster
   cat(paste0("Unsupervised correlation analysis method: ", cor.method, "\n"))
-  cat(paste0("Genes/Probes/Genomic features assessed: first ", n, "\n"))
+  cat(paste0("Genes/Probes/Genomic features assessed: ", n, "\n"))
   cat("-------------------\n")
   corcoef_list <- vector(mode = "list", length = length(contra_levels_all))
   corp_list <- vector(mode = "list", length = length(contra_levels_all))
@@ -233,30 +268,32 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
   names(adj_corp_list) <- cor_names_vector
 
   # sig plot
-  if (sigplot.adj.p) {
-    sigplot.corp_list <- adj_corp_list
-  } else {
-    sigplot.corp_list <- corp_list
-  }
+  if (sigplot) {
+    if (sigplot.adj.p) {
+      sigplot.corp_list <- adj_corp_list
+    } else {
+      sigplot.corp_list <- corp_list
+    }
 
-  cat("\n")
-  for (i in seq(length(corcoef_list))) {
-    tryCatch(
-      {
-        pdf(file = paste(names(corcoef_list)[i], "_cor.unsuper.sigplot.pdf", sep = ""), width = sigplot.width, height = sigplot.height)
-        corrplot(corr = corcoef_list[[i]], method = "color", type = "upper", p.mat = sigplot.corp_list[[i]], sig.level = sigplot.alpha,
-                 insig = c("label_sig"), pch.col = sigplot.sigLabelColour, pch.cex = sigplot.sigLabelSize,
-                 col = brewer.pal(n.map.colour, map.colour),
-                 tl.col = sigplot.labelColour, tl.cex = sigplot.labelSize, tl.srt = sigplot.labelAngle, cl.length = 3, cl.cex = sigplot.keySize)
-        cat(paste0("Correlation significance plot saved to file: ", names(corcoef_list)[i], "_cor.unsuper.sigplot.pdf..."))
-        dev.off()
-        cat("Done!\n")
-      },
-      error = function(err){
-        cat(paste0("No significant correlation found for ", names(corcoef_list)[i], ". ", "Therefore no significance plot generated.\n"))
-        dev.off()
-      }
-    )
+    cat("\n")
+    for (i in seq(length(corcoef_list))) {
+      tryCatch(
+        {
+          pdf(file = paste(names(corcoef_list)[i], "_cor.unsuper.sigplot.pdf", sep = ""), width = sigplot.width, height = sigplot.height)
+          corrplot(corr = corcoef_list[[i]], method = "color", type = "upper", p.mat = sigplot.corp_list[[i]], sig.level = sigplot.alpha,
+                   insig = c("label_sig"), pch.col = sigplot.sigLabelColour, pch.cex = sigplot.sigLabelSize,
+                   col = brewer.pal(n.map.colour, map.colour), mar = sigplot.mar,
+                   tl.col = sigplot.labelColour, tl.cex = sigplot.labelSize, tl.srt = sigplot.labelAngle, cl.length = 3, cl.cex = sigplot.keySize)
+          cat(paste0("Correlation significance plot saved to file: ", names(corcoef_list)[i], "_cor.unsuper.sigplot.pdf..."))
+          dev.off()
+          cat("Done!\n")
+        },
+        error = function(err){
+          cat(paste0("No significant correlation found for ", names(corcoef_list)[i], ". ", "Therefore no significance plot generated.\n"))
+          dev.off()
+        }
+      )
+    }
   }
 
   # csv export
@@ -315,6 +352,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
 #' @param sigplot.labelSize The significance heatmap axis label size. Default is \code{1}.
 #' @param sigplot.labelAngle The significance heatmap axis label angle. Default is \code{90}.
 #' @param sigplot.keySize The significance heatmap colour key size. Default is \code{1}.
+#' @param sigplot.mar The A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. The default is c(5, 4, 4, 2) + 0.1.
 #' @param sigplot.width Width for correlation significance plot. Unit is \code{inch}. Default is \code{7}.
 #' @param sigplot.height Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.
 #' @details The function takes \code{sig} class object. It behaves in the following ways:
@@ -346,6 +384,7 @@ rbio_supervised_corcluster <- function(object,
                                        sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
                                        sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
                                        sigplot.labelColour = "black", sigplot.labelSize = 1, sigplot.labelAngle = 90, sigplot.keySize = 1,
+                                       sigplot.mar = c(5, 4, 4, 2) + 0.1,
                                        sigplot.width = 7, sigplot.height = 7){
   ## argument check
   if (class(object) != "sig") stop("The input object has to be a \"sig\" class.")
@@ -453,7 +492,7 @@ rbio_supervised_corcluster <- function(object,
         pdf(file = paste(names(corcoef_list)[i], "_cor.sigplot.pdf", sep = ""), width = sigplot.width, height = sigplot.height)
         corrplot(corr = corcoef_list[[i]], method = "color", type = "upper", p.mat = sigplot.corp_list[[i]], sig.level = sigplot.alpha,
                  insig = c("label_sig"), pch.col = sigplot.sigLabelColour, pch.cex = sigplot.sigLabelSize,
-                 col = brewer.pal(n.map.colour, map.colour),
+                 col = brewer.pal(n.map.colour, map.colour), mar = sigplot.mar,
                  tl.col = sigplot.labelColour, tl.cex = sigplot.labelSize, tl.srt = sigplot.labelAngle, cl.length = 3, cl.cex = sigplot.keySize)
         cat(paste0("Correlation significance plot saved to file: ", names(corcoef_list)[i], "_cor.sigplot.pdf..."))
         dev.off()

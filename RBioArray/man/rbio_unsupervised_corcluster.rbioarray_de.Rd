@@ -4,27 +4,13 @@
 \alias{rbio_unsupervised_corcluster.rbioarray_de}
 \title{rbio_unsupervised_corcluster.rbioarray_de}
 \usage{
-\method{rbio_unsupervised_corcluster}{rbioarray_de}(object,
-  sample_id.var.name = NULL, ...)
-
-\method{rbio_unsupervised_corcluster}{rbioarray_de}(object,
-  sample_id.var.name = NULL, ...)
+\method{rbio_unsupervised_corcluster}{rbioarray_de}(object, ...)
 }
 \arguments{
 \item{object}{Input object in \code{rbioarray_de} class.}
 
 \item{...}{Additional arguments for the default method.}
-
-\item{object}{Input object in \code{rbioseq_de} class.}
-
-\item{...}{Additional arguments for the default method.}
 }
 \description{
 \code{rbio_unsupervised_corcluster} function for \code{rbioarray_de} class object.
-
-\code{rbio_unsupervised_corcluster} function for \code{rbioseq_de} class object.
-}
-\details{
-The function uses filtered count data, as opposed to normalized data.
-         Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 }

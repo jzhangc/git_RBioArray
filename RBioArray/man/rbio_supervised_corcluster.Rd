@@ -10,7 +10,8 @@ rbio_supervised_corcluster(object, gene_symbol.only = FALSE,
   sigplot.alpha = 0.05, sigplot.sigLabelColour = "red",
   sigplot.sigLabelSize = 3, sigplot.labelColour = "black",
   sigplot.labelSize = 1, sigplot.labelAngle = 90,
-  sigplot.keySize = 1, sigplot.width = 7, sigplot.height = 7)
+  sigplot.keySize = 1, sigplot.mar = c(5, 4, 4, 2) + 0.1,
+  sigplot.width = 7, sigplot.height = 7)
 }
 \arguments{
 \item{object}{Input \code{sig} class object.}
@@ -44,6 +45,8 @@ rbio_supervised_corcluster(object, gene_symbol.only = FALSE,
 \item{sigplot.labelAngle}{The significance heatmap axis label angle. Default is \code{90}.}
 
 \item{sigplot.keySize}{The significance heatmap colour key size. Default is \code{1}.}
+
+\item{sigplot.mar}{The A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. The default is c(5, 4, 4, 2) + 0.1.}
 
 \item{sigplot.width}{Width for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
 

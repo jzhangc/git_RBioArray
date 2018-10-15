@@ -12,7 +12,9 @@ rbio_unsupervised_corcluster(object, ...)
 \item{...}{Additional arguments for corresponding S3 class methods.}
 }
 \value{
-A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+PDF files for unsupervsied correlation heatmap and if set, significance plot. Also CSV files containing unsupervised correlation analysis results.
+
+        It is generally not recommend to perform correlation analysis on the huge number of genes/probes/genomic features - extremely time consuming.
 }
 \description{
 Generic unsupersived correlation clustering function.
@@ -29,9 +31,36 @@ It behaves in the following ways:
 
 \dontrun{
 # rbioarray_de class input
+rbio_unsupervised_corcluster(object = delist, n = 50, cor.method = "pearson",
+                             rm.control = TRUE,
+                             gene_symbol.only = TRUE,
+                             map.colour = "PRGn", n.map.colour = 11,
+                             heatmap.axis.label = FALSE,
+                             cexCol = 0.6, cexRow = 0.6, margins = c(8, 8), key.title = NA,
+                             heatmap.width = 7, heatmap.height = 7,
+                             sigplot = TRUE,
+                             sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
+                             sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 1,
+                             sigplot.labelColour = "black", sigplot.labelSize = 0.6, sigplot.labelAngle = 90,
+                             sigplot.keySize = 1,
+                             sigplot.mar = c(1.25, 1, 1, 0.5),
+                             sigplot.width = 7, sigplot.height = 7)
 
 # rbioseq_de class input
-
+rbio_unsupervised_corcluster(object = mrna_de, n = 50, cor.method = "pearson",
+                             rm.control = TRUE,
+                             gene_symbol.only = TRUE,
+                             map.colour = "PRGn", n.map.colour = 11,
+                             heatmap.axis.label = FALSE,
+                             cexCol = 0.6, cexRow = 0.6, margins = c(8, 8), key.title = NA,
+                             heatmap.width = 7, heatmap.height = 7,
+                             sigplot = TRUE,
+                             sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
+                             sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 1,
+                             sigplot.labelColour = "black", sigplot.labelSize = 0.6, sigplot.labelAngle = 90,
+                             sigplot.keySize = 1,
+                             sigplot.mar = c(1.25, 1, 1, 0.5),
+                             sigplot.width = 7, sigplot.height = 7)
 }
 
 }
