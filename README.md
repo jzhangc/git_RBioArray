@@ -23,28 +23,7 @@ Installation:
 
 Update log
 
-    0.5.1 (feature roadmap)
-      - New microarray functions:
-        - New DE analysis function added: rbioarray_de_analysis()
-          - The fnction has export options:
-            (i) all features, 
-            (ii) features with an annotation name, 
-            (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol"
-            
-      - New clustering funcions:
-        - Bayesian biclustering function rbioarray_bbc()
-        - K-mean clustering function rbioarray_kmean()
-      
-      - Updates to microarray functions
-        - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
-        
-      - Revamp GS functions
-      
-      - Other update
-        - Functions updated for R Notebook/Markdown compatibility
-        - Dependency ggplot2 now requires version 3.0.0
-
-    0.5.0
+    0.5.0 (Oct. 17. 2018)
       - New RNAseq functions
         - rbioseq_import_gtf() function to import and parse gtf/gff annotation files
         - rbioseq_import_count() function added to import read count files (e.g. HTseq-count files) to R environment. The function outputs an "rbioseq_count" object
