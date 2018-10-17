@@ -14,7 +14,7 @@
   gene.annot.control_type.val.neg = -1,
   gene.annot.control_type.val.exp = 0, gene.annot.rm.var.name = NULL,
   target.annot.file = NULL, target.annot.file.path = getwd(),
-  sample_groups.var.name = NULL)
+  sample_groups.var.name = NULL, verbose = TRUE)
 }
 \arguments{
 \item{raw.dataframe}{Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.}
@@ -46,6 +46,8 @@
 \item{target.annot.file.path}{The directory for \code{target.annot.file}. Default is \code{getwd()}.}
 
 \item{sample_groups.var.name}{The variable name for sample groupping information from \code{target.annot.file}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \description{
 The default \code{rbioarrary_rlist} function.

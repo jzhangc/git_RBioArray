@@ -6,7 +6,7 @@
 \usage{
 \method{rbioarray_transfo_normalize}{default}(E, E.background = NULL,
   bgc.method = "auto", between.sample.norm.method = "quantile",
-  between.sample.weight.design = NULL, ...)
+  between.sample.weight.design = NULL, ..., verbose = TRUE)
 }
 \arguments{
 \item{E}{Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.}
@@ -20,6 +20,8 @@
 \item{between.sample.weight.design}{Microarray experiment sample design matrix for beteween sample weight calculation.}
 
 \item{...}{Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A list with the core items for a \code{rbioarray_plist} class.

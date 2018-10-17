@@ -4,7 +4,8 @@
 \alias{rbioarray_transfo_normalize.rbioarray_rlist}
 \title{Title rbioarray_transfo_normalize.rbioarray_rlist}
 \usage{
-\method{rbioarray_transfo_normalize}{rbioarray_rlist}(object, design, ...)
+\method{rbioarray_transfo_normalize}{rbioarray_rlist}(object, design, ...,
+  verbose = TRUE)
 }
 \arguments{
 \item{object}{Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.}
@@ -12,6 +13,8 @@
 \item{design}{Microarray experiment sample design matrix.}
 
 \item{...}{Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A \code{rbioarray_plist} class object.

@@ -131,6 +131,7 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 #' @param export.name File name for the export \code{pdf} plot file.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
@@ -143,7 +144,8 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
                                                sample_id.vector = NULL,
                                                distance = "euclidean", clust = "complete",
                                                col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, ...,
-                                               export.name = NULL, plot.width = 7, plot.height = 7){
+                                               export.name = NULL, plot.width = 7, plot.height = 7,
+                                               verbose = TRUE){
   ## check arguments
   if (n != "all" && n %% 1 != 0) stop("Argument n needs to be either \"all\" or an integer number.")
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
@@ -199,12 +201,12 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 
   ## heatmap
   # draw heatmap
-  cat(paste0("Unsupervised hierarchical clustering heatmap saved to: ", export.name, "_unsuper_heatmap.pdf..."))
+  if (verbose) cat(paste0("Unsupervised hierarchical clustering heatmap saved to: ", export.name, "_unsuper_heatmap.pdf..."))
   pdf(file = paste0(export.name, "_unsuper_heatmap.pdf"), width = plot.width, height = plot.height)
   heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
             labRow = row.lab,
             col = brewer.pal(n.map.colour, map.colour), ColSideColors = colC[colG], ...)
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
   dev.off()
 }
 
@@ -226,6 +228,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details Unlink the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
@@ -236,7 +239,8 @@ rbio_supervised_hcluster <- function(object,
                                      sample_id.var.name = NULL,
                                      distance = "euclidean", clust = "complete",
                                      col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, ...,
-                                     plot.width = 7, plot.height = 7){
+                                     plot.width = 7, plot.height = 7,
+                                     verbose = TRUE){
   ## check arguments
   if (class(object) != "sig") stop("The input object has to be a \"sig\" class.")
   if (!is.null(sample_id.var.name)){
@@ -323,12 +327,12 @@ rbio_supervised_hcluster <- function(object,
     colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), col.colour) # column colour
 
     # draw heatmap
-    cat(paste0("Supervised hierarchical clustering heatmap saved to: ", comparisons[i], "_super_heatmap.pdf..."))
+    if (verbose) cat(paste0("Supervised hierarchical clustering heatmap saved to: ", comparisons[i], "_super_heatmap.pdf..."))
     pdf(file = paste0(comparisons[i], "_super_heatmap.pdf"), width = plot.width, height = plot.height)
     heatmap.2(plt_mtx, distfun = distfunc, hclustfun = clustfunc,
               labRow = row.lab,
               col = brewer.pal(n.map.colour, map.colour), ColSideColors = colC[colG], ...)
-    cat("Done!\n")
+    if (verbose) cat("Done!\n")
     dev.off()
   }
 }

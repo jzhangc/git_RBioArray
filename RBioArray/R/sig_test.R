@@ -153,6 +153,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
 #' @param plot.Width The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plot.Height The height of the figure for the final output figure file. Default is \code{150}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details Explanation for \code{export.mode} options:
 #'
 #'         \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
@@ -184,7 +185,8 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                         plot.top.gene = FALSE, plot.top.gene.n = 5,  plot.top.gene.padding = 0.5,
                         plot.Title = NULL,  plot.xLabel = "log2(fold change)", plot.yLabel = "-log10(p value)",
                         plot.symbolSize = 2, plot.sigColour = "red", plot.nonsigColour = "gray",
-                        plot.xTxtSize = 10, plot.yTxtSize = 10, plot.Width = 170, plot.Height = 150){
+                        plot.xTxtSize = 10, plot.yTxtSize = 10, plot.Width = 170, plot.Height = 150,
+                        verbose = TRUE){
   ## check arguments
   if (p.val.correction.method == "spikein") {
     if (is.null(input.genes_annotation.control_type)){
@@ -306,14 +308,14 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     }
     names(plt_list) <- names(input.de.list)
 
-    cat("\n")
+    if (verbose) cat("\n")
     for (i in seq(length(input.de.list))) {
-      cat(paste0("Saving volcano plots to file: ", names(input.de.list)[i], ".volcano.pdf..."))
+      if (verbose) cat(paste0("Saving volcano plots to file: ", names(input.de.list)[i], ".volcano.pdf..."))
       grid.newpage()
       ggsave(filename = paste(names(input.de.list)[i],".volcano.pdf", sep = ""), plot = plt_list[[i]],
              width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       grid.draw(plt_list[[i]])
-      cat("Done!\n")
+      if (verbose) cat("Done!\n")
     }
   }
 
@@ -334,30 +336,30 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   class(out) <- "sig"
 
   ## export
-  cat("\n")
-  cat(paste0("Exporting DE F-stats to file: ", export.name, "_Fstats.csv..."))
+  if (verbose) cat("\n")
+  if (verbose) cat(paste0("Exporting DE F-stats to file: ", export.name, "_Fstats.csv..."))
   write.csv(file = paste0(export.name, "_Fstats.csv"), input.Fstats.matrix, row.names = FALSE)
-  cat("Done!\n")
-  cat(paste0("Saving signifiance test summary to file: ", export.name, "_sig_summary.csv..."))
+  if (verbose) cat("Done!\n")
+  if (verbose) cat(paste0("Saving signifiance test summary to file: ", export.name, "_sig_summary.csv..."))
   write.csv(file = paste0(export.name, "_sig_summary.csv"), sig_summary_mtx, row.names = FALSE)
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
   if (export.mode == "all") {
     for (i in seq(length(input.de.list))) {  # use the input DE dataframes
-      cat(paste0("Exporting all DE results for all genes/probes/features to file: ", export.name, "_", names(input.de.list)[i], "_de_all.csv..."))
+      if (verbose) cat(paste0("Exporting all DE results for all genes/probes/features to file: ", export.name, "_", names(input.de.list)[i], "_de_all.csv..."))
       write.csv(file = paste0(export.name, "_", names(input.de.list)[i], "_de_all.csv"), input.de.list[[i]], row.names = FALSE)
-      cat("Done!\n")
+      if (verbose) cat("Done!\n")
     }
   } else if (export.mode == "all.gene_symbol") {  # use the subsetted DE dataframes
     for (i in seq(length(input.de.list))) {
-      cat(paste0("Exporting all results for genes/probes/features with a symbol to file: ", export.name, "_", names(de_list)[i], "_de_gene_symbol.csv..."))
+      if (verbose) cat(paste0("Exporting all results for genes/probes/features with a symbol to file: ", export.name, "_", names(de_list)[i], "_de_gene_symbol.csv..."))
       write.csv(file = paste0(export.name, "_", names(de_list)[i], "_de_gene_symbol.csv"), de_list[[i]], row.names = FALSE)
-      cat("Done!\n")
+      if (verbose) cat("Done!\n")
     }
   } else if (export.mode == "sig") {
     for (i in seq(length(input.de.list))) {
-      cat(paste0("Exporting only the significantly changes to file: ", export.name, "_", names(de_list)[i], ifelse(gene_symbol, "_sig_gene_symbol.csv...", "_sig.csv...")))
+      if (verbose) cat(paste0("Exporting only the significantly changes to file: ", export.name, "_", names(de_list)[i], ifelse(gene_symbol, "_sig_gene_symbol.csv...", "_sig.csv...")))
       write.csv(file = paste0(export.name, "_", names(de_list)[i], ifelse(gene_symbol, "_sig_gene_symbol.csv", "_sig.csv")), sig_out_list[[i]], row.names = FALSE)
-      cat("Done!\n")
+      if (verbose) cat("Done!\n")
     }
   }
 

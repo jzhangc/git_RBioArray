@@ -5,7 +5,7 @@
 \title{rbioseq_clr_ilr_transfo}
 \usage{
 rbioseq_clr_ilr_transfo(x, offset = 1, mode = "clr",
-  ilr.method.fast = TRUE)
+  ilr.method.fast = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{x}{Input read count data matrix.}
@@ -15,6 +15,8 @@ rbioseq_clr_ilr_transfo(x, offset = 1, mode = "clr",
 \item{mode}{Log ratio transformation method. Options are "clr" (centered log transformation) and "ilr" (isometric log transformation). Default is \code{"clr"}.}
 
 \item{ilr.method.fast}{Useful only when \code{mode = "ilr"}. Default is \code{TRUE}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A data matrix with log ratio transformed values.

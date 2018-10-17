@@ -11,7 +11,7 @@ rbio_supervised_corcluster(object, gene_symbol.only = FALSE,
   sigplot.sigLabelSize = 3, sigplot.labelColour = "black",
   sigplot.labelSize = 1, sigplot.labelAngle = 90,
   sigplot.keySize = 1, sigplot.mar = c(5, 4, 4, 2) + 0.1,
-  sigplot.width = 7, sigplot.height = 7)
+  sigplot.width = 7, sigplot.height = 7, verbose = TRUE)
 }
 \arguments{
 \item{object}{Input \code{sig} class object.}
@@ -51,6 +51,8 @@ rbio_supervised_corcluster(object, gene_symbol.only = FALSE,
 \item{sigplot.width}{Width for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{sigplot.height}{Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. The function also outputs a significance plot.

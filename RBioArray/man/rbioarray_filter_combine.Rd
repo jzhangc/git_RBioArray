@@ -7,7 +7,7 @@
 rbioarray_filter_combine(object, filter.percentile = 0.05,
   filter.threshold.min.sample = NULL, gene.annot.rm.var.name = NULL,
   combine.gene.duplicate = FALSE, parallelComputing = FALSE,
-  clusterType = "PSOCK")
+  clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
 \item{object}{Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.}
@@ -19,6 +19,8 @@ rbioarray_filter_combine(object, filter.percentile = 0.05,
 \item{combine.gene.duplicate}{If to combine different transcripts from the same gene/genomic feature. Default is \code{FALSE}. See details for more.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
 \item{cluterType}{clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }

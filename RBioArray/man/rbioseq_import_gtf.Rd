@@ -4,10 +4,12 @@
 \alias{rbioseq_import_gtf}
 \title{Title rbioseq_import_gtf}
 \usage{
-rbioseq_import_gtf(file)
+rbioseq_import_gtf(file, verbose = TRUE)
 }
 \arguments{
 \item{file}{GTF/GFF file. Add path if needed.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A matrix with items from GTF/GFF file.

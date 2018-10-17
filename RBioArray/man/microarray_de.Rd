@@ -4,12 +4,14 @@
 \alias{microarray_de}
 \title{microarray_de}
 \usage{
-microarray_de(object, contra)
+microarray_de(object, contra, verbose = TRUE)
 }
 \arguments{
 \item{object}{The input \code{rbioarray_flist} object.}
 
 \item{contra}{contra Contrast matrix.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A \code{rbioarray_de} class object with DE results, containing the following core items:

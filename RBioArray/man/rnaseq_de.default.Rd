@@ -7,7 +7,8 @@
 \method{rnaseq_de}{default}(x, y = NULL, y.gene_id.var.name = "genes",
   y.gene_symbol.var.name = "genes", filter.threshold.cpm = "none",
   filter.threshold.min.sample = NULL, annot.group = NULL,
-  between.genes.norm.method = "TMM", design, contra, qc.plot = TRUE)
+  between.genes.norm.method = "TMM", design, contra, qc.plot = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{x}{Input read count matrix, with rows for genes and columns for RNA samples.}
@@ -31,6 +32,8 @@
 \item{contra}{Contrast matrix.}
 
 \item{qc.plot}{QC plot for the input read counts}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A list containing core elements of a \code{rbioseq_de} class. The items of a \code{rbioseq_de} class are following:

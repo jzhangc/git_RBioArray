@@ -7,7 +7,8 @@
 rbio_supervised_hcluster(object, gene_symbol.only = FALSE,
   sample_id.var.name = NULL, distance = "euclidean",
   clust = "complete", col.colour = "Paired", map.colour = "PRGn",
-  n.map.colour = 11, ..., plot.width = 7, plot.height = 7)
+  n.map.colour = 11, ..., plot.width = 7, plot.height = 7,
+  verbose = TRUE)
 }
 \arguments{
 \item{object}{Input \code{sig} class object.}
@@ -29,6 +30,8 @@ rbio_supervised_hcluster(object, gene_symbol.only = FALSE,
 \item{plot.width}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plot.height}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
 \item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
 

@@ -94,6 +94,7 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
 #' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
 #' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details The \code{raw.background.signal.matrix} is usefual when processing a \code{EListRaw} class object from \code{limma} package.
 #'
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
@@ -110,7 +111,8 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
                                     gene.annot.control_type.var.name = NULL,
                                     gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
                                     gene.annot.rm.var.name = NULL,
-                                    target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL){
+                                    target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL,
+                                    verbose = TRUE){
   ## check arguments and set up variables
   # raw data
   if (is.null(dim(raw.dataframe)))
@@ -173,9 +175,9 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     if (target.annot_ext != "csv") {
       stop("target.annot.file is not in csv format.")
     } else {
-      cat("Loading target annotation file...")
+      if(verbose) cat("Loading target annotation file...")
       tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
-      cat("Done!\n")
+      if(verbose) cat("Done!\n")
     }
   }
   if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
@@ -199,7 +201,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
                                        neg_type.value = gene.annot.control_type.val.neg,
                                        exp_type.value = gene.annot.control_type.val.exp)
       } else {
-        cat("Input probe control type values not found in the gene control type variable from gene annotation. Proceed without using them.\n")
+        if (verbose) cat("Input probe control type values not found in the gene control type variable from gene annotation. Proceed without using them.\n")
         gene.annot.control_type = NULL
       }
     }
@@ -214,7 +216,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
   }
 
   ## output
-  cat("Constructing rlist...")
+  if (verbose) cat("Constructing rlist...")
   out <- list(E = E,
               E_background = raw.background.signal.matrix,
               raw_file.gene_annotation.var_name = raw.annot.var.name,
@@ -228,9 +230,9 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
               targets = tgt,
               sample_groups = sample.groups)
   class(out) <- "rbioarray_rlist"
-  cat("Done!\n")
-  cat("\n")
-  cat(paste0("The resulted rbioarray_rlist object contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), " samples for ", length(unique(sample.groups)), " groups."))
+  if (verbose) cat("Done!\n")
+  if (verbose) cat("\n")
+  if (verbose) cat(paste0("The resulted rbioarray_rlist object contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), " samples for ", length(unique(sample.groups)), " groups."))
   return(out)
 }
 
@@ -309,20 +311,21 @@ rbioarray_transfo_normalize <- function(object, ...){
 #' @param object Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
 #' @param design Microarray experiment sample design matrix.
 #' @param ... Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 #' @return A \code{rbioarray_plist} class object.
 #'
 #' @export
-rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
+rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ..., verbose = TRUE){
   ## processing
   default_out <- rbioarray_transfo_normalize.default(E = object$E, E.background = object$E_background,
-                                                     between.sample.weight.design = design, ...)
+                                                     between.sample.weight.design = design, ..., verbose = verbose)
   ## output
-  cat("\n")
-  cat("Constructing rbioarray_plist...")
+  if (verbose) cat("\n")
+  if (verbose) cat("Constructing rbioarray_plist...")
   out <- append(default_out, object[!names(object) %in% c("E", "E_background")])
   class(out) <- "rbioarray_plist"
-  cat("Done!\n\n")
+  if (verbose) cat("Done!\n\n")
   return(out)
 }
 
@@ -336,6 +339,7 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
 #' @param between.sample.norm.method Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
 #' @param between.sample.weight.design Microarray experiment sample design matrix for beteween sample weight calculation.
 #' @param ... Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 #'          ADD the fact that \code{normalizeBetweenArrays} function is where \code{limma} log transforms data.
@@ -344,7 +348,8 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ...){
 #' @export
 rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
                                                 bgc.method = "auto", between.sample.norm.method = "quantile",
-                                                between.sample.weight.design = NULL, ...){
+                                                between.sample.weight.design = NULL, ...,
+                                                verbose = TRUE){
   ## check arguments
   if (!bgc.method %in% c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
     stop("Agument bgc.method needs to be set with one of \"auto\", \"auto\", \"none\", \"subtract\", \"half\", \"minimum\", \"movingmin\", \"edwards\", and \"normexp\" exactly.")
@@ -352,9 +357,9 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
   if (is.null(between.sample.weight.design)) stop("Please provide the microarray design matrix for between.sample.weight.design argument.")
 
   ## pre-processing
-  cat("Background correction: \n")
+  if (verbose) cat("Background correction: \n")
   E_bgc <- backgroundCorrect.matrix(E = E, Eb = E.background, method = bgc.method, ...) #background correction
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
   # cat("\n")
   #
   # ## log transform  or not
@@ -392,11 +397,11 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
   # }
 
   ## normalization
-  cat("\n")
-  cat(paste0("Data normalization using ", between.sample.norm.method, " method..."))
+  if (verbose) cat("\n")
+  if (verbose) cat(paste0("Data normalization using ", between.sample.norm.method, " method..."))
   Norm <- log2(normalizeBetweenArrays(E_bgc, between.sample.norm.method)) # quantile normalization
   Wgt <- arrayWeights(Norm, design = between.sample.weight.design) # array weight
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
 
   ## output
   raw.data <- list(original_E = E, original_background = E.background)
@@ -434,6 +439,7 @@ print.rbioarray_plist <- function(x, ...){
 #' @param combine.gene.duplicate If to combine different transcripts from the same gene/genomic feature. Default is \code{FALSE}. See details for more.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details For \code{filter.percentile},
 #'
 #'          For \code{filter.threshold.min.sample}
@@ -462,7 +468,8 @@ rbioarray_filter_combine <- function(object,
                                      filter.threshold.min.sample = NULL,
                                      gene.annot.rm.var.name = NULL,
                                      combine.gene.duplicate = FALSE,
-                                     parallelComputing = FALSE, clusterType = "PSOCK"){
+                                     parallelComputing = FALSE, clusterType = "PSOCK",
+                                     verbose = TRUE){
   ## check arguments
   if (!"rbioarray_plist" %in% class(object)) stop("The input object needs to be, but not exclusive to, rbioarray_plist class.")
 
@@ -485,7 +492,7 @@ rbioarray_filter_combine <- function(object,
     neg_control_used = FALSE
   }
 
-  cat("Filtering low expresson genes/probes/genomic features...")
+  if (verbose) cat("Filtering low expresson genes/probes/genomic features...")
   # low expression cuttoff set at at least 10% hihger than the neg
   LE_cutoff <- matrix(1.1 * neg, nrow(object$E), ncol(object$E), byrow = TRUE)
   # set filtering matrix
@@ -499,19 +506,19 @@ rbioarray_filter_combine <- function(object,
   # filter
   flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
   flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name]
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
 
   ## averaging technical replicates
-  cat("Averaging technical replicates...")
+  if (verbose) cat("Averaging technical replicates...")
   flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
   flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), ])
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
 
   ## combine duplicate genes if set
   if (combine.gene.duplicate) {
     if (length(flt_genes_avg[, object$genes_annotation.gene_id.var_name]) != length(unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]))) {
       if (object$gene_display_name_used){
-        cat("Combining gene duplicates (i.e. different transcripts belonging to the same gene/genomic feature)...")
+        if (verbose) cat("Combining gene duplicates (i.e. different transcripts belonging to the same gene/genomic feature)...")
         if (!parallelComputing) {
           combGeneProbe <- foreach(i = unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]), .combine = "c") %do% {
             tmp <- flt_E_avg[which(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name] %in% i), ]
@@ -546,15 +553,15 @@ rbioarray_filter_combine <- function(object,
         }
         out_E <- flt_E_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
         out_genes <- flt_genes_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
-        cat("Done! Records without a gene symbol have been automatically removed. \n")
+        if (verbose) cat("Done! Records without a gene symbol have been automatically removed. \n")
       } else {
-        cat("\n")
-        cat("Gene symbol not used in the input object. Proceed without combining gene duplicates.\n")
+        if (verbose) cat("\n")
+        if (verbose) cat("Gene symbol not used in the input object. Proceed without combining gene duplicates.\n")
         out_E <- flt_E_avg
         out_genes <- flt_genes_avg
       }
     } else {
-      cat("Number of transcripts same as number of genes, no need to combine.\n")
+      if (verbose) cat("Number of transcripts same as number of genes, no need to combine.\n")
       out_E <- flt_E_avg
       out_genes <- flt_genes_avg
     }
@@ -564,7 +571,7 @@ rbioarray_filter_combine <- function(object,
   }
 
   ## output
-  cat("Constucting rbioarray_flist...")
+  if (verbose) cat("Constucting rbioarray_flist...")
   filter.results <- list(neg_control_used = neg_control_used,
                          filter_percentile = filter.percentile,
                          filter_threshold_min_sample = filter.threshold.min.sample,
@@ -575,7 +582,7 @@ rbioarray_filter_combine <- function(object,
               filter_results = filter.results)
   out <- append(out, object[!names(object) %in% c("E", "genes")])
   class(out) <- "rbioarray_flist"
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
   return(out)
 }
 
@@ -599,6 +606,7 @@ print.rbioarray_flist <- function(x, ...){
 #' @description Function that performs statistical analysis for microarray data from \code{rbioarray_flist} class object.
 #' @param object The input \code{rbioarray_flist} object.
 #' @param contra contra Contrast matrix.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return A \code{rbioarray_de} class object with DE results, containing the following core items:
 #'
 #'         \code{F_stats}
@@ -621,8 +629,8 @@ print.rbioarray_flist <- function(x, ...){
 #'
 #' }
 #' @export
-microarray_de <- function(object, contra){
-  cat("Constructing rbioarray_de object...")
+microarray_de <- function(object, contra, verbose = TRUE){
+  if (verbose) cat("Constructing rbioarray_de object...")
   ## argument check
   if (class(object) != "rbioarray_flist") stop("The input object needs to be a \"rbioarray_flist\" class.")
 
@@ -666,7 +674,7 @@ microarray_de <- function(object, contra){
               input_data = flist_data)
   out <- append(out, object[!names(object) %in% c("E", "genes", "raw_data", "raw_file.genes_annotation.var_name", "raw_file.gene_id.var_name")])
   class(out) <- "rbioarray_de"
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
 
   return(out)
 }

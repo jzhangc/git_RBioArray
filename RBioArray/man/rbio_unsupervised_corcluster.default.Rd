@@ -16,7 +16,7 @@
   sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
   sigplot.labelColour = "black", sigplot.labelSize = 1,
   sigplot.labelAngle = 90, sigplot.keySize = 1, sigplot.mar = c(5, 4,
-  4, 2) + 0.1, sigplot.width = 7, sigplot.height = 7)
+  4, 2) + 0.1, sigplot.width = 7, sigplot.height = 7, verbose = TRUE)
 }
 \arguments{
 \item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}
@@ -76,6 +76,8 @@
 \item{sigplot.width}{Width for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{sigplot.height}{Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.

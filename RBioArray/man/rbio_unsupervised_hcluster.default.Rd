@@ -12,7 +12,7 @@
   sample_id.vector = NULL, distance = "euclidean",
   clust = "complete", col.colour = "Paired", map.colour = "PRGn",
   n.map.colour = 11, ..., export.name = NULL, plot.width = 7,
-  plot.height = 7)
+  plot.height = 7, verbose = TRUE)
 }
 \arguments{
 \item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}
@@ -52,6 +52,8 @@
 \item{plot.width}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plot.height}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.

@@ -83,6 +83,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param qc.plot QC plot for the input read counts
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details \code{filter.threshold.cpm.count} uses CPM (counts per million) as the basis for filtering. The rule of thumb is to filter reads independently from the groupping information.
 #'
 #'          The default is based on the paper by Chen et al (2016):
@@ -126,7 +127,7 @@ rnaseq_de.default <- function(x, y = NULL,
                               filter.threshold.cpm = "none",
                               filter.threshold.min.sample = NULL, annot.group = NULL,
                               between.genes.norm.method = "TMM",
-                              design, contra, qc.plot = TRUE){
+                              design, contra, qc.plot = TRUE, verbose = TRUE){
   ## check the key arguments
   if (!class(x) %in% c("data.frame", "matrix")){
     stop("x has to be either a data.frame or matrix object")
@@ -189,7 +190,7 @@ rnaseq_de.default <- function(x, y = NULL,
   names(contra_levels) <- cf
 
   ## DE
-  cat("Data filtering and normalization...") # message
+  if (verbose) cat("Data filtering and normalization...") # message
   dge <- DGEList(counts = x, genes = y)
 
   if (filter.threshold.cpm != "none"){ # set the count threshold for filtering
@@ -209,14 +210,14 @@ rnaseq_de.default <- function(x, y = NULL,
   dgenormf <- calcNormFactors(dge, method = between.genes.norm.method)  # between-genes
   # between-samples: Voom normalization with quality weights
   vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile")
-  cat("DONE!\n") # message
+  if (verbose) cat("DONE!\n") # message
 
   # fitting
-  cat("Linear fitting...") # message
+  if (verbose) cat("Linear fitting...") # message
   fit <- lmFit(vmwt, design = design) # linear fitting
   fit <- contrasts.fit(fit, contrasts = contra)
   fit <- eBayes(fit)
-  cat("DONE!\n") # message
+  if (verbose) cat("DONE!\n") # message
 
   ## output
   # below: set sort.by = "none" for both f_stats and de_list to preserve the order, for supervsied clustering analysis.

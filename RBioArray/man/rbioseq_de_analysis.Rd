@@ -10,7 +10,7 @@ rbioseq_de_analysis(raw.file.path, raw.file.ext = ".txt",
   filter.threshold.min.count = 10, filter.threshold.min.sample = NULL,
   design, contra, alpha = 0.05, FC = 1.5, FDR = TRUE,
   export.name = "data", export.mode = "all", ...,
-  parallelComputing = FALSE, clusterType = "FORK")
+  parallelComputing = FALSE, clusterType = "FORK", verbose = TRUE)
 }
 \arguments{
 \item{raw.file.path}{Path to raw files. Default is the system working directory.}
@@ -48,6 +48,8 @@ rbioseq_de_analysis(raw.file.path, raw.file.ext = ".txt",
 \item{...}{Additional arguments for \code{\link{sig}} function.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
 \item{filter.threshold.cpm}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}
 

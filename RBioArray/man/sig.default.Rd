@@ -14,7 +14,7 @@
   plot.xLabel = "log2(fold change)", plot.yLabel = "-log10(p value)",
   plot.symbolSize = 2, plot.sigColour = "red",
   plot.nonsigColour = "gray", plot.xTxtSize = 10, plot.yTxtSize = 10,
-  plot.Width = 170, plot.Height = 150)
+  plot.Width = 170, plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{input.de.list}{Input list cantaining DE dataframes for each comparison.}
@@ -68,6 +68,8 @@
 \item{plot.Width}{The width of the figure for the final output figure file. Default is \code{170}.}
 
 \item{plot.Height}{The height of the figure for the final output figure file. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 }

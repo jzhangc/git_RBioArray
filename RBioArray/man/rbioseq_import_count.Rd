@@ -8,7 +8,7 @@ rbioseq_import_count(path = getwd(), species = NULL,
   target.annot.file = NULL, sample_groups.var.name = NULL,
   gtf.matrix = NULL, raw.file.ext = ".txt", raw.file.sep = "",
   raw.file.source = "htseq-count", parallelComputing = FALSE,
-  clusterType = "FORK")
+  clusterType = "FORK", verbose = TRUE)
 }
 \arguments{
 \item{path}{Path to raw files. Default is the system working directory.}
@@ -28,6 +28,8 @@ rbioseq_import_count(path = getwd(), species = NULL,
 \item{raw.file.source}{Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.}
 
 \item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
 \item{cluterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }

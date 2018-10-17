@@ -5,6 +5,7 @@
 #' @param offset Read count offset value added to avoid zero. Default is \code{1}.
 #' @param mode Log ratio transformation method. Options are "clr" (centered log transformation) and "ilr" (isometric log transformation). Default is \code{"clr"}.
 #' @param ilr.method.fast Useful only when \code{mode = "ilr"}. Default is \code{TRUE}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return A data matrix with log ratio transformed values.
 #' @details This funciton is needed as part of the data pre-processing procedure to run multivariate and machine learning analysis featured in \code{RBioFS} package.
 #'
@@ -19,7 +20,8 @@
 #' tstX <- rbioseq_clr_ilr_transfo(tstdata, offset = 1, mode = "clr")
 #' }
 #' @export
-rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast = TRUE){
+rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast = TRUE,
+                                    verbose = TRUE){
   # data and arguments check
   if (!is.matrix(x))stop("x needs to b e a matrix")
   if (any(x == 0) & offset == 0)stop("zero detected in x. set offset to avoid it for ratio transformation")
@@ -28,7 +30,6 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast
   # log ratio transformation
   if (tolower(mode) == "clr"){  # clr calculation
     if (dim(x)[2] == 1){
-      cat()
       out <- list(x.clr = x, gm = rep(1, dim(x)[1]))
     } else {
       gm <- apply(x, 1, function(x) exp(mean(log(x + offset))))  # geometric mean = exp(mean(log(X)))
@@ -36,7 +37,7 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast
       out <- clrX
     }
   } else if (tolower(mode) == "ilr"){  # ilr calculation, modified from ilr.transfo function from mixOmics package
-    cat(paste0("ilr mode result in one less variable: ", ncol(x) - 1, " variables left for this dataset upon transformation.\n"))
+    if (verbose) cat(paste0("ilr mode result in one less variable: ", ncol(x) - 1, " variables left for this dataset upon transformation.\n"))
     ilrX = matrix(NA, nrow = nrow(x), ncol = ncol(x) - 1)
     D = ncol(x)
     if (ilr.method.fast) {
@@ -64,6 +65,7 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast
 #'
 #' @description Import GTF/GFF files
 #' @param file GTF/GFF file. Add path if needed.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return A matrix with items from GTF/GFF file.
 #' @details The following items are extracted from GTF/GFF file: \code{chromosome}, \code{gene_id}, \code{gene_type}, and \code{gene_name}.
 #' @examples
@@ -73,7 +75,7 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast
 #' }
 #'
 #' @export
-rbioseq_import_gtf <- function(file){
+rbioseq_import_gtf <- function(file, verbose = TRUE){
   # open connection
   gtf_gff <- file(file)
 
@@ -84,12 +86,12 @@ rbioseq_import_gtf <- function(file){
   if (class(filecheck) == "try-error") {
     stop("Bad gtf/gff file.")
   } else {
-    cat("Loading GTF/GFF file (speed depending on the hardware configurations)...")
+    if (verbose) cat("Loading GTF/GFF file (speed depending on the hardware configurations)...")
     tmpfile <- scan(gtf_gff, what = "", quiet = TRUE, sep = "\n")
     # tmpfile <- data.table::fread(file = file, sep = "\n", header = FALSE)
     tmpfile <- tmpfile[-c(1:5)]
-    cat("Done!\n")
-    cat("Parsing annotation information (speed depending on the hardware configurations)...")
+    if (verbose) cat("Done!\n")
+    if (verbose) cat("Parsing annotation information (speed depending on the hardware configurations)...")
     out_mtx <- matrix(ncol = 4, nrow = length(tmpfile))
     for (i in seq(length(tmpfile))) {
       tmp <- tmpfile[i]
@@ -116,13 +118,13 @@ rbioseq_import_gtf <- function(file){
     out_colnames <- c(tmp_colnames9, "chromosome")
     colnames(out_mtx) <- out_colnames
     out_mtx <- unique(out_mtx)
-    cat("Done!\n")
+    if (verbose) cat("Done!\n")
   }
   # close connection
   close(gtf_gff)
 
   # output
-  cat(paste(nrow(out_mtx), " records sucessfully loaded from the inoput GTF/GFF file.", sep = ""))
+  if (verbose) cat(paste(nrow(out_mtx), " records sucessfully loaded from the inoput GTF/GFF file.", sep = ""))
   return(out_mtx)
 }
 
@@ -140,6 +142,7 @@ rbioseq_import_gtf <- function(file){
 #' @param raw.file.source Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
 #'
 #'          For \code{target.annot.file}, the argument doesn't accept full file path.
@@ -199,7 +202,8 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
                                  target.annot.file = NULL, sample_groups.var.name = NULL,
                                  gtf.matrix = NULL,
                                  raw.file.ext = ".txt", raw.file.sep = "", raw.file.source = "htseq-count",
-                                 parallelComputing = FALSE, clusterType = "FORK"){
+                                 parallelComputing = FALSE, clusterType = "FORK",
+                                 verbose = TRUE){
   ## check argument
   if (is.null(target.annot.file)){  # check and load target (sample) annotation
     stop("Please provide a target annotation file for target.annot.file arugment.")
@@ -209,9 +213,9 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
     if (target.annot_ext != "csv") {
       stop("target.annot.file is not in csv format.")
     } else {
-      cat("Loading target annotation file...")
+      if (verbose) cat("Loading target annotation file...")
       tgt <- read.csv(file = target.annot.file, header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
-      cat("Done!\n")
+      if (verbose) cat("Done!\n")
     }
   }
 
@@ -228,7 +232,7 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
   filename_wo_ext <- sub("[.][^.]*$", "", filename)  # general expression to remove extension, i.e. a.b.c becomes a.b
 
   # load reads
-  cat("Processing read count files...")
+  if (verbose) cat("Processing read count files...")
 
   raw_list <- vector(mode = "list", length = length(filename))
   if (!parallelComputing){ # single core
@@ -254,13 +258,13 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
     }
   }
   names(raw_list) <- filename_wo_ext
-  cat("Done!\n")
+  if (verbose) cat("Done!\n")
 
   # file loaded message
-  cat("\n")
-  cat("Files loaded: \n")
+  if (verbose) cat("\n")
+  if (verbose) cat("Files loaded: \n")
   for (i in filename){
-    cat(paste0("\t", i, "\n"))
+    if (verbose) cat(paste0("\t", i, "\n"))
   }
 
   # merge reads
@@ -328,6 +332,7 @@ print.rbioseq_count <- function(x, ...){
 #' @param ... Additional arguments for \code{\link{sig}} function.
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
 #'
 #'          For more on the classes \code{rbioseq_count}, \code{rbioseq_de} and \code{sig}, see the help pages for functions \code{\link{rbioseq_import_count}}, \code{\link{rnaseq_de}} and \code{\link{sig}}, respectively.
@@ -369,7 +374,7 @@ rbioseq_de_analysis <- function(raw.file.path, raw.file.ext = ".txt", raw.file.s
                                 alpha = 0.05, FC = 1.5, FDR = TRUE,
                                 export.name = "data", export.mode = "all",
                                 ...,
-                                parallelComputing = FALSE, clusterType = "FORK"){
+                                parallelComputing = FALSE, clusterType = "FORK", verbose = TRUE){
   ## import raw reads
   # import
   count <- rbioseq_import_count(path = raw.file.path,
@@ -380,10 +385,11 @@ rbioseq_de_analysis <- function(raw.file.path, raw.file.ext = ".txt", raw.file.s
                                 target.annot.file = target.annot.file,
                                 sample_groups.var.name = sample_groups.var.name,
                                 gtf.matrix = gtf.matrix,
-                                parallelComputing = parallelComputing, clusterType = clusterType)
+                                parallelComputing = parallelComputing, clusterType = clusterType,
+                                verbose = verbose)
   # export
   assign(paste0(export.name, "_count"), count, envir = .GlobalEnv)
-  cat("\n\n")
+  if (verbose) cat("\n\n")
 
   ## DE analysis
   # DE
@@ -395,13 +401,14 @@ rbioseq_de_analysis <- function(raw.file.path, raw.file.ext = ".txt", raw.file.s
   de <- rnaseq_de(object = count, design = design, contra = contra,
                   filter.threshold.min.count = 5,
                   filter.threshold.min.sample = filter.threshold.min.sample,
-                  annot.group = annot.group)
+                  annot.group = annot.group, verbose = verbose)
   # export
   assign(paste0(export.name, "_de"), de, envir = .GlobalEnv)
-  cat("\n\n")
+  if (verbose) cat("\n\n")
 
   ## sig analysis
-  sig <- sig(object = de, alpha = alpha, FC = FC, FDR = FDR, export.name = export.name, export.mode = export.mode, ...)
+  sig <- sig(object = de, alpha = alpha, FC = FC, FDR = FDR, export.name = export.name, export.mode = export.mode, ...,
+             verbose = verbose)
 
   # export
   assign(paste0(export.name, "_sig"), sig, envir = .GlobalEnv)
