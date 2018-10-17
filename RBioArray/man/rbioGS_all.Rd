@@ -5,12 +5,12 @@
 \title{rbioGS_all}
 \usage{
 rbioGS_all(objTitle = "DE", DElst, entrezVar = NULL, GS = NULL,
-  GSfile = NULL, ..., parallelComputing = FALSE, clusterType = "PSOCK",
-  boxplot = TRUE, boxplotKEGG = FALSE, boxplotN = 20,
-  boxplotTitle = NULL, boxplotXlabel = "rank", boxplotYlabel = NULL,
-  boxplotYlabelsize = 7, boxplotWidth = 170, boxplotHeight = 150,
-  scatterplot = TRUE, scatterplotCutoff = 20, scatterRankline = 20,
-  scatterPline = 0.05, scatterTitle = NULL,
+  GSfile = NULL, ..., parallelComputing = FALSE,
+  clusterType = "PSOCK", boxplot = TRUE, boxplotKEGG = FALSE,
+  boxplotN = 20, boxplotTitle = NULL, boxplotXlabel = "rank",
+  boxplotYlabel = NULL, boxplotYlabelsize = 7, boxplotWidth = 170,
+  boxplotHeight = 150, scatterplot = TRUE, scatterplotCutoff = 20,
+  scatterRankline = 20, scatterPline = 0.05, scatterTitle = NULL,
   scatterXlabel = "median p value", scatterYlabel = "consensus score",
   scatterWidth = 170, scatterHeight = 150, plotMethod = "median",
   plotPadjust = TRUE, plotGSname = "GS")

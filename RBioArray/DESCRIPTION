@@ -1,11 +1,12 @@
 Package: RBioArray
 Type: Package
 Title: Simple to use package for both microarray and RNAseq data analysis (limma and piano based)
-Version: 0.4.6
+Version: 0.5.0
 Author: Jing Zhang
 Maintainer: Jing Zhang <jzhangcad@gmail.com>
 Description: This package does the entire pipeline, i.e., data pre-processing, gene differential expression (DE) analysis, gene set (GS) analysis, and graphing.
 License: GPL-3
+Encoding: UTF-8
 LazyData: TRUE
 Imports:
     limma (>= 3.28.21), edgeR (>= 3.14.0),
@@ -15,4 +16,4 @@ Imports:
     parallel (>= 3.3.2), corrplot (>= 0.84),
     doParallel (>= 1.0.10), foreach (>= 1.4.3), RBioplot (>= 0.5.1)
 Remotes: jzhangc/git_R_STATS_KBS/package/rbioplot
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

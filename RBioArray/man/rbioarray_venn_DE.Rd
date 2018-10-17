@@ -7,9 +7,10 @@
 rbioarray_venn_DE(objTitle = "DE", plotName = "DE", plotWidth = 5,
   plotHeight = 5, ..., annot = NULL, DEdata = NULL,
   dataProbeVar = "ProbeName", geneName = FALSE,
-  annotProbeVar = "ProbeName", genesymbolVar = NULL, sig.method = "fdr",
-  fltlist = NULL, design = NULL, contra = NULL, weights = NULL,
-  sig.p = 0.05, FC = 1.5, parallelComputing = FALSE)
+  annotProbeVar = "ProbeName", genesymbolVar = NULL,
+  sig.method = "fdr", fltlist = NULL, design = NULL, contra = NULL,
+  weights = NULL, sig.p = 0.05, FC = 1.5,
+  parallelComputing = FALSE)
 }
 \arguments{
 \item{plotName}{Name for the output venn diagram. Default is \code{"DE"}.}

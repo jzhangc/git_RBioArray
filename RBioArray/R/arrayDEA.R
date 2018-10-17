@@ -1,559 +1,691 @@
-#' @title rbioarray_PreProc
+#' @title rbioarray_rlist
 #'
-#' @description Data pre-processing function for the microarary data.
-#' @param rawlist Input data, either a list, \code{EList} or \code{MAList} object.
-#' @param logTrans If to perfom a log transformation on the data or not. Default is \code{FALSE}.
-#' @param logTransMethod If \code{logTrans = TRUE}, set which method to use for the transformation, \code{"log2"} or \code{"log10"}. Default is \code{"log2"}.
-#' @param logTransObjT If \code{logTrans = TRUE}, set the file name for the output \code{csv} file containing the log transformed data.
-#' @param logTransParallelComputing If \code{logTrans = TRUE}, set if to use parallel computing for the transformation or not. Default is \code{FALSE}.
-#' @param bgMethod Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
-#' @param normMethod Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
-#' @param ... arguments for \code{backgroundCorrect.matrix()} or \code{backgroundCorrect()} functions from \code{limma} package.
-#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with corrected and normalized expression values. If \code{logTrans = TRUE}, the function also outputs a \code{csv} file containing the log transformed data.
-#' @import doParallel
-#' @import foreach
-#' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
+#' @description Function to constuct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
+#' @param object Input object.
+#' @details When \code{object} is missing, the default fuction is used - make sure to pass all the arguments.
+#'
+#'          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
+#'
+#' @return A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the following items:
+#'
+#'         \code{E}: raw expression matrix (i.e. hybridization signal)
+#'
+#'         \code{E_background}: background signal marix if applicable
+#'
+#'         \code{raw_file.gene_annotation.var_name}
+#'
+#'         \code{raw_file.gene_id.var_name}
+#'
+#'         \code{gene_display_name_used}: if the gene display name is extracted from \code{gene.annot.dataframe}.
+#'
+#'         \code{genes_annotation.gene_id.var_name}
+#'
+#'         \code{genes_annotation.gene_symbol.var_name}
+#'
+#'         \code{genes_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
+#'
+#'         \code{genes_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
+#'                                                    This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
+#'
+#'         \code{targets}: the sample annotation data frame.
+#'
+#'         \code{sample_groups}
+#'
 #' @examples
 #' \dontrun{
-#' normdata <- rbioarray_PreProc(mydata)
+#' \code{# ElistRaw}
+#' rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", gene.annot.dataframe = annot,
+#'                          gene.annot.gene_id.var.name = "ProbeName", gene.annot.gene_symbol.var.name = "Gene.Symbol",
+#'                          gene.annot.control_type.var.name = "ControlType", gene.annot.control_type.val.pos = 1,
+#'                          gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
+#'                          target.annot.file = "Targets.csv", target.annot.file.path = getwd(),
+#'                          sample_groups.var.name = "Group")
+#'
+#' \code{# non-EListRaw}
+#' raw_list <- rbioarray_rlist(raw.dataframe = raw, raw.annot.var.name = c("PROBE_ID","ILMN_GENE"), raw.gene_id.var.name = "PROBE_ID",
+#'                             gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
+#'                             target.annot.file = "sample_index_end6.csv", sample_groups.var.name = "time_point")
 #' }
 #' @export
-rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2", logTransObjT = "data", logTransParallelComputing = FALSE,
-                              bgMethod = "auto", normMethod = "quantile", ...){
-  if (class(rawlist) == "list"){
-    ## log transform  or not
-    if (logTrans){
-      if (!logTransParallelComputing){
-        # log transform
-        mtx <- apply(rawlist$E, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
-      } else {
-        # parallel computing
-        # set up cpu cluster
-        n_cores <- detectCores() - 1
-        cl <- makeCluster(n_cores, type = "PSOCK")
-        on.exit(stopCluster(cl)) # close connect when exiting the function
-        # log transform
-        mtx <- foreach(i = rawlist$E) %dopar% {
-          out <- apply(i, c(1,2), FUN = ifelse(logTransMethod == "log10", log10, log2))
-        }
-      }
-      tmpdata <- list(E = mtx, genes = rawlist$genes, target = rawlist$target)
-      # store and export log transformed data into a csv file
-      logTransOut <- data.frame(rawlist$genes, mtx)
-      write.csv(logTransOut, file = paste(logTransObjT, "_log_transformed.csv", sep = ""), row.names = FALSE)
-    } else {
-      tmpdata <- rawlist
-    }
-
-    ## normalization
-    BgC <- backgroundCorrect.matrix(tmpdata$E, method = bgMethod, ...) #background correction
-    Norm <- normalizeBetweenArrays(BgC, normMethod) # quantile normalization
-    Wgt <- arrayWeights(Norm) # array weight
-    output <- list(E = Norm, genes = rawlist$genes, target = rawlist$target, ArrayWeight = Wgt)
+rbioarray_rlist <- function(object, ...){
+  ## processing
+  if (missing(object)) {
+    rlist <- rbioarray_rlist.default(...)
+    return(rlist)
   } else {
-    ## normalization
-    BgC <- backgroundCorrect(rawlist, method = bgMethod, ...) #background correction
-    Norm <- normalizeBetweenArrays(BgC, method = normMethod) # quantile normalization
-    Wgt <- arrayWeights(Norm)
-    Norm$ArrayWeight <- Wgt
-    output <- Norm
+    UseMethod("rbioarray_rlist", object)
   }
-  return(output)
 }
 
-#' @title rbioarray_flt
+#' @title rbioarray_rlist.EListRaw
 #'
-#' @description data filter function based on spike-in negative control.
-#' @param normlst Normalized data, either a list, \code{EList} or \code{MAList} object.
-#' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
-#' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
-#' @param percentile The percentile cutoff. When \code{ctrlProbe = TRUE} and muliptle negative control probes are detected, the default is \code{0.95}. When \code{ctrlProbe = FALSE}, default value is \code{0.05}.
-#' @param combineGeneDup Wether or not to combine gene duplicates (different probe ID) by probe signal variance. Default is \code{FALSE}.
-#' @param geneSymbolVar Set only when \code{combineGeneDup = TRUE}, the name for variables contained in normlst or annotation dataframe. Default is \code{NULL}.
-#' @param annot Set only when \code{combineGeneDup = TRUE} and normlst is a \code{EList} object, the probe annotation dataframe.
-#' @param parallelComputing Set only when \code{combineGeneDup = TRUE}, if to use parallel computing. Default is \code{FALSE}.
-#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @details When ctrlProbe is present, the retained probes are the ones with expression value above 10 percent of the 95 percentile of the negative control probe signal by default. When \code{ctrlProbe = FALSE}, the probes with a expression value 10 percent higher than the 5 percentile of total expression values are retained by default. When \code{combineGeneDup = TRUE}, the probe with the highest variance in signal will be retained for the gene of interest.
-#' @return Depending on the input type, the function outputs a \code{list}, \code{Elist} or \code{MAList} object with filtered expression values.
-#' @importFrom limma avereps
-#' @examples
-#' \dontrun{
-#' fltdata <- rbioarray_flt(normdata)
-#' }
+#' @description The \code{rbioarrary_rlist} function for \code{EListRaw} class
+#' @param object A input \code{EListRaw} class object from \code{limma} package
+#' @param ... Additional argument for the default function.
 #' @export
-rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType", percentile = ifelse(ctrlProbe, 0.95, 0.05),
-                          combineGeneDup = FALSE, geneSymbolVar = NULL, annot = NULL,
-                          parallelComputing = FALSE, clusterType = "PSOCK"){
-  ## check key arguments
-  if (combineGeneDup){
-    if (is.null(geneSymbolVar)){
-      stop(cat("Please set variable name for gene symbol when combineGeneDup = TRUE. Function terminated.\n"))
-    }
-  }
+rbioarray_rlist.EListRaw <- function(object, ...){
+  ## set up variables
+  raw.dataframe <- data.frame(object$genes, object$E, stringsAsFactors = FALSE, check.names = FALSE)
+  raw.background.signal.matrix <- object$Eb
+  raw.annot.var.name <- names(object$genes)
 
-  if (!"ProbeName" %in% names(normlst$genes)){
-    stop(cat("Make sure to name the variable containing probe name \"ProbeName\". Function terminated.\n"))
-  }
+  ## processing
+  rlist <- rbioarray_rlist.default(raw.dataframe = raw.dataframe, raw.background.signal.matrix = raw.background.signal.matrix,
+                                   raw.annot.var.name = raw.annot.var.name, ...)
 
-  if (ctrlProbe){
-    if (!ctrlTypeVar %in% names(normlst$genes)){
-      stop(cat("Make sure to include the correct variable name for control probes. Function terminated.\n"))
-    }
-  }
+  return(rlist)
+}
 
-  if (!class(normlst) == "list" & combineGeneDup){
-    if(is.null(annot)){
-      stop(cat("Since combineGeneDup = TRUE and norlst is an Elist objects, please set annotation dataframe for annot argument.
-               Function terminated.\n"))
-    }
-    if (!"ProbeName" %in% names(annot)){
-      stop(cat("Make sure to name the variable containing probe name \"ProbeName\" in annotation dataframe. Function terminated.\n"))
-    }
-    if (!geneSymbolVar %in% names(annot)){
-      stop(cat("Make sure to name the variable containing gene symbols in annotation data.frame. Function terminated.\n"))
-    }
-  }
+#' @title rbioarray_rlist.default
+#'
+#' @description The default \code{rbioarrary_rlist} function.
+#' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
+#' @param raw.background.signal.matrix A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
+#' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
+#' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
+#' @param gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
+#' @param gene.annot.gene_id.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.
+#' @param gene.annot.gene_symbol.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.
+#' @param gene.annot.control_type.var.name Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.
+#' @param gene.annot.control_type.val.pos Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.
+#' @param gene.annot.control_type.val.neg Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.
+#' @param gene.annot.control_type.val.exp Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.
+#' @param gene.annot.rm.var.name Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.
+#' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
+#' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
+#' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @details The \code{raw.background.signal.matrix} is usefual when processing a \code{EListRaw} class object from \code{limma} package.
+#'
+#'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+#'
+#'          The optional annotation data frame \code{gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
+#'          It is noted that \code{gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
+#'          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
+#'          The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+#'
+#' @export
+rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix = NULL,
+                                    raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
+                                    gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
+                                    gene.annot.control_type.var.name = NULL,
+                                    gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
+                                    gene.annot.rm.var.name = NULL,
+                                    target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL,
+                                    verbose = TRUE){
+  ## check arguments and set up variables
+  # raw data
+  if (is.null(dim(raw.dataframe)))
+    stop("raw.matrix has to be a data.frame, with rows for genes/probes/genomic features, columns for samples.")
+  if (is.null(raw.annot.var.name) || is.null(raw.gene_id.var.name))
+    stop("Please set raw.annot.var.name AND raw.gene_id.var.name arguments.")
+  if (!raw.annot.var.name %in% names(raw.dataframe)  || !raw.gene_id.var.name %in% names(raw.dataframe))
+    stop("Annoation variables (i.e. columns) and/or the gene_id variable (i.e. column) not found in raw.dataframe")
 
-  ## extract the 95% percentile of the negative control signals
-  if (ctrlProbe){ # if there are neg control probes
-    if (class(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ]) == "numeric"){ # if there is only one entry in the neg values
-      neg <- normlst$E[normlst$genes[, ctrlTypeVar] == -1, ] # no 95% percentile required as only one neg entry
+  # gene annotation
+  if (!is.null(gene.annot.dataframe)){  # check and load gene annoation
+    if (!is.data.frame(gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
+    # if (nrow(gene.annot.dataframe) < nrow(raw.dataframe)) stop("gene.annot.dataframe has less record than the raw.dataframe") # check size
+
+    if (is.null(gene.annot.gene_id.var.name) || is.null(gene.annot.gene_symbol.var.name)) { # gene id and symbol variables
+      stop("Please set gene.annot.gene_id.var.name AND gene.annot.gene_symbol.var.name arguments according to gene.annot")
+    } else if (!gene.annot.gene_id.var.name %in% names(gene.annot.dataframe) || !gene.annot.gene_symbol.var.name %in% names(gene.annot.dataframe)) {
+      stop("Gene ID variable and/or gene symbol variable not found in gene.annot.dataframe")
     } else {
-      neg <- apply(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
+      gene.symbol <- TRUE
     }
-  } else { # no neg control probes, we use the
-    neg <- apply(normlst$E, 2, function(x)quantile(x, p = 0.05)) # 5% percentile of all the data
-  }
+    # additional variables
+    raw_dfm <- raw.dataframe
+    genes_annot_dfm <- gene.annot.dataframe
 
-  if (class(normlst) == "list"){
-    ## low expression cuttoff set at at least 10% hihger than the neg
-    LE_cutoff <- matrix(1.1 * neg, nrow(normlst$E), ncol(normlst$E), byrow = TRUE)
+    ## Set up the information
+    # merge gene annotation with raw dataframe
+    raw_dfm$row_id <- as.integer(rownames(raw_dfm))  # used to make sure the same order as the background matrix for EListRaw
+    raw_dfm$merge_id <- raw_dfm[, raw.gene_id.var.name]
+    genes_annot_dfm$merge_id <- genes_annot_dfm[, gene.annot.gene_id.var.name]
+    merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm, all.x = TRUE)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
+    merged_raw_gene_annot_dfm <- merged_raw_gene_annot_dfm[order(merged_raw_gene_annot_dfm$row_id), ]  # restore the original order
+    all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm), "row_id"))  # all annotation variable names
 
-    ## summary after applying LE_cutoff (T/F for each sample)
-    # this only compares the element Nrm$E
-    isexpr <- rowSums(normlst$E > LE_cutoff) >= 3 # We keep probes that meet the criterion on at least 3 arrays (minimum for stats)
-
-    ## filter out only the low expressed probes (not control) in the dataset
-    # LE means low expression removed (only)
-    flt_E <- normlst$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-    flt_gene <- normlst$gene[isexpr, ]
-    fltlst <- list(E = flt_E, genes = flt_gene, target = normlst$target)
-    flt_E_avg <- avereps(fltlst$E, ID = fltlst$genes$ProbeName)
-    genes <- unique(fltlst$genes[fltlst$genes$ProbeName %in% rownames(flt_E_avg), ])
-
-    ## to combine gene repeats by probe signel variance (retain maximum variance probes for the same gene)
-    if (combineGeneDup){
-      tmplst <- list(E = flt_E_avg, genes = genes)
-
-      if (parallelComputing){  # parallel computing
-        # set up clusters for PSOCK
-        n_cores <- detectCores() - 1
-        cl <- makeCluster(n_cores, type = clusterType, outfile = "")
-        registerDoParallel(cl) # part of doParallel package
-        on.exit(stopCluster(cl)) # close connect when exiting the function
-
-        cat("Combining gene duplicates by signal variance...") # initiation message
-        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %dopar% {
-          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
-          if (is.null(nrow(tmp))){
-            out <- var(tmp)
-          } else {
-            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
-              var(as.numeric(tmp[j, ]))
-            }
-          }
-          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
-          out[which(out$var %in% max(out$var)), "ProbeName"]
-        }
-        cat("DONE!\n") # termination message
-      } else {  # single core
-        cat("Combining gene duplicates by signal variance...") # initiation message
-        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %do% {
-          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
-          if (is.null(nrow(tmp))){
-            out <- var(tmp)
-          } else {
-            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
-              var(as.numeric(tmp[j, ]))
-            }
-          }
-          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
-          out[which(out$var %in% max(out$var)), "ProbeName"]
-        }
-        cat("DONE!\n") # termination message
-      }
-      avgProbes <- list(E = flt_E_avg[which(genes$ProbeName %in% combGeneProbe), ],
-                        genes = genes[which(genes$ProbeName %in% combGeneProbe), ],
-                        target = normlst$target, ArrayWeight = normlst$ArrayWeight)
-    } else {
-      avgProbes <- list(E = flt_E_avg, genes = genes,
-                        target = normlst$target, ArrayWeight = normlst$ArrayWeight)
+    # Set up output E matrix
+    E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns
+    rownames(E) <- NULL
+    if (!is.null(raw.background.signal.matrix) && dim(raw.background.signal.matrix) != dim(E)) {
+      cat("The dimension of raw.background.signal.matrix not the same as the expressoin matrix. Proceed without using it. ")
+      raw.background.signal.matrix <- NULL
     }
 
+    # set up output annotation information
+    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
+    genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]
   } else {
-    ## low expression cuttoff set at at least 10% hihger than the neg95
-    LE_cutoff <- matrix(1.1 * neg, nrow(normlst), ncol(normlst), byrow = TRUE)
+    cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
+    gene.annot.gene_id.var.name <- raw.gene_id.var.name
+    gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
+    genes <- raw.dataframe[, raw.annot.var.name]
+    gene.symbol <- FALSE
+  }
 
-    ## summary after applying LE_cutoff (T/F for each sample)
-    # this only compares the element Nrm$E
-    isexpr <- rowSums(normlst$E > LE_cutoff) >= 3 # We keep probes that meet the criterion on at least 3 arrays (minimum for stats)
-
-    ## filter out only the low expressed probes (not control) in the dataset
-    # LE means low expression removed (only)
-    fltNrm <- normlst[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-    avgProbes <- avereps(fltNrm, ID = fltNrm$genes$ProbeName) #average the probes. note: use ProbeName instead of SystematicName
-
-    ## to combine gene repeats by probe signel variance (retain maximum variance probes for the same gene)
-    if (combineGeneDup){
-      tmplst <- avgProbes
-      tmplst$genes <- merge(tmplst$genes, annot, by = "ProbeName", all.x = TRUE)
-
-      if (parallelComputing){
-        # set up clusters for PSOCK
-        n_cores <- detectCores() - 1
-        cl <- makeCluster(n_cores, type = clusterType, outfile = "")
-        registerDoParallel(cl) # part of doParallel package
-        on.exit(stopCluster(cl)) # close connect when exiting the function
-
-        cat("Combining gene duplicates by signal variance...") # initiation message
-        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %dopar% {
-          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
-          if (is.null(nrow(tmp))){
-            out <- var(tmp)
-          } else {
-            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
-              var(as.numeric(tmp[j, ]))
-            }
-          }
-          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
-          out[which(out$var %in% max(out$var)), "ProbeName"]
-        }
-        cat("DONE!\n") # termination message
-      } else {
-        cat("Combining gene duplicates by signal variance...") # initiation message
-        combGeneProbe <- foreach(i = unique(tmplst$genes[, geneSymbolVar]), .combine = "c", .packages = "foreach") %do% {
-          tmp <- tmplst$E[which(tmplst$genes[, geneSymbolVar] %in% i), ]
-          if (is.null(nrow(tmp))){
-            out <- var(tmp)
-          } else {
-            out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
-              var(as.numeric(tmp[j, ]))
-            }
-          }
-          out <- data.frame(tmplst$genes[which(tmplst$genes[, geneSymbolVar] %in% i), ], var = out)
-          out[which(out$var %in% max(out$var)), "ProbeName"]
-        }
-        cat("DONE!\n") # termination message
-      }
-
-      avgProbes <- avgProbes[avgProbes$genes[, "ProbeName"] %in% combGeneProbe, ]
+  # target annotation
+  if (is.null(target.annot.file)){  # check and load target (sample) annotation
+    stop("Please provide a target annotation file for target.annot.file arugment.")
+  } else {
+    target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
+    target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
+    if (target.annot_ext != "csv") {
+      stop("target.annot.file is not in csv format.")
+    } else {
+      if(verbose) cat("Loading target annotation file...")
+      tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
+      if(verbose) cat("Done!\n")
     }
+  }
+  if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
+  if (!sample_groups.var.name %in% names(tgt)){
+    stop("Sample group annotation variable not found in the target annotation file.")
+  } else {
+    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
+  }
+
+  # optional control_type variable
+  if (!is.null(gene.annot.control_type.var.name)) {
+    if (!gene.annot.control_type.var.name %in% names(genes)) {
+      cat("The set control type variable not found in gene.annot.dataframe. Proceed without using it.\n")
+      gene.annot.control_type = NULL
+    } else {
+      control_type.values <- unique(genes[, gene.annot.control_type.var.name])
+      input.control_type.values <- c(gene.annot.control_type.val.pos, gene.annot.control_type.val.neg, gene.annot.control_type.val.exp)
+      if (all(input.control_type.values %in% control_type.values)){
+        gene.annot.control_type = list(control_type.var_name = gene.annot.control_type.var.name,
+                                       pos_type.value = gene.annot.control_type.val.pos,
+                                       neg_type.value = gene.annot.control_type.val.neg,
+                                       exp_type.value = gene.annot.control_type.val.exp)
+      } else {
+        if (verbose) cat("Input probe control type values not found in the gene control type variable from gene annotation. Proceed without using them.\n")
+        gene.annot.control_type = NULL
+      }
+    }
+  } else {
+    gene.annot.control_type = NULL
+  }
+
+  # variable names to remove
+  if (!is.null(gene.annot.rm.var.name) && !gene.annot.rm.var.name %in% names(genes)) {
+    cat("gene.annot.rm.var.name not found in gene annation. Proceed without using it")
+    gene.annot.rm.var.name <- NULL
   }
 
   ## output
-  cat("Probes retained upon backgroud filtering:\n")
-  print(table(isexpr)) # output the isexpr summary
-  return(avgProbes)
+  if (verbose) cat("Constructing rlist...")
+  out <- list(E = E,
+              E_background = raw.background.signal.matrix,
+              raw_file.gene_annotation.var_name = raw.annot.var.name,
+              raw_file.gene_id.var_name = raw.gene_id.var.name,
+              genes = genes,
+              gene_display_name_used = gene.symbol,
+              genes_annotation.gene_id.var_name = gene.annot.gene_id.var.name,
+              genes_annotation.gene_symbol.var_name = gene.annot.gene_symbol.var.name,
+              genes_annotation.control_type = gene.annot.control_type,
+              genes_annotation.to_remove.var.name = gene.annot.rm.var.name,
+              targets = tgt,
+              sample_groups = sample.groups)
+  class(out) <- "rbioarray_rlist"
+  if (verbose) cat("Done!\n")
+  if (verbose) cat("\n")
+  if (verbose) cat(paste0("The resulted rbioarray_rlist object contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), " samples for ", length(unique(sample.groups)), " groups."))
+  return(out)
 }
 
-#' @title rbioarray_DE
+
+#' @export
+print.rbioarray_rlist <- function(x, ...){
+  cat("\n")
+  cat("---- rbioarray_rlist information ----\n")
+  cat(paste0("Number of genes/probes/genomic features: ", nrow(x$E), "\n"))
+  cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
+  cat(paste0("Groups: "))
+  cat(paste0(levels(x$sample_groups)))
+  cat("\n\n")
+  cat(paste0("Gene display name from annotation information: ", ifelse(x$gene_display_name_used, "Available\n", "Unavailable\n")))
+  cat("\n")
+}
+
+
+#' @title rbioarray_transfo_normalize
 #'
-#' @description DE analysis function.
-#' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
-#' @param fltlist filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
-#' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.
-#' @param design Design matrix. Default is \code{NULL}.
-#' @param contra Contrast matrix. Default is \code{NULL}.
-#' @param weights Array weights, determined by \code{arrayWeights()} function from \code{limma} package. Default is \code{NULL}.
-#' @param ... arguments for \code{topTable()} from \code{limma} package.
-#' @param plot If to generate volcano plots for the DE results. Defualt is \code{TRUE}. Plots are exported as \code{pdf} files.
-#' @param geneName If to only plot probes with a gene name. Default is \code{FALSE}.
-#' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
-#' @param topgeneLabel If to display the gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
-#' @param nGeneSymbol When \code{topgeneLabel = TRUE}, to set how many genes to display. Default is \code{5}.
-#' @param padding When \code{topgeneLabel = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
-#' @param FC Threshold for fold change (FC) for volcano plot. Default is \code{1.5}.
-#' @param ctrlProbe Wether or not the data set has control type variable, with values \code{-1 (negative control)}, \code{0 (gene probes)} and \code{1 (positive control)}. Default is \code{TRUE}.
-#' @param ctrlTypeVar Set only when \code{ctrlProbe = TRUE}, the control type variable. Default is the \code{Agilent} variable name \code{"ControlType"}.
-#' @param sig.method DE methods set for p value thresholding. Values are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}. \code{"spikein"} can only be set when \code{ctrlProbe = TRUE} and \code{ctrlTypeVar} is properly set.
-#' @param sig.p Only used when sig.method set as \code{"spikein"}, backup threshold for the p value if spikein p values is larger than \code{0.05}.
-#' @param plotTitle Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
-#' @param xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
-#' @param yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
-#' @param symbolSize Size of the symbol. Default is \code{2}.
-#' @param sigColour Colour of the significant genes or probes. Default is \code{"red"}.
-#' @param nonsigColour Colour of the non-significant genes or probes. Default is \code{"gray"}.
-#' @param xTxtSize Font size for the x-axis text. Default is \code{10}.
-#' @param yTxtSize Font size for the y-axis text. Default is \code{10}.
-#' @param plotWidth The width of the figure for the final output figure file. Default is \code{170}.
-#' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
-#' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
-#' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
-#' @details When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}. When there is no significant genes or probes identified under \code{sig.method = "fdr"}, the threshold is set to \code{sig.p}. When set \code{sig.method = "none"}, the p cutoff will be \code{sig.p}. Also note that both \code{geneName} and \code{genesymbolVar} need to be set to display gene sysmbols on the plot. Otherwise, the labels will be probe names. Additionally, when set to display gene symbols, all the probes without a gene symbol will be removed.
-#' @import ggplot2
+#' @description Generic data log transformation and nomalization function for microarray.
+#' @param object Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
+#' @param ... Additional arguments for corresponding S3 class methods.
+#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
+#'
+#'          The expression matrix will be normalized and then log2 tranformed for output.
+#'
+#'          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
+#'          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
+#'          However, when input is \code{matrix}, it assumes the data has already been log2 tranformed, meaning normalization will
+#'          be done AFTER log2 transformation.
+#'             After comparision, these two methods will NOT produce the same results for the same expression data:
+#'          In other words, applying \code{normalizeBetweenArrays} directly to log2 transformed E matrix is NOT the same as apply the function
+#'          to the \code{EListRaw} that contains E.
+#'             In fact, when using \code{"quantile"} method, applying \code{normalizeBetweenArrays} to log2 transformed E matrix is the
+#'          same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
+#'          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is appled BEFORE
+#'          \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
+#'
+#'
+#'
+#' @return A \code{rbioarray_plist} class object with the following items:
+#'
+#'         \code{E}: Normalized and then log2 transformed expression matrix
+#'
+#'         \code{design}: Microrray experiment sample design matrix
+#'
+#'         \code{ArrayWeight}
+#'
+#'         \code{raw_data}: A list including original E matrix and background matrix from the input \code{rbioarray_rlist}.
+#'
+#'         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
+#'
+#' @examples
+#'
+#' \dontrun{
+#' # for \code{rbioarray_rlist} object:
+#' microarray_plist <- rbioarray_transfo_normalize(object = microarray_rlist, logTransfo = TRUE, logTransfo.method = "log2",
+#'                                                 logTransfo.parallelComputing = TRUE, logTransfo.cluterType = "FORK",
+#'                                                 bgc.method = "auto", between.sample.norm.method = "quantile")
+#' }
+#'
+#' @export
+rbioarray_transfo_normalize <- function(object, ...){
+  ## check arguments
+  if (class(object) != "rbioarray_rlist") stop("The input object needs to be \"rbioarray_rlist\" class.\"")
+
+  ## use method
+  UseMethod("rbioarray_transfo_normalize", object)
+}
+
+
+#' Title rbioarray_transfo_normalize.rbioarray_rlist
+#'
+#' @description \code{\link{rbioarray_transfo_normalize}} for \code{rbioarray_rlist} class object.
+#' @param object Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
+#' @param design Microarray experiment sample design matrix.
+#' @param ... Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
+#' @return A \code{rbioarray_plist} class object.
+#'
+#' @export
+rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ..., verbose = TRUE){
+  ## processing
+  default_out <- rbioarray_transfo_normalize.default(E = object$E, E.background = object$E_background,
+                                                     between.sample.weight.design = design, ..., verbose = verbose)
+  ## output
+  if (verbose) cat("\n")
+  if (verbose) cat("Constructing rbioarray_plist...")
+  out <- append(default_out, object[!names(object) %in% c("E", "E_background")])
+  class(out) <- "rbioarray_plist"
+  if (verbose) cat("Done!\n\n")
+  return(out)
+}
+
+
+#' @title rbioarray_transfo_normalize.default
+#'
+#' @description \code{\link{rbioarray_transfo_normalize}} for \code{rbioarray_rlist} class object.
+#' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.
+#' @param E.background A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
+#' @param bgc.method Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
+#' @param between.sample.norm.method Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
+#' @param between.sample.weight.design Microarray experiment sample design matrix for beteween sample weight calculation.
+#' @param ... Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
+#'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+#'          ADD the fact that \code{normalizeBetweenArrays} function is where \code{limma} log transforms data.
+#' @return A list with the core items for a \code{rbioarray_plist} class.
+#' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
+#' @export
+rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
+                                                bgc.method = "auto", between.sample.norm.method = "quantile",
+                                                between.sample.weight.design = NULL, ...,
+                                                verbose = TRUE){
+  ## check arguments
+  if (!bgc.method %in% c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
+    stop("Agument bgc.method needs to be set with one of \"auto\", \"auto\", \"none\", \"subtract\", \"half\", \"minimum\", \"movingmin\", \"edwards\", and \"normexp\" exactly.")
+  if (!between.sample.norm.method %in% c("quantile", "Aquantile")) stop("Argument between.sample.norm.method needs to be set with ")
+  if (is.null(between.sample.weight.design)) stop("Please provide the microarray design matrix for between.sample.weight.design argument.")
+
+  ## pre-processing
+  if (verbose) cat("Background correction: \n")
+  E_bgc <- backgroundCorrect.matrix(E = E, Eb = E.background, method = bgc.method, ...) #background correction
+  if (verbose) cat("Done!\n")
+  # cat("\n")
+  #
+  # ## log transform  or not
+  # transfo_E_mtx <- NULL
+  # if (logTransfo){  # log transform
+  #   cat(paste0("Data ", logTransfo.method, " tranformation..."))
+  #   # additional argument check
+  #   if (!logTransfo.method %in% c("log2", "log10")) stop("Argument logTransfo.method needs to be set with either \"log2\" or \"log10\" exactly.")
+  #
+  #   if (is.null(logTransfo.gene.annot)) {
+  #     stop("Please provide logTransfo.gene.annot when logTransfo = TRUE.")
+  #   } else {
+  #     if (is.null(dim(logTransfo.gene.annot))){
+  #       if (length(logTransfo.gene.annot) != nrow(E)) stop("logTransfo.gene.annot vector length not same as row number of E")
+  #     } else {
+  #       if (nrow(logTransfo.gene.annot) != nrow(E)) stop("Row number of logTransfo.gene.annot matrix/data frame not the same length as the row number of E")
+  #     }
+  #   }
+  #
+  #   # log2 transformation
+  #   if (logTransfo.method == "log2"){
+  #     transfo_E_mtx <- log2(E_bgc)
+  #   } else {
+  #     transfo_E_mtx <- log10(E_bgc)
+  #   }
+  #   E_mtx <- transfo_E_mtx
+  #   cat("Done!\n")
+  #
+  #   # store and export log transformed data into a csv file if applicable
+  #   cat(paste0("The log transformed data saved to file: ", logTransfo.export.name, "_log_transformed.csv\n"))
+  #   logTransfo_out <- data.frame(logTransfo.gene.annot, transfo_E_mtx)
+  #   write.csv(logTransfo_out, file = paste0(logTransfo.export.name, "_log_transformed.csv"), row.names = FALSE)
+  # } else {
+  #   E_mtx <- E_bgc
+  # }
+
+  ## normalization
+  if (verbose) cat("\n")
+  if (verbose) cat(paste0("Data normalization using ", between.sample.norm.method, " method..."))
+  Norm <- log2(normalizeBetweenArrays(E_bgc, between.sample.norm.method)) # quantile normalization
+  Wgt <- arrayWeights(Norm, design = between.sample.weight.design) # array weight
+  if (verbose) cat("Done!\n")
+
+  ## output
+  raw.data <- list(original_E = E, original_background = E.background)
+  default_out <- list(E = Norm,
+                      design = between.sample.weight.design,
+                      ArrayWeight = Wgt,
+                      background_correction_method = bgc.method,
+                      between_sample_normalization_method = between.sample.norm.method,
+                      raw_data = raw.data)
+  return(default_out)
+}
+
+
+#' @export
+print.rbioarray_plist <- function(x, ...){
+  cat("\n")
+  cat("---- rbioarray_plist information ----\n")
+  cat(paste0("Background correction method: ", x$background_correction_method, "\n"))
+  cat(paste0("Between-sample normalization method: ", x$between_sample_normalization_method))
+  cat("\n\n")
+  cat(paste0("Number of genes/probes/genomic features: ", nrow(x$E), "\n"))
+  cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
+  cat(paste0("Groups: "))
+  cat(paste0(levels(x$sample_groups)))
+  cat("\n")
+}
+
+
+#' @title rbioarray_filter_combine
+#'
+#' @description Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.
+#' @param object Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.
+#' @param filter.percentile The percentile threshold for filtering. Default is \code{0.05}. See details for more.
+#' @param filter.threshold.min.sample Minimum number of samples meeting the filtering threshold. Default is \code{NULL}. See details for more.
+#' @param combine.gene.duplicate If to combine different transcripts from the same gene/genomic feature. Default is \code{FALSE}. See details for more.
+#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @details For \code{filter.percentile},
+#'
+#'          For \code{filter.threshold.min.sample}
+#'
+#'          When \code{combine.gene.duplicate = TRUE}
+#'
+#' @return A \code{rbioarray_flist} class, including the following core items:
+#'
+#'         \code{E}: filtered (and if set, combined) expression matrix
+#'
+#'         \code{genes}: gene annotation with same row number as E
+#'
+#'         \code{gene_duplicates_combined}: either \code{TRUE} or \code{FALSE}
+#'
+#'         \code{filter_results}: a list containing \code{neg_control_used}, \code{filter_percentile}, \code{filter_threshold_min_sample}, and \code{filter_summary}
+#'
+#'         Additionally, \code{rbioarray_flist} object will include additional items from the input \code{rbioarray_plist} object.
+#'
 #' @import doParallel
 #' @import foreach
-#' @importFrom parallel detectCores makeCluster stopCluster mclapply
-#' @importFrom limma lmFit eBayes topTable contrasts.fit
 #' @importFrom parallel detectCores makeCluster stopCluster
-#' @importFrom grid grid.newpage grid.draw
-#' @importFrom RBioplot rightside_y
-#' @importFrom ggrepel geom_text_repel
+#' @importFrom limma avereps
+#' @export
+rbioarray_filter_combine <- function(object,
+                                     filter.percentile = 0.05,
+                                     filter.threshold.min.sample = NULL,
+                                     gene.annot.rm.var.name = NULL,
+                                     combine.gene.duplicate = FALSE,
+                                     parallelComputing = FALSE, clusterType = "PSOCK",
+                                     verbose = TRUE){
+  ## check arguments
+  if (!"rbioarray_plist" %in% class(object)) stop("The input object needs to be, but not exclusive to, rbioarray_plist class.")
+
+  ## filter
+  # set negative/low expression threshold
+  if (!is.null(object$genes_annotation.control_type)){ # 0.95 percentile of all negative control values
+    cat("Gene control type variable detected in the input object. The filter.percentile argument value reset to 0.95.\n")
+    filter.percentile = 0.95
+    control_type.var.name = object$genes_annotation.control_type$control_type.var_name
+    control_type.neg.value = object$genes_annotation.control_type$neg_type.value
+
+    if (class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric"){ # if there is only one entry in the neg values
+      neg <- object$E[object$genes[, control_type.var.name] == control_type.neg.value, ] # no 95% percentile required as only one neg entry
+    } else {
+      neg <- apply(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ], 2, function(x)quantile(x, p = filter.percentile)) # neg95
+    }
+    neg_control_used = TRUE
+  } else {
+    neg <- apply(object$E, 2, function(x)quantile(x, p = filter.percentile)) # 5% percentile of all the data
+    neg_control_used = FALSE
+  }
+
+  if (verbose) cat("Filtering low expresson genes/probes/genomic features...")
+  # low expression cuttoff set at at least 10% hihger than the neg
+  LE_cutoff <- matrix(1.1 * neg, nrow(object$E), ncol(object$E), byrow = TRUE)
+  # set filtering matrix
+  if (is.null(filter.threshold.min.sample)) {
+    filter.threshold.min.sample <- min(table(object$sample_groups))
+  }
+  isexpr <- rowSums(object$E > LE_cutoff) >= filter.threshold.min.sample
+  flt_summary <- as.numeric(table(isexpr))
+  names(flt_summary) <- c("filtered", "remaning")
+
+  # filter
+  flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
+  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name]
+  if (verbose) cat("Done!\n")
+
+  ## averaging technical replicates
+  if (verbose) cat("Averaging technical replicates...")
+  flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
+  flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), ])
+  if (verbose) cat("Done!\n")
+
+  ## combine duplicate genes if set
+  if (combine.gene.duplicate) {
+    if (length(flt_genes_avg[, object$genes_annotation.gene_id.var_name]) != length(unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]))) {
+      if (object$gene_display_name_used){
+        if (verbose) cat("Combining gene duplicates (i.e. different transcripts belonging to the same gene/genomic feature)...")
+        if (!parallelComputing) {
+          combGeneProbe <- foreach(i = unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]), .combine = "c") %do% {
+            tmp <- flt_E_avg[which(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name] %in% i), ]
+            if (is.null(dim(tmp))){
+              out <- var(tmp)
+            } else {
+              out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+                var(as.numeric(tmp[j, ]))
+              }
+            }
+            out <- data.frame(flt_genes_avg[which(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name] %in% i), ], var = out)
+            out[which(out$var %in% max(out$var)), object$genes_annotation.gene_id.var_name]
+          }
+        } else {
+          n_cores <- detectCores() - 1
+          cl <- makeCluster(n_cores, type = clusterType, outfile = "")
+          registerDoParallel(cl) # part of doParallel package
+          on.exit(stopCluster(cl)) # close connect when exiting the function
+
+          combGeneProbe <- foreach(i = unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]), .combine = "c", .packages = "foreach") %dopar% {
+            tmp <- flt_E_avg[which(flt_genes_avg[,object$genes_annotation.gene_symbol.var_name] %in% i), ]
+            if (is.null(dim(tmp))){
+              out <- var(tmp)
+            } else {
+              out <- foreach(j = seq(nrow(tmp)), .combine = "c") %do% {
+                var(as.numeric(tmp[j, ]))
+              }
+            }
+            out <- data.frame(flt_genes_avg[which(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name] %in% i), ], var = out)
+            out[which(out$var %in% max(out$var)), object$genes_annotation.gene_id.var_name]
+          }
+        }
+        out_E <- flt_E_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
+        out_genes <- flt_genes_avg[flt_genes_avg[, object$genes_annotation.gene_id.var_name] %in% combGeneProbe, ]
+        if (verbose) cat("Done! Records without a gene symbol have been automatically removed. \n")
+      } else {
+        if (verbose) cat("\n")
+        if (verbose) cat("Gene symbol not used in the input object. Proceed without combining gene duplicates.\n")
+        out_E <- flt_E_avg
+        out_genes <- flt_genes_avg
+      }
+    } else {
+      if (verbose) cat("Number of transcripts same as number of genes, no need to combine.\n")
+      out_E <- flt_E_avg
+      out_genes <- flt_genes_avg
+    }
+  } else {
+    out_E <- flt_E_avg
+    out_genes <- flt_genes_avg
+  }
+
+  ## output
+  if (verbose) cat("Constucting rbioarray_flist...")
+  filter.results <- list(neg_control_used = neg_control_used,
+                         filter_percentile = filter.percentile,
+                         filter_threshold_min_sample = filter.threshold.min.sample,
+                         filter_summary = flt_summary)
+  out <- list(E = out_E,
+              genes = out_genes,
+              gene_duplicates_combined = combine.gene.duplicate,
+              filter_results = filter.results)
+  out <- append(out, object[!names(object) %in% c("E", "genes")])
+  class(out) <- "rbioarray_flist"
+  if (verbose) cat("Done!\n")
+  return(out)
+}
+
+
+#' @export
+print.rbioarray_flist <- function(x, ...){
+  cat("\n")
+  cat("---- rbioarray_flist information ----\n")
+  cat(paste0("Number of genes/probes/genomic features upon filtering/averaging/combing: ", nrow(x$E), "\n"))
+  cat(paste0("Original number of genes/probes/genomic features: ", nrow(x$extra_E_data$original_E), "\n"))
+  cat(paste0("Gene duplicates combined: ", ifelse(x$gene_duplicates_combined, TRUE, FALSE), "\n"))
+  cat("\n")
+  cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
+  cat(paste0("Groups: "))
+  cat(paste0(levels(x$sample_groups)))
+  cat("\n")
+}
+
+#' @title microarray_de
+#'
+#' @description Function that performs statistical analysis for microarray data from \code{rbioarray_flist} class object.
+#' @param object The input \code{rbioarray_flist} object.
+#' @param contra contra Contrast matrix.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @return A \code{rbioarray_de} class object with DE results, containing the following core items:
+#'
+#'         \code{F_stats}
+#'
+#'         \code{DE_results}: a list containing the DE results
+#'
+#'         \code{comparisons}: a list with comparisons and comparison levles
+#'
+#'         \code{fit}: the limma fitted DE object as a reference
+#'
+#'         \code{input_data}: input E matrix and genes data frame from rbioarray_flist object
+#'
+#'         Additionally, the \code{rbioarray_de} includes additional items from the input \code{rbioarray_flist} object.
+#'
+#' @importFrom limma lmFit eBayes topTable contrasts.fit
 #' @examples
 #' \dontrun{
-#' rbioarray_DE(objTitle = "fltdata2", fltlist, annot = Anno, design, contra = contra,
-#'              weights = fltdata$ArrayWeight, parallelComputing = TRUE,
-#'              plot = TRUE, geneName = TRUE, genesymbolVar = "GeneSymbol",
-#'              DE = "spikein")
+#'
+#' de_list <- microarray_de(object = filtered_list, contra = contra)
+#'
 #' }
 #' @export
-rbioarray_DE <- function(objTitle = "data_filtered", fltlist = NULL, annot = NULL,
-                         design = NULL, contra = NULL, weights = NULL,
-                         ...,
-                         plot = TRUE, geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
-                         FC = 1.5,
-                         ctrlProbe = TRUE, ctrlTypeVar = "ControlType", sig.method = "fdr", sig.p = 0.05,
-                         plotTitle = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
-                         symbolSize = 2, sigColour = "red", nonsigColour = "gray",
-                         xTxtSize = 10, yTxtSize =10,
-                         plotWidth = 170, plotHeight = 150,
-                         parallelComputing = FALSE, clusterType = "PSOCK"){
-  ## check the key arguments
-  if (is.null(fltlist)){
-    stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data. Function terminated.\n")
+microarray_de <- function(object, contra, verbose = TRUE){
+  if (verbose) cat("Constructing rbioarray_de object...")
+  ## argument check
+  if (class(object) != "rbioarray_flist") stop("The input object needs to be a \"rbioarray_flist\" class.")
+
+  ## variable initation
+  cf <- colnames(contra)
+  contra_levels <- vector(mode = "list", length = length(cf))
+  contra_levels[] <- foreach(i = seq(length(cf))) %do% {
+    rownames(contra)[which(contra[, i] != 0)]
   }
-  if (!is.null(annot)){ # check if the variable "ProbeName" is included in the annotation dataframe
-    if (!"ProbeName" %in% names(annot)){
-      stop(cat("For the annotation dataframe, make sure to name the variable containing probe name \"ProbeName\". Function terminated.\n"))
-    }
+  names(contra_levels) <- cf
+
+  ## fitting
+  fit <- lmFit(object$E, design = object$design, weights = object$ArrayWeight)
+  fit <- contrasts.fit(fit, contrasts = contra)
+  fit <- eBayes(fit)
+  fit$genes <- object$genes
+
+  ## output
+  f_stats <- topTable(fit, number = Inf, sort.by = "none")
+  f_stats[, object$genes_annotation.gene_id.var_name] <- rownames(f_stats)
+  f_stats <- merge(f_stats, object$genes)
+
+  de_list <- vector(mode = "list", length(cf))
+  de_list[] <- foreach(i = seq(length(cf))) %do% {
+    # below: set sort.by = "none" to preserve the order, for supervsied clustering analysis.
+    # specifically, it is for constructing threshoding vector used for subsetting E matrix,
+    de_dfm <- topTable(fit = fit, coef = cf[i], number = Inf, sort.by = "none")
+    de_dfm[, object$genes_annotation.gene_id.var_name] <- rownames(de_dfm)
+    de_dfm <- merge(de_dfm, object$genes)
+    de_dfm
   }
-  if (is.null(design)){
-    stop("Please set design matrix. Function terminated.\n")
-  }
-  if (is.null(contra)){
-    stop("Please set contrast object. Function terminated.\n")
-  }
-  if (tolower(sig.method) == "spikein"){
-    if (!ctrlProbe){
-      stop(cat("\"spiken\" DE method can only be set when ctrlProbe = TRUE and ctrlTypeVar is properly set. Function terminated.\n"))
-    }
-  }
-  if (ctrlProbe){
-    if (!ctrlTypeVar %in% names(fltlist$genes)){
-      stop(cat("ctrlTypeVar not found. Function terminated.\n"))
-    }
-  }
+  names(de_list) <- cf
 
-  ## extract coefficients
-  cf <- colnames(contra) # extract coefficient
-  # set an empty matrix for exporting the threolding summery
-  threshold_summary <- matrix(nrow = length(cf), ncol = 5)
-  colnames(threshold_summary) <- c("coeffcient", "p.value.threshold", "fold.change.threshold", "True", "False")
-  threshold_summary <- as.matrix(threshold_summary)
+  flist_data <- list(E = object$E, genes = object$genes)
+  comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
-  ## temp func for plotting
-  # i: outlist (object) listed below
-  tmpfunc <- function(i, j, PC = NULL){
-    # set the data frame
-    if (geneName){
-      if (!genesymbolVar %in% names(i[[j]])){
-        stop(cat("Invalid gene symbol variable"))
-      }
+  out <- list(F_stats = f_stats,
+              DE_results = de_list,
+              comparisons = comparisons,
+              fit = fit,
+              input_data = flist_data)
+  out <- append(out, object[!names(object) %in% c("E", "genes", "raw_data", "raw_file.genes_annotation.var_name", "raw_file.gene_id.var_name")])
+  class(out) <- "rbioarray_de"
+  if (verbose) cat("Done!\n")
 
-      if (!is.null(genesymbolVar)){
-        tmpdfm <- i[[j]][complete.cases(i[[j]][, genesymbolVar]), ]
-      } else {
-        warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
-        tmpdfm <- i[[j]]
-      }
-    } else {
-      tmpdfm <- i[[j]]
-    }
+  return(out)
+}
 
-    # set the cutoff
-    if (tolower(sig.method) == "fdr"){
-      if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
-        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
-        pcutoff <- sig.p
-      } else {
-        pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
-      }
-    } else if (tolower(sig.method) == "spikein") {
-      ifelse(min(PC$p.value[, cf[j]]) > sig.p, pcutoff <- sig.p, pcutoff <- min(PC$p.value[, cf[j]]))
-    } else if (tolower(sig.method) == "none"){
-      pcutoff <- sig.p
-    } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
-    cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
 
-    # plot
-    loclEnv <- environment()
-    plt <- ggplot(tmpdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
-      geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
-      scale_color_manual(values = c(nonsigColour, sigColour)) +
-      ggtitle(plotTitle) +
-      scale_y_continuous(expand = c(0.02, 0)) +
-      xlab(xLabel) +
-      ylab(yLabel) +
-      geom_vline(xintercept = log2(FC), linetype = "dashed") +
-      geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-      geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(hjust = 0.5),
-            legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_text(size = xTxtSize),
-            axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
-
-    if (topgeneLabel){
-      tmpfltdfm <- tmpdfm[abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff, ]
-      tmpfltdfm <- tmpfltdfm[order(tmpfltdfm$P.Value), ]
-      plt <- plt + geom_text_repel(data = head(tmpfltdfm, n = nGeneSymbol),
-                                   aes(x = logFC, y = -log10(P.Value), label = head(tmpfltdfm, n = nGeneSymbol)[, genesymbolVar]),
-                                   point.padding = unit(padding, "lines"))
-    }
-
-    grid.newpage()
-    pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
-    # export the file and draw a preview
-    ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-           width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
-    grid.draw(pltgtb) # preview
-
-    # dump the info to the threshold dataframe
-    if (length(levels(cutoff)) == 1){
-      if (levels(cutoff) == "TRUE"){
-        tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
-      } else {
-        tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
-      }
-    } else {
-      tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
-    }
-  }
-
-  ## DE
-  cat("Linear fitting...") # message
-  if (class(fltlist) == "list"){
-    fit <- lmFit(fltlist$E, design, weights = weights)
-    fit <- contrasts.fit(fit, contrasts = contra)
-    fit <- eBayes(fit)
-    fit$genes <- fltlist$genes # add genes matrix to the DE results
-  } else {
-    fit <- lmFit(fltlist, design, weights = weights)
-    fit <- contrasts.fit(fit, contrasts = contra)
-    fit <- eBayes(fit)
-  }
-  cat("DONE!\n") # message
-
-  if (ctrlProbe){
-    out <- fit[fit$genes[, ctrlTypeVar] == 0, ] # remove control probes
-  } else {
-    out <- fit
-  }
-
-  if (tolower(sig.method) == "spikein"){ # extract PC stats for spikein method
-    PCntl <- fit[fit$genes[, ctrlTypeVar] == 1, ]
-  } else {
-    PCntl <- NULL
-  }
-
-  ## output and plotting
-  if(!parallelComputing){
-    # compile resutls into a list
-    outlist <- lapply(cf, function(i){
-      tmp <- topTable(out, coef = i, number = Inf, ...)
-      tmp$ProbeName <- rownames(tmp)
-      if (!is.null(annot)){ # merge with annotation dataframe
-        tmp <- merge(tmp, annot, by = "ProbeName")
-      }
-      return(tmp)
-    })
-
-    names(outlist) <- cf
-    # write DE results into files
-    lapply(1:length(cf), function(j){
-      write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
-    })
-
-    # volcano plot and output summary
-    if (plot){
-      threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
-    }
-  } else { ## parallel computing
-    # check the cluster type
-    if (clusterType != "PSOCK" & clusterType != "FORK"){
-      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
-    }
-
-    # set up cpu cores
-    n_cores <- detectCores() - 1
-
-    if (clusterType == "PSOCK"){ # all OS types
-      # set up cpu cluster
-      cl <- makeCluster(n_cores, type = "PSOCK")
-      registerDoParallel(cl)
-      on.exit(stopCluster(cl)) # close connect when exiting the function
-
-      outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
-        tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        if (!is.null(annot)){ # merge with annotation dataframe
-          tmp <- merge(tmp, annot, by = "ProbeName")
-        }
-        return(tmp)
-      }
-      names(outlist) <- cf
-
-      # write DE results into files
-      foreach(j = 1: length(cf)) %dopar% {
-        write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""),  na = "NA", row.names = FALSE)
-      }
-
-      # volcano plot and output summary
-      if (plot){
-        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
-                                       .packages = c("limma", "ggplot2", "gtable", "grid")) %dopar% {
-          tmpfunc(i = outlist, j = j, PC = PCntl)
-        }
-      }
-    } else { # macOS and Unix-like systems
-      outlist <- mclapply(cf, FUN = function(i){
-        tmp <- topTable(out, coef = i, number = Inf, ...)
-        tmp$ProbeName <- rownames(tmp)
-        if (!is.null(annot)){ # merge with annotation dataframe
-          tmp <- merge(tmp, annot, by = "ProbeName")
-        }
-        return(tmp)
-      }, mc.cores = n_cores, mc.preschedule = FALSE)
-
-      names(outlist) <- cf
-      # write DE results into files
-      mclapply(1:length(cf), FUN = function(j){
-        write.csv(outlist[[j]], file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
-      }, mc.cores = n_cores, mc.preschedule = FALSE)
-
-      # volcano plot and output summary
-      if (plot){
-        threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
-      }
-    }
-  }
-
-  ## output the DE/fit objects to the environment, as well as the DE csv files into wd
-  fitout <- topTable(out, number = Inf)
-  if (!is.null(annot)){ # merge with annotation dataframe
-    fitout <- merge(fitout, annot, by = "ProbeName")
-  }
-  assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
-  write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
-  assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
-  write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
-
-  ## message
-  if (geneName & !is.null(genesymbolVar)){
-    print("Probes without a gene symbol are removed from the volcano plots")
-  }
+#' @export
+print.rbioarray_de <- function(x, ...){
+  cat("\n")
+  cat("--- Microarray gene differential expression analysis ---\n")
+  cat("\n")
+  cat("Comparisons assessed: \n")
+  cat(paste0("\t", x$comparisons$comparisons, "\n"))
+  cat("\n")
 }
