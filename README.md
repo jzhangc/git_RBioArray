@@ -80,7 +80,7 @@ Update log
       - Bug fixes
       
       
-    0.4.6 (4.26.2018)
+    0.4.6
       - Centered log transformation and isometric log transformation function rbioseq_clr_ilr_transfo() added
       - Normalizatin method arugment norm.method added to rbioseq_DE() function
         - options are: "TMM","RLE","upperquartile","none". NOTE: clr and ilr options to be added in the next release
