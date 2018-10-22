@@ -22,6 +22,28 @@ Installation:
         devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos(), ref = "beta")  
 
 Update log
+
+    0.5.2 (feature roadmap)
+    (ICEBOX)
+      - New microarray functions:
+        - New DE analysis function added: rbioarray_de_analysis()
+          - The fnction has export options:
+            (i) all features, 
+            (ii) features with an annotation name, 
+            (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol"
+            
+      - New clustering funcions:
+        - Bayesian biclustering function rbioarray_bbc()
+        - K-mean clustering function rbioarray_kmean()
+      
+      - Updates to microarray functions
+        - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
+        
+      - Revamp GS functions
+      
+      - Other update
+        - Functions updated for R Notebook/Markdown compatibility
+        - Dependency ggplot2 now requires version 3.0.0
     
     0.5.1  (Oct. 22. 2018)
       - Updates to RNAseq functions
