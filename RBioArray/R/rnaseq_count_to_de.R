@@ -79,7 +79,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param annot.group Ssample group annotation object. Can be a \code{factor} or \code{vector} object.
-#' @param between.genes.norm.method Between gene normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
+#' @param between.samples.norm.method Between-sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param qc.plot QC plot for the input read counts
@@ -126,7 +126,7 @@ rnaseq_de.default <- function(x, y = NULL,
                               y.gene_symbol.var.name = "genes",
                               filter.threshold.cpm = "none",
                               filter.threshold.min.sample = NULL, annot.group = NULL,
-                              between.genes.norm.method = "TMM",
+                              between.samples.norm.method = "TMM",
                               design, contra, qc.plot = TRUE, verbose = TRUE){
   ## check the key arguments
   if (!class(x) %in% c("data.frame", "matrix")){
@@ -177,8 +177,8 @@ rnaseq_de.default <- function(x, y = NULL,
     stop("Please set contrast object.")
   }
 
-  if (!between.genes.norm.method %in% c("none", "TMM","RLE","upperquartile")){
-    stop("Please set the norm.method with exactly one of the following: \"none\", \"TMM\", \"RLE\", or \"upperquartile\".")
+  if (!between.samples.norm.method %in% c("none", "TMM","RLE", "upperquartile")){
+    stop("Please set the between.samples.norm.method with exactly one of the following: \"none\", \"TMM\", \"RLE\", or \"upperquartile\".")
   }
 
   ## extract coefficients
@@ -206,9 +206,9 @@ rnaseq_de.default <- function(x, y = NULL,
     filter_results <- NULL
   }
 
-  # between-genes normalization
-  dgenormf <- calcNormFactors(dge, method = between.genes.norm.method)  # between-genes
-  # between-samples: Voom normalization with quality weights
+  # between-samples normalization
+  dgenormf <- calcNormFactors(dge, method = between.samples.norm.method)  # between-genes
+  # between-genes: Voom normalization with quality weights
   vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile")
   if (verbose) cat("DONE!\n") # message
 
@@ -229,7 +229,7 @@ rnaseq_de.default <- function(x, y = NULL,
   comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
   out <- list(filter_results = filter_results,
-              normalization_method = list(between_genes = between.genes.norm.method, between_samples = "voom"),
+              normalization_method = list(between_samples = between.samples.norm.method, between_genes = "voom"),
               normalized_data = vmwt,
               genes_annotation.gene_id.var_name = y.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = y.gene_symbol.var.name,
