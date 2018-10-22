@@ -45,6 +45,11 @@ Update log
         - Functions updated for R Notebook/Markdown compatibility
         - Dependency ggplot2 now requires version 3.0.0
     
+    (ADDED)
+        - Updates to RNAseq functions:
+          - Print method for "rbioseq_de" now shows "between-sample" normalization method first
+      
+    
     0.5.1  (Oct. 22. 2018)
       - Updates to RNAseq functions
         - TMM scaling now correctly identified as "between-sample" normalization, whereas Voom as "between-gene" normalization method
