@@ -48,9 +48,6 @@ Update log
         - Dependency ggplot2 now requires version 3.0.0
     
     (ADDED)
-      - Updates to the clustring functions:
-        - The CLR transformatioin added to rbio_supervised_corcluster() for RNAseq dataset
-      
       - Updates to RNAseq functions:
         - Print method for "rbioseq_de" now shows "between-sample" normalization method first
 
