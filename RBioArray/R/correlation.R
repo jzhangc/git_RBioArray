@@ -112,18 +112,25 @@ rbio_unsupervised_corcluster.rbioseq_de <- function(object, sample_id.var.name =
   ## variables
   export.name <- deparse(substitute(object))
   # transform
-  cat("CLR transformation of filtered RNAseq count data...")
-  E_transfo <- rbioseq_clr_ilr_transfo(object$filter_results$filtered_counts$counts, offset = 1, mode = "clr")  # clr tranformation
-  cat("Done!\n")
+  # cat("CLR transformation of filtered RNAseq count data...")
+  # E_transfo <- rbioseq_clr_ilr_transfo(object$filter_results$filtered_counts$counts, offset = 1, mode = "clr")  # clr tranformation
+  # cat("Done!\n")
 
   ## use methods
-  rbio_unsupervised_corcluster.default(E = E_transfo, genes = object$filter_results$filtered_counts$genes,
-                  input.genes_annotation.control_type = NULL,
-                  input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
-                  input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
-                  input.sample_groups = object$sample_groups,
-                  input.comparisons = object$comparisons,
-                  export.name = export.name, ...)
+  # rbio_unsupervised_corcluster.default(E = E_transfo, genes = object$filter_results$filtered_counts$genes,
+  #                 input.genes_annotation.control_type = NULL,
+  #                 input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+  #                 input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+  #                 input.sample_groups = object$sample_groups,
+  #                 input.comparisons = object$comparisons,
+  #                 export.name = export.name, ...)
+  rbio_unsupervised_corcluster.default(E = object$normalized_data$E, genes = object$filter_results$filtered_counts$genes,
+                                       input.genes_annotation.control_type = NULL,
+                                       input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+                                       input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+                                       input.sample_groups = object$sample_groups,
+                                       input.comparisons = object$comparisons,
+                                       export.name = export.name, ...)
 }
 
 

@@ -49,4 +49,5 @@ Supersived hierarchical clustering function.
 }
 \details{
 Unlink the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
+         The column colour group is usually 2.
 }

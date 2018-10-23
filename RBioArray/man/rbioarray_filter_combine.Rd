@@ -27,7 +27,7 @@ rbioarray_filter_combine(object, filter.percentile = 0.05,
 \value{
 A \code{rbioarray_flist} class, including the following core items:
 
-        \code{E}: filtered (and if set, combined) expression matrix
+        \code{E}: filtered (and if set, combined) and normlized expression matrix
 
         \code{genes}: gene annotation with same row number as E
 

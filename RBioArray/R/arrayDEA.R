@@ -448,7 +448,7 @@ print.rbioarray_plist <- function(x, ...){
 #'
 #' @return A \code{rbioarray_flist} class, including the following core items:
 #'
-#'         \code{E}: filtered (and if set, combined) expression matrix
+#'         \code{E}: filtered (and if set, combined) and normlized expression matrix
 #'
 #'         \code{genes}: gene annotation with same row number as E
 #'
@@ -618,6 +618,7 @@ print.rbioarray_flist <- function(x, ...){
 #'         \code{fit}: the limma fitted DE object as a reference
 #'
 #'         \code{input_data}: input E matrix and genes data frame from rbioarray_flist object
+#'                            note the E matrix is \code{E} from the \code{rbioarray_flist} object, meaning the filtered and normalized data
 #'
 #'         Additionally, the \code{rbioarray_de} includes additional items from the input \code{rbioarray_flist} object.
 #'

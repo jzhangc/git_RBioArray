@@ -230,6 +230,8 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details Unlink the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
+#'          The column colour group is usually 2.
+#'
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
@@ -278,12 +280,6 @@ rbio_supervised_hcluster <- function(object,
   thresholding_summary <- object$thresholding_summary
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
 
-  if(length(levels(input.sample_groups)) <= 19) {
-    colGroup <- length(levels(input.sample_groups))
-  } else {
-    cat("The sample groups exceed the maximum allowed colour group number (19). Proceed with 19.\n\n")
-    colGroup <- 19
-  }
   if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(genes)) {
     cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
     gene_symbol.only <- FALSE
@@ -322,6 +318,7 @@ rbio_supervised_hcluster <- function(object,
     row.lab <- plt_dfm[, row.lab.var_name]
 
     ## set ColSideColors
+    colGroup <- length(comparison_levels[[i]])
     col_cluster <- clustfunc(distfunc(t(plt_mtx)))
     colG <- cutree(col_cluster, colGroup) # column group
     colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), col.colour) # column colour

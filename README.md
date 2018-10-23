@@ -35,6 +35,7 @@ Update log
       - New clustering funcions:
         - Bayesian biclustering function rbioarray_bbc()
         - K-mean clustering function rbioarray_kmean()
+        - Propotionality correlation function added for CLR transformed RNAseq data
       
       - Updates to microarray functions
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
@@ -42,13 +43,20 @@ Update log
       - Revamp GS functions
       
       - Other update
+        - Updates to Venn diagram function for the S3 class "sig"
         - Functions updated for R Notebook/Markdown compatibility
         - Dependency ggplot2 now requires version 3.0.0
     
     (ADDED)
-        - Updates to RNAseq functions:
-          - Print method for "rbioseq_de" now shows "between-sample" normalization method first
+      - Updates to the clustring functions:
+        - The CLR transformatioin added to rbio_supervised_corcluster() for RNAseq dataset
       
+      - Updates to RNAseq functions:
+        - Print method for "rbioseq_de" now shows "between-sample" normalization method first
+
+      - Updates to microarray functions:
+       - Better doumentation for rbioarray_transfo_normalize(), rbioarray_filter_combine() and microarray_de()
+       
     
     0.5.1  (Oct. 22. 2018)
       - Updates to RNAseq functions
