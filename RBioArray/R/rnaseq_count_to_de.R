@@ -229,7 +229,7 @@ rnaseq_de.default <- function(x, y = NULL,
   comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
   out <- list(filter_results = filter_results,
-              normalization_method = list(between_samples = between.samples.norm.method, between_genes = "voom"),
+              normalization_method = list(between_samples = between.samples.norm.method, between_genes = "voom process with quantile normalization"),
               normalized_data = vmwt,
               genes_annotation.gene_id.var_name = y.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = y.gene_symbol.var.name,

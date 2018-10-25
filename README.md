@@ -50,6 +50,7 @@ Update log
     (ADDED)
       - Updates to RNAseq functions:
         - Print method for "rbioseq_de" now shows "between-sample" normalization method first
+        - Updated documentation for voom process for rnaseq_de()
 
       - Updates to microarray functions:
        - Better doumentation for rbioarray_transfo_normalize(), rbioarray_filter_combine() and microarray_de()
