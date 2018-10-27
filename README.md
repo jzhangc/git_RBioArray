@@ -53,7 +53,10 @@ Update log
         - Updated documentation for voom process for rnaseq_de()
 
       - Updates to microarray functions:
-       - Better doumentation for rbioarray_transfo_normalize(), rbioarray_filter_combine() and microarray_de()
+        - Better doumentation for rbioarray_transfo_normalize(), rbioarray_filter_combine() and microarray_de()
+
+      - Other updates
+        - Package description updated
        
     
     0.5.1  (Oct. 22. 2018)
