@@ -45,6 +45,7 @@ Update log
       - Other update
         - Updates to Venn diagram function for the S3 class "sig"
         - Functions updated for R Notebook/Markdown compatibility
+        - Combine documentatin for methods of different classes 
         - Dependency ggplot2 now requires version 3.0.0
     
     (ADDED)

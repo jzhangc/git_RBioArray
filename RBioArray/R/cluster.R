@@ -229,7 +229,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details Unlink the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
+#' @details Unlike the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
 #'          The column colour group is usually 2.
 #'
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
