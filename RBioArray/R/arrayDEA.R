@@ -157,7 +157,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
 
     # set up output annotation information
     genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
-    genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]
+    genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
   } else {
     cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
@@ -360,41 +360,6 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
   if (verbose) cat("Background correction: \n")
   E_bgc <- backgroundCorrect.matrix(E = E, Eb = E.background, method = bgc.method, ...) #background correction
   if (verbose) cat("Done!\n")
-  # cat("\n")
-  #
-  # ## log transform  or not
-  # transfo_E_mtx <- NULL
-  # if (logTransfo){  # log transform
-  #   cat(paste0("Data ", logTransfo.method, " tranformation..."))
-  #   # additional argument check
-  #   if (!logTransfo.method %in% c("log2", "log10")) stop("Argument logTransfo.method needs to be set with either \"log2\" or \"log10\" exactly.")
-  #
-  #   if (is.null(logTransfo.gene.annot)) {
-  #     stop("Please provide logTransfo.gene.annot when logTransfo = TRUE.")
-  #   } else {
-  #     if (is.null(dim(logTransfo.gene.annot))){
-  #       if (length(logTransfo.gene.annot) != nrow(E)) stop("logTransfo.gene.annot vector length not same as row number of E")
-  #     } else {
-  #       if (nrow(logTransfo.gene.annot) != nrow(E)) stop("Row number of logTransfo.gene.annot matrix/data frame not the same length as the row number of E")
-  #     }
-  #   }
-  #
-  #   # log2 transformation
-  #   if (logTransfo.method == "log2"){
-  #     transfo_E_mtx <- log2(E_bgc)
-  #   } else {
-  #     transfo_E_mtx <- log10(E_bgc)
-  #   }
-  #   E_mtx <- transfo_E_mtx
-  #   cat("Done!\n")
-  #
-  #   # store and export log transformed data into a csv file if applicable
-  #   cat(paste0("The log transformed data saved to file: ", logTransfo.export.name, "_log_transformed.csv\n"))
-  #   logTransfo_out <- data.frame(logTransfo.gene.annot, transfo_E_mtx)
-  #   write.csv(logTransfo_out, file = paste0(logTransfo.export.name, "_log_transformed.csv"), row.names = FALSE)
-  # } else {
-  #   E_mtx <- E_bgc
-  # }
 
   ## normalization
   if (verbose) cat("\n")

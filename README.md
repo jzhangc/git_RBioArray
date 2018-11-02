@@ -43,12 +43,15 @@ Update log
       - Revamp GS functions
       
       - Other update
-        - Updates to Venn diagram function for the S3 class "sig"
         - Functions updated for R Notebook/Markdown compatibility
         - Combine documentatin for methods of different classes 
         - Dependency ggplot2 now requires version 3.0.0
     
     (ADDED)
+      - Updates to shared functions:
+        - Full DE gene-level stats are now stored in "sig" class
+        - Docmentation updated for sig() function
+      
       - Updates to RNAseq functions:
         - Print method for "rbioseq_de" now shows "between-sample" normalization method first
         - Updated documentation for voom process for rnaseq_de()
@@ -57,6 +60,8 @@ Update log
         - Better doumentation for rbioarray_transfo_normalize(), rbioarray_filter_combine() and microarray_de()
 
       - Other updates
+        - New Venn diagram function rbio_venn_de() for the S3 class "sig"
+          - Due to the S3 revamp, the old venn diagram function rbioarray_venn_DE is now a legacy function
         - Package description updated
        
     

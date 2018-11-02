@@ -260,6 +260,10 @@ rbio_supervised_hcluster <- function(object,
     stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
   if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
     stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
+  if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(object$input_data$genes)) {
+    cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
+    gene_symbol.only <- FALSE
+  }
 
   # check contrast levels against sample groups
   contra_levels_all <- unique(foreach(i = 1:length(object$input_data$comparisons$comparison_levels), .combine = "c") %do% {
@@ -280,10 +284,7 @@ rbio_supervised_hcluster <- function(object,
   thresholding_summary <- object$thresholding_summary
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
 
-  if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(genes)) {
-    cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
-    gene_symbol.only <- FALSE
-  }
+
   if (is.null(input.genes_annotation.control_type)) {
     cat("Argument input.genes_annotation.control_type is NULL, no control probes are removed.\n\n")
     rm.control <- FALSE

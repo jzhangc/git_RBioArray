@@ -20,7 +20,8 @@
 #'
 #'         \code{genes_annotation.gene_symbol.var_name}
 #'
-#'         \code{input_data}: expression data matrix and gene annotation data frame from either \code{rbioarray_de} or \code{rbioseq_de} objects.
+#'         \code{input_data}: expression data matrix and gene annotation data frame from either \code{rbioarray_de} or \code{rbioseq_de} objects, along with key variable names.
+#'                            full DE gene-level stats
 #'                            For \code{rbioarray_de} class, it is filtered and normalized data, i.e. input_data$norm_E
 #'                            For \code{rbioreq_de} class, it is both filtered (not normalized), i.e. input_data$filtered_E, and filtered + normalized data input_data$norm_E
 #'
@@ -70,7 +71,8 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                      targets = object$targets,
                      sample_groups = object$sample_groups,
-                     comparisons = object$comparisons)
+                     comparisons = object$comparisons,
+                     full_de_results = object$DE_results)
 
   out$input_data <- input.data
   class(out) <- "sig"
@@ -115,7 +117,8 @@ sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.nam
                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                      targets = object$targets,
                      sample_groups = object$sample_groups,
-                     comparisons = object$comparisons)
+                     comparisons = object$comparisons,
+                     full_de_results = object$DE_results)
 
   out$input_data <- input.data
   class(out) <- "sig"
