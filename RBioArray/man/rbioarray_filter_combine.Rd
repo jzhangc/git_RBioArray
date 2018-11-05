@@ -5,9 +5,8 @@
 \title{rbioarray_filter_combine}
 \usage{
 rbioarray_filter_combine(object, filter.percentile = 0.05,
-  filter.threshold.min.sample = NULL, gene.annot.rm.var.name = NULL,
-  combine.gene.duplicate = FALSE, parallelComputing = FALSE,
-  clusterType = "PSOCK", verbose = TRUE)
+  filter.threshold.min.sample = NULL, combine.gene.duplicate = FALSE,
+  parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
 \item{object}{Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.}

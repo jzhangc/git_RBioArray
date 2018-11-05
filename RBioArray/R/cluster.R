@@ -217,8 +217,6 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param object Input \code{sig} class object.
 #' @param input.sample_groups Input \code{factor} object for sample groupping labels.
 #' @param gene_symbol.only Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
-#' @param input.genes_annotation.gene_symbol.var_name Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.
-#' @param input.genes_annotation.gene_id.var_name Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.
 #' @param sample_id.vector A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
@@ -260,10 +258,6 @@ rbio_supervised_hcluster <- function(object,
     stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
   if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
     stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
-  if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(object$input_data$genes)) {
-    cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
-    gene_symbol.only <- FALSE
-  }
 
   # check contrast levels against sample groups
   contra_levels_all <- unique(foreach(i = 1:length(object$input_data$comparisons$comparison_levels), .combine = "c") %do% {
@@ -275,21 +269,32 @@ rbio_supervised_hcluster <- function(object,
   E <- object$input_data$norm_E
   genes <- object$input_data$genes
   input.genes_annotation.gene_symbol.var_name = object$input_data$input.genes_annotation.gene_symbol.var_name
+  if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(object$input_data$genes)) {
+    cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
+    gene_symbol.only <- FALSE
+  }
   input.genes_annotation.gene_id.var_name = object$input_data$input.genes_annotation.gene_id.var_name
   export.name <- deparse(substitute(object))
   input.sample_groups <- object$input_data$sample_groups
   input.genes_annotation.control_type <- object$input_data$input.genes_annotation.control_type
   comparisons <- object$input_data$comparisons$comparisons
   comparison_levels <- object$input_data$comparisons$comparison_levels
+  comp_to_remove <- which(as.numeric(object$significant_change_summary[, "True"]) < 2)
   thresholding_summary <- object$thresholding_summary
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
-
 
   if (is.null(input.genes_annotation.control_type)) {
     cat("Argument input.genes_annotation.control_type is NULL, no control probes are removed.\n\n")
     rm.control <- FALSE
   } else {
     rm.control <- TRUE
+  }
+
+  if (length(comp_to_remove) > 0) {
+    cat("Comparisons with less than two significant changes were removed: ", comparisons[comp_to_remove], "\n")
+    comparisons <- comparisons[-comp_to_remove]
+    comparison_levels <- comparison_levels[-comp_to_remove]
+    thresholding_summary <- thresholding_summary[-comp_to_remove]
   }
 
   ## set up data
@@ -318,7 +323,7 @@ rbio_supervised_hcluster <- function(object,
     plt_mtx <- plt_mtx[, which(input.sample_groups %in% comparison_levels[[i]])]  # subsetting samples for the comparison levels
     row.lab <- plt_dfm[, row.lab.var_name]
 
-    ## set ColSideColors
+    # set ColSideColors
     colGroup <- length(comparison_levels[[i]])
     col_cluster <- clustfunc(distfunc(t(plt_mtx)))
     colG <- cutree(col_cluster, colGroup) # column group

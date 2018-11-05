@@ -410,6 +410,7 @@ rbio_supervised_corcluster <- function(object,
   input.genes_annotation.control_type <- object$input_data$input.genes_annotation.control_type
   comparisons <- object$input_data$comparisons$comparisons
   comparison_levels <- object$input_data$comparisons$comparison_levels
+  comp_to_remove <- which(as.numeric(object$significant_change_summary[, "True"]) < 2)
   thresholding_summary <- object$thresholding_summary
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
 
@@ -422,6 +423,13 @@ rbio_supervised_corcluster <- function(object,
     rm.control <- FALSE
   } else {
     rm.control <- TRUE
+  }
+
+  if (length(comp_to_remove) > 0) {
+    cat("Comparisons with less than two significant changes were removed: ", comparisons[comp_to_remove], "\n")
+    comparisons <- comparisons[-comp_to_remove]
+    comparison_levels <- comparison_levels[-comp_to_remove]
+    thresholding_summary <- thresholding_summary[-comp_to_remove]
   }
 
   # prepare dfm for clustering

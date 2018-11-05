@@ -16,7 +16,7 @@
 #'
 #'         \code{raw_file.gene_id.var_name}
 #'
-#'         \code{gene_display_name_used}: if the gene display name is extracted from \code{gene.annot.dataframe}.
+#'         \code{gene_display_name_used}: if the gene display name is extracted from \code{extra.gene.annot.dataframe}.
 #'
 #'         \code{genes_annotation.gene_id.var_name}
 #'
@@ -34,7 +34,7 @@
 #' @examples
 #' \dontrun{
 #' \code{# ElistRaw}
-#' rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", gene.annot.dataframe = annot,
+#' rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", extra.gene.annot.dataframe = annot,
 #'                          gene.annot.gene_id.var.name = "ProbeName", gene.annot.gene_symbol.var.name = "Gene.Symbol",
 #'                          gene.annot.control_type.var.name = "ControlType", gene.annot.control_type.val.pos = 1,
 #'                          gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
@@ -43,7 +43,7 @@
 #'
 #' \code{# non-EListRaw}
 #' raw_list <- rbioarray_rlist(raw.dataframe = raw, raw.annot.var.name = c("PROBE_ID","ILMN_GENE"), raw.gene_id.var.name = "PROBE_ID",
-#'                             gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
+#'                             extra.gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
 #'                             target.annot.file = "sample_index_end6.csv", sample_groups.var.name = "time_point")
 #' }
 #' @export
@@ -83,10 +83,10 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param raw.background.signal.matrix A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
 #' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
 #' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
-#' @param gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
-#' @param gene.annot.gene_id.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.
-#' @param gene.annot.gene_symbol.var.name Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.
-#' @param gene.annot.control_type.var.name Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.
+#' @param extra.gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
+#' @param gene.annot.gene_id.var.name Set only when \code{extra.gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{extra.gene.annot.dataframe}.
+#' @param gene.annot.gene_symbol.var.name Set only when \code{extra.gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{extra.gene.annot.dataframe}, e.g. gene symbols.
+#' @param gene.annot.control_type.var.name Optional, from either \code{raw.annot} or \code{extra.gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.
 #' @param gene.annot.control_type.val.pos Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.
 #' @param gene.annot.control_type.val.neg Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.
 #' @param gene.annot.control_type.val.exp Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.
@@ -99,15 +99,15 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #'
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 #'
-#'          The optional annotation data frame \code{gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
-#'          It is noted that \code{gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
+#'          The optional annotation data frame \code{extra.gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
+#'          It is noted that \code{extra.gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
 #'          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
-#'          The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+#'          The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
 #'
 #' @export
 rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix = NULL,
                                     raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
-                                    gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
+                                    extra.gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
                                     gene.annot.control_type.var.name = NULL,
                                     gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
                                     gene.annot.rm.var.name = NULL,
@@ -123,20 +123,20 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     stop("Annoation variables (i.e. columns) and/or the gene_id variable (i.e. column) not found in raw.dataframe")
 
   # gene annotation
-  if (!is.null(gene.annot.dataframe)){  # check and load gene annoation
-    if (!is.data.frame(gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
-    # if (nrow(gene.annot.dataframe) < nrow(raw.dataframe)) stop("gene.annot.dataframe has less record than the raw.dataframe") # check size
+  if (!is.null(extra.gene.annot.dataframe)){  # check and load gene annoation
+    if (!is.data.frame(extra.gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
+    # if (nrow(extra.gene.annot.dataframe) < nrow(raw.dataframe)) stop("extra.gene.annot.dataframe has less record than the raw.dataframe") # check size
 
     if (is.null(gene.annot.gene_id.var.name) || is.null(gene.annot.gene_symbol.var.name)) { # gene id and symbol variables
       stop("Please set gene.annot.gene_id.var.name AND gene.annot.gene_symbol.var.name arguments according to gene.annot")
-    } else if (!gene.annot.gene_id.var.name %in% names(gene.annot.dataframe) || !gene.annot.gene_symbol.var.name %in% names(gene.annot.dataframe)) {
-      stop("Gene ID variable and/or gene symbol variable not found in gene.annot.dataframe")
+    } else if (!gene.annot.gene_id.var.name %in% names(extra.gene.annot.dataframe) || !gene.annot.gene_symbol.var.name %in% names(extra.gene.annot.dataframe)) {
+      stop("Gene ID variable and/or gene symbol variable not found in extra.gene.annot.dataframe")
     } else {
       gene.symbol <- TRUE
     }
     # additional variables
     raw_dfm <- raw.dataframe
-    genes_annot_dfm <- gene.annot.dataframe
+    genes_annot_dfm <- extra.gene.annot.dataframe
 
     ## Set up the information
     # merge gene annotation with raw dataframe
@@ -159,7 +159,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
     genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
   } else {
-    cat("Note: gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
+    cat("Note: extra.gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
     gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
     genes <- raw.dataframe[, raw.annot.var.name]
@@ -190,7 +190,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
   # optional control_type variable
   if (!is.null(gene.annot.control_type.var.name)) {
     if (!gene.annot.control_type.var.name %in% names(genes)) {
-      cat("The set control type variable not found in gene.annot.dataframe. Proceed without using it.\n")
+      cat("The set control type variable not found in extra.gene.annot.dataframe. Proceed without using it.\n")
       gene.annot.control_type = NULL
     } else {
       control_type.values <- unique(genes[, gene.annot.control_type.var.name])
@@ -431,7 +431,6 @@ print.rbioarray_plist <- function(x, ...){
 rbioarray_filter_combine <- function(object,
                                      filter.percentile = 0.05,
                                      filter.threshold.min.sample = NULL,
-                                     gene.annot.rm.var.name = NULL,
                                      combine.gene.duplicate = FALSE,
                                      parallelComputing = FALSE, clusterType = "PSOCK",
                                      verbose = TRUE){
@@ -557,7 +556,7 @@ print.rbioarray_flist <- function(x, ...){
   cat("\n")
   cat("---- rbioarray_flist information ----\n")
   cat(paste0("Number of genes/probes/genomic features upon filtering/averaging/combing: ", nrow(x$E), "\n"))
-  cat(paste0("Original number of genes/probes/genomic features: ", nrow(x$extra_E_data$original_E), "\n"))
+  cat(paste0("Original number of genes/probes/genomic features: ", nrow(x$raw_data$original_E), "\n"))
   cat(paste0("Gene duplicates combined: ", ifelse(x$gene_duplicates_combined, TRUE, FALSE), "\n"))
   cat("\n")
   cat(paste0("Number of samples: ", nrow(x$targets), "\n"))

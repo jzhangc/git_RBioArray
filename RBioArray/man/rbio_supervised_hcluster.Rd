@@ -35,10 +35,6 @@ rbio_supervised_hcluster(object, gene_symbol.only = FALSE,
 
 \item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
 
-\item{input.genes_annotation.gene_symbol.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.}
-
-\item{input.genes_annotation.gene_id.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.}
-
 \item{sample_id.vector}{A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.}
 }
 \value{

@@ -6,7 +6,7 @@
 \usage{
 \method{rbioarray_rlist}{default}(raw.dataframe,
   raw.background.signal.matrix = NULL, raw.annot.var.name = NULL,
-  raw.gene_id.var.name = NULL, gene.annot.dataframe = NULL,
+  raw.gene_id.var.name = NULL, extra.gene.annot.dataframe = NULL,
   gene.annot.gene_id.var.name = NULL,
   gene.annot.gene_symbol.var.name = NULL,
   gene.annot.control_type.var.name = NULL,
@@ -25,13 +25,13 @@
 
 \item{raw.gene_id.var.name}{Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.}
 
-\item{gene.annot.dataframe}{Optional annotation data frame for gene/probe/genomic feature annotation.}
+\item{extra.gene.annot.dataframe}{Optional annotation data frame for gene/probe/genomic feature annotation.}
 
-\item{gene.annot.gene_id.var.name}{Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{gene.annot.dataframe}.}
+\item{gene.annot.gene_id.var.name}{Set only when \code{extra.gene.annot.dataframe} is provided, variable name for probe/gene/genomic features identification from \code{extra.gene.annot.dataframe}.}
 
-\item{gene.annot.gene_symbol.var.name}{Set only when \code{gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{gene.annot.dataframe}, e.g. gene symbols.}
+\item{gene.annot.gene_symbol.var.name}{Set only when \code{extra.gene.annot.dataframe} is provided, variable name for probe/gene/genomic features display name from \code{extra.gene.annot.dataframe}, e.g. gene symbols.}
 
-\item{gene.annot.control_type.var.name}{Optional and set only when \code{gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.}
+\item{gene.annot.control_type.var.name}{Optional, from either \code{raw.annot} or \code{extra.gene.annot.dataframe} is provided, name for the variable that denotes if the gene is a control and its control type. Default is \code{NULL}.}
 
 \item{gene.annot.control_type.val.pos}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a positive control probe. Default is \code{1}.}
 
@@ -57,8 +57,8 @@ The \code{raw.background.signal.matrix} is usefual when processing a \code{EList
 
          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 
-         The optional annotation data frame \code{gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
-         It is noted that \code{gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
+         The optional annotation data frame \code{extra.gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
+         It is noted that \code{extra.gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
-         The gene display name will only be used if \code{gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+         The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
 }

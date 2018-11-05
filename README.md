@@ -48,6 +48,9 @@ Update log
         - Dependency ggplot2 now requires version 3.0.0
     
     (ADDED)
+      - New clustering funcions:
+        - Fixes made to rbio_supervised_hcluster() so that it skips the comparisons without significant result
+        
       - Updates to shared functions:
         - Full DE gene-level stats are now stored in "sig" class
         - Docmentation updated for sig() function
@@ -57,12 +60,15 @@ Update log
         - Updated documentation for voom process for rnaseq_de()
 
       - Updates to microarray functions:
+        - The gene.annot.dataframe argument changed to extra.gene.annot.dataframe for rbioarray_rlist()
         - Better doumentation for rbioarray_transfo_normalize(), rbioarray_filter_combine() and microarray_de()
 
       - Other updates
         - New Venn diagram function rbio_venn_de() for the S3 class "sig"
           - Due to the S3 revamp, the old venn diagram function rbioarray_venn_DE is now a legacy function
         - Package description updated
+      
+      - Other bug fixes
        
     
     0.5.1  (Oct. 22. 2018)

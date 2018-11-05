@@ -20,7 +20,7 @@ A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the f
 
         \code{raw_file.gene_id.var_name}
 
-        \code{gene_display_name_used}: if the gene display name is extracted from \code{gene.annot.dataframe}.
+        \code{gene_display_name_used}: if the gene display name is extracted from \code{extra.gene.annot.dataframe}.
 
         \code{genes_annotation.gene_id.var_name}
 
@@ -46,7 +46,7 @@ When \code{object} is missing, the default fuction is used - make sure to pass a
 \examples{
 \dontrun{
 \\code{# ElistRaw}
-rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", gene.annot.dataframe = annot,
+rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", extra.gene.annot.dataframe = annot,
                          gene.annot.gene_id.var.name = "ProbeName", gene.annot.gene_symbol.var.name = "Gene.Symbol",
                          gene.annot.control_type.var.name = "ControlType", gene.annot.control_type.val.pos = 1,
                          gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
@@ -55,7 +55,7 @@ rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeNa
 
 \\code{# non-EListRaw}
 raw_list <- rbioarray_rlist(raw.dataframe = raw, raw.annot.var.name = c("PROBE_ID","ILMN_GENE"), raw.gene_id.var.name = "PROBE_ID",
-                            gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
+                            extra.gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
                             target.annot.file = "sample_index_end6.csv", sample_groups.var.name = "time_point")
 }
 }
