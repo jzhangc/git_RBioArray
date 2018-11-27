@@ -9,17 +9,18 @@ Installation:
     
   - Install bioconductor
   
-        source("https://bioconductor.org/biocLite.R")
-      
-        biocLite()
+        if (!requireNamespace("BiocManager"))
+            install.packages("BiocManager")
+            
+        BiocManager::install()
     
   - Install stable release
   
-        devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos())   
+        devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocManager::repositories())   
 
   - Install development build
   
-        devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocInstaller::biocinstallRepos(), ref = "beta")  
+        devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocManager::repositories(), ref = "beta")  
 
 Update log
 
@@ -67,6 +68,7 @@ Update log
         - New Venn diagram function rbio_venn_de() for the S3 class "sig"
           - Due to the S3 revamp, the old venn diagram function rbioarray_venn_DE is now a legacy function
         - Package description updated
+        - New bioconductor installation instructions added
       
       - Other bug fixes
        
