@@ -79,7 +79,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param annot.group Ssample group annotation object. Can be a \code{factor} or \code{vector} object.
-#' @param between.samples.norm.method Between-sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
+#' @param library.size.scale.method Between-sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param qc.plot QC plot for the input read counts
@@ -126,7 +126,7 @@ rnaseq_de.default <- function(x, y = NULL,
                               y.gene_symbol.var.name = "genes",
                               filter.threshold.cpm = "none",
                               filter.threshold.min.sample = NULL, annot.group = NULL,
-                              between.samples.norm.method = "TMM",
+                              library.size.scale.method = "TMM",
                               design, contra, qc.plot = TRUE, verbose = TRUE){
   ## check the key arguments
   if (!class(x) %in% c("data.frame", "matrix")){
@@ -177,8 +177,8 @@ rnaseq_de.default <- function(x, y = NULL,
     stop("Please set contrast object.")
   }
 
-  if (!between.samples.norm.method %in% c("none", "TMM","RLE", "upperquartile")){
-    stop("Please set the between.samples.norm.method with exactly one of the following: \"none\", \"TMM\", \"RLE\", or \"upperquartile\".")
+  if (!library.size.scale.method %in% c("none", "TMM","RLE", "upperquartile")){
+    stop("Please set the library.size.scale.method with exactly one of the following: \"none\", \"TMM\", \"RLE\", or \"upperquartile\".")
   }
 
   ## extract coefficients
@@ -207,7 +207,7 @@ rnaseq_de.default <- function(x, y = NULL,
   }
 
   # between-samples normalization
-  dgenormf <- calcNormFactors(dge, method = between.samples.norm.method)  # between-genes
+  dgenormf <- calcNormFactors(dge, method = library.size.scale.method)  # between-genes
   # between-genes: Voom normalization with quality weights
   vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile")
   if (verbose) cat("DONE!\n") # message
@@ -229,7 +229,7 @@ rnaseq_de.default <- function(x, y = NULL,
   comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
   out <- list(filter_results = filter_results,
-              normalization_method = list(between_samples = between.samples.norm.method, between_genes = "voom process with quantile normalization"),
+              normalization_method = list(library_scalling = library.size.scale.method, between_genes = "voom process with quantile normalization"),
               normalized_data = vmwt,
               genes_annotation.gene_id.var_name = y.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = y.gene_symbol.var.name,
@@ -251,7 +251,7 @@ print.rbioseq_de <- function(x, ...){
   cat(paste0("\tRemaining genes: ", x$filter_results$filter_summary[2], "\n"))
   cat("\n")
   cat("Reads normalization methods: \n")
-  cat(paste0("\tBetween-samples: ", x$normalization_method$between_samples, "\n"))
+  cat(paste0("\tLibrary size-scaling: ", x$normalization_method$library_scalling, "\n"))
   cat(paste0("\tBetween-genes: ", x$normalization_method$between_genes, "\n"))
   cat("\n")
   cat("Comparisons assessed: \n")

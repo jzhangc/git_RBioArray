@@ -16,4 +16,4 @@ Imports:
     parallel (>= 3.3.2), corrplot (>= 0.84),
     doParallel (>= 1.0.10), foreach (>= 1.4.3), RBioplot (>= 0.5.1)
 Remotes: jzhangc/git_R_STATS_KBS/package/rbioplot
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1

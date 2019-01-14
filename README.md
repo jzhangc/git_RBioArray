@@ -57,7 +57,9 @@ Update log
         - Docmentation updated for sig() function
       
       - Updates to RNAseq functions:
-        - Print method for "rbioseq_de" now shows "between-sample" normalization method first
+        - The "between.samples.norm.method" argument changed to "library.size.scale.metho" for rnaseq_de()
+        - The "between-sample" item changed to "Library size-scaling" for the pirnt method for "rbioseq_de"
+        - Print method for "rbioseq_de" now shows "Library size-scaling (between-sample)" normalization method first
         - Updated documentation for voom process for rnaseq_de()
 
       - Updates to microarray functions:

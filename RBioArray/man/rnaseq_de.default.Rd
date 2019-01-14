@@ -7,7 +7,7 @@
 \method{rnaseq_de}{default}(x, y = NULL, y.gene_id.var.name = "genes",
   y.gene_symbol.var.name = "genes", filter.threshold.cpm = "none",
   filter.threshold.min.sample = NULL, annot.group = NULL,
-  between.samples.norm.method = "TMM", design, contra, qc.plot = TRUE,
+  library.size.scale.method = "TMM", design, contra, qc.plot = TRUE,
   verbose = TRUE)
 }
 \arguments{
@@ -25,7 +25,7 @@
 
 \item{annot.group}{Ssample group annotation object. Can be a \code{factor} or \code{vector} object.}
 
-\item{between.samples.norm.method}{Between-sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
+\item{library.size.scale.method}{Between-sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
 
 \item{design}{Design matrix.}
 
