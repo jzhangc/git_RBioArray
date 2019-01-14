@@ -25,7 +25,7 @@
 
 \item{annot.group}{Ssample group annotation object. Can be a \code{factor} or \code{vector} object.}
 
-\item{library.size.scale.method}{Between-sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
+\item{library.size.scale.method}{Library size scaling method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
 
 \item{design}{Design matrix.}
 

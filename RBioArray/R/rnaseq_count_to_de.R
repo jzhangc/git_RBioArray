@@ -79,7 +79,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param annot.group Ssample group annotation object. Can be a \code{factor} or \code{vector} object.
-#' @param library.size.scale.method Between-sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
+#' @param library.size.scale.method Library size scaling method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param qc.plot QC plot for the input read counts
@@ -206,7 +206,7 @@ rnaseq_de.default <- function(x, y = NULL,
     filter_results <- NULL
   }
 
-  # between-samples normalization
+  # library size scaling normalization
   dgenormf <- calcNormFactors(dge, method = library.size.scale.method)  # between-genes
   # between-genes: Voom normalization with quality weights
   vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile")
