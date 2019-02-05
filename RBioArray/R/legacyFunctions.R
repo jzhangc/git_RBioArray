@@ -1025,7 +1025,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
       pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(corcoef, symm = TRUE, trace = "none",
                 col = brewer.pal(n_mapColour, mapColour), labRow = rownames(corcoef), labCol = colnames(corcoef), ...)
-      dev.off()
+      garbage <- dev.off()
 
       if (sigPlot){
         if (sigPlot.sig.FDR){  # fdr correction or not
@@ -1040,11 +1040,11 @@ rbioarray_corcluster_super <- function(plotName = "data",
                      insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
                      col = brewer.pal(n_mapColour, mapColour),
                      tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
-            dev.off()
+            garbage <- dev.off()
           },
           error = function(err){
             print("No significance found. Therefore no significance plot generated.")
-            dev.off()
+            garbage <- dev.off()
           }
         )
       }
@@ -1064,7 +1064,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
       pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(corcoef, symm = TRUE, trace = "none",
                 col = brewer.pal(n_mapColour, mapColour), labRow = rownames(corcoef), labCol = colnames(corcoef),...)
-      dev.off()
+      garbage <- dev.off()
 
       if (sigPlot){
         if (sigPlot.sig.FDR){  # fdr correction or not
@@ -1080,11 +1080,11 @@ rbioarray_corcluster_super <- function(plotName = "data",
                      insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
                      col = brewer.pal(n_mapColour, mapColour),
                      tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
-            dev.off()
+            garbage <- dev.off()
           },
           error = function(err){
             print("No significant correlation found. Therefore no significance plot generated.")
-            dev.off()
+            garbage <- dev.off()
           }
         )
       }
@@ -1104,7 +1104,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
     pdf(file = paste(plotName, "_corheatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
     heatmap.2(corcoef, symm = TRUE, trace = "none",
               col = brewer.pal(n_mapColour, mapColour), labRow = FALSE, labCol = FALSE,...)
-    dev.off()
+    garbage <- dev.off()
 
     if (sigPlot){
       if (sigPlot.sig.FDR){  # fdr correction or not
@@ -1120,11 +1120,11 @@ rbioarray_corcluster_super <- function(plotName = "data",
                    insig = c("label_sig"), pch.col = sigPlot.sigLabelColour, pch.cex = sigPlot.sigLabelSize,
                    col = brewer.pal(n_mapColour, mapColour),
                    tl.col = sigPlot.labelColour, tl.cex = sigPlot.labelSize, tl.srt = sigPlot.labelAngle, cl.length = 3, cl.cex = sigPlot.keySize)
-          dev.off()
+          garbage <- dev.off()
         },
         error = function(err){
           print("No significance found. Therefore no significance plot generated.")
-          dev.off()
+          garbage <- dev.off()
         }
       )
     }
@@ -1301,7 +1301,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
   pdf(file = paste(plotName, "_heatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
   heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
             col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
-  dev.off()
+  garbage <- dev.off()
 }
 
 
@@ -1407,7 +1407,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
   pdf(file = paste(plotName, "_heatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
   heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
             col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
-  dev.off()
+  garbage <- dev.off()
 }
 
 
@@ -1545,7 +1545,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
-      dev.off()
+      garbage <- dev.off()
 
     } else {
       geneSymbl <- annot[annot[, annotProbeVar] %in% dfm[, dataProbeVar], ][, genesymbolVar]
@@ -1570,7 +1570,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = labrow, ...)
-      dev.off()
+      garbage <- dev.off()
       cat("Probes with no gene names are removed.")
     }
 
@@ -1589,7 +1589,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
     pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
     heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
               col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = FALSE,...)
-    dev.off()
+    garbage <- dev.off()
   }
 }
 
@@ -1755,15 +1755,15 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
   ## venn diagram plotting
   pdf(file = paste(plotName, "_venn_total.pdf", sep = ""), width = plotWidth, height = plotHeight)
   vennDiagram(mtx, circle.col = 1:length(names(DEdata)), ...)
-  dev.off()
+  garbage <- dev.off()
 
   pdf(file = paste(plotName, "_venn_up.pdf", sep = ""), width = plotWidth, height = plotHeight)
   vennDiagram(mtx, circle.col = 1:length(names(DEdata)), include = "up", ...)
-  dev.off()
+  garbage <- dev.off()
 
   pdf(file = paste(plotName, "_venn_down.pdf", sep = ""), width = plotWidth, height = plotHeight)
   vennDiagram(mtx, circle.col = 1:length(names(DEdata)), include = "down", ...)
-  dev.off()
+  garbage <- dev.off()
 
   ## output a csv file with annotation
   if (is.null(annot)){
