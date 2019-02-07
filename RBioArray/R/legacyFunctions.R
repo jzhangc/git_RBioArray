@@ -847,6 +847,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
   write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
   assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
   write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
+  assign(paste(objTitle, "_DE_summary", sep = ""), threshold_summary, envir = .GlobalEnv)
 
   ## messages
   if (geneName & !is.null(genesymbolVar)){

@@ -49,7 +49,9 @@ Update log
         - Dependency ggplot2 now requires version 3.0.0
     
     (ADDED)
-      - Suppressmessage method added for legacy functions figure export dev.off()
+      - Updates to legacy functions
+        - Suppressmessage method added for legacy functions figure export dev.off()
+        - rbioarrary_DE now also exports the DE summary data frame into the environment
       
     
     0.5.2 (Jan.17.2019)
