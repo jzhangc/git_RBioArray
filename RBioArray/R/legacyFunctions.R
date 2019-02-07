@@ -618,7 +618,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
                          symbolSize = 2, sigColour = "red", nonsigColour = "gray",
                          xTxtSize = 10, yTxtSize =10,
                          plotWidth = 170, plotHeight = 150,
-                         parallelComputing = FALSE, clusterType = "PSOCK"){
+                         parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE){
   ## check the key arguments
   if (is.null(fltlist)){
     stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data. Function terminated.\n")

@@ -14,7 +14,7 @@ rbioarray_DE(objTitle = "data_filtered", output.mode = "probe.all",
   yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
   nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10,
   plotWidth = 170, plotHeight = 150, parallelComputing = FALSE,
-  clusterType = "PSOCK")
+  clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
