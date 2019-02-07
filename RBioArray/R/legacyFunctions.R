@@ -579,6 +579,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #' @param plotHeight The height of the figure for the final output figure file. Default is \code{150}.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return The function outputs a \code{list} object with DE results, a \code{data frame} object for the F test results, merged with annotation. The function also exports DE reuslts to the working directory in \code{csv} format.
 #' @details When \code{"fdr"} set for sig.method, the p value threshold is set as \code{0.05}.
 #'
@@ -753,7 +754,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
   }
 
   ## DE
-  cat("Linear fitting...") # message
+  if (verbose) cat("Linear fitting...") # message
   if (class(fltlist) == "list"){
     fit <- lmFit(fltlist$E, design, weights = weights)
     fit <- contrasts.fit(fit, contrasts = contra)
@@ -764,7 +765,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
     fit <- contrasts.fit(fit, contrasts = contra)
     fit <- eBayes(fit)
   }
-  cat("Done!\n") # message
+  if (verbose) cat("Done!\n") # message
 
   if (ctrlProbe){
     out <- fit[fit$genes[, ctrlTypeVar] == 0, ] # remove control probes
@@ -780,7 +781,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
 
   ## output and plotting
   if(!parallelComputing){
-    cat("Plotting and exporting files...") # message
+    if (verbose) cat("Plotting and exporting files...") # message
     # compile resutls into a list
     outlist <- lapply(cf, function(i){
       tmp <- topTable(out, coef = i, number = Inf, ...)
@@ -797,9 +798,9 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
     if (plot){
       threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
     }
-    cat("Done!\n") # message
+    if (verbose) cat("Done!\n") # message
   } else { ## parallel computing
-    cat("Plotting and exporting files...") # message
+    if (verbose) cat("Plotting and exporting files...") # message
     # check the cluster type
     if (clusterType != "PSOCK" & clusterType != "FORK"){
       stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
@@ -835,7 +836,7 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
                                        }
       }
     }
-    cat("Done!\n") # message
+    if (verbose) cat("Done!\n") # message
   }
 
   ## output the DE/fit objects to the environment, as well as the DE csv files into wd
@@ -850,26 +851,28 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
   assign(paste(objTitle, "_DE_summary", sep = ""), threshold_summary, envir = .GlobalEnv)
 
   ## messages
-  if (geneName & !is.null(genesymbolVar)){
-    cat("Probes without a gene symbol are removed from the volcano plots.\n")
-  }
-
-  if (output.mode == "probe.all") cat("DE results for all probes exported into csv files. \n")
-  if (output.mode == "probe.sig") cat("DE results for significant probes regardless of gene name saved to csv files. \n")
-  if (output.mode == "geneName.all") {
-    if (!geneName){
-      cat("geneName = FALSE, DE results for all probes saved to csv files,
-          even with output.mode = \"geneName.all\"\n")
-    } else {
-      cat("DE results for probes with gene name saved to csv files. \n")
+  if (verbose) {
+    if (geneName & !is.null(genesymbolVar)){
+      cat("Probes without a gene symbol are removed from the volcano plots.\n")
     }
-  }
-  if (output.mode == "geneName.sig") {
-    if (!geneName){
-      cat("geneName = FALSE, DE results for significant probes regardless of gene name saved to csv files,
-          even with output.mode = \"geneName.sig\"\n")
-    } else {
-      cat("DE results for significant probes with gene name saved to csv files. \n")
+
+    if (output.mode == "probe.all") cat("DE results for all probes exported into csv files. \n")
+    if (output.mode == "probe.sig") cat("DE results for significant probes regardless of gene name saved to csv files. \n")
+    if (output.mode == "geneName.all") {
+      if (!geneName){
+        cat("geneName = FALSE, DE results for all probes saved to csv files,
+            even with output.mode = \"geneName.all\"\n")
+      } else {
+        cat("DE results for probes with gene name saved to csv files. \n")
+      }
+    }
+    if (output.mode == "geneName.sig") {
+      if (!geneName){
+        cat("geneName = FALSE, DE results for significant probes regardless of gene name saved to csv files,
+            even with output.mode = \"geneName.sig\"\n")
+      } else {
+        cat("DE results for significant probes with gene name saved to csv files. \n")
+      }
     }
   }
 }

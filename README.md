@@ -52,6 +52,7 @@ Update log
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()
         - rbioarrary_DE now also exports the DE summary data frame into the environment
+        - verbose argument added to rbioarrary_DE()
       
     
     0.5.2 (Jan.17.2019)
