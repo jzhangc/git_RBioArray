@@ -12,7 +12,7 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
   distance = "euclidean", clust = "complete", rowLabel = FALSE,
   annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
   colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+  plotWidth = 7, plotHeight = 7, verbose = TRUE)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -62,6 +62,8 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
 \item{plotWidth}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plotHeight}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.

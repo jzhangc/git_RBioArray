@@ -1442,6 +1442,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
 #' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
@@ -1469,7 +1470,8 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                                      distance = "euclidean", clust = "complete",
                                      rowLabel = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-                                     plotWidth = 7, plotHeight = 7){ #DOI: fltered subset data of interest
+                                     plotWidth = 7, plotHeight = 7,
+                                     verbose = TRUE){ #DOI: fltered subset data of interest
   ## argument check
   if (!dataProbeVar %in% names(dfmDE) | !dataProbeVar %in% names(fltDOI$genes)){
     stop(cat("data probe variable not found in dfmDE or fltDOI"))
@@ -1575,7 +1577,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = labrow, ...)
       garbage <- dev.off()
-      cat("Probes with no gene names are removed.")
+      if (verbose) cat("Probes with no gene names are removed.")
     }
 
   } else {
