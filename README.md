@@ -52,7 +52,7 @@ Update log
       
       - Other updates
         - Functions updated for R Notebook/Markdown compatibility
-        - Combine documentatin for methods of different classes 
+        - Combine documentation for methods of different classes 
     
     (ADDED)
       - General updates
