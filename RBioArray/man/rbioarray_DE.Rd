@@ -4,20 +4,24 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered", output.mode = "probe.all",
-  fltlist = NULL, annot = NULL, design = NULL, contra = NULL,
-  weights = NULL, ..., plot = TRUE, geneName = FALSE,
-  genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5,
-  padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
-  ctrlTypeVar = "ControlType", sig.method = "fdr", sig.p = 0.05,
-  plotTitle = NULL, xLabel = "log2(fold change)",
-  yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
-  nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10,
-  plotWidth = 170, plotHeight = 150, parallelComputing = FALSE,
-  clusterType = "PSOCK", verbose = TRUE)
+rbioarray_DE(objTitle = "data_filtered",
+  input.outcome.mode = c("categorical", "continuous"),
+  output.mode = c("probe.all", "probe.sig", "geneName.all",
+  "geneName.sig"), fltlist = NULL, annot = NULL, design = NULL,
+  contra = NULL, weights = NULL, ..., plot = TRUE,
+  geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
+  nGeneSymbol = 5, padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType", sig.method = c("fdr", "spikein",
+  "none"), sig.p = 0.05, plotTitle = NULL,
+  xLabel = "log2(fold change)", yLabel = "-log10(p value)",
+  symbolSize = 2, sigColour = "red", nonsigColour = "gray",
+  xTxtSize = 10, yTxtSize = 10, plotWidth = 170, plotHeight = 150,
+  parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}
+
+\item{input.outcome.mode}{The outcome type. Options are \code{"categorical"} and \code{"continuous"}. Default is \code{"categorical"}.}
 
 \item{output.mode}{Csv file output mode. Options are \code{"probe.all"}, \code{"probe.sig"}, \code{"geneName.all"} and \code{"geneName.sig"}. Default is \code{"probe.all"}. See details below.}
 

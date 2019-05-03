@@ -26,6 +26,9 @@ Update log
 
     0.5.3 (feature roadmap)
     (ICEBOX)
+      - General updates
+        - splines pacakge added as a depedencing for continuous outcome support
+        
       - New microarray functions:
         - New DE analysis function added: rbioarray_de_analysis()
           - The fnction has export options:
@@ -40,19 +43,29 @@ Update log
       
       - Updates to microarray functions
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
+        - Relevant functions updated with continuous outcome support
+        
+      - Updates to RNAseq functions
+        - Relevant functions updated with continuous outcome support
         
       - Revamp GS functions
       
-      - Other update
+      - Other updates
         - Functions updated for R Notebook/Markdown compatibility
         - Combine documentatin for methods of different classes 
-        - Dependency ggplot2 now requires version 3.0.0
     
     (ADDED)
+      - General updates
+        - match.arg() method added to relevant functions for better user experience
+      
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()
         - rbioarrary_DE now also exports the DE summary data frame into the environment
         - verbose argument added to rbioarrary_DE(), rbioarray_hclust_super
+        - rbioarrary_DE() updated with suppport for continuous outcome
+        
+      - Other updates
+        - Dependency ggplot2 now requires version 3.0.0
       
     
     0.5.2 (Jan.17.2019)

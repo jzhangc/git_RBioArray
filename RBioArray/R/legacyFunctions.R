@@ -549,6 +549,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #'
 #' @description Legacy function. DE analysis function.
 #' @param objTitle Name for the output list. Default is \code{"data_filtered"}.
+#' @param input.outcome.mode The outcome type. Options are \code{"categorical"} and \code{"continuous"}. Default is \code{"categorical"}.
 #' @param output.mode Csv file output mode. Options are \code{"probe.all"}, \code{"probe.sig"}, \code{"geneName.all"} and \code{"geneName.sig"}. Default is \code{"probe.all"}. See details below.
 #' @param fltlist filtered data, either a list, \code{EList} or \code{MAList} object. Default is \code{NULL}.
 #' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Default is \code{NULL}.
@@ -606,19 +607,26 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 #'              DE = "spikein")
 #' }
 #' @export
-rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
+rbioarray_DE <- function(objTitle = "data_filtered",
+                         input.outcome.mode = c("categorical", "continuous"),
+                         output.mode = c("probe.all", "probe.sig", "geneName.all", "geneName.sig"),
                          fltlist = NULL, annot = NULL,
                          design = NULL, contra = NULL, weights = NULL,
                          ...,
                          plot = TRUE,
                          geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE, nGeneSymbol = 5, padding = 0.5,
                          FC = 1.5,
-                         ctrlProbe = TRUE, ctrlTypeVar = "ControlType", sig.method = "fdr", sig.p = 0.05,
+                         ctrlProbe = TRUE, ctrlTypeVar = "ControlType", sig.method = c("fdr", "spikein", "none"), sig.p = 0.05,
                          plotTitle = NULL, xLabel = "log2(fold change)", yLabel = "-log10(p value)",
                          symbolSize = 2, sigColour = "red", nonsigColour = "gray",
                          xTxtSize = 10, yTxtSize =10,
                          plotWidth = 170, plotHeight = 150,
                          parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE){
+  ## retrieve relevant arguments
+  input.outcome.mode <- match.arg(input.outcome.mode)
+  output.mode <- match.arg(output.mode)
+  sig.method <- match.arg(sig.method)
+
   ## check the key arguments
   if (is.null(fltlist)){
     stop("Please set input data object. Hint: either a list, EList or MAList object with pre-processed and flitered expression data. Function terminated.\n")
@@ -631,8 +639,16 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
   if (is.null(design)){
     stop("Please set design matrix. Function terminated.\n")
   }
-  if (is.null(contra)){
-    stop("Please set contrast object. Function terminated.\n")
+  if (input.outcome.mode == "categorical"){
+    if (is.null(contra)){
+      stop("Please set contrast object. Function terminated.\n")
+    }
+  } else {
+    contra <- NULL
+    if (plot){
+      cat("plot automatically set to FALSE when input.outcome.mode = \"continuous\" \n")
+      plot <- FALSE
+    }
   }
   if (tolower(sig.method) == "spikein"){
     if (!ctrlProbe){
@@ -649,229 +665,242 @@ rbioarray_DE <- function(objTitle = "data_filtered", output.mode = "probe.all",
     stop("output.mode should be one of \"probe.all\", \"probe.sig\", \"geneName.all\" or \"geneName.sig\".")
   }
 
-  ## extract coefficients
-  cf <- colnames(contra) # extract coefficient
-  # set an empty matrix for exporting the threolding summery
-  threshold_summary <- matrix(nrow = length(cf), ncol = 5)
-  colnames(threshold_summary) <- c("coeffcient", "p.value.threshold", "fold.change.threshold", "True", "False")
-  threshold_summary <- as.matrix(threshold_summary)
-
-  ## temp func for plotting
-  # i: outlist (object) listed below
-  tmpfunc <- function(i, j, PC = NULL){
-    # import DE data
-    tmpdfm <- i[[j]]
-
-    # set the cutoff
-    if (tolower(sig.method) == "fdr"){
-      if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
-        warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
-        pcutoff <- sig.p
-      } else {
-        pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
-      }
-    } else if (tolower(sig.method) == "spikein") {
-      ifelse(min(PC$p.value[, cf[j]]) > sig.p, pcutoff <- sig.p, pcutoff <- min(PC$p.value[, cf[j]]))
-    } else if (tolower(sig.method) == "none"){
-      pcutoff <- sig.p
-    } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
-
-    # set the data frame
-    if (geneName){
-      if (!genesymbolVar %in% names(tmpdfm)){
-        stop(cat("Invalid gene symbol variable"))
-      }
-
-      if (!is.null(genesymbolVar)){
-        pltdfm <- tmpdfm[complete.cases(tmpdfm[, genesymbolVar]), ]
-      } else {
-        warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
-        pltdfm <- tmpdfm
-      }
-    } else {
-      pltdfm <- tmpdfm
-    }
-    cutoff <- as.factor(abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff)
-
-    # plot
-    loclEnv <- environment()
-    plt <- ggplot(pltdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
-      geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
-      scale_color_manual(values = c(nonsigColour, sigColour)) +
-      ggtitle(plotTitle) +
-      scale_y_continuous(expand = c(0.02, 0)) +
-      xlab(xLabel) +
-      ylab(yLabel) +
-      geom_vline(xintercept = log2(FC), linetype = "dashed") +
-      geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-      geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(hjust = 0.5),
-            legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_text(size = xTxtSize),
-            axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
-
-    if (topgeneLabel){
-      tmpfltdfm <- pltdfm[abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff, ]
-      tmpfltdfm <- tmpfltdfm[order(tmpfltdfm$P.Value), ]
-      plt <- plt + geom_text_repel(data = head(tmpfltdfm, n = nGeneSymbol),
-                                   aes(x = logFC, y = -log10(P.Value), label = head(tmpfltdfm, n = nGeneSymbol)[, genesymbolVar]),
-                                   point.padding = unit(padding, "lines"))
-    }
-
-    grid.newpage()
-    pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
-    # export the file and draw a preview
-    ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
-           width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
-    grid.draw(pltgtb) # preview
-
-    # save DE results files
-    if (output.mode == "probe.all"){
-      outdfm <- tmpdfm
-    } else if (output.mode == "probe.sig"){
-      # below: make sure to use all probes, i.e.tmpdfm
-      outdfm <- tmpdfm[which(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff), ]
-    } else if (output.mode == "geneName.all"){
-      outdfm <- pltdfm
-    } else {
-      outdfm <- pltdfm[which(as.logical(cutoff)), ]  # it is ok to use cutoff straigtly here
-    }
-    write.csv(outdfm, file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
-
-    # dump the info to the threshold dataframe
-    if (length(levels(cutoff)) == 1){
-      if (levels(cutoff) == "TRUE"){
-        tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
-      } else {
-        tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
-      }
-    } else {
-      tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
-    }
-  }
-
   ## DE
+  if (verbose) cat(paste0("Dependent variable type: ", input.outcome.mode, "\n"))
   if (verbose) cat("Linear fitting...") # message
   if (class(fltlist) == "list"){
-    fit <- lmFit(fltlist$E, design, weights = weights)
-    fit <- contrasts.fit(fit, contrasts = contra)
+    fit <- lmFit(fltlist$E, design = design, weights = weights)
+    if (input.outcome.mode == "categorical"){
+      fit <- contrasts.fit(fit, contrasts = contra)
+    }
     fit <- eBayes(fit)
     fit$genes <- fltlist$genes # add genes matrix to the DE results
   } else {
-    fit <- lmFit(fltlist, design, weights = weights)
+    fit <- lmFit(fltlist, design = design, weights = weights)
+    if (input.outcome.mode == "categorical"){
+      fit <- contrasts.fit(fit, contrasts = contra)
+    }
     fit <- contrasts.fit(fit, contrasts = contra)
     fit <- eBayes(fit)
   }
-  if (verbose) cat("Done!\n") # message
-
   if (ctrlProbe){
     out <- fit[fit$genes[, ctrlTypeVar] == 0, ] # remove control probes
   } else {
     out <- fit
   }
+  if (verbose) cat("Done!\n") # message
 
-  if (tolower(sig.method) == "spikein"){ # extract PC stats for spikein method
-    PCntl <- fit[fit$genes[, ctrlTypeVar] == 1, ]
-  } else {
-    PCntl <- NULL
-  }
+  # for categorical study
+  if (input.outcome.mode == "categorical"){
+    ## extract coefficients
+    cf <- colnames(contra) # extract coefficient
+    # set an empty matrix for exporting the threolding summery
+    threshold_summary <- matrix(nrow = length(cf), ncol = 5)
+    colnames(threshold_summary) <- c("coeffcient", "p.value.threshold", "fold.change.threshold", "True", "False")
+    threshold_summary <- as.matrix(threshold_summary)
 
-  ## output and plotting
-  if(!parallelComputing){
-    if (verbose) cat("Plotting and exporting files...") # message
-    # compile resutls into a list
-    outlist <- lapply(cf, function(i){
-      tmp <- topTable(out, coef = i, number = Inf, ...)
-      tmp$ProbeName <- rownames(tmp)
-      if (!is.null(annot)){ # merge with annotation dataframe
-        # tmp <- merge(tmp, annot, by = "ProbeName", all.x = TRUE)
-        tmp <- merge(tmp, annot, all.x = TRUE)
-      }
-      return(tmp)
-    })
-    names(outlist) <- cf
+    ## temp func for plotting
+    # i: outlist (object) listed below
+    tmpfunc <- function(i, j, PC = NULL){
+      # import DE data
+      tmpdfm <- i[[j]]
 
-    # volcano plot and output summary
-    if (plot){
-      threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
-    }
-    if (verbose) cat("Done!\n") # message
-  } else { ## parallel computing
-    if (verbose) cat("Plotting and exporting files...") # message
-    # check the cluster type
-    if (clusterType != "PSOCK" & clusterType != "FORK"){
-      stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
-    }
+      # set the cutoff
+      if (tolower(sig.method) == "fdr"){
+        if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
+          warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
+          pcutoff <- sig.p
+        } else {
+          pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
+        }
+      } else if (tolower(sig.method) == "spikein") {
+        ifelse(min(PC$p.value[, cf[j]]) > sig.p, pcutoff <- sig.p, pcutoff <- min(PC$p.value[, cf[j]]))
+      } else if (tolower(sig.method) == "none"){
+        pcutoff <- sig.p
+      } else {stop(cat("Please set p value thresholding method, \"fdr\" or \"spikein\"."))}
 
-    # set up cpu cores and cluster
-    n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, type = clusterType)
-    registerDoParallel(cl)
-    on.exit(stopCluster(cl)) # close connect when exiting the function
+      # set the data frame
+      if (geneName){
+        if (!genesymbolVar %in% names(tmpdfm)){
+          stop(cat("Invalid gene symbol variable"))
+        }
 
-    outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
-      tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
-      tmp$ProbeName <- rownames(tmp)
-      if (!is.null(annot)){ # merge with annotation dataframe
-        tmp <- merge(tmp, annot, by = "ProbeName")
-      }
-      return(tmp)
-    }
-    names(outlist) <- cf
-
-    # volcano plot and output summary
-    if (plot){
-      if (clusterType == "PSOCK"){
-        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
-                                       .packages = c("limma", "ggplot2", "gtable", "grid", "ggrepel", "RBioplot")) %dopar% {
-                                         tmpfunc(i = outlist, j = j, PC = PCntl)
-                                       }
+        if (!is.null(genesymbolVar)){
+          pltdfm <- tmpdfm[complete.cases(tmpdfm[, genesymbolVar]), ]
+        } else {
+          warning("No variable name for gene symbol set. Proceed with probe names with no probes removed.")
+          pltdfm <- tmpdfm
+        }
       } else {
-        threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
-                                       .packages = c("limma", "ggplot2", "gtable", "grid", "ggrepel", "RBioplot")) %do% {
-                                         tmpfunc(i = outlist, j = j, PC = PCntl)
-                                       }
+        pltdfm <- tmpdfm
+      }
+      cutoff <- as.factor(abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff)
+
+      # plot
+      loclEnv <- environment()
+      plt <- ggplot(pltdfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
+        geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
+        scale_color_manual(values = c(nonsigColour, sigColour)) +
+        ggtitle(plotTitle) +
+        scale_y_continuous(expand = c(0.02, 0)) +
+        xlab(xLabel) +
+        ylab(yLabel) +
+        geom_vline(xintercept = log2(FC), linetype = "dashed") +
+        geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+        geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(hjust = 0.5),
+              legend.position = "none",
+              legend.title = element_blank(),
+              axis.text.x = element_text(size = xTxtSize),
+              axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+
+      if (topgeneLabel){
+        tmpfltdfm <- pltdfm[abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff, ]
+        tmpfltdfm <- tmpfltdfm[order(tmpfltdfm$P.Value), ]
+        plt <- plt + geom_text_repel(data = head(tmpfltdfm, n = nGeneSymbol),
+                                     aes(x = logFC, y = -log10(P.Value), label = head(tmpfltdfm, n = nGeneSymbol)[, genesymbolVar]),
+                                     point.padding = unit(padding, "lines"))
+      }
+
+      grid.newpage()
+      pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
+      # export the file and draw a preview
+      ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+             width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
+      grid.draw(pltgtb) # preview
+
+      # save DE results files
+      if (output.mode == "probe.all"){
+        outdfm <- tmpdfm
+      } else if (output.mode == "probe.sig"){
+        # below: make sure to use all probes, i.e.tmpdfm
+        outdfm <- tmpdfm[which(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff), ]
+      } else if (output.mode == "geneName.all"){
+        outdfm <- pltdfm
+      } else {
+        outdfm <- pltdfm[which(as.logical(cutoff)), ]  # it is ok to use cutoff straigtly here
+      }
+      write.csv(outdfm, file = paste(objTitle, "_", cf[[j]], "_DE.csv", sep = ""), na = "NA", row.names = FALSE)
+
+      # dump the info to the threshold dataframe
+      if (length(levels(cutoff)) == 1){
+        if (levels(cutoff) == "TRUE"){
+          tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], 0)
+        } else {
+          tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, 0, summary(cutoff)[["FALSE"]])
+        }
+      } else {
+        tmp <- c(cf[[j]], signif(pcutoff, digits = 4), FC, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
       }
     }
-    if (verbose) cat("Done!\n") # message
   }
 
-  ## output the DE/fit objects to the environment, as well as the DE csv files into wd
+  ## output the DE/fit objects to the environment, as well as the DE csv and plot files into wd if appblicable
   fitout <- topTable(out, number = Inf)
   if (!is.null(annot)){ # merge with annotation dataframe
     fitout <- merge(fitout, annot, by = "ProbeName")
   }
   assign(paste(objTitle, "_fit", sep = ""), fitout, envir = .GlobalEnv)
   write.csv(fitout, file = paste(objTitle, "_DE_Fstats.csv", sep = ""), row.names = FALSE)
-  assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
-  write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
-  assign(paste(objTitle, "_DE_summary", sep = ""), threshold_summary, envir = .GlobalEnv)
+  # message
+  if (verbose) cat("Fit results exported into csv file(s).\n")
 
-  ## messages
-  if (verbose) {
-    if (geneName & !is.null(genesymbolVar)){
-      cat("Probes without a gene symbol are removed from the volcano plots.\n")
+  # below: plotting and file export for categorical analysis
+  if (input.outcome.mode == "categorical") {
+    if (tolower(sig.method) == "spikein"){ # extract PC stats for spikein method
+      PCntl <- fit[fit$genes[, ctrlTypeVar] == 1, ]
+    } else {
+      PCntl <- NULL
     }
 
-    if (output.mode == "probe.all") cat("DE results for all probes exported into csv files. \n")
-    if (output.mode == "probe.sig") cat("DE results for significant probes regardless of gene name saved to csv files. \n")
-    if (output.mode == "geneName.all") {
-      if (!geneName){
-        cat("geneName = FALSE, DE results for all probes saved to csv files,
-            even with output.mode = \"geneName.all\"\n")
-      } else {
-        cat("DE results for probes with gene name saved to csv files. \n")
+    if(!parallelComputing){
+      if (verbose) cat("Plotting and exporting files...") # message
+      # compile resutls into a list
+      outlist <- lapply(cf, function(i){
+        tmp <- topTable(out, coef = i, number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        if (!is.null(annot)){ # merge with annotation dataframe
+          # tmp <- merge(tmp, annot, by = "ProbeName", all.x = TRUE)
+          tmp <- merge(tmp, annot, all.x = TRUE)
+        }
+        return(tmp)
+      })
+      names(outlist) <- cf
+
+      # volcano plot and output summary
+      if (plot){
+        threshold_summary[] <- t(sapply(1: length(cf), function(x)tmpfunc(i = outlist, j = x, PC = PCntl)))
       }
+      if (verbose) cat("Done!\n") # message
+    } else { ## parallel computing
+      if (verbose) cat("Plotting and exporting files...") # message
+      # check the cluster type
+      if (clusterType != "PSOCK" & clusterType != "FORK"){
+        stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
+      }
+
+      # set up cpu cores and cluster
+      n_cores <- detectCores() - 1
+      cl <- makeCluster(n_cores, type = clusterType)
+      registerDoParallel(cl)
+      on.exit(stopCluster(cl)) # close connect when exiting the function
+
+      outlist <- foreach(i = 1: length(cf), .packages = "limma") %dopar% {
+        tmp <- limma::topTable(out, coef = cf[i], number = Inf, ...)
+        tmp$ProbeName <- rownames(tmp)
+        if (!is.null(annot)){ # merge with annotation dataframe
+          tmp <- merge(tmp, annot, by = "ProbeName")
+        }
+        return(tmp)
+      }
+      names(outlist) <- cf
+
+      # volcano plot and output summary
+      if (plot){
+        if (clusterType == "PSOCK"){
+          threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
+                                         .packages = c("limma", "ggplot2", "gtable", "grid", "ggrepel", "RBioplot")) %dopar% {
+                                           tmpfunc(i = outlist, j = j, PC = PCntl)
+                                         }
+        } else {
+          threshold_summary[] <- foreach(j = 1: length(cf), .combine = "rbind",
+                                         .packages = c("limma", "ggplot2", "gtable", "grid", "ggrepel", "RBioplot")) %do% {
+                                           tmpfunc(i = outlist, j = j, PC = PCntl)
+                                         }
+        }
+      }
+      if (verbose) cat("Done!\n") # message
     }
-    if (output.mode == "geneName.sig") {
-      if (!geneName){
-        cat("geneName = FALSE, DE results for significant probes regardless of gene name saved to csv files,
+
+    # export result into the environment and files to the directory
+    assign(paste(objTitle, "_DE", sep = ""), outlist, envir = .GlobalEnv)
+    write.csv(threshold_summary, file = paste(objTitle, "_thresholding_summary.csv", sep = ""), row.names = FALSE)
+    assign(paste(objTitle, "_DE_summary", sep = ""), threshold_summary, envir = .GlobalEnv)
+
+    ## messages
+    if (verbose) {
+      if (geneName & !is.null(genesymbolVar)){
+        cat("If applicable, probes without a gene symbol are removed from the volcano plot(s).\n")
+      }
+      if (output.mode == "probe.all") cat("DE results for all probes exported into csv file(s). \n")
+      if (output.mode == "probe.sig") cat("DE results for significant probes regardless of gene name saved to csv file(s). \n")
+      if (output.mode == "geneName.all") {
+        if (!geneName){
+          cat("geneName = FALSE, DE results for all probes saved to csv file(s),
+            even with output.mode = \"geneName.all\"\n")
+        } else {
+          cat("DE results for probes with gene name saved to csv files. \n")
+        }
+      }
+      if (output.mode == "geneName.sig") {
+        if (!geneName){
+          cat("geneName = FALSE, DE results for significant probes regardless of gene name saved to csv file(s),
             even with output.mode = \"geneName.sig\"\n")
-      } else {
-        cat("DE results for significant probes with gene name saved to csv files. \n")
+        } else {
+          cat("DE results for significant probes with gene name saved to csv file(s). \n")
+        }
       }
     }
   }
