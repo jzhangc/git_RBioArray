@@ -4,8 +4,8 @@
 \alias{sig.rbioarray_de}
 \title{sig.rbioarray_de}
 \usage{
-\method{sig}{rbioarray_de}(object, p.val.correction.method = "fdr",
-  export.name = NULL, ...)
+\method{sig}{rbioarray_de}(object, p.val.correction.method = c("fdr",
+  "spikein", "none"), export.name = NULL, ...)
 }
 \arguments{
 \item{object}{A \code{rbioarray_de} object \code{\link{microarray_de}} function.}

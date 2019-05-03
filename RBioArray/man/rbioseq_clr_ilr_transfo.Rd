@@ -4,7 +4,7 @@
 \alias{rbioseq_clr_ilr_transfo}
 \title{rbioseq_clr_ilr_transfo}
 \usage{
-rbioseq_clr_ilr_transfo(x, offset = 1, mode = "clr",
+rbioseq_clr_ilr_transfo(x, offset = 1, mode = c("clr", "ilr"),
   ilr.method.fast = TRUE, verbose = TRUE)
 }
 \arguments{

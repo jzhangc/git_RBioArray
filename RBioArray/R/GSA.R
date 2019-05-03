@@ -18,10 +18,13 @@
 #' rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemblTransVar = "EnsemblID")
 #' }
 #' @export
-rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
+rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "rat", "medaka", "olatipes"),
+                                ensemblTransVar = NULL,
                                 entrezVar = NULL,
                                 parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check the arguments
+  tgtSpecies <- match.arg(tolower(tgtSpecies), c("mmu", "mouse", "rno", "rat", "medaka", "olatipes"))
+
   if (is.null(ensemblTransVar) & is.null(entrezVar)){
     stop("Please set the variable name for the ensembl transcript ID or entrezID.")
   }
@@ -159,18 +162,18 @@ rbioGS <- function(GS = NULL, GSfile = NULL, idVar = NULL,
                    ...,
                    parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check arguments
-  if (is.null(idVar)){stop("Please set the variable idVar.")}
+  method_p <- match.arg(method_p, c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"))
+  method_t <- match.arg(tolower(method_t), c("page", "gsea", "maxmean"))
 
+  if (is.null(idVar)){stop("Please set the variable idVar.")}
   if (is.null(pVar) != is.null(logFCVar)){ # is.null(pVar) and is.null(pFCVar) have to be the same
     stop("pVar and logFCVar have to be NULL or not at the same time.")
   }
-
   if (is.null(pVar) & is.null(logFCVar)){
     if (is.null(tVar)){
       stop("pVar and logFCVar not set, please set tVar.")
     }
   }
-
   if (is.null(GS) & is.null(GSfile)){
     stop("Please set GS file.")
   }

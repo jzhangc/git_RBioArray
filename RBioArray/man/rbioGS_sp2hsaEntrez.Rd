@@ -4,8 +4,9 @@
 \alias{rbioGS_sp2hsaEntrez}
 \title{rbioGS_sp2hsaEntrez}
 \usage{
-rbioGS_sp2hsaEntrez(DElst, tgtSpecies = "mmu", ensemblTransVar = NULL,
-  entrezVar = NULL, parallelComputing = FALSE, clusterType = "PSOCK")
+rbioGS_sp2hsaEntrez(DElst, tgtSpecies = c("mmu", "mouse", "rno", "rat",
+  "medaka", "olatipes"), ensemblTransVar = NULL, entrezVar = NULL,
+  parallelComputing = FALSE, clusterType = "PSOCK")
 }
 \arguments{
 \item{DElst}{The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}

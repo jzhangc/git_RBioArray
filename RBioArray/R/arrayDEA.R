@@ -347,13 +347,16 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ..., ver
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
 #' @export
 rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
-                                                bgc.method = "auto", between.sample.norm.method = "quantile",
+                                                bgc.method = c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"),
+                                                between.sample.norm.method = c("quantile", "Aquantile"),
                                                 between.sample.weight.design = NULL, ...,
                                                 verbose = TRUE){
   ## check arguments
-  if (!bgc.method %in% c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
-    stop("Agument bgc.method needs to be set with one of \"auto\", \"auto\", \"none\", \"subtract\", \"half\", \"minimum\", \"movingmin\", \"edwards\", and \"normexp\" exactly.")
-  if (!between.sample.norm.method %in% c("quantile", "Aquantile")) stop("Argument between.sample.norm.method needs to be set with ")
+  bgc.methd <- match.arg(tolower(bgc.method), c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
+  between.sample.norm.method <- match.arg(between.sample.norm.method, c("quantile", "Aquantile"))
+  # if (!bgc.method %in% c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
+  #   stop("Agument bgc.method needs to be set with one of \"auto\", \"auto\", \"none\", \"subtract\", \"half\", \"minimum\", \"movingmin\", \"edwards\", and \"normexp\" exactly.")
+  # if (!between.sample.norm.method %in% c("quantile", "Aquantile")) stop("Argument between.sample.norm.method needs to be set with ")
   if (is.null(between.sample.weight.design)) stop("Please provide the microarray design matrix for between.sample.weight.design argument.")
 
   ## pre-processing

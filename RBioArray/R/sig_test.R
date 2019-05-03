@@ -50,9 +50,10 @@ sig <- function(object, ...){
 #' @param ... Additional arguments for \code{\link{sig.defuault}}.
 #'
 #' @export
-sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method = "fdr",...){
+sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method = c("fdr", "none"),...){
   ## check argument
-  if (!tolower(p.val.correction.method) %in% c("fdr", "none")) stop("The argument sig.method needs to \"fdr\" or \"none\"")
+  p.val.correction.method <- match.arg(tolower(p.val.correction.method), c("fdr", "none"))
+  # if (!tolower(p.val.correction.method) %in% c("fdr", "none")) stop("The argument sig.method needs to \"fdr\" or \"none\"")
   if (is.null(export.name)){
     export.name = deparse(substitute(object))
   }
@@ -89,9 +90,11 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
 #' @param ... Additional arguments for \code{\link{sig.defuault}}.
 #'
 #' @export
-sig.rbioarray_de <- function(object, p.val.correction.method = "fdr", export.name = NULL, ...){
+sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein", "none"), export.name = NULL, ...){
   ## check arguments
-  if (!tolower(p.val.correction.method) %in% c("spikein", "fdr", "none")) stop("The argument sig.method needs to be one of \"spikein\", \"fdr\" or \"none\"")
+  p.val.correction.method <- match.arg(tolower(p.val.correction.method), c("fdr", "spikein", "none"))
+
+  # if (!tolower(p.val.correction.method) %in% c("fdr", "spikein", "none")) stop("The argument sig.method needs to be one of \"spikein\", \"fdr\" or \"none\"")
   if (tolower(p.val.correction.method) == "spikein") {
     if (object$gene_duplicates_combined) {
       cat("Gene duplicates combined, automatically set p.val.correction.method = \"fdr\".\n")

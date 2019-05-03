@@ -142,11 +142,15 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
                                                input.genes_annotation.gene_symbol.var_name = NULL,
                                                input.genes_annotation.gene_id.var_name = NULL,
                                                sample_id.vector = NULL,
-                                               distance = "euclidean", clust = "complete",
+                                               distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+                                               clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                                                col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, ...,
                                                export.name = NULL, plot.width = 7, plot.height = 7,
                                                verbose = TRUE){
   ## check arguments
+  distance <- match.arg(tolower(distance), c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+  clust <- match.arg(clust, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
+
   if (n != "all" && n %% 1 != 0) stop("Argument n needs to be either \"all\" or an integer number.")
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
   if (rm.control && is.null(input.genes_annotation.control_type)) {
@@ -158,10 +162,10 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
     gene_symbol.only <- FALSE
   }
   if (missing(export.name) || is.null(export.name)) stop("Please set value for argument export.name.")
-  if (!distance %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
-    stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
-  if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
-    stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
+  # if (!distance %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+  #   stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
+  # if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
+  #   stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
 
   ## variables
   if(length(levels(input.sample_groups)) <= 19) {
@@ -237,11 +241,15 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 rbio_supervised_hcluster <- function(object,
                                      gene_symbol.only = FALSE,
                                      sample_id.var.name = NULL,
-                                     distance = "euclidean", clust = "complete",
+                                     distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+                                     clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                                      col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, ...,
                                      plot.width = 7, plot.height = 7,
                                      verbose = TRUE){
   ## check arguments
+  distance <- match.arg(tolower(distance), c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+  clust <- match.arg(clust, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
+
   if (class(object) != "sig") stop("The input object has to be a \"sig\" class.")
   if (!is.null(sample_id.var.name)){
     if (!sample_id.var.name %in% names(object$input_data$targets)) {
@@ -254,10 +262,10 @@ rbio_supervised_hcluster <- function(object,
     sample_id.vector <- seq(ncol(object$input_data$E))
   }
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
-  if (!distance %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
-    stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
-  if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
-    stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
+  # if (!distance %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+  #   stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
+  # if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
+  #   stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
 
   # check contrast levels against sample groups
   contra_levels_all <- unique(foreach(i = 1:length(object$input_data$comparisons$comparison_levels), .combine = "c") %do% {

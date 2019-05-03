@@ -20,12 +20,13 @@
 #' tstX <- rbioseq_clr_ilr_transfo(tstdata, offset = 1, mode = "clr")
 #' }
 #' @export
-rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = "clr", ilr.method.fast = TRUE,
+rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = c("clr", "ilr"), ilr.method.fast = TRUE,
                                     verbose = TRUE){
   # data and arguments check
+  mode <- match.arg(tolower(mode), c("clr", "ilr"))
   if (!is.matrix(x))stop("x needs to b e a matrix")
   if (any(x == 0) & offset == 0)stop("zero detected in x. set offset to avoid it for ratio transformation")
-  if (!tolower(mode) %in% c("clr", "ilr"))stop("choose the proper transformation mode: \"clr\" or \"ilr\"")
+  # if (!tolower(mode) %in% c("clr", "ilr"))stop("choose the proper transformation mode: \"clr\" or \"ilr\"")
 
   # log ratio transformation
   if (tolower(mode) == "clr"){  # clr calculation

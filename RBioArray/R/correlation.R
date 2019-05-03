@@ -175,7 +175,7 @@ rbio_unsupervised_corcluster.rbioseq_de <- function(object, sample_id.var.name =
 #' @export
 rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, n = "all",
                                                  input.comparisons = NULL,
-                                                 cor.method = "pearson",
+                                                 cor.method = c("pearson", "spearman"),
                                                  rm.control = FALSE, input.genes_annotation.control_type,
                                                  gene_symbol.only = FALSE,
                                                  input.genes_annotation.gene_symbol.var_name = NULL,
@@ -190,6 +190,8 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
                                                  sigplot.mar = c(5, 4, 4, 2) + 0.1,
                                                  sigplot.width = 7, sigplot.height = 7, verbose = TRUE){
   ## check arguments
+  cor.method <- match.arg(tolower(cor.method), c("pearson", "spearman"))
+
   if (n != "all" && n %% 1 != 0) stop("Argument n needs to be either \"all\" or an integer number.")
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
   if (rm.control && is.null(input.genes_annotation.control_type)) {
@@ -200,7 +202,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
     if (verbose) cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
     gene_symbol.only <- FALSE
   }
-  if (!cor.method %in% c("pearson", "spearman")) stop("Argument cor.method needs to be \"pearson\" or \"spearman\".")
+  # if (!cor.method %in% c("pearson", "spearman")) stop("Argument cor.method needs to be \"pearson\" or \"spearman\".")
   if (missing(export.name) || is.null(export.name)) stop("Please set value for argument export.name.")
 
   # check contrast levels against sample groups
@@ -387,7 +389,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
 #' @export
 rbio_supervised_corcluster <- function(object,
                                        gene_symbol.only = FALSE,
-                                       cor.method = "pearson",
+                                       cor.method = c("pearson", "spearman"),
                                        map.colour = "PRGn", n.map.colour = 11, ...,
                                        heatmap.width = 7, heatmap.height = 7,
                                        sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
@@ -396,9 +398,11 @@ rbio_supervised_corcluster <- function(object,
                                        sigplot.mar = c(5, 4, 4, 2) + 0.1,
                                        sigplot.width = 7, sigplot.height = 7, verbose = TRUE){
   ## argument check
+  cor.method <- match.arg(tolower(cor.method), c("pearson", "spearman"))
+
   if (class(object) != "sig") stop("The input object has to be a \"sig\" class.")
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
-  if (!cor.method %in% c("pearson", "spearman")) stop("Argument cor.method needs to be \"pearson\" or \"spearman\".")
+  # if (!cor.method %in% c("pearson", "spearman")) stop("Argument cor.method needs to be \"pearson\" or \"spearman\".")
 
   ## variables
   E <- object$input_data$norm_E

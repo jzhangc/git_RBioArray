@@ -6,7 +6,7 @@
 \usage{
 \method{rbio_unsupervised_corcluster}{default}(E, genes,
   input.sample_groups, n = "all", input.comparisons = NULL,
-  cor.method = "pearson", rm.control = FALSE,
+  cor.method = c("pearson", "spearman"), rm.control = FALSE,
   input.genes_annotation.control_type, gene_symbol.only = FALSE,
   input.genes_annotation.gene_symbol.var_name = NULL,
   input.genes_annotation.gene_id.var_name = NULL, map.colour = "PRGn",

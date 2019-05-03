@@ -9,8 +9,10 @@
   gene_symbol.only = FALSE,
   input.genes_annotation.gene_symbol.var_name = NULL,
   input.genes_annotation.gene_id.var_name = NULL,
-  sample_id.vector = NULL, distance = "euclidean",
-  clust = "complete", col.colour = "Paired", map.colour = "PRGn",
+  sample_id.vector = NULL, distance = c("euclidean", "maximum",
+  "manhattan", "canberra", "binary", "minkowski"), clust = c("complete",
+  "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
+  "centroid"), col.colour = "Paired", map.colour = "PRGn",
   n.map.colour = 11, ..., export.name = NULL, plot.width = 7,
   plot.height = 7, verbose = TRUE)
 }

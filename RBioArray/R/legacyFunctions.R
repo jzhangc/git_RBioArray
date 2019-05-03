@@ -623,9 +623,9 @@ rbioarray_DE <- function(objTitle = "data_filtered",
                          plotWidth = 170, plotHeight = 150,
                          parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE){
   ## retrieve relevant arguments
-  input.outcome.mode <- match.arg(input.outcome.mode)
-  output.mode <- match.arg(output.mode)
-  sig.method <- match.arg(sig.method)
+  input.outcome.mode <- match.arg(tolower(input.outcome.mode), c("categorical", "continuous"))
+  output.mode <- match.arg(tolower(output.mode), c("probe.all", "probe.sig", "geneName.all", "geneName.sig"))
+  sig.method <- match.arg(tolower(sig.method), c("fdr", "spikein", "none"))
 
   ## check the key arguments
   if (is.null(fltlist)){
@@ -905,6 +905,7 @@ rbioarray_DE <- function(objTitle = "data_filtered",
     }
   }
 }
+
 
 
 #' @title rbioarray_corcluster_super
@@ -1373,10 +1374,14 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
                              count_threshold = "none", design = NULL, qc_plot = FALSE,
                              n = "all", sampleName = NULL,
                              fct = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-                             distance = "euclidean", clust = "complete",
+                             distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+                             clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                              colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                              plotWidth = 7, plotHeight = 7){
   ## chekc variables
+  distance <- match.arg(tolower(distance), c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+  clust <- match.arg(clust, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
+
   if (is.null(dfm_count) | is.null(dfm_annot) | class(dfm_count) != "data.frame" | class(dfm_annot) != "data.frame"){
     stop(cat("Please provide the read count and annotation dataframes. Please also make sure the type as data.frame. Function terminated.\n"))
   }
@@ -1496,12 +1501,16 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                                      DE.sig.p = 0.05, FC = 1.5,
                                      fct, sampleName = NULL,
                                      colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-                                     distance = "euclidean", clust = "complete",
+                                     distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+                                     clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                                      rowLabel = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
                                      colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                      plotWidth = 7, plotHeight = 7,
                                      verbose = TRUE){ #DOI: fltered subset data of interest
   ## argument check
+  distance <- match.arg(tolower(distance), c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
+  clust <- match.arg(clust, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
+
   if (!dataProbeVar %in% names(dfmDE) | !dataProbeVar %in% names(fltDOI$genes)){
     stop(cat("data probe variable not found in dfmDE or fltDOI"))
   }
