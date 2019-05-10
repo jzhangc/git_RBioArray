@@ -63,7 +63,7 @@ Update log
         - rbioarrary_DE now also exports the DE summary data frame into the environment
         - verbose argument added to rbioarrary_DE(), rbioarray_hclust_super
         - rbioarrary_DE() updated with suppport for continuous outcome
-        - rbioarray_hcluster() can now hid top heatmap strip by setting ColSideCol = FALSE
+        - rbioarray_hcluster() and rbioarray_hcluster_super() can now hide top heatmap strip by setting ColSideCol = FALSE
         
       - Other updates
         - Dependency ggplot2 now requires version 3.0.0

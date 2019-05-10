@@ -1478,6 +1478,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 #' @param annot Annotation object, usually a \code{dataframe}. Make sure to name the probe ID variable \code{ProbeName}. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
 #' @param annotProbeVar \code{annot} variable name for probe name. Default is \code{"ProbeName"}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.
+#' @param ColSideCol If to display the top heatmap strip. Default is \code{TRUE}.
 #' @param colColour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
@@ -1507,12 +1508,12 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
                                      dataProbeVar = "ProbeName",
                                      DE.sig.method = "none",
                                      DE.sig.p = 0.05, FC = 1.5,
-                                     fct, sampleName = NULL,
-                                     colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
+                                     sampleName = NULL,
+                                     fct, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                      distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
                                      clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                                      rowLabel = FALSE, annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-                                     colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+                                     ColSideCol = TRUE, colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
                                      plotWidth = 7, plotHeight = 7,
                                      verbose = TRUE){ #DOI: fltered subset data of interest
   ## argument check
@@ -1569,9 +1570,11 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
   clustfunc <- function(x)hclust(x, method = clust)
 
   # set ColSideColors
-  col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:(ncol(dfm) - ncol(fltDOI$E)))])))
-  colG <- cutree(col_cluster, colGroup) # column group
-  colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
+  if (ColSideCol) {
+    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:(ncol(dfm) - ncol(fltDOI$E)))])))
+    colG <- cutree(col_cluster, colGroup) # column group
+    colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
+  }
 
   # draw heatmap
   ogNcol <- dim(fltDOI$E)[2] # original numbers of col
@@ -1595,8 +1598,13 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
-      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+      if (ColSideCol) {
+        heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+      } else {
+        heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                  col = brewer.pal(n_mapColour, mapColour),  ...)
+      }
       garbage <- dev.off()
 
     } else {
@@ -1620,8 +1628,14 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       }
 
       pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
-      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
-                col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = labrow, ...)
+      if (ColSideCol){
+        heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                  col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = labrow, ...)
+      } else {
+        heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                  col = brewer.pal(n_mapColour, mapColour), labRow = labrow, ...)
+      }
+
       garbage <- dev.off()
       if (verbose) cat("Probes with no gene names are removed.")
     }
@@ -1639,8 +1653,14 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
     }
 
     pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
-    heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
-              col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = FALSE,...)
+    if(ColSideCol){
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = FALSE,...)
+    } else {
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                col = brewer.pal(n_mapColour, mapColour), labRow = FALSE,...)
+    }
+
     garbage <- dev.off()
   }
 }

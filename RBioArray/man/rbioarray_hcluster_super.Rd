@@ -7,14 +7,15 @@
 rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
   ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
   dataProbeVar = "ProbeName", DE.sig.method = "none",
-  DE.sig.p = 0.05, FC = 1.5, fct, sampleName = NULL,
+  DE.sig.p = 0.05, FC = 1.5, sampleName = NULL, fct,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
   distance = c("euclidean", "maximum", "manhattan", "canberra", "binary",
   "minkowski"), clust = c("complete", "ward.D", "ward.D2", "single",
   "average", "mcquitty", "median", "centroid"), rowLabel = FALSE,
   annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7, verbose = TRUE)
+  ColSideCol = TRUE, colColour = "Paired", mapColour = "PRGn",
+  n_mapColour = 11, ..., plotWidth = 7, plotHeight = 7,
+  verbose = TRUE)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -35,9 +36,9 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
 
 \item{FC}{Fold change (FC) filter for the heatmap. Default is \code{NULL}.}
 
-\item{fct}{Input \code{factor} object for samples.}
-
 \item{sampleName}{A \code{vector} containing names for column. Default is \code{NULL} and the function will use the column name from the input.}
+
+\item{fct}{Input \code{factor} object for samples.}
 
 \item{colGroup}{Colour group, numeric or dependent on \code{fct}.}
 
@@ -52,6 +53,8 @@ rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
 \item{annotProbeVar}{\code{annot} variable name for probe name. Default is \code{"ProbeName"}.}
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{rowLabel = TRUE}. Default is \code{NULL}.}
+
+\item{ColSideCol}{If to display the top heatmap strip. Default is \code{TRUE}.}
 
 \item{colColour}{Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.}
 
