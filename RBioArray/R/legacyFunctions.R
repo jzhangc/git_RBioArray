@@ -1341,7 +1341,7 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
               col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
   } else {
     heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
-              col = brewer.pal(n_mapColour, mapColour), ColSideColors, ...)
+              col = brewer.pal(n_mapColour, mapColour), ...)
   }
   garbage <- dev.off()
 }
