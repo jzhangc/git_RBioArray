@@ -10,9 +10,9 @@ rbioarray_hcluster(plotName = "data", fltlist = NULL,
   rmControl = TRUE, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
   sampleName = NULL, fct = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-  distance = "euclidean", clust = "complete", colColour = "Paired",
-  mapColour = "PRGn", n_mapColour = 11, ..., plotWidth = 7,
-  plotHeight = 7)
+  distance = "euclidean", clust = "complete", ColSideCol = TRUE,
+  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+  plotWidth = 7, plotHeight = 7)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}
@@ -46,6 +46,8 @@ rbioarray_hcluster(plotName = "data", fltlist = NULL,
 \item{distance}{Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.}
 
 \item{clust}{Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.}
+
+\item{ColSideCol}{If to display the top heatmap strip. Default is \code{TRUE}.}
 
 \item{colColour}{Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.}
 

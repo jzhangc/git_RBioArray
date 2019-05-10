@@ -1212,6 +1212,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' @param colGroup Colour group, numeric or dependent on \code{fct}.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
+#' @param ColSideCol If to display the top heatmap strip. Default is \code{TRUE}.
 #' @param colColour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
 #' @param mapColour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n_mapColour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
@@ -1265,7 +1266,8 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
                                sampleName = NULL,
                                fct = NULL, colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
                                distance = "euclidean", clust = "complete",
-                               colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
+                               ColSideCol = TRUE, colColour = "Paired",
+                               mapColour = "PRGn", n_mapColour = 11, ...,
                                plotWidth = 7, plotHeight = 7){
   ## chekc arguments
   if (is.null(fltlist)){
@@ -1300,10 +1302,11 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
   }
 
   ## set ColSideColors
-  col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:(ncol(dfm) - ncol(fltlist$E)))])))
-
-  colG <- cutree(col_cluster, colGroup) # column group
-  colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
+  if (ColSideCol){
+    col_cluster <- clustfunc(distfunc(t(dfm[, -c(1:(ncol(dfm) - ncol(fltlist$E)))])))
+    colG <- cutree(col_cluster, colGroup) # column group
+    colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), colColour) # column colour
+  }
 
   ## prepare mtx for plotting
   dfm2 <- dfm
@@ -1333,8 +1336,13 @@ rbioarray_hcluster <- function(plotName = "data", fltlist = NULL, dataProbeVar =
   ## heatmap
   # draw heatmap
   pdf(file = paste(plotName, "_heatmap.pdf", sep = ""), width = plotWidth, height = plotHeight)
-  heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
-            col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+  if (ColSideCol) {
+    heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+              col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
+  } else {
+    heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+              col = brewer.pal(n_mapColour, mapColour), ColSideColors, ...)
+  }
   garbage <- dev.off()
 }
 
