@@ -40,9 +40,10 @@ A \code{rbioarray_flist} class, including the following core items:
 Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.
 }
 \details{
-For \code{filter.percentile},
+For \code{filter.percentile}, when the input data has negative probes, the value is sete to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
+         When there is no negative control probes, the value is set to \code{0.05}, so that the 5 percentile of the entire data is considered the lower threshold
 
-         For \code{filter.threshold.min.sample}
+         For \code{filter.threshold.min.sample}, usually make sure to ensure the target gene has at least three samples, so that stats can be done.
 
          When \code{combine.gene.duplicate = TRUE}
 }

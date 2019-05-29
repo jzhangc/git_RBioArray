@@ -57,6 +57,9 @@ Update log
     (ADDED)
       - General updates
         - match.arg() method added to relevant functions for better user experience
+
+      - Updates to microarray functions
+        - A bug fixed for rbioarray_rlist() where the function crashes when no gene annotation data frame is provided
       
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()

@@ -121,6 +121,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     stop("Please set raw.annot.var.name AND raw.gene_id.var.name arguments.")
   if (!raw.annot.var.name %in% names(raw.dataframe)  || !raw.gene_id.var.name %in% names(raw.dataframe))
     stop("Annoation variables (i.e. columns) and/or the gene_id variable (i.e. column) not found in raw.dataframe")
+  raw_dfm <- raw.dataframe
 
   # gene annotation
   if (!is.null(extra.gene.annot.dataframe)){  # check and load gene annoation
@@ -135,7 +136,6 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
       gene.symbol <- TRUE
     }
     # additional variables
-    raw_dfm <- raw.dataframe
     genes_annot_dfm <- extra.gene.annot.dataframe
 
     ## Set up the information
@@ -159,6 +159,9 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
     genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
   } else {
+    E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name]) # remove annotation columns
+    rownames(E) <- NULL
+
     cat("Note: extra.gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
     gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
@@ -235,6 +238,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
   if (verbose) cat(paste0("The resulted rbioarray_rlist object contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), " samples for ", length(unique(sample.groups)), " groups."))
   return(out)
 }
+
 
 
 #' @export
@@ -408,9 +412,10 @@ print.rbioarray_plist <- function(x, ...){
 #' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details For \code{filter.percentile},
+#' @details For \code{filter.percentile}, when the input data has negative probes, the value is sete to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
+#'          When there is no negative control probes, the value is set to \code{0.05}, so that the 5 percentile of the entire data is considered the lower threshold
 #'
-#'          For \code{filter.threshold.min.sample}
+#'          For \code{filter.threshold.min.sample}, usually make sure to ensure the target gene has at least three samples, so that stats can be done.
 #'
 #'          When \code{combine.gene.duplicate = TRUE}
 #'
