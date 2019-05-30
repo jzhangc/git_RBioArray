@@ -351,7 +351,7 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ..., ver
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
 #' @export
 rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
-                                                bgc.method = c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"),
+                                                bgc.method = c("auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"),
                                                 between.sample.norm.method = c("quantile", "Aquantile"),
                                                 between.sample.weight.design = NULL, ...,
                                                 verbose = TRUE){
