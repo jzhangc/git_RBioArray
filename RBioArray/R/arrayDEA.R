@@ -59,7 +59,8 @@ rbioarray_rlist <- function(object, ...){
 
 #' @title rbioarray_rlist.EListRaw
 #'
-#' @description The \code{rbioarrary_rlist} function for \code{EListRaw} class
+#' @rdname rbioarray_rlist
+#' @method rbioarray_rlist EListRaw
 #' @param object A input \code{EListRaw} class object from \code{limma} package
 #' @param ... Additional argument for the default function.
 #' @export
@@ -78,7 +79,8 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 
 #' @title rbioarray_rlist.default
 #'
-#' @description The default \code{rbioarrary_rlist} function.
+#' @rdname rbioarray_rlist
+#' @method rbioarray_rlist default
 #' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
 #' @param raw.background.signal.matrix A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
 #' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
@@ -257,7 +259,7 @@ print.rbioarray_rlist <- function(x, ...){
 
 #' @title rbioarray_transfo_normalize
 #'
-#' @description Generic data log transformation and nomalization function for microarray.
+#' @description Data log transformation and nomalization function for microarray.
 #' @param object Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
@@ -311,7 +313,8 @@ rbioarray_transfo_normalize <- function(object, ...){
 
 #' Title rbioarray_transfo_normalize.rbioarray_rlist
 #'
-#' @description \code{\link{rbioarray_transfo_normalize}} for \code{rbioarray_rlist} class object.
+#' @rdname rbioarray_transfo_normalize
+#' @method rbioarray_transfo_normalize rbioarray_rlist
 #' @param object Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
 #' @param design Microarray experiment sample design matrix. Make sure the design colnames are the same as the levles of \code{object$sample_groups}.
 #' @param ... Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.
@@ -336,7 +339,8 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ..., ver
 
 #' @title rbioarray_transfo_normalize.default
 #'
-#' @description \code{\link{rbioarray_transfo_normalize}} for \code{rbioarray_rlist} class object.
+#' @rdname rbioarray_transfo_normalize
+#' @method rbioarray_transfo_normalize default
 #' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.
 #' @param E.background A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
 #' @param bgc.method Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.

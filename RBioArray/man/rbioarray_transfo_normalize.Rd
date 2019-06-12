@@ -2,14 +2,47 @@
 % Please edit documentation in R/arrayDEA.R
 \name{rbioarray_transfo_normalize}
 \alias{rbioarray_transfo_normalize}
+\alias{rbioarray_transfo_normalize.rbioarray_rlist}
+\alias{rbioarray_transfo_normalize.default}
 \title{rbioarray_transfo_normalize}
 \usage{
 rbioarray_transfo_normalize(object, ...)
+
+\method{rbioarray_transfo_normalize}{rbioarray_rlist}(object, design, ...,
+  verbose = TRUE)
+
+\method{rbioarray_transfo_normalize}{default}(E, E.background = NULL,
+  bgc.method = c("auto", "none", "subtract", "half", "minimum",
+  "movingmin", "edwards", "normexp"),
+  between.sample.norm.method = c("quantile", "Aquantile"),
+  between.sample.weight.design = NULL, ..., verbose = TRUE)
 }
 \arguments{
 \item{object}{Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.}
 
 \item{...}{Additional arguments for corresponding S3 class methods.}
+
+\item{design}{Microarray experiment sample design matrix. Make sure the design colnames are the same as the levles of \code{object$sample_groups}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+
+\item{E}{Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.}
+
+\item{E.background}{A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.}
+
+\item{bgc.method}{Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.}
+
+\item{between.sample.norm.method}{Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.}
+
+\item{between.sample.weight.design}{Microarray experiment sample design matrix for beteween sample weight calculation.}
+
+\item{object}{Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.}
+
+\item{...}{Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.}
+
+\item{...}{Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A \code{rbioarray_plist} class object with the following items:
@@ -23,9 +56,13 @@ A \code{rbioarray_plist} class object with the following items:
         \code{raw_data}: A list including original E matrix and background matrix from the input \code{rbioarray_rlist}.
 
         Additionally, \code{rbioarray_plist} object will include additional items from the input \code{rbioarray_rlist} object.
+
+A \code{rbioarray_plist} class object.
+
+A list with the core items for a \code{rbioarray_plist} class.
 }
 \description{
-Generic data log transformation and nomalization function for microarray.
+Data log transformation and nomalization function for microarray.
 }
 \details{
 The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
@@ -43,6 +80,12 @@ The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rli
          same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is appled BEFORE
          \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
+
+The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
+
+The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
+         The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+         ADD the fact that \code{normalizeBetweenArrays} function is where \code{limma} log transforms data.
 }
 \examples{
 

@@ -1,6 +1,6 @@
 #' @title sig
 #'
-#' @description Generic significance test function
+#' @description Significance test function
 #' @param object Object containing DE inforamtion. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.
 #' @param ... Additional arguments for corresponding S3 class methods.
 #' @return Signifiance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
@@ -43,7 +43,8 @@ sig <- function(object, ...){
 
 #' @title sig.rbioseq_de
 #'
-#' @description The \code{sig} function for \code{rbioseq_de} object from \code{\link{rnaseq_de}} function.
+#' @rdname sig
+#' @method sig rbioseq_de
 #' @param object A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.
 #' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
 #' @param p.val.correction.method A character string describing the p value correction method used for significant test. Options are \code{"fdr"} and \code{"none"}. Default is \code{"fdr"}.
@@ -83,7 +84,8 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
 
 #' @title sig.rbioarray_de
 #'
-#' @description The \code{sig} function for \code{rbioarray_de} object from \code{\link{microarray_de}} function.
+#' @rdname sig
+#' @method sig rbioarray_de
 #' @param object A \code{rbioarray_de} object \code{\link{microarray_de}} function.
 #' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
 #' @param p.val.correction.method A character string describing the p value correction method used for significant test. Options are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}.
@@ -131,7 +133,8 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 
 #' @title sig.default
 #'
-#' @description The default \code{sig} function.
+#' @rdname sig
+#' @method sig default
 #' @param input.de.list  Input list cantaining DE dataframes for each comparison.
 #' @param input.Fstats.matrix Input dataframe containing F stats.
 #' @param input.genes_annotation.control_type Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.

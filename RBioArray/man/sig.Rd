@@ -2,14 +2,107 @@
 % Please edit documentation in R/sig_test.R
 \name{sig}
 \alias{sig}
+\alias{sig.rbioseq_de}
+\alias{sig.rbioarray_de}
+\alias{sig.default}
 \title{sig}
 \usage{
 sig(object, ...)
+
+\method{sig}{rbioseq_de}(object, export.name = NULL,
+  p.val.correction.method = c("fdr", "none"), ...)
+
+\method{sig}{rbioarray_de}(object, p.val.correction.method = c("fdr",
+  "spikein", "none"), export.name = NULL, ...)
+
+\method{sig}{default}(input.de.list, input.gene_symbol.var.name,
+  input.Fstats.matrix, input.genes_annotation.control_type = NULL,
+  input.fit = NULL, experiment = NULL, FC = 1.5, alpha = 0.05,
+  p.val.correction.method = "fdr", gene_symbol = TRUE,
+  export.name = NULL, export.mode = "all", plot = TRUE,
+  plot.top.gene = FALSE, plot.top.gene.n = 5,
+  plot.top.gene.padding = 0.5, plot.Title = NULL,
+  plot.xLabel = "log2(fold change)", plot.yLabel = "-log10(p value)",
+  plot.symbolSize = 2, plot.sigColour = "red",
+  plot.nonsigColour = "gray", plot.xTxtSize = 10, plot.yTxtSize = 10,
+  plot.Width = 170, plot.Height = 150, verbose = TRUE)
 }
 \arguments{
 \item{object}{Object containing DE inforamtion. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.}
 
 \item{...}{Additional arguments for corresponding S3 class methods.}
+
+\item{export.name}{Optional name used for output objects to the environment and directory. Default is \code{NULL}.}
+
+\item{p.val.correction.method}{A character string describing the p value correction method used for significant test. Options are \code{"fdr"} and \code{"none"}. Default is \code{"fdr"}.}
+
+\item{input.de.list}{Input list cantaining DE dataframes for each comparison.}
+
+\item{input.gene_symbol.var.name}{Input gene sysmbol variable name from the DE dataframes.}
+
+\item{input.Fstats.matrix}{Input dataframe containing F stats.}
+
+\item{input.genes_annotation.control_type}{Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.}
+
+\item{input.fit}{Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object}
+
+\item{experiment}{Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".}
+
+\item{FC}{Threshold for fold change. Default is \code{1.5}.}
+
+\item{alpha}{Threshold for p values. Default is \code{0.05}.}
+
+\item{gene_symbol}{If to apply gene symbols in the plot and exported results. Default is \code{TRUE}.}
+
+\item{export.mode}{Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"} and \code{"sig"}. Default is \code{"all"}. See details.}
+
+\item{plot}{If to plot volcano plot. Default is \code{TRUE}.}
+
+\item{plot.top.gene}{If to display the top gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.}
+
+\item{plot.top.gene.n}{When \code{plot.top.gene = TRUE}, to set how many genes to display. Default is \code{5}.}
+
+\item{plot.top.gene.padding}{When \code{plot.top.gene = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.}
+
+\item{plot.Title}{Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{plot.xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
+
+\item{plot.yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+
+\item{plot.symbolSize}{Size of the symbol. Default is \code{2}.}
+
+\item{plot.sigColour}{Colour of the significant genes or probes. Default is \code{"red"}.}
+
+\item{plot.nonsigColour}{Colour of the non-significant genes or probes. Default is \code{"gray"}.}
+
+\item{plot.xTxtSize}{Font size for the x-axis text. Default is \code{10}.}
+
+\item{plot.yTxtSize}{Font size for the y-axis text. Default is \code{10}.}
+
+\item{plot.Width}{The width of the figure for the final output figure file. Default is \code{170}.}
+
+\item{plot.Height}{The height of the figure for the final output figure file. Default is \code{150}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+
+\item{object}{A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.}
+
+\item{...}{Additional arguments for \code{\link{sig.defuault}}.}
+
+\item{object}{A \code{rbioarray_de} object \code{\link{microarray_de}} function.}
+
+\item{export.name}{Optional name used for output objects to the environment and directory. Default is \code{NULL}.}
+
+\item{p.val.correction.method}{A character string describing the p value correction method used for significant test. Options are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}.}
+
+\item{...}{Additional arguments for \code{\link{sig.defuault}}.}
+
+\item{p.val.correction.method}{A character string describing the p value correction method used for significant test.}
+
+\item{export.name}{Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.}
+
+\item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 }
 \value{
 Signifiance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
@@ -35,7 +128,22 @@ Signifiance test results as \code{csv} files and volcano plots to the working di
                            For \code{rbioreq_de} class, it is both filtered (not normalized), i.e. input_data$filtered_E, and filtered + normalized data input_data$norm_E
 }
 \description{
-Generic significance test function
+Significance test function
+}
+\details{
+Explanation for \code{export.mode} options:
+
+        \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
+
+        \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
+
+        \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
+
+        \code{p_val.correction.method}
+
+        The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
+
+        The \code{input.E} and \code{input.genes} are only used for output, not part of the sig processing.
 }
 \examples{
 
