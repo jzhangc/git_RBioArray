@@ -10,7 +10,7 @@
 \arguments{
 \item{object}{Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.}
 
-\item{design}{Microarray experiment sample design matrix.}
+\item{design}{Microarray experiment sample design matrix. Make sure the design colnames are the same as the levles of \code{object$sample_groups}.}
 
 \item{...}{Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.}
 

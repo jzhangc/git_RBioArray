@@ -35,8 +35,6 @@ rbio_supervised_hcluster(object, gene_symbol.only = FALSE,
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
-\item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
-
 \item{sample_id.vector}{A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.}
 }
 \value{

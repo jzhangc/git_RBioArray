@@ -313,7 +313,7 @@ rbioarray_transfo_normalize <- function(object, ...){
 #'
 #' @description \code{\link{rbioarray_transfo_normalize}} for \code{rbioarray_rlist} class object.
 #' @param object Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
-#' @param design Microarray experiment sample design matrix.
+#' @param design Microarray experiment sample design matrix. Make sure the design colnames are the same as the levles of \code{object$sample_groups}.
 #' @param ... Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.

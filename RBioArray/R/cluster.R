@@ -162,10 +162,6 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
     gene_symbol.only <- FALSE
   }
   if (missing(export.name) || is.null(export.name)) stop("Please set value for argument export.name.")
-  # if (!distance %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
-  #   stop("Argument distance needs to be one of \"euclidean\", \"maximum\", \"manhattan\", \"canberra\", \"binary\"or \"minkowski\".")
-  # if (!clust %in% c("ward.D", "ward.D2", "single", "complete", "average", "mcquitty", "median", "centroid"))
-  #   stop("Argument clust needs to be one of \"ward.D\", \"ward.D2\", \"single\", \"complete\", \"average\", \"mcquitty\", \"median\", \"centroid\".")
 
   ## variables
   if(length(levels(input.sample_groups)) <= 19) {
@@ -219,7 +215,6 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #'
 #' @description Supersived hierarchical clustering function.
 #' @param object Input \code{sig} class object.
-#' @param input.sample_groups Input \code{factor} object for sample groupping labels.
 #' @param gene_symbol.only Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
 #' @param sample_id.vector A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.

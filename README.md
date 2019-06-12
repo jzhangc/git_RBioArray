@@ -60,6 +60,7 @@ Update log
 
       - Updates to microarray functions
         - A bug fixed for rbioarray_rlist() where the function crashes when no gene annotation data frame is provided
+        - Information regarding the design colnames specification added for rbioarray_transfo_normalize()'s manual page
       
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()

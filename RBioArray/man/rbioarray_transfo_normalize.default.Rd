@@ -5,7 +5,7 @@
 \title{rbioarray_transfo_normalize.default}
 \usage{
 \method{rbioarray_transfo_normalize}{default}(E, E.background = NULL,
-  bgc.method = c("auto", "auto", "none", "subtract", "half", "minimum",
+  bgc.method = c("auto", "none", "subtract", "half", "minimum",
   "movingmin", "edwards", "normexp"),
   between.sample.norm.method = c("quantile", "Aquantile"),
   between.sample.weight.design = NULL, ..., verbose = TRUE)
