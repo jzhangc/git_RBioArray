@@ -24,7 +24,6 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
                                 parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check the arguments
   tgtSpecies <- match.arg(tolower(tgtSpecies), c("mmu", "mouse", "rno", "rat", "medaka", "olatipes"))
-
   if (is.null(ensemblTransVar) & is.null(entrezVar)){
     stop("Please set the variable name for the ensembl transcript ID or entrezID.")
   }
@@ -94,7 +93,6 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
     out[] <- lapply(DElst, function(i)tmpfunc(i))
 
   } else { # parallel computing
-
     # check the cluster type
     if (clusterType != "PSOCK" & clusterType != "FORK"){
       stop("Please set the cluter type. Options are \"PSOCK\" (default) and \"FORK\".")
@@ -102,7 +100,6 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
 
     # set up core numbers
     n_cores <- detectCores() - 1
-
     if (clusterType == "PSOCK"){ # all OS types
       # set up clusters for PSOCK
       cl <- makeCluster(n_cores, type = "PSOCK", outfile = "")
@@ -114,9 +111,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
         tmpout <- tmpfunc(i) }
 
       } else { # macOS and Unix-like only
-
         out[] <- mclapply(DElst, FUN = tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
-
       }
   }
 
@@ -162,9 +157,6 @@ rbioGS <- function(GS = NULL, GSfile = NULL, idVar = NULL,
                    ...,
                    parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check arguments
-  method_p <- match.arg(method_p, c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon"))
-  method_t <- match.arg(tolower(method_t), c("page", "gsea", "maxmean"))
-
   if (is.null(idVar)){stop("Please set the variable idVar.")}
   if (is.null(pVar) != is.null(logFCVar)){ # is.null(pVar) and is.null(pFCVar) have to be the same
     stop("pVar and logFCVar have to be NULL or not at the same time.")
