@@ -250,11 +250,12 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                    ". \nPlease consider using another thresholding method. For now, alpha is applied to the raw p.values.\n"))
         pcutoff <- alpha
         fdr.stats <- FALSE
+        cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff)
       } else {
         pcutoff <- max(sig_dfm[sig_dfm$adj.P.Val < alpha, ]$P.Value)
         fdr.stats <- TRUE
+        cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value <= pcutoff)
       }
-      cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff)
     } else {
       pcutoff <- alpha
       fdr.stats <- FALSE

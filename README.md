@@ -62,10 +62,12 @@ Update log
       - Updates to microarray functions
         - A bug fixed for rbioarray_rlist() where the function crashes when no gene annotation data frame is provided
         - Information regarding the design colnames specification added for rbioarray_transfo_normalize()'s manual page
-      
+        - A bug fixed for sig() where the cutoff was set to "raw p value less than the FDR resulted p cutoff"
+        
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()
-        - rbioarrary_DE now also exports the DE summary data frame into the environment
+        - rbioarrary_DE() now also exports the DE summary data frame into the environment
+        - A bug fixed for rbioarrary_DE() where the cutoff was set to "raw p value less than the FDR resulted p cutoff"
         - verbose argument added to rbioarrary_DE(), rbioarray_hclust_super
         - rbioarrary_DE() updated with suppport for continuous outcome
         - rbioarray_hcluster() and rbioarray_hcluster_super() can now hide top heatmap strip by setting ColSideCol = FALSE

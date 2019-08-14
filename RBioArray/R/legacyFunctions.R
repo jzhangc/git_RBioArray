@@ -116,10 +116,11 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
       if (length(which(tmpdfm$adj.P.Val < sig.p)) == 0){
         warning("No significant results found using FDR correction. Please consider using another thresholding method. For now, sig.p is applied on raw p.values.")
         pcutoff <- sig.p
+        cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
       } else {
         pcutoff <- max(tmpdfm[tmpdfm$adj.P.Val < sig.p, ]$P.Value)
+        cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value <= pcutoff)
       }
-      cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
     } else  {
       pcutoff <- sig.p
       cutoff <- as.factor(abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff)
@@ -734,7 +735,12 @@ rbioarray_DE <- function(objTitle = "data_filtered",
       } else {
         pltdfm <- tmpdfm
       }
-      cutoff <- as.factor(abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff)
+
+      if (tolower(sig.method) == "fdr") {
+        cutoff <- as.factor(abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value <= pcutoff)
+      } else {
+        cutoff <- as.factor(abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff)
+      }
 
       # plot
       loclEnv <- environment()
