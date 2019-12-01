@@ -212,7 +212,8 @@ rnaseq_de.default <- function(x, y = NULL,
   # library size scaling normalization
   dgenormf <- calcNormFactors(dge, method = library.size.scale.method)  # between-genes
   # between-genes: Voom normalization with quality weights
-  vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile")
+  # vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile") # old
+  vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalize.method = "quantile")
   if (verbose) cat("DONE!\n") # message
 
   # fitting
