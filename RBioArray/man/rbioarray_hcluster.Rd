@@ -4,15 +4,31 @@
 \alias{rbioarray_hcluster}
 \title{rbioarray_hcluster}
 \usage{
-rbioarray_hcluster(plotName = "data", fltlist = NULL,
-  dataProbeVar = "ProbeName", genesymbolOnly = FALSE, annot = NULL,
-  annotProbeVar = "ProbeName", genesymbolVar = NULL, n = "all",
-  rmControl = TRUE, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
-  sampleName = NULL, fct = NULL,
+rbioarray_hcluster(
+  plotName = "data",
+  fltlist = NULL,
+  dataProbeVar = "ProbeName",
+  genesymbolOnly = FALSE,
+  annot = NULL,
+  annotProbeVar = "ProbeName",
+  genesymbolVar = NULL,
+  n = "all",
+  rmControl = TRUE,
+  ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType",
+  sampleName = NULL,
+  fct = NULL,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-  distance = "euclidean", clust = "complete", ColSideCol = TRUE,
-  colColour = "Paired", mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+  distance = "euclidean",
+  clust = "complete",
+  ColSideCol = TRUE,
+  colColour = "Paired",
+  mapColour = "PRGn",
+  n_mapColour = 11,
+  ...,
+  plotWidth = 7,
+  plotHeight = 7
+)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}

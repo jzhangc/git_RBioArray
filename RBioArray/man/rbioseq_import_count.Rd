@@ -4,11 +4,19 @@
 \alias{rbioseq_import_count}
 \title{rbioseq_import_count}
 \usage{
-rbioseq_import_count(path = getwd(), species = NULL,
-  target.annot.file = NULL, sample_groups.var.name = NULL,
-  gtf.matrix = NULL, raw.file.ext = ".txt", raw.file.sep = "",
-  raw.file.source = "htseq-count", parallelComputing = FALSE,
-  clusterType = "FORK", verbose = TRUE)
+rbioseq_import_count(
+  path = getwd(),
+  species = NULL,
+  target.annot.file = NULL,
+  sample_groups.var.name = NULL,
+  gtf.matrix = NULL,
+  raw.file.ext = ".txt",
+  raw.file.sep = "",
+  raw.file.source = "htseq-count",
+  parallelComputing = FALSE,
+  clusterType = "FORK",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{path}{Path to raw files. Default is the system working directory.}

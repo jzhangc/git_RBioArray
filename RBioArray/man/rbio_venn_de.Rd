@@ -4,8 +4,14 @@
 \alias{rbio_venn_de}
 \title{rbio_venn_de}
 \usage{
-rbio_venn_de(object, gene_symbol.only = FALSE, ..., plot.Width = 5,
-  plot.Height = 5, verbose = TRUE)
+rbio_venn_de(
+  object,
+  gene_symbol.only = FALSE,
+  ...,
+  plot.Width = 5,
+  plot.Height = 5,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{Input \code{sig} class object.}

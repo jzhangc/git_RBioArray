@@ -4,16 +4,38 @@
 \alias{rbioseq_DE}
 \title{rbioseq_DE}
 \usage{
-rbioseq_DE(objTitle = "data_filtered", dfm_count = NULL,
-  dfm_annot = NULL, count_threshold = "none", norm.method = "TMM",
-  qc_plot = TRUE, design = NULL, contra = NULL, ..., plot = TRUE,
-  geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
-  nGeneSymbol = 5, padding = 0.5, FC = 1.5, FDR = TRUE,
-  sig.p = 0.05, Title = NULL, xLabel = "log2(fold change)",
-  yLabel = "-log10(p value)", symbolSize = 2, sigColour = "red",
-  nonsigColour = "gray", xTxtSize = 10, yTxtSize = 10,
-  plotWidth = 170, plotHeight = 150, parallelComputing = FALSE,
-  clusterType = "PSOCK")
+rbioseq_DE(
+  objTitle = "data_filtered",
+  dfm_count = NULL,
+  dfm_annot = NULL,
+  count_threshold = "none",
+  norm.method = "TMM",
+  qc_plot = TRUE,
+  design = NULL,
+  contra = NULL,
+  ...,
+  plot = TRUE,
+  geneName = FALSE,
+  genesymbolVar = NULL,
+  topgeneLabel = FALSE,
+  nGeneSymbol = 5,
+  padding = 0.5,
+  FC = 1.5,
+  FDR = TRUE,
+  sig.p = 0.05,
+  Title = NULL,
+  xLabel = "log2(fold change)",
+  yLabel = "-log10(p value)",
+  symbolSize = 2,
+  sigColour = "red",
+  nonsigColour = "gray",
+  xTxtSize = 10,
+  yTxtSize = 10,
+  plotWidth = 170,
+  plotHeight = 150,
+  parallelComputing = FALSE,
+  clusterType = "PSOCK"
+)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"seq_data"}.}

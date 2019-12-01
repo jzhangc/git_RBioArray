@@ -9,32 +9,58 @@
 \usage{
 sig(object, ...)
 
-\method{sig}{rbioseq_de}(object, export.name = NULL,
-  p.val.correction.method = c("fdr", "none"), ...)
+\method{sig}{rbioseq_de}(
+  object,
+  export.name = NULL,
+  p.val.correction.method = c("fdr", "none"),
+  ...
+)
 
-\method{sig}{rbioarray_de}(object, p.val.correction.method = c("fdr",
-  "spikein", "none"), export.name = NULL, ...)
+\method{sig}{rbioarray_de}(
+  object,
+  p.val.correction.method = c("fdr", "spikein", "none"),
+  export.name = NULL,
+  ...
+)
 
-\method{sig}{default}(input.de.list, input.gene_symbol.var.name,
-  input.Fstats.matrix, input.genes_annotation.control_type = NULL,
-  input.fit = NULL, experiment = NULL, FC = 1.5, alpha = 0.05,
-  p.val.correction.method = "fdr", gene_symbol = TRUE,
-  export.name = NULL, export.mode = "all", plot = TRUE,
-  plot.top.gene = FALSE, plot.top.gene.n = 5,
-  plot.top.gene.padding = 0.5, plot.Title = NULL,
-  plot.xLabel = "log2(fold change)", plot.yLabel = "-log10(p value)",
-  plot.symbolSize = 2, plot.sigColour = "red",
-  plot.nonsigColour = "gray", plot.xTxtSize = 10, plot.yTxtSize = 10,
-  plot.Width = 170, plot.Height = 150, verbose = TRUE)
+\method{sig}{default}(
+  input.de.list,
+  input.gene_symbol.var.name,
+  input.Fstats.matrix,
+  input.genes_annotation.control_type = NULL,
+  input.fit = NULL,
+  experiment = NULL,
+  FC = 1.5,
+  alpha = 0.05,
+  p.val.correction.method = "fdr",
+  gene_symbol = TRUE,
+  export.name = NULL,
+  export.mode = "all",
+  plot = TRUE,
+  plot.top.gene = FALSE,
+  plot.top.gene.n = 5,
+  plot.top.gene.padding = 0.5,
+  plot.Title = NULL,
+  plot.xLabel = "log2(fold change)",
+  plot.yLabel = "-log10(p value)",
+  plot.symbolSize = 2,
+  plot.sigColour = "red",
+  plot.nonsigColour = "gray",
+  plot.xTxtSize = 10,
+  plot.yTxtSize = 10,
+  plot.Width = 170,
+  plot.Height = 150,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{object}{Object containing DE inforamtion. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.}
+\item{object}{A \code{rbioarray_de} object \code{\link{microarray_de}} function.}
 
-\item{...}{Additional arguments for corresponding S3 class methods.}
+\item{...}{Additional arguments for \code{\link{sig.defuault}}.}
 
-\item{export.name}{Optional name used for output objects to the environment and directory. Default is \code{NULL}.}
+\item{export.name}{Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.}
 
-\item{p.val.correction.method}{A character string describing the p value correction method used for significant test. Options are \code{"fdr"} and \code{"none"}. Default is \code{"fdr"}.}
+\item{p.val.correction.method}{A character string describing the p value correction method used for significant test.}
 
 \item{input.de.list}{Input list cantaining DE dataframes for each comparison.}
 
@@ -85,22 +111,6 @@ sig(object, ...)
 \item{plot.Height}{The height of the figure for the final output figure file. Default is \code{150}.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
-
-\item{object}{A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.}
-
-\item{...}{Additional arguments for \code{\link{sig.defuault}}.}
-
-\item{object}{A \code{rbioarray_de} object \code{\link{microarray_de}} function.}
-
-\item{export.name}{Optional name used for output objects to the environment and directory. Default is \code{NULL}.}
-
-\item{p.val.correction.method}{A character string describing the p value correction method used for significant test. Options are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}.}
-
-\item{...}{Additional arguments for \code{\link{sig.defuault}}.}
-
-\item{p.val.correction.method}{A character string describing the p value correction method used for significant test.}
-
-\item{export.name}{Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.}
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 }

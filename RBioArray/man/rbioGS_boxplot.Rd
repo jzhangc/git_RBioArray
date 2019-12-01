@@ -4,10 +4,20 @@
 \alias{rbioGS_boxplot}
 \title{rbioGS_boxplot}
 \usage{
-rbioGS_boxplot(GSA_list, fileName = "GS_list", KEGG = FALSE,
-  pClass = NULL, classDirection = NULL, ..., plotTitle = NULL,
-  xLabel = "rank", yLabel = NULL, yLabelSize = 7, plotWidth = 170,
-  plotHeight = 150)
+rbioGS_boxplot(
+  GSA_list,
+  fileName = "GS_list",
+  KEGG = FALSE,
+  pClass = NULL,
+  classDirection = NULL,
+  ...,
+  plotTitle = NULL,
+  xLabel = "rank",
+  yLabel = NULL,
+  yLabelSize = 7,
+  plotWidth = 170,
+  plotHeight = 150
+)
 }
 \arguments{
 \item{GSA_list}{piano GS results object.}

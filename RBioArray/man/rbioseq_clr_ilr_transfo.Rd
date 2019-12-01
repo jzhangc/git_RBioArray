@@ -4,8 +4,13 @@
 \alias{rbioseq_clr_ilr_transfo}
 \title{rbioseq_clr_ilr_transfo}
 \usage{
-rbioseq_clr_ilr_transfo(x, offset = 1, mode = c("clr", "ilr"),
-  ilr.method.fast = TRUE, verbose = TRUE)
+rbioseq_clr_ilr_transfo(
+  x,
+  offset = 1,
+  mode = c("clr", "ilr"),
+  ilr.method.fast = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{x}{Input read count data matrix.}

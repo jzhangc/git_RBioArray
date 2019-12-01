@@ -4,8 +4,7 @@
 \alias{rbio_unsupervised_hcluster.rbioarray_flist}
 \title{rbio_unsupervised_hcluster.rbioarray_flist}
 \usage{
-\method{rbio_unsupervised_hcluster}{rbioarray_flist}(object,
-  sample_id.var.name = NULL, ...)
+\method{rbio_unsupervised_hcluster}{rbioarray_flist}(object, sample_id.var.name = NULL, ...)
 }
 \arguments{
 \item{object}{Input object in \code{rbioarray_flist} class.}

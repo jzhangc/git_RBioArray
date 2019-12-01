@@ -4,16 +4,35 @@
 \alias{rbioarray_corcluster_super}
 \title{rbioarray_corcluster_super}
 \usage{
-rbioarray_corcluster_super(plotName = "data", fltlist = NULL,
-  rmControl = TRUE, n_subgroup = NULL, dfmDE = NULL, FDR = TURE,
-  DE.sig.p = 0.05, FC = NULL, dataProbeVar = NULL,
-  method = "pearson", sigPlot = FALSE, sigPlot.sig.FDR = FALSE,
-  sigPlot.sig = 0.05, sigPlot.sigLabelColour = "red",
-  sigPlot.sigLabelSize = 3, sigPlot.labelColour = "black",
-  sigPlot.labelSize = 1, sigPlot.labelAngle = 90,
-  sigPlot.keySize = 1, axisLabel = FALSE, annot = NULL,
-  genesymbolVar = NULL, mapColour = "PRGn", n_mapColour = 11, ...,
-  plotWidth = 7, plotHeight = 7)
+rbioarray_corcluster_super(
+  plotName = "data",
+  fltlist = NULL,
+  rmControl = TRUE,
+  n_subgroup = NULL,
+  dfmDE = NULL,
+  FDR = TURE,
+  DE.sig.p = 0.05,
+  FC = NULL,
+  dataProbeVar = NULL,
+  method = "pearson",
+  sigPlot = FALSE,
+  sigPlot.sig.FDR = FALSE,
+  sigPlot.sig = 0.05,
+  sigPlot.sigLabelColour = "red",
+  sigPlot.sigLabelSize = 3,
+  sigPlot.labelColour = "black",
+  sigPlot.labelSize = 1,
+  sigPlot.labelAngle = 90,
+  sigPlot.keySize = 1,
+  axisLabel = FALSE,
+  annot = NULL,
+  genesymbolVar = NULL,
+  mapColour = "PRGn",
+  n_mapColour = 11,
+  ...,
+  plotWidth = 7,
+  plotHeight = 7
+)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}

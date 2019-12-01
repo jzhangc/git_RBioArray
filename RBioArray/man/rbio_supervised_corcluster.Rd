@@ -4,14 +4,28 @@
 \alias{rbio_supervised_corcluster}
 \title{rbio_supervised_corcluster}
 \usage{
-rbio_supervised_corcluster(object, gene_symbol.only = FALSE,
-  cor.method = c("pearson", "spearman"), map.colour = "PRGn",
-  n.map.colour = 11, ..., heatmap.width = 7, heatmap.height = 7,
-  sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
-  sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
-  sigplot.labelColour = "black", sigplot.labelSize = 1,
-  sigplot.labelAngle = 90, sigplot.keySize = 1, sigplot.mar = c(5, 4,
-  4, 2) + 0.1, sigplot.width = 7, sigplot.height = 7, verbose = TRUE)
+rbio_supervised_corcluster(
+  object,
+  gene_symbol.only = FALSE,
+  cor.method = c("pearson", "spearman"),
+  map.colour = "PRGn",
+  n.map.colour = 11,
+  ...,
+  heatmap.width = 7,
+  heatmap.height = 7,
+  sigplot.adj.p = FALSE,
+  sigplot.alpha = 0.05,
+  sigplot.sigLabelColour = "red",
+  sigplot.sigLabelSize = 3,
+  sigplot.labelColour = "black",
+  sigplot.labelSize = 1,
+  sigplot.labelAngle = 90,
+  sigplot.keySize = 1,
+  sigplot.mar = c(5, 4, 4, 2) + 0.1,
+  sigplot.width = 7,
+  sigplot.height = 7,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{Input \code{sig} class object.}

@@ -4,18 +4,35 @@
 \alias{rbioarray_hcluster_super}
 \title{rbioarray_hcluster_super}
 \usage{
-rbioarray_hcluster_super(plotName = "data", fltDOI, dfmDE,
-  ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
-  dataProbeVar = "ProbeName", DE.sig.method = "none",
-  DE.sig.p = 0.05, FC = 1.5, sampleName = NULL, fct,
+rbioarray_hcluster_super(
+  plotName = "data",
+  fltDOI,
+  dfmDE,
+  ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType",
+  dataProbeVar = "ProbeName",
+  DE.sig.method = "none",
+  DE.sig.p = 0.05,
+  FC = 1.5,
+  sampleName = NULL,
+  fct,
   colGroup = ifelse(length(levels(fct)) < 19, length(levels(fct)), 19),
-  distance = c("euclidean", "maximum", "manhattan", "canberra", "binary",
-  "minkowski"), clust = c("complete", "ward.D", "ward.D2", "single",
-  "average", "mcquitty", "median", "centroid"), rowLabel = FALSE,
-  annot = NULL, annotProbeVar = "ProbeName", genesymbolVar = NULL,
-  ColSideCol = TRUE, colColour = "Paired", mapColour = "PRGn",
-  n_mapColour = 11, ..., plotWidth = 7, plotHeight = 7,
-  verbose = TRUE)
+  distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+  clust = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
+    "centroid"),
+  rowLabel = FALSE,
+  annot = NULL,
+  annotProbeVar = "ProbeName",
+  genesymbolVar = NULL,
+  ColSideCol = TRUE,
+  colColour = "Paired",
+  mapColour = "PRGn",
+  n_mapColour = 11,
+  ...,
+  plotWidth = 7,
+  plotHeight = 7,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{plotName}{File name for the export \code{pdf} plot file. Default is \code{"data"}.}

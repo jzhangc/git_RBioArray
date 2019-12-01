@@ -4,19 +4,41 @@
 \alias{rbioarray_DE}
 \title{rbioarray_DE}
 \usage{
-rbioarray_DE(objTitle = "data_filtered",
+rbioarray_DE(
+  objTitle = "data_filtered",
   input.outcome.mode = c("categorical", "continuous"),
-  output.mode = c("probe.all", "probe.sig", "geneName.all",
-  "geneName.sig"), fltlist = NULL, annot = NULL, design = NULL,
-  contra = NULL, weights = NULL, ..., plot = TRUE,
-  geneName = FALSE, genesymbolVar = NULL, topgeneLabel = FALSE,
-  nGeneSymbol = 5, padding = 0.5, FC = 1.5, ctrlProbe = TRUE,
-  ctrlTypeVar = "ControlType", sig.method = c("fdr", "spikein",
-  "none"), sig.p = 0.05, plotTitle = NULL,
-  xLabel = "log2(fold change)", yLabel = "-log10(p value)",
-  symbolSize = 2, sigColour = "red", nonsigColour = "gray",
-  xTxtSize = 10, yTxtSize = 10, plotWidth = 170, plotHeight = 150,
-  parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE)
+  output.mode = c("probe.all", "probe.sig", "geneName.all", "geneName.sig"),
+  fltlist = NULL,
+  annot = NULL,
+  design = NULL,
+  contra = NULL,
+  weights = NULL,
+  ...,
+  plot = TRUE,
+  geneName = FALSE,
+  genesymbolVar = NULL,
+  topgeneLabel = FALSE,
+  nGeneSymbol = 5,
+  padding = 0.5,
+  FC = 1.5,
+  ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType",
+  sig.method = c("fdr", "spikein", "none"),
+  sig.p = 0.05,
+  plotTitle = NULL,
+  xLabel = "log2(fold change)",
+  yLabel = "-log10(p value)",
+  symbolSize = 2,
+  sigColour = "red",
+  nonsigColour = "gray",
+  xTxtSize = 10,
+  yTxtSize = 10,
+  plotWidth = 170,
+  plotHeight = 150,
+  parallelComputing = FALSE,
+  clusterType = "PSOCK",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{objTitle}{Name for the output list. Default is \code{"data_filtered"}.}

@@ -4,17 +4,29 @@
 \alias{rbio_unsupervised_hcluster.default}
 \title{rbio_unsupervised_hcluster.default}
 \usage{
-\method{rbio_unsupervised_hcluster}{default}(E, genes, input.sample_groups,
-  n = "all", rm.control = FALSE, input.genes_annotation.control_type,
+\method{rbio_unsupervised_hcluster}{default}(
+  E,
+  genes,
+  input.sample_groups,
+  n = "all",
+  rm.control = FALSE,
+  input.genes_annotation.control_type,
   gene_symbol.only = FALSE,
   input.genes_annotation.gene_symbol.var_name = NULL,
   input.genes_annotation.gene_id.var_name = NULL,
-  sample_id.vector = NULL, distance = c("euclidean", "maximum",
-  "manhattan", "canberra", "binary", "minkowski"), clust = c("complete",
-  "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
-  "centroid"), col.colour = "Paired", map.colour = "PRGn",
-  n.map.colour = 11, ..., export.name = NULL, plot.width = 7,
-  plot.height = 7, verbose = TRUE)
+  sample_id.vector = NULL,
+  distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+  clust = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
+    "centroid"),
+  col.colour = "Paired",
+  map.colour = "PRGn",
+  n.map.colour = 11,
+  ...,
+  export.name = NULL,
+  plot.width = 7,
+  plot.height = 7,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}

@@ -2,20 +2,104 @@
 % Please edit documentation in R/rnaseq_count_to_de.R
 \name{rnaseq_de}
 \alias{rnaseq_de}
+\alias{rnaseq_de.rbioseq_count}
+\alias{rnaseq_de.default}
 \title{rnaseq_de}
 \usage{
 rnaseq_de(object, ...)
+
+\method{rnaseq_de}{rbioseq_count}(
+  object,
+  filter.threshold.min.count = 10,
+  filter.threshold.min.sample = NULL,
+  ...
+)
+
+\method{rnaseq_de}{default}(
+  x,
+  y = NULL,
+  y.gene_id.var.name = "genes",
+  y.gene_symbol.var.name = "genes",
+  filter.threshold.cpm = "none",
+  filter.threshold.min.sample = NULL,
+  annot.group = NULL,
+  library.size.scale.method = "TMM",
+  design,
+  contra,
+  qc.plot = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{object}{Object containing expression values. Currently the function supports \code{rbioseq_count} and \code{mir_count} from \code{RBioMIR} pacakge.}
+\item{object}{A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.}
 
-\item{...}{Additional arguments for corresponding S3 class methods.}
+\item{...}{Additional arguments for \code{\link{rnaseq_de.defuault}}.}
+
+\item{filter.threshold.min.count}{Minimum count for the smallest library for filter thresholding. Default is \code{10}.}
+
+\item{filter.threshold.min.sample}{Minimum number of samples meeting the count threshold. Default is \code{NULL}.}
+
+\item{x}{Input read count matrix, with rows for genes and columns for RNA samples.}
+
+\item{y}{Target (e.g. genes) annotation matrix or vector.}
+
+\item{y.gene_id.var.name}{Variable name for gene (i.e. target) identification. Default is \code{"genes"}.}
+
+\item{y.gene_symbol.var.name}{Variable name for gene (i.e. target) symbols. Default is \code{"genes"}.}
+
+\item{filter.threshold.cpm}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}
+
+\item{annot.group}{Ssample group annotation object. Can be a \code{factor} or \code{vector} object.}
+
+\item{library.size.scale.method}{Library size scaling method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
+
+\item{design}{Design matrix.}
+
+\item{contra}{Contrast matrix.}
+
+\item{qc.plot}{QC plot for the input read counts}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A differential expression result object.
+
+A list containing core elements of a \code{rbioseq_de} class. The items of a \code{rbioseq_de} class are following:
+
+        \code{filter_results}: A list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample}, \code{filter_summary} and \code{filtered_counts}.
+                               Note: \code{filtered_counts} is a \code{DGEList} class from \code{edgeR} package.
+
+        \code{normalization_results}
+
+        \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
+                                Note: The \code{targets} is NOT the same as the \code{targets} outside.
+
+        \code{genes_annotation.gene_id.var_name}
+
+        \code{genes_annotation.gene_symbol.var_name}
+
+        \code{F_stats}
+
+        \code{DE_results}
+
+        \code{comparisons}: a list with comparisons and comparison levles
+
+        \code{targets}: sample annotation data frame
+
+        \code{sample_groups}
 }
 \description{
 Generic RNAseq statistical analysis function
+}
+\details{
+\code{filter.threshold.cpm.count} uses CPM (counts per million) as the basis for filtering. The rule of thumb is to filter reads independently from the groupping information.
+
+         The default is based on the paper by Chen et al (2016):
+         10~15 counts per library, which translate to 10~15/L with L being the smallest library size in millions.
+         Therefore, if using 10 as an example, the above becomes 10 / min(library_sizes) / 1000000
+
+         Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
+         using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
 }
 \examples{
 

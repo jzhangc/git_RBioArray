@@ -4,9 +4,16 @@
 \alias{rbioarray_PreProc}
 \title{rbioarray_PreProc}
 \usage{
-rbioarray_PreProc(rawlist, logTrans = FALSE, logTransMethod = "log2",
-  logTransObjT = "data", logTransParallelComputing = FALSE,
-  bgMethod = "auto", normMethod = "quantile", ...)
+rbioarray_PreProc(
+  rawlist,
+  logTrans = FALSE,
+  logTransMethod = "log2",
+  logTransObjT = "data",
+  logTransParallelComputing = FALSE,
+  bgMethod = "auto",
+  normMethod = "quantile",
+  ...
+)
 }
 \arguments{
 \item{rawlist}{Input data, either a list, \code{EList} or \code{MAList} object.}

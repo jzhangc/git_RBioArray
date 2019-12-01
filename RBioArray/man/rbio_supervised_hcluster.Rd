@@ -4,13 +4,21 @@
 \alias{rbio_supervised_hcluster}
 \title{rbio_supervised_hcluster}
 \usage{
-rbio_supervised_hcluster(object, gene_symbol.only = FALSE,
-  sample_id.var.name = NULL, distance = c("euclidean", "maximum",
-  "manhattan", "canberra", "binary", "minkowski"), clust = c("complete",
-  "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
-  "centroid"), col.colour = "Paired", map.colour = "PRGn",
-  n.map.colour = 11, ..., plot.width = 7, plot.height = 7,
-  verbose = TRUE)
+rbio_supervised_hcluster(
+  object,
+  gene_symbol.only = FALSE,
+  sample_id.var.name = NULL,
+  distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+  clust = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
+    "centroid"),
+  col.colour = "Paired",
+  map.colour = "PRGn",
+  n.map.colour = 11,
+  ...,
+  plot.width = 7,
+  plot.height = 7,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{object}{Input \code{sig} class object.}

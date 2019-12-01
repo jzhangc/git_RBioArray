@@ -4,8 +4,15 @@
 \alias{rbioGS_kegg}
 \title{rbioGS_kegg}
 \usage{
-rbioGS_kegg(dfm, entrezVar = NULL, statsVar = "logFC", keggID, suffix,
-  species = "hsa", ...)
+rbioGS_kegg(
+  dfm,
+  entrezVar = NULL,
+  statsVar = "logFC",
+  keggID,
+  suffix,
+  species = "hsa",
+  ...
+)
 }
 \arguments{
 \item{dfm}{GS dataframe with \code{ENTREZID} and \code{logFC} variables.}

@@ -4,10 +4,17 @@
 \alias{rbioarray_flt}
 \title{rbioarray_flt}
 \usage{
-rbioarray_flt(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType",
-  percentile = ifelse(ctrlProbe, 0.95, 0.05), combineGeneDup = FALSE,
-  geneSymbolVar = NULL, annot = NULL, parallelComputing = FALSE,
-  clusterType = "PSOCK")
+rbioarray_flt(
+  normlst,
+  ctrlProbe = TRUE,
+  ctrlTypeVar = "ControlType",
+  percentile = ifelse(ctrlProbe, 0.95, 0.05),
+  combineGeneDup = FALSE,
+  geneSymbolVar = NULL,
+  annot = NULL,
+  parallelComputing = FALSE,
+  clusterType = "PSOCK"
+)
 }
 \arguments{
 \item{normlst}{Normalized data, either a list, \code{EList} or \code{MAList} object.}

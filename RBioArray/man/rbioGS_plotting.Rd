@@ -4,16 +4,32 @@
 \alias{rbioGS_plotting}
 \title{rbioGS_plotting}
 \usage{
-rbioGS_plotting(GSlst, plotGSname = "GS", boxplot = TRUE,
-  boxplotKEGG = FALSE, boxplotN = 20, boxplotTitle = NULL,
-  boxplotXlabel = "rank", boxplotYlabel = NULL,
-  boxplotYlabelsize = 7, boxplotWidth = 170, boxplotHeight = 150,
-  scatterplot = TRUE, scatterplotCutoff = 20, scatterRankline = 20,
-  scatterPline = 0.05, scatterTitle = NULL,
+rbioGS_plotting(
+  GSlst,
+  plotGSname = "GS",
+  boxplot = TRUE,
+  boxplotKEGG = FALSE,
+  boxplotN = 20,
+  boxplotTitle = NULL,
+  boxplotXlabel = "rank",
+  boxplotYlabel = NULL,
+  boxplotYlabelsize = 7,
+  boxplotWidth = 170,
+  boxplotHeight = 150,
+  scatterplot = TRUE,
+  scatterplotCutoff = 20,
+  scatterRankline = 20,
+  scatterPline = 0.05,
+  scatterTitle = NULL,
   scatterXlabel = "median p value",
-  scatterYlabel = "log consensus score", scatterWidth = 170,
-  scatterHeight = 150, plotMethod = "median", plotPadjust = TRUE,
-  parallelComputing = FALSE, clusterType = "PSOCK")
+  scatterYlabel = "log consensus score",
+  scatterWidth = 170,
+  scatterHeight = 150,
+  plotMethod = "median",
+  plotPadjust = TRUE,
+  parallelComputing = FALSE,
+  clusterType = "PSOCK"
+)
 }
 \arguments{
 \item{GSlst}{The input list with GS reuslt from the GS functions.}

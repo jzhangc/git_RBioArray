@@ -4,13 +4,29 @@
 \alias{rbioseq_de_analysis}
 \title{rbioseq_de_analysis}
 \usage{
-rbioseq_de_analysis(raw.file.path, raw.file.ext = ".txt",
-  raw.file.sep = "", raw.file.source = "htseq-count", species,
-  target.annot.file, sample_groups.var.name = NULL, gtf.matrix,
-  filter.threshold.min.count = 10, filter.threshold.min.sample = NULL,
-  design, contra, alpha = 0.05, FC = 1.5, FDR = TRUE,
-  export.name = "data", export.mode = "all", ...,
-  parallelComputing = FALSE, clusterType = "FORK", verbose = TRUE)
+rbioseq_de_analysis(
+  raw.file.path,
+  raw.file.ext = ".txt",
+  raw.file.sep = "",
+  raw.file.source = "htseq-count",
+  species,
+  target.annot.file,
+  sample_groups.var.name = NULL,
+  gtf.matrix,
+  filter.threshold.min.count = 10,
+  filter.threshold.min.sample = NULL,
+  design,
+  contra,
+  alpha = 0.05,
+  FC = 1.5,
+  FDR = TRUE,
+  export.name = "data",
+  export.mode = "all",
+  ...,
+  parallelComputing = FALSE,
+  clusterType = "FORK",
+  verbose = TRUE
+)
 }
 \arguments{
 \item{raw.file.path}{Path to raw files. Default is the system working directory.}

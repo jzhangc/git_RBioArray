@@ -10,20 +10,27 @@ rbioarray_rlist(object, ...)
 
 \method{rbioarray_rlist}{EListRaw}(object, ...)
 
-\method{rbioarray_rlist}{default}(raw.dataframe,
-  raw.background.signal.matrix = NULL, raw.annot.var.name = NULL,
-  raw.gene_id.var.name = NULL, extra.gene.annot.dataframe = NULL,
+\method{rbioarray_rlist}{default}(
+  raw.dataframe,
+  raw.background.signal.matrix = NULL,
+  raw.annot.var.name = NULL,
+  raw.gene_id.var.name = NULL,
+  extra.gene.annot.dataframe = NULL,
   gene.annot.gene_id.var.name = NULL,
   gene.annot.gene_symbol.var.name = NULL,
   gene.annot.control_type.var.name = NULL,
   gene.annot.control_type.val.pos = 1,
   gene.annot.control_type.val.neg = -1,
-  gene.annot.control_type.val.exp = 0, gene.annot.rm.var.name = NULL,
-  target.annot.file = NULL, target.annot.file.path = getwd(),
-  sample_groups.var.name = NULL, verbose = TRUE)
+  gene.annot.control_type.val.exp = 0,
+  gene.annot.rm.var.name = NULL,
+  target.annot.file = NULL,
+  target.annot.file.path = getwd(),
+  sample_groups.var.name = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{object}{Input object.}
+\item{object}{A input \code{EListRaw} class object from \code{limma} package}
 
 \item{...}{Additional argument for the default function.}
 
@@ -58,8 +65,6 @@ rbioarray_rlist(object, ...)
 \item{sample_groups.var.name}{The variable name for sample groupping information from \code{target.annot.file}.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
-
-\item{object}{A input \code{EListRaw} class object from \code{limma} package}
 }
 \value{
 A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the following items:
@@ -106,7 +111,7 @@ The \code{raw.background.signal.matrix} is usefual when processing a \code{EList
 }
 \examples{
 \dontrun{
-\\code{# ElistRaw}
+\code{# ElistRaw}
 rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeName", extra.gene.annot.dataframe = annot,
                          gene.annot.gene_id.var.name = "ProbeName", gene.annot.gene_symbol.var.name = "Gene.Symbol",
                          gene.annot.control_type.var.name = "ControlType", gene.annot.control_type.val.pos = 1,
@@ -114,7 +119,7 @@ rlist <- rbioarray_rlist(object = ElistRaw_list, raw.gene_id.var.name = "ProbeNa
                          target.annot.file = "Targets.csv", target.annot.file.path = getwd(),
                          sample_groups.var.name = "Group")
 
-\\code{# non-EListRaw}
+\code{# non-EListRaw}
 raw_list <- rbioarray_rlist(raw.dataframe = raw, raw.annot.var.name = c("PROBE_ID","ILMN_GENE"), raw.gene_id.var.name = "PROBE_ID",
                             extra.gene.annot.dataframe = annot, gene.annot.gene_id.var.name = "PROBE_ID", gene.annot.gene_symbol.var.name = "SYMBOL",
                             target.annot.file = "sample_index_end6.csv", sample_groups.var.name = "time_point")

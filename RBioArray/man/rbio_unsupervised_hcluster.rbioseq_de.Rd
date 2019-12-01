@@ -4,8 +4,7 @@
 \alias{rbio_unsupervised_hcluster.rbioseq_de}
 \title{rbio_unsupervised_hcluster.rbioseq_de}
 \usage{
-\method{rbio_unsupervised_hcluster}{rbioseq_de}(object,
-  sample_id.var.name = NULL, ...)
+\method{rbio_unsupervised_hcluster}{rbioseq_de}(object, sample_id.var.name = NULL, ...)
 }
 \arguments{
 \item{object}{Input object in \code{rbioseq_de} class.}

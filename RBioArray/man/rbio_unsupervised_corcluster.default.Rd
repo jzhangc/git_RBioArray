@@ -4,19 +4,39 @@
 \alias{rbio_unsupervised_corcluster.default}
 \title{rbio_unsupervised_corcluster.default}
 \usage{
-\method{rbio_unsupervised_corcluster}{default}(E, genes,
-  input.sample_groups, n = "all", input.comparisons = NULL,
-  cor.method = c("pearson", "spearman"), rm.control = FALSE,
-  input.genes_annotation.control_type, gene_symbol.only = FALSE,
+\method{rbio_unsupervised_corcluster}{default}(
+  E,
+  genes,
+  input.sample_groups,
+  n = "all",
+  input.comparisons = NULL,
+  cor.method = c("pearson", "spearman"),
+  rm.control = FALSE,
+  input.genes_annotation.control_type,
+  gene_symbol.only = FALSE,
   input.genes_annotation.gene_symbol.var_name = NULL,
-  input.genes_annotation.gene_id.var_name = NULL, map.colour = "PRGn",
-  n.map.colour = 11, ..., export.name = NULL,
-  heatmap.axis.label = FALSE, heatmap.width = 7, heatmap.height = 7,
-  sigplot = FALSE, sigplot.adj.p = FALSE, sigplot.alpha = 0.05,
-  sigplot.sigLabelColour = "red", sigplot.sigLabelSize = 3,
-  sigplot.labelColour = "black", sigplot.labelSize = 1,
-  sigplot.labelAngle = 90, sigplot.keySize = 1, sigplot.mar = c(5, 4,
-  4, 2) + 0.1, sigplot.width = 7, sigplot.height = 7, verbose = TRUE)
+  input.genes_annotation.gene_id.var_name = NULL,
+  map.colour = "PRGn",
+  n.map.colour = 11,
+  ...,
+  export.name = NULL,
+  heatmap.axis.label = FALSE,
+  heatmap.width = 7,
+  heatmap.height = 7,
+  sigplot = FALSE,
+  sigplot.adj.p = FALSE,
+  sigplot.alpha = 0.05,
+  sigplot.sigLabelColour = "red",
+  sigplot.sigLabelSize = 3,
+  sigplot.labelColour = "black",
+  sigplot.labelSize = 1,
+  sigplot.labelAngle = 90,
+  sigplot.keySize = 1,
+  sigplot.mar = c(5, 4, 4, 2) + 0.1,
+  sigplot.width = 7,
+  sigplot.height = 7,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}

@@ -46,7 +46,8 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
 
 #' @title rnaseq_de.rbioseq_count
 #'
-#' @description The \code{rnaseq_de} function for \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
+#' @rdname rnaseq_de
+#' @method rnaseq_de rbioseq_count
 #' @param object A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
 #' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
@@ -71,7 +72,8 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 
 #' @title rnaseq_de.default
 #'
-#' @description The default \code{rnaseq_de} function that performs statistical analysis for RNAseq data.
+#' @rdname rnaseq_de
+#' @method rnaseq_de default
 #' @param x Input read count matrix, with rows for genes and columns for RNA samples.
 #' @param y Target (e.g. genes) annotation matrix or vector.
 #' @param y.gene_id.var.name Variable name for gene (i.e. target) identification. Default is \code{"genes"}.

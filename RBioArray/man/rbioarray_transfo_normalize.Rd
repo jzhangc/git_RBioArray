@@ -8,19 +8,23 @@
 \usage{
 rbioarray_transfo_normalize(object, ...)
 
-\method{rbioarray_transfo_normalize}{rbioarray_rlist}(object, design, ...,
-  verbose = TRUE)
+\method{rbioarray_transfo_normalize}{rbioarray_rlist}(object, design, ..., verbose = TRUE)
 
-\method{rbioarray_transfo_normalize}{default}(E, E.background = NULL,
-  bgc.method = c("auto", "none", "subtract", "half", "minimum",
-  "movingmin", "edwards", "normexp"),
+\method{rbioarray_transfo_normalize}{default}(
+  E,
+  E.background = NULL,
+  bgc.method = c("auto", "none", "subtract", "half", "minimum", "movingmin", "edwards",
+    "normexp"),
   between.sample.norm.method = c("quantile", "Aquantile"),
-  between.sample.weight.design = NULL, ..., verbose = TRUE)
+  between.sample.weight.design = NULL,
+  ...,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{object}{Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.}
+\item{object}{Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.}
 
-\item{...}{Additional arguments for corresponding S3 class methods.}
+\item{...}{Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.}
 
 \item{design}{Microarray experiment sample design matrix. Make sure the design colnames are the same as the levles of \code{object$sample_groups}.}
 
@@ -35,14 +39,6 @@ rbioarray_transfo_normalize(object, ...)
 \item{between.sample.norm.method}{Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.}
 
 \item{between.sample.weight.design}{Microarray experiment sample design matrix for beteween sample weight calculation.}
-
-\item{object}{Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.}
-
-\item{...}{Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.}
-
-\item{...}{Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.}
-
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A \code{rbioarray_plist} class object with the following items:
@@ -90,7 +86,7 @@ The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rli
 \examples{
 
 \dontrun{
-# for \\code{rbioarray_rlist} object:
+# for \code{rbioarray_rlist} object:
 microarray_plist <- rbioarray_transfo_normalize(object = microarray_rlist, logTransfo = TRUE, logTransfo.method = "log2",
                                                 logTransfo.parallelComputing = TRUE, logTransfo.cluterType = "FORK",
                                                 bgc.method = "auto", between.sample.norm.method = "quantile")

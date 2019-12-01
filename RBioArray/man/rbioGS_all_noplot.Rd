@@ -4,8 +4,14 @@
 \alias{rbioGS_all_noplot}
 \title{rbioGS_all_noplot}
 \usage{
-rbioGS_all_noplot(DElst, entrezVar = NULL, GS = NULL, ...,
-  parallelComputing = FALSE, clusterType = "PSOCK")
+rbioGS_all_noplot(
+  DElst,
+  entrezVar = NULL,
+  GS = NULL,
+  ...,
+  parallelComputing = FALSE,
+  clusterType = "PSOCK"
+)
 }
 \arguments{
 \item{DElst}{The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}

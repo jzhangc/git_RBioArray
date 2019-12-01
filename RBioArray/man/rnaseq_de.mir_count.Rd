@@ -4,8 +4,12 @@
 \alias{rnaseq_de.mir_count}
 \title{rnaseq_de.mir_count}
 \usage{
-\method{rnaseq_de}{mir_count}(object, filter.threshold.min.count = 10,
-  filter.threshold.min.sample = NULL, ...)
+\method{rnaseq_de}{mir_count}(
+  object,
+  filter.threshold.min.count = 10,
+  filter.threshold.min.sample = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.}
