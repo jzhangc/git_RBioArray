@@ -63,6 +63,10 @@ Update log
         - A bug fixed for rbioarray_rlist() where the function crashes when no gene annotation data frame is provided
         - Information regarding the design colnames specification added for rbioarray_transfo_normalize()'s manual page
         - A bug fixed for sig() where the cutoff was set to "raw p value less than the FDR resulted p cutoff"
+
+      - Updates to RNAseq functions
+        - a bug fixed for rnaseq_de default method where the function has an unused arugment "normalization"
+        - manual page updated for rnaseq_de()
         
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()

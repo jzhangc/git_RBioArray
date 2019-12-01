@@ -22,7 +22,8 @@ rnaseq_de <- function(object, ...){
 
 #' @title rnaseq_de.mir_count
 #'
-#' @description The \code{rnaseq_de} function for \code{mir_count} object from \code{RBioMIR} object.
+#' @rdname rnaseq_de
+#' @method rnaseq_de mir_count
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.
 #' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
