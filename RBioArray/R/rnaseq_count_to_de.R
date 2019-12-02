@@ -121,7 +121,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'         \code{sample_groups}
 #'
 #' @importFrom limma lmFit eBayes topTable contrasts.fit voomWithQualityWeights
-#' @importFrom edgeR DGEList calcNormFactors
+#' @importFrom edgeR DGEList calcNormFactors cpm
 #'
 #' @export
 rnaseq_de.default <- function(x, y = NULL,

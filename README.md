@@ -65,8 +65,10 @@ Update log
         - A bug fixed for sig() where the cutoff was set to "raw p value less than the FDR resulted p cutoff"
 
       - Updates to RNAseq functions
-        - a bug fixed for rnaseq_de default method where the function has an unused arugment "normalization"
+        - fixed a bug where rnaseq_de default method doesn't automatically load cpm() from edgeR
+        - fixed a bug for rnaseq_de default method where the function has an unused arugment "normalization"
         - manual page updated for rnaseq_de()
+        
         
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()
