@@ -226,7 +226,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details Unlike the unsupervised veresion, the supervised hcluster uses normalized expression data for both RNAseq and microaray.
+#' @details Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microaray.
 #'          The column colour group is usually 2.
 #'
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
@@ -333,7 +333,7 @@ rbio_supervised_hcluster <- function(object,
     colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), col.colour) # column colour
 
     # draw heatmap
-    if (verbose) cat(paste0("Supervised hierarchical clustering heatmap saved to: ", comparisons[i], "_sig_heatmap.pdf..."))
+    if (verbose) cat(paste0("Sig data hierarchical clustering heatmap saved to: ", comparisons[i], "_sig_heatmap.pdf..."))
     pdf(file = paste0(comparisons[i], "_sig_heatmap.pdf"), width = plot.width, height = plot.height)
     heatmap.2(plt_mtx, distfun = distfunc, hclustfun = clustfunc,
               labRow = row.lab,
