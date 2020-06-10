@@ -69,7 +69,9 @@ Update log
         - fixed a bug for rnaseq_de default method where the function has an unused arugment "normalization"
         - manual page updated for rnaseq_de()
         
-        
+      - Update(s) to cluster functions
+        - rbio_supervised_hcluster() export file name suffix changed to "_sig_heatmap.pdf"
+
       - Updates to legacy functions
         - Suppressmessage method added for legacy functions figure export dev.off()
         - rbioarrary_DE() now also exports the DE summary data frame into the environment
@@ -77,8 +79,10 @@ Update log
         - verbose argument added to rbioarrary_DE(), rbioarray_hclust_super
         - rbioarrary_DE() updated with suppport for continuous outcome
         - rbioarray_hcluster() and rbioarray_hcluster_super() can now hide top heatmap strip by setting ColSideCol = FALSE
+        - rbioarray_hcluster_super() export file name suffix changed to "sig.pdf"
         
       - Other updates
+        - Small fixes
         - Dependency ggplot2 now requires version 3.0.0
       
     

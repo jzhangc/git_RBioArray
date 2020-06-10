@@ -1658,7 +1658,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
       }
     }
 
-    pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+    pdf(file = paste(plotName, "_heatmap.sig.pdf", sep = ""), width = plotWidth, height = plotHeight)
     if(ColSideCol){
       heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = FALSE,...)

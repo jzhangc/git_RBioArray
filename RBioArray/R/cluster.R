@@ -334,7 +334,7 @@ rbio_supervised_hcluster <- function(object,
 
     # draw heatmap
     if (verbose) cat(paste0("Supervised hierarchical clustering heatmap saved to: ", comparisons[i], "_super_heatmap.pdf..."))
-    pdf(file = paste0(comparisons[i], "_super_heatmap.pdf"), width = plot.width, height = plot.height)
+    pdf(file = paste0(comparisons[i], "_sig_heatmap.pdf"), width = plot.width, height = plot.height)
     heatmap.2(plt_mtx, distfun = distfunc, hclustfun = clustfunc,
               labRow = row.lab,
               col = brewer.pal(n.map.colour, map.colour), ColSideColors = colC[colG], ...)
