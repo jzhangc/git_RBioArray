@@ -47,7 +47,7 @@ rbioarray_corcluster_super(
 
 \item{FDR}{If to use FDR corrcted p value. Default is \code{TRUE}.}
 
-\item{DE.sig.p}{P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{DE.sig.p = 1}.}
+\item{DE.sig.p}{P value cut off. Default is \code{0.05}. For full data clustering, set \code{DE.sig.p = 1}.}
 
 \item{FC}{Fold change (FC) filter for the heatmap. Default is \code{NULL}.}
 
@@ -90,10 +90,10 @@ rbioarray_corcluster_super(
 \item{plotHeight}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
 }
 \value{
-A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. If set, the function also outputs a significant value heatmap.
+A sig data heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. If set, the function also outputs a significant value heatmap.
 }
 \description{
-Legacy function. Wrapper for supervised (or unsupervised) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
+Legacy function. Wrapper for (full or sig data) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
 }
 \details{
 Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.

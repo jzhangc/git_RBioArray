@@ -333,7 +333,7 @@ rbio_supervised_hcluster <- function(object,
     colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), col.colour) # column colour
 
     # draw heatmap
-    if (verbose) cat(paste0("Supervised hierarchical clustering heatmap saved to: ", comparisons[i], "_super_heatmap.pdf..."))
+    if (verbose) cat(paste0("Supervised hierarchical clustering heatmap saved to: ", comparisons[i], "_sig_heatmap.pdf..."))
     pdf(file = paste0(comparisons[i], "_sig_heatmap.pdf"), width = plot.width, height = plot.height)
     heatmap.2(plt_mtx, distfun = distfunc, hclustfun = clustfunc,
               labRow = row.lab,

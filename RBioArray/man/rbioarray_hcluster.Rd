@@ -92,7 +92,7 @@ offsetCol = 0, adjCol = c(1, 0), labRow = FALSE, key.title = "", keysize = 1.5,
 key.xlab = "Normalized expression value", key.ylab = "Probe count")
 
 # for non microarray or RNAseq data sets
-###### unsupervised heatmap ######
+###### full data heatmap ######
 ## load the file
 raw <- read.csv(file = "all_data.csv", na.strings = " ", stringsAsFactors = FALSE, check.names = FALSE)
 

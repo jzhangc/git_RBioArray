@@ -916,14 +916,14 @@ rbioarray_DE <- function(objTitle = "data_filtered",
 
 #' @title rbioarray_corcluster_super
 #'
-#' @description Legacy function. Wrapper for supervised (or unsupervised) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
+#' @description Legacy function. Wrapper for (full or sig data) Pearson correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltlist Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param rmControl If to remove control probes (Agilent platform). Default is \code{TRUE}.
 #' @param n_subgroup A vector of sample index (row number) for phenotype group. Default is \code{NULL}. The setting can be obtained from the corresponding condition summary object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
 #' @param FDR If to use FDR corrcted p value. Default is \code{TRUE}.
-#' @param DE.sig.p P value cut off. Default is \code{0.05}. For unsupervised clustering, set \code{DE.sig.p = 1}.
+#' @param DE.sig.p P value cut off. Default is \code{0.05}. For full data clustering, set \code{DE.sig.p = 1}.
 #' @param FC Fold change (FC) filter for the heatmap. Default is \code{NULL}.
 #' @param dataProbeVar \code{dfmDE} variable name for probe name. Default is \code{NULL}.
 #' @param method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
@@ -945,7 +945,7 @@ rbioarray_DE <- function(objTitle = "data_filtered",
 #' @param plotWidth Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @details Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
-#' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. If set, the function also outputs a significant value heatmap.
+#' @return A sig data heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. If set, the function also outputs a significant value heatmap.
 #' @import corrplot
 #' @import foreach
 #' @importFrom gplots heatmap.2
@@ -1237,7 +1237,7 @@ rbioarray_corcluster_super <- function(plotName = "data",
 #' key.xlab = "Normalized expression value", key.ylab = "Probe count")
 #'
 #' # for non microarray or RNAseq data sets
-#' ###### unsupervised heatmap ######
+#' ###### full data heatmap ######
 #' ## load the file
 #' raw <- read.csv(file = "all_data.csv", na.strings = " ", stringsAsFactors = FALSE, check.names = FALSE)
 #'
@@ -1465,7 +1465,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 
 #' @title rbioarray_hcluster_super
 #'
-#' @description Legacy function. Wrapper for supervised hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
+#' @description Legacy function. Wrapper for sig data hierarchical clustering analysis and heatmap visualization for both microarray and RNAseq.
 #' @param plotName File name for the export \code{pdf} plot file. Default is \code{"data"}.
 #' @param fltDOI Based on filtered data, a subset corresponding to the comparasion, either a list, \code{EList} or \code{MAList} object.
 #' @param dfmDE A subset of the DE list, i.e. a \code{topTable} dataframe, corresponding to the comparasion (i.e., contrast).
@@ -1493,7 +1493,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
 #' @param plotHeight Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details Note that both \code{annot} and \code{genesymbolVar} need to be set to display gene sysmbols as row labels. Otherwise, the row labels will be probe names. Also note that when set to display gene symbols, all the probes without a gene symbol will be removed.
-#' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format.
+#' @return A sig heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
 #' @examples
@@ -1603,7 +1603,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
         }
       }
 
-      pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      pdf(file = paste(plotName, "_heatmap.sig.pdf", sep = ""), width = plotWidth, height = plotHeight)
       if (ColSideCol) {
         heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                 col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], ...)
@@ -1633,7 +1633,7 @@ rbioarray_hcluster_super <- function(plotName = "data", fltDOI, dfmDE,
         }
       }
 
-      pdf(file = paste(plotName, "_heatmap.supervised.pdf", sep = ""), width = plotWidth, height = plotHeight)
+      pdf(file = paste(plotName, "_heatmap.sig.pdf", sep = ""), width = plotWidth, height = plotHeight)
       if (ColSideCol){
         heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
                   col = brewer.pal(n_mapColour, mapColour), ColSideColors = colC[colG], labRow = labrow, ...)
