@@ -72,7 +72,7 @@ cor_pvalue <- function(r, n){
 #' @export
 rbio_unsupervised_corcluster <- function(object, ...){
   ## check arguments
-  if (!class(object) %in% c("rbioarray_de", "rbioseq_de")) stop("The input object needs to be either \"rbioarray_de\" or \"rbioseq_de\" class object.")
+  if (!any(class(object) %in% c("rbioarray_de", "rbioseq_de"))) stop("The input object needs to be either \"rbioarray_de\" or \"rbioseq_de\" class object.")
 
   ## use methods
   UseMethod("rbio_unsupervised_corcluster", object)
@@ -400,7 +400,7 @@ rbio_supervised_corcluster <- function(object,
   ## argument check
   cor.method <- match.arg(tolower(cor.method), c("pearson", "spearman"))
 
-  if (class(object) != "sig") stop("The input object has to be a \"sig\" class.")
+  if (any(class(object) != "sig")) stop("The input object has to be a \"sig\" class.")
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
   # if (!cor.method %in% c("pearson", "spearman")) stop("Argument cor.method needs to be \"pearson\" or \"spearman\".")
 

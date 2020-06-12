@@ -64,11 +64,11 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
                        plotWidth = 170, plotHeight = 150,
                        parallelComputing = FALSE, clusterType = "PSOCK"){
   ## check the key arguments
-  if (!class(dfm_count) %in% c("data.frame", "matrix")){
+  if (!any(class(dfm_count) %in% c("data.frame", "matrix"))){
     stop("dfm_count has to be either a data.frame or matrix object")
   }
 
-  if (!class(dfm_annot) %in% c("data.frame", "matrix")){
+  if (!any(class(dfm_annot) %in% c("data.frame", "matrix"))){
     stop("dfm_annot has to be either a data.frame or matrix object")
   }
 
@@ -307,7 +307,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
 rbioarray_PreProc <- function(rawlist, logTrans = FALSE, logTransMethod = "log2",
                               logTransObjT = "data", logTransParallelComputing = FALSE,
                               bgMethod = "auto", normMethod = "quantile", ...){
-  if (class(rawlist) == "list"){
+  if (any(class(rawlist) == "list")){
     ## log transform  or not
     if (logTrans){
       if (!logTransParallelComputing){
@@ -390,7 +390,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
     }
   }
 
-  if (!class(normlst) == "list" & combineGeneDup){
+  if (!any(class(normlst) == "list" & combineGeneDup)){
     if(is.null(annot)){
       stop(cat("Since combineGeneDup = TRUE and normlst is not an Elist object, please set annotation dataframe for annot argument.
                Function terminated.\n"))
@@ -405,7 +405,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
 
   ## extract the 95% percentile of the negative control signals
   if (ctrlProbe){ # if there are neg control probes
-    if (class(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ]) == "numeric"){ # if there is only one entry in the neg values
+    if (any(class(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ]) == "numeric")){ # if there is only one entry in the neg values
       neg <- normlst$E[normlst$genes[, ctrlTypeVar] == -1, ] # no 95% percentile required as only one neg entry
     } else {
       neg <- apply(normlst$E[normlst$genes[, ctrlTypeVar] == -1, ], 2, function(x)quantile(x, p = percentile)) # neg95
@@ -414,7 +414,7 @@ rbioarray_flt <- function(normlst, ctrlProbe = TRUE, ctrlTypeVar = "ControlType"
     neg <- apply(normlst$E, 2, function(x)quantile(x, p = percentile)) # 5% percentile of all the data
   }
 
-  if (class(normlst) == "list"){
+  if (any(class(normlst) == "list")){
     ## low expression cuttoff set at at least 10% hihger than the neg
     LE_cutoff <- matrix(1.1 * neg, nrow(normlst$E), ncol(normlst$E), byrow = TRUE)
 
@@ -669,7 +669,7 @@ rbioarray_DE <- function(objTitle = "data_filtered",
   ## DE
   if (verbose) cat(paste0("Dependent variable type: ", input.outcome.mode, "\n"))
   if (verbose) cat("Linear fitting...") # message
-  if (class(fltlist) == "list"){
+  if (any(class(fltlist) == "list")){
     fit <- lmFit(fltlist$E, design = design, weights = weights)
     if (input.outcome.mode == "categorical"){
       fit <- contrasts.fit(fit, contrasts = contra)
@@ -1396,7 +1396,7 @@ rbioseq_hcluster <- function(plotName = "data", dfm_count = NULL, dfm_annot = NU
   distance <- match.arg(tolower(distance), c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
   clust <- match.arg(clust, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
 
-  if (is.null(dfm_count) | is.null(dfm_annot) | class(dfm_count) != "data.frame" | class(dfm_annot) != "data.frame"){
+  if (is.null(dfm_count) | is.null(dfm_annot) | any(class(dfm_count) != "data.frame") | any(class(dfm_annot) != "data.frame")){
     stop(cat("Please provide the read count and annotation dataframes. Please also make sure the type as data.frame. Function terminated.\n"))
   }
 
@@ -1768,7 +1768,7 @@ rbioarray_venn_DE <- function(objTitle = "DE", plotName = "DE", plotWidth = 5, p
 
       } else {
         # DE for extracting positive control
-        if (class(fltlist) == "list"){
+        if (any(class(fltlist) == "list")){
           fit <- lmFit(fltlist$E, design, weights = weights)
           fit <- contrasts.fit(fit, contrasts = contra)
           fit <- eBayes(fit)

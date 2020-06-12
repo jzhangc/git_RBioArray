@@ -58,6 +58,7 @@ Update log
       - General updates
         - match.arg() method added to relevant functions for better user experience
         - Manual pages combined for S3 methods
+        - All functions updated to be compatible with R version 4.0
 
       - Updates to microarray functions
         - A bug fixed for rbioarray_rlist() where the function crashes when no gene annotation data frame is provided

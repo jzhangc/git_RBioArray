@@ -304,7 +304,7 @@ print.rbioarray_rlist <- function(x, ...){
 #' @export
 rbioarray_transfo_normalize <- function(object, ...){
   ## check arguments
-  if (class(object) != "rbioarray_rlist") stop("The input object needs to be \"rbioarray_rlist\" class.\"")
+  if (any(class(object) != "rbioarray_rlist")) stop("The input object needs to be \"rbioarray_rlist\" class.\"")
 
   ## use method
   UseMethod("rbioarray_transfo_normalize", object)
@@ -457,7 +457,7 @@ rbioarray_filter_combine <- function(object,
     control_type.var.name = object$genes_annotation.control_type$control_type.var_name
     control_type.neg.value = object$genes_annotation.control_type$neg_type.value
 
-    if (class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric"){ # if there is only one entry in the neg values
+    if (any(class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric")){ # if there is only one entry in the neg values
       neg <- object$E[object$genes[, control_type.var.name] == control_type.neg.value, ] # no 95% percentile required as only one neg entry
     } else {
       neg <- apply(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ], 2, function(x)quantile(x, p = filter.percentile)) # neg95
@@ -609,7 +609,7 @@ print.rbioarray_flist <- function(x, ...){
 microarray_de <- function(object, contra, verbose = TRUE){
   if (verbose) cat("Constructing rbioarray_de object...")
   ## argument check
-  if (class(object) != "rbioarray_flist") stop("The input object needs to be a \"rbioarray_flist\" class.")
+  if (any(class(object) != "rbioarray_flist")) stop("The input object needs to be a \"rbioarray_flist\" class.")
 
   ## variable initation
   cf <- colnames(contra)

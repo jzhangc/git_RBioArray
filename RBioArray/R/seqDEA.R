@@ -84,7 +84,7 @@ rbioseq_import_gtf <- function(file, verbose = TRUE){
   filecheck <- try(suppressWarnings(open(gtf_gff)), silent = TRUE)
 
   # load file
-  if (class(filecheck) == "try-error") {
+  if (any(class(filecheck) == "try-error")) {
     stop("Bad gtf/gff file.")
   } else {
     if (verbose) cat("Loading GTF/GFF file (speed depending on the hardware configurations)...")

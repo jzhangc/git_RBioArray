@@ -13,7 +13,7 @@
 #' @export
 rnaseq_de <- function(object, ...){
   ## check object
-  if (!class(object) %in% c("rbioseq_count", "mir_count")) stop("object needs to be either a \"rbioseq_count\" or \"mir_count\" object")
+  if (!any(class(object) %in% c("rbioseq_count", "mir_count"))) stop("object needs to be either a \"rbioseq_count\" or \"mir_count\" object")
 
   ## use methods
   UseMethod("rnaseq_de", object)
@@ -132,7 +132,7 @@ rnaseq_de.default <- function(x, y = NULL,
                               library.size.scale.method = "TMM",
                               design, contra, qc.plot = TRUE, verbose = TRUE){
   ## check the key arguments
-  if (!class(x) %in% c("data.frame", "matrix")){
+  if (!any(class(x) %in% c("data.frame", "matrix"))){
     stop("x has to be either a data.frame or matrix object")
   } else {
     x <- as.matrix(x)

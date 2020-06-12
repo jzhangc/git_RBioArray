@@ -18,7 +18,7 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
                          plot.Width = 5, plot.Height = 5,
                          verbose = TRUE){
   ## argument check
-  if (class(object) != "sig") stop("The input object has to be a \"sig\" class.")
+  if (any(class(object) != "sig")) stop("The input object has to be a \"sig\" class.")
   if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(object$input_data$genes)) {
     cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
     gene_symbol.only <- FALSE

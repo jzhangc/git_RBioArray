@@ -245,7 +245,7 @@ rbio_supervised_hcluster <- function(object,
   distance <- match.arg(tolower(distance), c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
   clust <- match.arg(clust, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
 
-  if (class(object) != "sig") stop("The input object has to be a \"sig\" class.")
+  if (any(class(object) != "sig")) stop("The input object has to be a \"sig\" class.")
   if (!is.null(sample_id.var.name)){
     if (!sample_id.var.name %in% names(object$input_data$targets)) {
       cat("The sample_id.var.name not found in targets element of the input object. Proceed without using it.\n")
