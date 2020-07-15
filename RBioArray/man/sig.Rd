@@ -56,7 +56,7 @@ sig(object, ...)
 \arguments{
 \item{object}{A \code{rbioarray_de} object \code{\link{microarray_de}} function.}
 
-\item{...}{Additional arguments for \code{\link{sig.defuault}}.}
+\item{...}{Additional arguments for \code{\link{sig.default}}.}
 
 \item{export.name}{Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.}
 

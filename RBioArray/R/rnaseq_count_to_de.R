@@ -27,7 +27,7 @@ rnaseq_de <- function(object, ...){
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.
 #' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
-#' @param ... Additional arguments for \code{\link{rnaseq_de.defuault}}.
+#' @param ... Additional arguments for \code{\link{rnaseq_de.default}}.
 #'
 #' @export
 rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
@@ -52,7 +52,7 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
 #' @param object A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.
 #' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
-#' @param ... Additional arguments for \code{\link{rnaseq_de.defuault}}.
+#' @param ... Additional arguments for \code{\link{rnaseq_de.default}}.
 #'
 #' @export
 rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){

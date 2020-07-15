@@ -48,7 +48,7 @@ sig <- function(object, ...){
 #' @param object A \code{rbioseq_de} object \code{\link{rnaseq_de}} function.
 #' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
 #' @param p.val.correction.method A character string describing the p value correction method used for significant test. Options are \code{"fdr"} and \code{"none"}. Default is \code{"fdr"}.
-#' @param ... Additional arguments for \code{\link{sig.defuault}}.
+#' @param ... Additional arguments for \code{\link{sig.default}}.
 #'
 #' @export
 sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method = c("fdr", "none"),...){
@@ -89,7 +89,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
 #' @param object A \code{rbioarray_de} object \code{\link{microarray_de}} function.
 #' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
 #' @param p.val.correction.method A character string describing the p value correction method used for significant test. Options are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}.
-#' @param ... Additional arguments for \code{\link{sig.defuault}}.
+#' @param ... Additional arguments for \code{\link{sig.default}}.
 #'
 #' @export
 sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein", "none"), export.name = NULL, ...){

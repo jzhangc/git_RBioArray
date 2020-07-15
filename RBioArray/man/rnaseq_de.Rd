@@ -41,7 +41,7 @@ rnaseq_de(object, ...)
 \arguments{
 \item{object}{A \code{rbioseq_count} object from \code{\code{rbioseq_import_count}} function.}
 
-\item{...}{Additional arguments for \code{\link{rnaseq_de.defuault}}.}
+\item{...}{Additional arguments for \code{\link{rnaseq_de.default}}.}
 
 \item{filter.threshold.min.count}{Minimum count for the smallest library for filter thresholding. Default is \code{10}.}
 
