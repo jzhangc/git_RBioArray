@@ -66,8 +66,9 @@ Update log
         - A bug fixed for sig() where the cutoff was set to "raw p value less than the FDR resulted p cutoff"
 
       - Updates to RNAseq functions
-        - fixed a bug where rnaseq_de default method doesn't automatically load cpm() from edgeR
-        - fixed a bug for rnaseq_de default method where the function has an unused arugment "normalization"
+        - A bug fixed for rnaseq_de default method where it doesn't automatically load cpm() from edgeR
+        - A bug fixed for rnaseq_de default method where the function has an unused arugment "normalization"
+        - A bug fixed for rnaseq_de default method where the function fails when filtering resulted in singular (i.e. all filtered in or out) results
         - manual page updated for rnaseq_de()
         
       - Update(s) to cluster functions

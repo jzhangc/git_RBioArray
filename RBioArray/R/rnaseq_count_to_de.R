@@ -34,7 +34,7 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
   ## for setting up comparison groups info and minimum sample number
   annot.group <- object$sample_groups
 
-  ## contruct rbioseq_de object
+  ## construct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
                            filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
                            filter.threshold.min.sample = filter.threshold.min.sample,
@@ -198,14 +198,33 @@ rnaseq_de.default <- function(x, y = NULL,
 
   if (filter.threshold.cpm != "none"){ # set the count threshold for filtering
     isexpr <- rowSums(cpm(dge$counts) > filter.threshold.cpm) >= filter.threshold.min.sample  # cpm threshold, cite the paper
+    isexpr <- rep(FALSE, times = 611)
     dge <- dge[isexpr, , keep.lib.size = FALSE] # filtering
-    flt_summary <- as.numeric(table(isexpr))
+
+    # isexpr <- c(TRUE, TRUE, TRUE)
+    # isexpr <- c(FALSE, FALSE, FALSE)
+    # isexpr <- c(FALSE, FALSE, TRUE)
+
+    if (all(isexpr)) {  # if all TRUE
+      warning('Nothing is filtered out. \n')
+      flt_summary <- table(isexpr)
+      flt_summary['FALSE'] <- 0
+      flt_summary <- sort(flt_summary)  # make sure always this order: FALSE, TRUE
+    } else if (all(!isexpr)){ # if all FALSE
+      stop('Nothing remained after filtering. Function stopped.')
+      flt_summary <- table(isexpr)
+      flt_summary['TRUE'] <- 0
+    } else {
+      flt_summary <- table(isexpr)
+    }
+
     names(flt_summary) <- c("filtered", "remaning")
     filter_results <- list(filter_threshold_cpm = filter.threshold.cpm,
                            filter_threshold_min_sample = filter.threshold.min.sample,
                            filter_summary = flt_summary,
                            filtered_counts = dge)
   } else {
+    cat("No filtering applied as filter.threshold.cpm = none. \n")
     filter_results <- NULL
   }
 
