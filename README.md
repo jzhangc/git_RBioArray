@@ -24,37 +24,7 @@ Installation:
 
 Update log
 
-    0.5.3 (feature roadmap)
-    (ICEBOX)
-      - General updates
-        - splines pacakge added as a depedencing for continuous outcome support
-        
-      - New microarray functions:
-        - New DE analysis function added: rbioarray_de_analysis()
-          - The fnction has export options:
-            (i) all features, 
-            (ii) features with an annotation name, 
-            (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol"
-            
-      - New clustering funcions:
-        - Bayesian biclustering function rbioarray_bbc()
-        - K-mean clustering function rbioarray_kmean()
-        - Propotionality correlation function added for CLR transformed RNAseq data
-      
-      - Updates to microarray functions
-        - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
-        - Relevant functions updated with continuous outcome support
-        
-      - Updates to RNAseq functions
-        - Relevant functions updated with continuous outcome support
-        
-      - Revamp GS functions
-      
-      - Other updates
-        - Functions updated for R Notebook/Markdown compatibility
-        - Combine documentation for methods of different classes 
-    
-    (ADDED)
+    0.5.3 (Aug.6.2020)
       - General updates
         - match.arg() method added to relevant functions for better user experience
         - Manual pages combined for S3 methods
