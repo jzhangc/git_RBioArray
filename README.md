@@ -1,7 +1,7 @@
 # git_RBioArray
 Simple to use package for both microarray and RNAseq data analysis (limma based)
 
-To cite in publication
+To cite in publication:
   
     Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor to reflect anoxia and freezing survival adaptations. GENOMICS. 020 Jul 27: S0888-7543(20)30169-5. doi: 10.1016/j.ygeno.2020.07.036.
     Zhang J, Knight R, Wang Y, Sawyer TW, Martyniuk CJ, Langlois VS. 2019. Hair follicle miRNAs: a novel biomarker for primary blast induced-mild traumatic brain injury. Biomarkers. 24(2): 166 – 179. doi: 10.1080/1354750X.2018.1531929.
@@ -34,6 +34,7 @@ Update log
         - match.arg() method added to relevant functions for better user experience
         - Manual pages combined for S3 methods
         - All functions updated to be compatible with R version 4.0
+        - Citation added
 
       - Updates to microarray functions
         - A bug fixed for rbioarray_rlist() where the function crashes when no gene annotation data frame is provided
