@@ -3,7 +3,7 @@ Simple to use package for both microarray and RNAseq data analysis (limma based)
 
 To cite in publication:
   
-    Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor to reflect anoxia and freezing survival adaptations. GENOMICS. 020 Jul 27: S0888-7543(20)30169-5. doi: 10.1016/j.ygeno.2020.07.036.
+    Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor to reflect anoxia and freezing survival adaptations. GENOMICS. 2020 Jul 27: S0888-7543(20)30169-5. doi: 10.1016/j.ygeno.2020.07.036.
     Zhang J, Wallace SJ, Shiu MY, Smith I, Rhind SG, Langlois VS. 2017.  Human hair follicle transcriptome profiling: a minimally invasive tool to assess molecular adaptations upon low-volume, high-intensity interval training. Physiological Reports. 5(23) pii: e13534. doi: 10.14814/phy2.13534.
 
 Installation:
@@ -28,39 +28,6 @@ Installation:
         devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocManager::repositories(), ref = "beta")  
 
 Update log
-
-    0.5.4 (feature roadmap)
-    (ICEBOX)
-      - General updates
-        - splines pacakge added as a depedencing for continuous outcome support
-        
-      - New microarray functions:
-        - New DE analysis function added: rbioarray_de_analysis()
-          - The fnction has export options:
-            (i) all features, 
-            (ii) features with an annotation name, 
-            (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol"
-            
-      - New clustering funcions:
-        - Bayesian biclustering function rbioarray_bbc()
-        - K-mean clustering function rbioarray_kmean()
-        - Propotionality correlation function added for CLR transformed RNAseq data
-      
-      - Updates to microarray functions
-        - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
-        - Relevant functions updated with continuous outcome support
-        
-      - Updates to RNAseq functions
-        - Relevant functions updated with continuous outcome support
-        
-      - Revamp GS functions
-      
-      - Other updates
-        - Functions updated for R Notebook/Markdown compatibility
-        - Combine documentation for methods of different classes 
-    
-    (ADDED)
-    
 
     0.5.3 (Aug.6.2020)
       - General updates
