@@ -21,7 +21,7 @@ rbioGS(
 \arguments{
 \item{GS}{pre-loaded gene set objects. Default is \code{NULL}.}
 
-\item{GSfile}{GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
+\item{GSfile}{GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
 
 \item{idVar}{Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.}
 

@@ -1,13 +1,16 @@
 #' @title rbioGS_sp2hsaEntrez
 #'
 #' @description Using up-to-date ensembl database, convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
-#' @param DElst The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param DElst The list with DE result, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param tgtSpecies The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.
 #' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
 #' @param entrezVar The name of the variable from DE list containing entrez gene ID.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
+#'          When using legacy functions, the DElst can be from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#'          When using the new \code{rbioseq_de} or \code{rbioarray_de}, the DElst is \code{object$DE_results}
+#'
 #' @return Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
 #' @import doParallel
 #' @import foreach
@@ -41,18 +44,18 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
   # extract hsa ortholog information
   sp_ensembl <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
   attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
-  attr_entrezgene <- c("ensembl_transcript_id", "entrezgene")
+  attr_entrezgene <- c("ensembl_transcript_id", "entrezgene_id")
   sp_tmp <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
                        mart = sp_ensembl)
   sp_entrezgene <- getBM(attr_entrezgene, filters = "with_hsapiens_homolog", values = TRUE,
                         mart = sp_ensembl) # extract entrezgene info for the species of interest
   sp_hsa_orth <- merge(sp_tmp, sp_entrezgene, by  = "ensembl_transcript_id", all.x = TRUE) # merge to have entrezgene in the hsa orth dataframe
   names(sp_hsa_orth)[names(sp_hsa_orth) == "ensembl_transcript_id"] <- paste0(tgtSpecies, "_ensembl_transcript_id") # generalized term for change column names
-  names(sp_hsa_orth)[names(sp_hsa_orth) == "entrezgene"] <- paste0(tgtSpecies, "_entrezgene")
+  names(sp_hsa_orth)[names(sp_hsa_orth) == "entrezgene_id"] <- paste0(tgtSpecies, "_entrezgene")
 
   # extract hsa entrezgene ID
   hsa_ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl") # establish the human set
-  attr_hsa <- c("ensembl_gene_id", "entrezgene")
+  attr_hsa <- c("ensembl_gene_id", "entrezgene_id")
   hsa_entrez <- getBM(attr_hsa, filters = "", values = TRUE,
                       mart = hsa_ensembl)
 
@@ -60,7 +63,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
   sp_hsa_orth_entrez <- merge(sp_hsa_orth, hsa_entrez,
                               by.x = "hsapiens_homolog_ensembl_gene", by.y = "ensembl_gene_id",
                               all.x = TRUE)
-  names(sp_hsa_orth_entrez)[names(sp_hsa_orth_entrez) == "entrezgene"] <- "hsa_entrezgene"
+  names(sp_hsa_orth_entrez)[names(sp_hsa_orth_entrez) == "entrezgene_id"] <- "hsa_entrezgene"
   sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez[, paste0(tgtSpecies, "_ensembl_transcript_id")]), ]
 
   ## add the hsa entrez ID to the non-hsa DElist
@@ -126,7 +129,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
 #'
 #' @description Add Human entrez ID to the DE dataframe
 #' @param GS pre-loaded gene set objects. Default is \code{NULL}.
-#' @param GSfile GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
+#' @param GSfile GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param idVar Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.
 #' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}, and can be set as \code{NULL}.
 #' @param pVar Set only method_p is not NULL, DE p values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.
@@ -519,7 +522,7 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL, statsVar = "logFC",
 #'
 #' @description All-in-one wrapper for GSA and plotting.
 #' @param objTitle Object title for the output GS analysis list from \code{piano} package.
-#' @param DElst The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param DElst The input list with DE result, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
 #' @param GS Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.
 #' @param GSfile GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.

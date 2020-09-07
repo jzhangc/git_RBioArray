@@ -39,7 +39,7 @@ rbioGS_all(
 \arguments{
 \item{objTitle}{Object title for the output GS analysis list from \code{piano} package.}
 
-\item{DElst}{The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
+\item{DElst}{The input list with DE result, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
 \item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
 

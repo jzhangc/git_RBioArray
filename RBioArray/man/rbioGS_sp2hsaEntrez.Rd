@@ -14,7 +14,7 @@ rbioGS_sp2hsaEntrez(
 )
 }
 \arguments{
-\item{DElst}{The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
+\item{DElst}{The list with DE result, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
 \item{tgtSpecies}{The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.}
 
@@ -34,6 +34,8 @@ Using up-to-date ensembl database, convert from mouse/rat ensemble transcript ID
 }
 \details{
 IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
+         When using legacy functions, the DElst can be from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+         When using the new \code{rbioseq_de} or \code{rbioarray_de}, the DElst is \code{object$DE_results}
 }
 \examples{
 \dontrun{

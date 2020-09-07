@@ -38,7 +38,8 @@ rbio_unsupervised_hcluster <- function(object, ...){
 
 #' @title rbio_unsupervised_hcluster.rbioarray_flist
 #'
-#' @description \code{rbio_unsupervised_hcluster} function for \code{rbioarray_flist} class object.
+#' @rdname rbio_unsupervised_hcluster
+#' @method rbio_unsupervised_hcluster rbioarray_flist
 #' @param object Input object in \code{rbioarray_flist} class.
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
 #' @param ... Additional arguments for the default method.
@@ -71,7 +72,8 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
 
 #' @title rbio_unsupervised_hcluster.rbioseq_de
 #'
-#' @description \code{rbio_unsupervised_hcluster} function for \code{rbioseq_de} class object.
+#' @rdname rbio_unsupervised_hcluster
+#' @method rbio_unsupervised_hcluster rbioseq_de
 #' @param object Input object in \code{rbioseq_de} class.
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
 #' @param ... Additional arguments for the default method.
@@ -111,6 +113,8 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 
 #' @title rbio_unsupervised_hcluster.default
 #'
+#' @rdname rbio_unsupervised_hcluster
+#' @method rbio_unsupervised_hcluster default
 #' @description Default unsupersived hierarchical clustering function.
 #' @param E Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.
 #' @param genes Annotation data frame for genes/probes/genomic features.

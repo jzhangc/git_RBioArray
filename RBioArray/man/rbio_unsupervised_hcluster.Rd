@@ -2,24 +2,106 @@
 % Please edit documentation in R/cluster.R
 \name{rbio_unsupervised_hcluster}
 \alias{rbio_unsupervised_hcluster}
+\alias{rbio_unsupervised_hcluster.rbioarray_flist}
+\alias{rbio_unsupervised_hcluster.rbioseq_de}
+\alias{rbio_unsupervised_hcluster.default}
 \title{rbio_unsupervised_hcluster}
 \usage{
 rbio_unsupervised_hcluster(object, ...)
+
+\method{rbio_unsupervised_hcluster}{rbioarray_flist}(object, sample_id.var.name = NULL, ...)
+
+\method{rbio_unsupervised_hcluster}{rbioseq_de}(object, sample_id.var.name = NULL, ...)
+
+\method{rbio_unsupervised_hcluster}{default}(
+  E,
+  genes,
+  input.sample_groups,
+  n = "all",
+  rm.control = FALSE,
+  input.genes_annotation.control_type,
+  gene_symbol.only = FALSE,
+  input.genes_annotation.gene_symbol.var_name = NULL,
+  input.genes_annotation.gene_id.var_name = NULL,
+  sample_id.vector = NULL,
+  distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
+  clust = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty", "median",
+    "centroid"),
+  col.colour = "Paired",
+  map.colour = "PRGn",
+  n.map.colour = 11,
+  ...,
+  export.name = NULL,
+  plot.width = 7,
+  plot.height = 7,
+  verbose = TRUE
+)
 }
 \arguments{
-\item{object}{Input object in either \code{rbioseq_de} or \code{rbioarray_flist} class.}
+\item{object}{Input object in \code{rbioseq_de} class.}
 
-\item{...}{Additional arguments for corresponding S3 class methods.}
+\item{...}{Additional arguments for \code{heatmap.2} function from \code{gplots} package.}
+
+\item{sample_id.var.name}{Variable name for sample identification, typically from \code{object$target}.}
+
+\item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}
+
+\item{genes}{Annotation data frame for genes/probes/genomic features.}
+
+\item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
+
+\item{n}{Number of genes/probes/genomic features to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
+
+\item{rm.control}{Whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.}
+
+\item{input.genes_annotation.control_type}{Only set when \code{rm.control = TRUE}, input control type variable annotation list.}
+
+\item{gene_symbol.only}{Whether or not to remove probes without gene symbol. Default is \code{FALSE}.}
+
+\item{input.genes_annotation.gene_symbol.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.}
+
+\item{input.genes_annotation.gene_id.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.}
+
+\item{sample_id.vector}{A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.}
+
+\item{distance}{Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.}
+
+\item{clust}{Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.}
+
+\item{col.colour}{Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.}
+
+\item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
+
+\item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
+
+\item{export.name}{File name for the export \code{pdf} plot file.}
+
+\item{plot.width}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{plot.height}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
+
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
 A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+
+A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+
+A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+
+A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 }
 \description{
 Generic unsupersived hierarchical clustering function.
+
+Default unsupersived hierarchical clustering function.
 }
 \details{
 Since the function depends on the \code{heatmap.2} function from \code{gplots} package,
          arguments can be passed directly, as seen in the examples below.
+
+The function uses filtered count data, as opposed to normalized data.
+         Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 }
 \examples{
 
