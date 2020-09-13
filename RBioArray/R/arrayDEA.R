@@ -263,19 +263,30 @@ print.rbioarray_rlist <- function(x, ...){
 #' @param object Input object with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
 #' @details The expression matrix will be normalized and then log2 transformed for output.
+#'          The function currently only supports \code{"quantile"} method.
 #'
 #'          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
 #'          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
-#'          However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning normalization will
-#'          be done AFTER log2 transformation.
+#'             However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning this function will not
+#'          log2 transform the data after normalization.
 #'             After comparison, these two methods will NOT produce the same results for the same expression data:
 #'          In other words, applying \code{normalizeBetweenArrays} directly to log2 transformed E matrix is NOT the same as apply the function
 #'          to the \code{EListRaw} that contains E.
+#'
 #'             In fact, when using \code{"quantile"} method, applying \code{normalizeBetweenArrays} to log2 transformed E matrix is the
 #'          same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
 #'          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is applied BEFORE
 #'          \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
 #'
+#'          In \code{limma}, the \code{EListRaw} is data before log2 transformation, whereas \code{EList} contains log2 transformed data.
+#'
+#'          To avoid such confusion and provide a unified experiences, the current \code{rbioarray_transfo_normalize.rbioarray_rlist} method only
+#'          treats all input E data as a matrix, which is ensured by the \code{rbioarray_rlist} function. The \code{rbioarray_rlist} accepts
+#'          unlogged data or converts \code{ElistRaw} objects into to a \code{matrix}.
+#'
+#'          The \code{limma} author suggests doing quantile on logged or unlogged data remains to be debatable, but "slowly leaning towards"
+#'          quantile on raw and then log transfom. As such, the \code{rbioarray_transfo_normalize}will first do conduct normalization then log2
+#'          transform the data.
 #'
 #'
 #' @return A \code{rbioarray_plist} class object with the following items:
@@ -359,20 +370,21 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
   ## check arguments
   bgc.methd <- match.arg(tolower(bgc.method), c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
   between.sample.norm.method <- match.arg(between.sample.norm.method, c("quantile", "Aquantile"))
-  # if (!bgc.method %in% c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
-  #   stop("Agument bgc.method needs to be set with one of \"auto\", \"auto\", \"none\", \"subtract\", \"half\", \"minimum\", \"movingmin\", \"edwards\", and \"normexp\" exactly.")
-  # if (!between.sample.norm.method %in% c("quantile", "Aquantile")) stop("Argument between.sample.norm.method needs to be set with ")
+  if (between.sample.norm.method != "quantile") {
+    stop("Currently the function only supports quantile method")
+  }
   if (is.null(between.sample.weight.design)) stop("Please provide the microarray design matrix for between.sample.weight.design argument.")
 
   ## pre-processing
   if (verbose) cat("Background correction: \n")
+  # E_gbc is a "matrix" "array" object
   E_bgc <- backgroundCorrect.matrix(E = E, Eb = E.background, method = bgc.method, ...) #background correction
   if (verbose) cat("Done!\n")
 
   ## normalization
   if (verbose) cat("\n")
   if (verbose) cat(paste0("Data normalization using ", between.sample.norm.method, " method..."))
-  Norm <- log2(normalizeBetweenArrays(E_bgc, between.sample.norm.method)) # quantile normalization
+  Norm <- log2(normalizeBetweenArrays(E_bgc, between.sample.norm.method)) # quantile normalization then log2 transformation
   Wgt <- arrayWeights(Norm, design = between.sample.weight.design) # array weight
   if (verbose) cat("Done!\n")
 

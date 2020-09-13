@@ -62,18 +62,30 @@ Data log transformation and normalization function for microarray.
 }
 \details{
 The expression matrix will be normalized and then log2 transformed for output.
+         The function currently only supports \code{"quantile"} method.
 
          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
-         However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning normalization will
-         be done AFTER log2 transformation.
+            However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning this function will not
+         log2 transform the data after normalization.
             After comparison, these two methods will NOT produce the same results for the same expression data:
          In other words, applying \code{normalizeBetweenArrays} directly to log2 transformed E matrix is NOT the same as apply the function
          to the \code{EListRaw} that contains E.
+
             In fact, when using \code{"quantile"} method, applying \code{normalizeBetweenArrays} to log2 transformed E matrix is the
          same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is applied BEFORE
          \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
+
+         In \code{limma}, the \code{EListRaw} is data before log2 transformation, whereas \code{EList} contains log2 transformed data.
+
+         To avoid such confusion and provide a unified experiences, the current \code{rbioarray_transfo_normalize.rbioarray_rlist} method only
+         treats all input E data as a matrix, which is ensured by the \code{rbioarray_rlist} function. The \code{rbioarray_rlist} accepts
+         unlogged data or converts \code{ElistRaw} objects into to a \code{matrix}.
+
+         The \code{limma} author suggests doing quantile on logged or unlogged data remains to be debatable, but "slowly leaning towards"
+         quantile on raw and then log transfom. As such, the \code{rbioarray_transfo_normalize}will first do conduct normalization then log2
+         transform the data.
 
 The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 

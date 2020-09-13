@@ -70,6 +70,9 @@ Update log
         - A bug fixed for rbioGS_sp2hsaEntrez() due to updated BiomaRt package
         - Manual page updated for rbioGS_sp2hsaEntrez() to reflect the new S3 DE classes
       
+      - Updates to microarray functions
+        - rbioarray_transfo_normalize() now only supports quantile method for normalization
+      
       - Other fixes
         - Typos fixed for manual pages
         
