@@ -69,6 +69,9 @@ Update log
       - Updates(s) to GSA functions
         - A bug fixed for rbioGS_sp2hsaEntrez() due to updated BiomaRt package
         - Manual page updated for rbioGS_sp2hsaEntrez() to reflect the new S3 DE classes
+      
+      - Other fixes
+        - Typos fixed for manual pages
         
 
     0.5.3 (Aug.6.2020)

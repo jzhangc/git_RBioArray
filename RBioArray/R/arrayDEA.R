@@ -259,23 +259,21 @@ print.rbioarray_rlist <- function(x, ...){
 
 #' @title rbioarray_transfo_normalize
 #'
-#' @description Data log transformation and nomalization function for microarray.
-#' @param object Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
+#' @description Data log transformation and normalization function for microarray.
+#' @param object Input object with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
-#'
-#'          The expression matrix will be normalized and then log2 tranformed for output.
+#' @details The expression matrix will be normalized and then log2 transformed for output.
 #'
 #'          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
 #'          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
-#'          However, when input is \code{matrix}, it assumes the data has already been log2 tranformed, meaning normalization will
+#'          However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning normalization will
 #'          be done AFTER log2 transformation.
-#'             After comparision, these two methods will NOT produce the same results for the same expression data:
+#'             After comparison, these two methods will NOT produce the same results for the same expression data:
 #'          In other words, applying \code{normalizeBetweenArrays} directly to log2 transformed E matrix is NOT the same as apply the function
 #'          to the \code{EListRaw} that contains E.
 #'             In fact, when using \code{"quantile"} method, applying \code{normalizeBetweenArrays} to log2 transformed E matrix is the
 #'          same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
-#'          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is appled BEFORE
+#'          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is applied BEFORE
 #'          \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
 #'
 #'
@@ -284,7 +282,7 @@ print.rbioarray_rlist <- function(x, ...){
 #'
 #'         \code{E}: Normalized and then log2 transformed expression matrix
 #'
-#'         \code{design}: Microrray experiment sample design matrix
+#'         \code{design}: Microarray experiment sample design matrix
 #'
 #'         \code{ArrayWeight}
 #'
@@ -315,10 +313,10 @@ rbioarray_transfo_normalize <- function(object, ...){
 #'
 #' @rdname rbioarray_transfo_normalize
 #' @method rbioarray_transfo_normalize rbioarray_rlist
-#' @param object Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
-#' @param design Microarray experiment sample design matrix. Make sure the design colnames are the same as the levles of \code{object$sample_groups}.
+#' @param object Input object with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
+#' @param design Microarray experiment sample design matrix. Make sure the design colnames are the same as the levels of \code{object$sample_groups}.
 #' @param ... Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 #' @return A \code{rbioarray_plist} class object.
 #'
@@ -341,15 +339,14 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ..., ver
 #'
 #' @rdname rbioarray_transfo_normalize
 #' @method rbioarray_transfo_normalize default
-#' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.
-#' @param E.background A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
+#' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genome features.
+#' @param E.background A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.
 #' @param bgc.method Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
 #' @param between.sample.norm.method Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
-#' @param between.sample.weight.design Microarray experiment sample design matrix for beteween sample weight calculation.
+#' @param between.sample.weight.design Microarray experiment sample design matrix for between sample weight calculation.
 #' @param ... Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
-#'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genome feature.
 #'          ADD the fact that \code{normalizeBetweenArrays} function is where \code{limma} log transforms data.
 #' @return A list with the core items for a \code{rbioarray_plist} class.
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
@@ -408,15 +405,15 @@ print.rbioarray_plist <- function(x, ...){
 
 #' @title rbioarray_filter_combine
 #'
-#' @description Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.
+#' @description Function to filter, averaging and (if set) combine genes/probes/genome features from the \code{rbioarray_plist} objects.
 #' @param object Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.
 #' @param filter.percentile The percentile threshold for filtering. Default is \code{0.05}. See details for more.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the filtering threshold. Default is \code{NULL}. See details for more.
-#' @param combine.gene.duplicate If to combine different transcripts from the same gene/genomic feature. Default is \code{FALSE}. See details for more.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param combine.gene.duplicate If to combine different transcripts from the same gene/genome feature. Default is \code{FALSE}. See details for more.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details For \code{filter.percentile}, when the input data has negative probes, the value is sete to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details For \code{filter.percentile}, when the input data has negative probes, the value is set to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
 #'          When there is no negative control probes, the value is set to \code{0.05}, so that the 5 percentile of the entire data is considered the lower threshold
 #'
 #'          For \code{filter.threshold.min.sample}, usually make sure to ensure the target gene has at least three samples, so that stats can be done.
@@ -425,7 +422,7 @@ print.rbioarray_plist <- function(x, ...){
 #'
 #' @return A \code{rbioarray_flist} class, including the following core items:
 #'
-#'         \code{E}: filtered (and if set, combined) and normlized expression matrix
+#'         \code{E}: filtered (and if set, combined) and normalized expression matrix
 #'
 #'         \code{genes}: gene annotation with same row number as E
 #'
@@ -582,14 +579,14 @@ print.rbioarray_flist <- function(x, ...){
 #' @description Function that performs statistical analysis for microarray data from \code{rbioarray_flist} class object.
 #' @param object The input \code{rbioarray_flist} object.
 #' @param contra contra Contrast matrix.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return A \code{rbioarray_de} class object with DE results, containing the following core items:
 #'
 #'         \code{F_stats}
 #'
 #'         \code{DE_results}: a list containing the DE results
 #'
-#'         \code{comparisons}: a list with comparisons and comparison levles
+#'         \code{comparisons}: a list with comparisons and comparison levels
 #'
 #'         \code{fit}: the limma fitted DE object as a reference
 #'

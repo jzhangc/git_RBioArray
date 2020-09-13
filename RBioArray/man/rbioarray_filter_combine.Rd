@@ -21,18 +21,18 @@ rbioarray_filter_combine(
 
 \item{filter.threshold.min.sample}{Minimum number of samples meeting the filtering threshold. Default is \code{NULL}. See details for more.}
 
-\item{combine.gene.duplicate}{If to combine different transcripts from the same gene/genomic feature. Default is \code{FALSE}. See details for more.}
+\item{combine.gene.duplicate}{If to combine different transcripts from the same gene/genome feature. Default is \code{FALSE}. See details for more.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
 \item{cluterType}{clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 A \code{rbioarray_flist} class, including the following core items:
 
-        \code{E}: filtered (and if set, combined) and normlized expression matrix
+        \code{E}: filtered (and if set, combined) and normalized expression matrix
 
         \code{genes}: gene annotation with same row number as E
 
@@ -43,10 +43,10 @@ A \code{rbioarray_flist} class, including the following core items:
         Additionally, \code{rbioarray_flist} object will include additional items from the input \code{rbioarray_plist} object.
 }
 \description{
-Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.
+Function to filter, averaging and (if set) combine genes/probes/genome features from the \code{rbioarray_plist} objects.
 }
 \details{
-For \code{filter.percentile}, when the input data has negative probes, the value is sete to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
+For \code{filter.percentile}, when the input data has negative probes, the value is set to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
          When there is no negative control probes, the value is set to \code{0.05}, so that the 5 percentile of the entire data is considered the lower threshold
 
          For \code{filter.threshold.min.sample}, usually make sure to ensure the target gene has at least three samples, so that stats can be done.
