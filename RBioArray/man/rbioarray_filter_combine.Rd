@@ -51,5 +51,6 @@ For \code{filter.percentile}, when the input data has negative probes, the value
 
          For \code{filter.threshold.min.sample}, usually make sure to ensure the target gene has at least three samples, so that stats can be done.
 
-         When \code{combine.gene.duplicate = TRUE}
+         When \code{combine.gene.duplicate = TRUE},the function combines the expression values from different probes from the same gene.
+         This depends on if the input object has a valid gene symbol variable.
 }

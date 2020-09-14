@@ -42,10 +42,11 @@ rbio_unsupervised_hcluster <- function(object, ...){
 #' @method rbio_unsupervised_hcluster rbioarray_flist
 #' @param object Input object in \code{rbioarray_flist} class.
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
+#' @param export.name Optional user defined export name prefix. Default is \code{NULL}.
 #' @param ... Additional arguments for the default method.
 #' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @export
-rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.name = NULL, ...){
+rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.name = NULL, export.name = NULL, ...){
   ## check arguments
   if (!is.null(sample_id.var.name)){
     if (!sample_id.var.name %in% names(object$targets)) {
@@ -58,7 +59,11 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
     sample_id.vector <- seq(ncol(object$E))
   }
 
-  export.name <- deparse(substitute(object))
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
 
   ## use methods
   rbio_unsupervised_hcluster.default(E = object$E, genes = object$genes,
@@ -76,12 +81,13 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
 #' @method rbio_unsupervised_hcluster rbioseq_de
 #' @param object Input object in \code{rbioseq_de} class.
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
+#' @param export.name Optional user defined export name prefix. Default is \code{NULL}.
 #' @param ... Additional arguments for the default method.
 #' @details The function uses filtered count data, as opposed to normalized data.
 #'          Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 #' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @export
-rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = NULL, ...){
+rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = NULL, export.name = NULL, ...){
   ## check arguments
   if (!is.null(sample_id.var.name)){
     if (!sample_id.var.name %in% names(object$targets)) {
@@ -94,7 +100,11 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
     sample_id.vector <- seq(ncol(object$filter_results$filtered_counts$counts))
   }
 
-  export.name <- deparse(substitute(object))
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
 
   ## transform
   cat("CLR transformation of filtered RNAseq count data...")
@@ -137,6 +147,7 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
+#'         The function also outputs the column and row distance and cluster objects in a list.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
 #' @export
@@ -177,7 +188,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
 
   ## set up dis and cluster functions
-  distfunc <- function(x)dist(x, method = distance)
+  distfunc <- function(x)dist(x, method = distance, upper = TRUE, diag = TRUE)
   clustfunc <- function(x)hclust(x, method = clust)
 
   ## prepare dfm for clustering
@@ -198,10 +209,23 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
   colnames(mtx) <- sample_id.vector
   row.lab <- dfm[, row.lab.var_name]
 
-  ## set ColSideColors
-  col_cluster <- clustfunc(distfunc(t(mtx)))
+  ## calculate and output distance, cluster and set ColSideColors
+  # column cluster (samples)
+  col_dist <- distfunc(t(mtx))
+  col_cluster <- clustfunc(col_dist)
   colG <- cutree(col_cluster, colGroup) # column group
   colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), col.colour) # column colour
+  col_cluster_list <- list(col_dist = col_dist, col_hclust = col_cluster)
+
+  # row cluster (genes/features)
+  row_dist <- distfunc(mtx)
+  row_cluster <- clustfunc(row_dist)
+  row_cluster_list <- list(row_dist = row_dist, row_hclust = row_cluster)
+
+  # output the distance and cluster
+  out <- list(col_dist_hclust = col_cluster_list, row__dist_hclust = row_cluster_list,
+              distance_method = distance, cluster_method = clust)
+  assign(paste0(export.name, "_dist_clust"), out, envir = .GlobalEnv)
 
   ## heatmap
   # draw heatmap

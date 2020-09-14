@@ -72,6 +72,10 @@ Update log
       
       - Updates to microarray functions
         - rbioarray_transfo_normalize() now only supports quantile method for normalization
+
+      - Updates to cluster funcions:
+        - rbio_unsupervised_hcluster() now outputs a list object of distance and clusrter resutls (for network analysis)
+        - rbio_unsupervised_hcluster() now accepts user defined export name prefix via the export.name argument
       
       - Other fixes
         - Typos fixed for manual pages

@@ -280,12 +280,12 @@ print.rbioarray_rlist <- function(x, ...){
 #'
 #'          In \code{limma}, the \code{EListRaw} is data before log2 transformation, whereas \code{EList} contains log2 transformed data.
 #'
-#'          To avoid such confusion and provide a unified experiences, the current \code{rbioarray_transfo_normalize.rbioarray_rlist} method only
-#'          treats all input E data as a matrix, which is ensured by the \code{rbioarray_rlist} function. The \code{rbioarray_rlist} accepts
+#'          To avoid such confusion and provide a unified experience, the current \code{rbioarray_transfo_normalize.rbioarray_rlist} method only
+#'          treats input E data as a matrix, which is ensured by the \code{rbioarray_rlist} function. The \code{rbioarray_rlist} accepts
 #'          unlogged data or converts \code{ElistRaw} objects into to a \code{matrix}.
 #'
 #'          The \code{limma} author suggests doing quantile on logged or unlogged data remains to be debatable, but "slowly leaning towards"
-#'          quantile on raw and then log transfom. As such, the \code{rbioarray_transfo_normalize}will first do conduct normalization then log2
+#'          quantile on raw and then log transfom. As such, the \code{rbioarray_transfo_normalize}will first conduct normalization then log2
 #'          transform the data.
 #'
 #'
@@ -430,7 +430,8 @@ print.rbioarray_plist <- function(x, ...){
 #'
 #'          For \code{filter.threshold.min.sample}, usually make sure to ensure the target gene has at least three samples, so that stats can be done.
 #'
-#'          When \code{combine.gene.duplicate = TRUE}
+#'          When \code{combine.gene.duplicate = TRUE},the function combines the expression values from different probes from the same gene.
+#'          This depends on if the input object has a valid gene symbol variable.
 #'
 #' @return A \code{rbioarray_flist} class, including the following core items:
 #'

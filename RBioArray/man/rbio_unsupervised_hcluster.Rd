@@ -9,9 +9,19 @@
 \usage{
 rbio_unsupervised_hcluster(object, ...)
 
-\method{rbio_unsupervised_hcluster}{rbioarray_flist}(object, sample_id.var.name = NULL, ...)
+\method{rbio_unsupervised_hcluster}{rbioarray_flist}(
+  object,
+  sample_id.var.name = NULL,
+  export.name = NULL,
+  ...
+)
 
-\method{rbio_unsupervised_hcluster}{rbioseq_de}(object, sample_id.var.name = NULL, ...)
+\method{rbio_unsupervised_hcluster}{rbioseq_de}(
+  object,
+  sample_id.var.name = NULL,
+  export.name = NULL,
+  ...
+)
 
 \method{rbio_unsupervised_hcluster}{default}(
   E,
@@ -44,6 +54,8 @@ rbio_unsupervised_hcluster(object, ...)
 
 \item{sample_id.var.name}{Variable name for sample identification, typically from \code{object$target}.}
 
+\item{export.name}{File name for the export \code{pdf} plot file.}
+
 \item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}
 
 \item{genes}{Annotation data frame for genes/probes/genomic features.}
@@ -74,8 +86,6 @@ rbio_unsupervised_hcluster(object, ...)
 
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
 
-\item{export.name}{File name for the export \code{pdf} plot file.}
-
 \item{plot.width}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 
 \item{plot.height}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
@@ -90,6 +100,7 @@ A pdf file containing a heatmap for unsupervised hierarchical clustering analysi
 A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.
+        The function also outputs the column and row distance and cluster objects in a list.
 }
 \description{
 Generic unsupersived hierarchical clustering function.
