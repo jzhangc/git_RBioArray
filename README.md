@@ -74,7 +74,7 @@ Update log
         - rbioarray_transfo_normalize() now only supports quantile method for normalization
 
       - Updates to cluster funcions:
-        - rbio_unsupervised_hcluster() now outputs a list object of distance and clusrter resutls (for network analysis)
+        - rbio_unsupervised_hcluster() now outputs a list object including distance and cluster results (for network analysis)
         - rbio_unsupervised_hcluster() now accepts user defined export name prefix via the export.name argument
       
       - Other fixes
