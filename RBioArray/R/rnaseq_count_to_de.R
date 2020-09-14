@@ -198,7 +198,7 @@ rnaseq_de.default <- function(x, y = NULL,
 
   if (filter.threshold.cpm != "none"){ # set the count threshold for filtering
     isexpr <- rowSums(cpm(dge$counts) > filter.threshold.cpm) >= filter.threshold.min.sample  # cpm threshold, cite the paper
-    isexpr <- rep(FALSE, times = 611)
+    # isexpr <- rep(FALSE, times = 611)
     dge <- dge[isexpr, , keep.lib.size = FALSE] # filtering
 
     # isexpr <- c(TRUE, TRUE, TRUE)

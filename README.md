@@ -73,6 +73,9 @@ Update log
       - Updates to microarray functions
         - rbioarray_transfo_normalize() now only supports quantile method for normalization
 
+      - Updates to RNAseq functions
+        - A bug fixed for rnaseq_de() where filtering not working properly
+
       - Updates to cluster funcions:
         - rbio_unsupervised_hcluster() now outputs a list object including distance and cluster results (for network analysis)
         - rbio_unsupervised_hcluster() now accepts user defined export name prefix via the export.name argument
