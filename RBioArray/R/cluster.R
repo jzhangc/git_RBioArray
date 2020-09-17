@@ -253,10 +253,11 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microaray.
-#'          The column colour group is usually 2.
+#'          The column colour group is usually 2, since the function only outputs
 #'
+#'          NOTE: this function only outputs the pair-wise comparison clusters.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
@@ -346,6 +347,7 @@ rbio_supervised_hcluster <- function(object,
   }
 
   ## subsetting and plotting
+  sig_dist_clust_list <- vector(mode = "list", length = length(comparisons))
   for (i in seq(length(comparisons))) {
     # set up plotting matrix
     plt_dfm <- dfm[as.logical(thresholding_summary[[i]]), ]
@@ -356,9 +358,19 @@ rbio_supervised_hcluster <- function(object,
 
     # set ColSideColors
     colGroup <- length(comparison_levels[[i]])
-    col_cluster <- clustfunc(distfunc(t(plt_mtx)))
+    col_dist <- distfunc(t(plt_mtx))
+    col_cluster <- clustfunc(col_dist)
     colG <- cutree(col_cluster, colGroup) # column group
     colC <- brewer.pal(ifelse(colGroup < 3, 3, colGroup), col.colour) # column colour
+    col_cluster_list <- list(col_dist = col_dist, col_hclust = col_cluster)
+
+    # row cluster (genes/features)
+    row_dist <- distfunc(plt_mtx)
+    row_cluster <- clustfunc(row_dist)
+    row_cluster_list <- list(row_dist = row_dist, row_hclust = row_cluster)
+
+    # output
+    sig_dist_clust_list[[i]] <- list(sig_col_dist_clust = col_cluster_list, sig_row_dist_clust = row_cluster_list)
 
     # draw heatmap
     if (verbose) cat(paste0("Sig data hierarchical clustering heatmap saved to: ", comparisons[i], "_sig_heatmap.pdf..."))
@@ -369,4 +381,6 @@ rbio_supervised_hcluster <- function(object,
     if (verbose) cat("Done!\n")
     dev.off()
   }
+  names(sig_dist_clust_list) <- comparisons
+  assign(paste0(export.name, "_sig_dist_clust"), sig_dist_clust_list, envir = .GlobalEnv)
 }

@@ -41,7 +41,7 @@ rbio_supervised_hcluster(
 
 \item{plot.height}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
 \item{sample_id.vector}{A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.}
 }
@@ -53,5 +53,7 @@ Supersived hierarchical clustering function.
 }
 \details{
 Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microaray.
-         The column colour group is usually 2.
+         The column colour group is usually 2, since the function only outputs
+
+         NOTE: this function only outputs the pair-wise comparison clusters.
 }

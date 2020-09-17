@@ -381,6 +381,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
 #'          3. the function will use normalized and filtered expression data for both RNAseq and microaorray
 #'          4. the function will automatically subset data using \code{thresholding_summary} from \code{sig} class input
 #'          5. the function will automatically subset and plot for each group under each comparison
+#'
 #' @return A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correlation coefficient and p value matrices.
 #'         The function also outputs a significance plot.
 #'         The function also generates two list objects containing correlation results
