@@ -60,8 +60,8 @@ Update log
     
     (ADDED)
       - New clustering funcions:
-        - K-means clustering function rbio_kmeans()
-          - K-means clustering plotting function with PCA functionality rbio_kmeans_plot() added 
+        - K means clustering function rbio_kmeans()
+          - K means clustering plotting function with PCA functionality rbio_kmeans_plot() added 
 
       - Update(s) to cluster functions
         - rbio_unsupervised_corcluster() and rbio_supervised_corcluster() now export correlation results into the environment
