@@ -42,8 +42,8 @@ Update log
             (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol"
             
       - New clustering funcions:
-        - Bayesian biclustering function rbioarray_bbc()
-        - K-mean clustering function rbioarray_kmean()
+        - Bayesian biclustering function rbio_bbc()
+        - K-means clustering function rbio_kmeans()
         - Propotionality correlation function added for CLR transformed RNAseq data
       
       - Updates to microarray functions
@@ -60,6 +60,10 @@ Update log
         - Combine documentation for methods of different classes 
     
     (ADDED)
+      - New clustering funcions:
+        - K-means clustering function rbio_kmeans()
+          - K-means clustering plotting function with PCA functionality rbio_kmeans_plot() added 
+
       - Update(s) to cluster functions
         - rbio_unsupervised_corcluster() and rbio_supervised_corcluster() now export correlation results into the environment
           - With suffixes of "_cor_unsuper" and "_cor_sig", respectively

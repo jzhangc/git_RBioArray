@@ -207,6 +207,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 
   mtx <- as.matrix(dfm[, !names(dfm) %in% names(genes)])
   colnames(mtx) <- sample_id.vector
+  rownames(mtx) <- dfm[, row.lab.var_name]
   row.lab <- dfm[, row.lab.var_name]
 
   ## calculate and output distance, cluster and set ColSideColors
@@ -353,6 +354,7 @@ rbio_supervised_hcluster <- function(object,
     plt_dfm <- dfm[as.logical(thresholding_summary[[i]]), ]
     plt_mtx <- as.matrix(plt_dfm[, !names(plt_dfm) %in% names(genes)])
     colnames(plt_mtx) <- sample_id.vector
+    rownames(plt_mtx) <- plt_dfm[, row.lab.var_name]
     plt_mtx <- plt_mtx[, which(input.sample_groups %in% comparison_levels[[i]])]  # subsetting samples for the comparison levels
     row.lab <- plt_dfm[, row.lab.var_name]
 
@@ -382,5 +384,156 @@ rbio_supervised_hcluster <- function(object,
     dev.off()
   }
   names(sig_dist_clust_list) <- comparisons
+  sig_dist_clust_list$distance_method <- distance
+  sig_dist_clust_list$cluster_method <- clust
   assign(paste0(export.name, "_sig_dist_clust"), sig_dist_clust_list, envir = .GlobalEnv)
+}
+
+
+#' @title rbio_kmeans
+#'
+#' @description K means cluster function
+#' @param x Matrix or Data frame. The function will cluster row items.
+#' @param export.name Optional user defined export name prefix. Default is \code{NULL}.
+#' @param k_range Integer array. The range of K to try to find the optimal number of cluster (K). Default is \code{2:15}.
+#' @param nstart The number of tries to find the optimal cluster per K. Default is \code{25}.
+#' @param plot.title Whether to display plot title on top of the plot. Default is \code{FALSE}.
+#' @param plot.titleSize The font size of the plot title. Default is \code{10}.
+#' @param plot.symbolSize Symbol size. Default is \code{2}.
+#' @param plot.vline.label Boolean. If to show the label the on the silhouette
+#' @param plot.fontType The type of font in the figure. Default is "sans". For all options please refer to R font table, which is available on the website: \url{http://kenstoreylab.com/?page_id=2448}.
+#' @param plot.xLabel x axis label. Type with quotation marks. Could be NULL. Default is \code{"Features"}.
+#' @param plot.xLabelSize x axis label size. Default is \code{10}.
+#' @param plot.xTickLblSize Font size of x axis ticks. Default is \code{10}.
+#' @param plot.xTickItalic Set x axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.xTickBold Set x axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.xAngle The rotation angle (degrees) of the x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.yLabel y axis label. Type with quotation marks. Could be NULL. Default is \code{"OOB error rate"}.
+#' @param plot.yLabelSize y axis label size. Default is \code{10}.
+#' @param plot.yTickLblSize Font size of y axis ticks. Default is \code{10}.
+#' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
+#' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
+#' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
+#' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
+#' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details The function does three things:
+#'          1. Conducts a silhouette score test to find out the optimal K (number of clusters)
+#'          2. Exports the silhouette score plot
+#'          3. Conducts the K means cluster analysis with the optimized K
+#'
+#'          For the input \code{x}, it typically does not contain annotation columns for microarray or RNA-seq data sets.
+#'          The function clusters the row items.
+#'          To have proper labels for the cluser plot using \code{rbio_kmeans_plot()}, make sure to have rownames set for \code{x}.
+#'
+#' @return A silhouette score plot showing the optimized number of clusters (K), and a \code{kmeans} object containing the final K means cluster result.
+#' @import ggplot2
+#' @import ggrepel
+#' @import foreach
+#' @importFrom cluster silhouette
+#' @importFrom RBioplot rightside_y
+#' @importFrom grid grid.newpage grid.draw
+#' @export
+rbio_kmeans <- function(x, export.name = NULL,
+                        k_range = 2:15, nstart = 25,
+                        plot.title = NULL, plot.titleSize = 10,
+                        plot.symbolSize = 2,
+                        plot.vline.label = FALSE,
+                        plot.fontType = "sans",
+                        plot.xLabel = "Number of clusters (K)", plot.xLabelSize = 10,
+                        plot.xTickLblSize = 10, plot.xTickItalic = FALSE, plot.xTickBold = FALSE,
+                        plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+                        plot.yLabel = "Average silhouette score", plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
+                        plot.yTickBold = FALSE,
+                        plot.rightsideY = TRUE,
+                        plot.Width = 170, plot.Height = 150,
+                        verbose = TRUE) {
+  # -- argument check --
+  if (!any(class(x) %in% c("matrix", "data.frame"))) stop("x needs to be a matrix or data frame.")
+  if (any(class(x) %in% "data.frame")){
+    x <- as.matrix(x)
+  } else {
+    x <- x
+  }
+  if (is.null(export.name)) {
+    export.name <- deparse(substitute(x))
+  }
+
+  # -- load data --
+  mtx <- as.matrix(x)
+
+  # -- silhouette score --
+  avg_sil <- foreach(i = k_range, .combine = "c") %do% {
+    km <- kmeans(mtx, centers = i, nstart = nstart)
+    ss <- cluster::silhouette(km$cluster, dist(mtx))
+    mean(ss[, 3])
+  }
+  names(avg_sil) <- k_range
+  optim_k <- as.integer(names(avg_sil)[avg_sil == max(avg_sil)])
+
+  # -- final kmeans cluster --
+  final_km <- kmeans(mtx, centers = optim_k, nstart = nstart)
+
+  # -- export results --
+  assign(paste0(export.name, "_kmeans"), final_km, envir = .GlobalEnv)
+
+  # -- plotting --
+  # - silhouette plot -
+  pltdfm <- data.frame(x = k_range, y = avg_sil)
+  loclEnv <- environment()
+  baseplt <- ggplot(pltdfm, aes(x = k_range, y = avg_sil), environment = loclEnv) +
+    geom_line() +
+    geom_point(size = plot.symbolSize) +
+    scale_x_continuous(expand = c(0.05, 0.05)) +
+    ggtitle(plot.title) +
+    xlab(plot.xLabel) +
+    ylab(plot.yLabel) +
+    geom_vline(xintercept = pltdfm$x[pltdfm$y == max(pltdfm$y)], linetype = "dashed", colour = "red") +
+    theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+          plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
+          axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+          axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+          axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle,
+                                     hjust = plot.xhAlign, vjust = plot.xvAlign),
+          axis.text.y = element_text(size = plot.yTickLblSize, family = plot.fontType, hjust = 0.5),
+          axis.ticks.x = if(plot.xTickLblSize == 0) element_blank())
+
+  if (plot.vline.label) {
+    baseplt <- baseplt +
+      geom_text_repel(data = pltdfm[pltdfm$y == max(pltdfm$y), ],
+                      aes(x = pltdfm$x[pltdfm$y == max(pltdfm$y)], y = max(pltdfm$y)*0.4, label = paste0(pltdfm$x[pltdfm$y == max(pltdfm$y)], " cluster(s)")),
+                      arrow = arrow(length = unit(0.015, "npc")))
+  }
+
+  if (plot.xTickItalic & plot.xTickBold){
+    baseplt <- baseplt +
+      theme(axis.text.x = element_text(face = "bold.italic"))
+  } else if (plot.xTickItalic & !plot.xTickBold){
+    baseplt <- baseplt +
+      theme(axis.text.x = element_text(face = "italic"))
+  } else if (plot.xTickBold & !plot.xTickItalic){
+    baseplt <- baseplt +
+      theme(axis.text.x = element_text(face = "bold"))
+  }
+
+  if (plot.yTickItalic & plot.yTickBold){
+    baseplt <- baseplt +
+      theme(axis.text.y  = element_text(face = "bold.italic"))
+  } else if (plot.yTickItalic & !plot.yTickBold){
+    baseplt <- baseplt +
+      theme(axis.text.y = element_text(face = "italic"))
+  } else if (plot.yTickBold & !plot.yTickItalic){
+    baseplt <- baseplt +
+      theme(axis.text.y = element_text(face = "bold"))
+  }
+
+  # add the right-side y axis
+  pltgtb <- RBioplot::rightside_y(baseplt)   # add the right-side y axis
+  ggsave(filename = paste0(export.name,".kmeans_silouette.pdf"), plot = pltgtb,
+         width = plot.Width, height = plot.Height, units = "mm",dpi = 600) # export the plot
+  grid.newpage()
+  grid.draw(pltgtb)
 }
