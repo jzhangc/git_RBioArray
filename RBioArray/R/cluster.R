@@ -393,7 +393,7 @@ rbio_supervised_hcluster <- function(object,
 #' @title rbio_kmeans
 #'
 #' @description K means cluster function
-#' @param x Matrix or Data frame. The function will cluster row items.
+#' @param x Matrix or Data frame. Input data matrix. The function will cluster row items.
 #' @param export.name Optional user defined export name prefix. Default is \code{NULL}.
 #' @param k_range Integer array. The range of K to try to find the optimal number of cluster (K). Default is \code{2:15}.
 #' @param nstart The number of tries to find the optimal cluster per K. Default is \code{25}.
@@ -435,6 +435,12 @@ rbio_supervised_hcluster <- function(object,
 #' @importFrom cluster silhouette
 #' @importFrom RBioplot rightside_y
 #' @importFrom grid grid.newpage grid.draw
+#' @examples
+#' \dontrun{
+#' mtx <- group_de_list$ex1$E
+#' rownames(mtx) <- group_de_list$ex1$genes$SYMBOL
+#' rbio_kmeans(x = mtx, export.name = "ex1", plot.vline.label = TRUE)
+#' }
 #' @export
 rbio_kmeans <- function(x, export.name = NULL,
                         k_range = 2:15, nstart = 25,
@@ -536,4 +542,371 @@ rbio_kmeans <- function(x, export.name = NULL,
          width = plot.Width, height = plot.Height, units = "mm",dpi = 600) # export the plot
   grid.newpage()
   grid.draw(pltgtb)
+}
+
+
+#' @title rbio_kmeans_plot
+#'
+#' @description A plot function for K means cluster results, with or without PCA.
+#' @param km.object A \code{kmeans} object, from \code{\link{rbio_kmeans()}} function.
+#' @param x Matrix or data.frame. The same data used to generate the input \code{km.object}.
+#' @param centerScale Boolean. If to center and scale the x data fro clustering. Default is \code{TRUE}.
+#' @param ... Additional arguments passed to \code{prcomp} function.
+#' @param plot.comps Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.
+#' @param plot.Title The biplot title. Default is \code{NULL}.
+#' @param plot.sampleLabel.type  If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
+#' @param plot.sampleLabelSize Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.
+#' @param plot.sampleLabel.padding Set only when \code{biplot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
+#' @param plot.SymbolSize The symbol size for the scatter plot portion of the biplot. Default is \code{2}.
+#' @param plot.ellipse If to draw ellipses. Default is \code{FALSE}.
+#' @param plot.ellipse_conf The confidence value for the ellipses. Default is \code{0.93}.
+#' @param plot.xAngle The rotation angle (degrees) of the biplot x axis marks. Default is \code{0} - horizontal.
+#' @param plot.xhAlign The horizontal alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.xvAlign The vertical alignment type of the x axis marks. Options are \code{0}, \code{0.5} and \code{1}. The default value at \code{0} is especially useful when \code{xAngle = 90}.
+#' @param plot.loadingplot If to superimpose loading plot. Default is \code{FALSE}.
+#' @param plot.loadingplot.textsize The font size of the loading plot labels. Default is \code{3}.
+#' @param plot.mtx.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
+#' @param plot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
+#' @param plot.Width The biplot width. Default is \code{170}.
+#' @param plot.Height The biplot height. Default is \code{150}.
+#' @param plot.rightsideY If to show the right side y-axis for both boxplot and biplot. For biplot, only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
+#' @param plot.fontType Font for the figure texts. Default is \code{"sans"}.
+#' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
+#' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+#' @details To have proper labels for the cluser plot using \code{rbio_kmeans_plot()}, make sure to have rownames set for \code{x}.
+#'
+#'          The function automatically detects if PCA is needed:
+#'          when \code{x} has more than two variables, the function will run PCA first.
+#'          \code{plot.comps} not needed and will not be used when \code{x} has less than three variables, i.e. no PCA needed for plotting.
+#' @import ggplot2
+#' @import ggrepel
+#' @importFrom GGally ggpairs
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom RBioplot rightside_y
+#' @examples
+#' \dontrun{
+#' rbio_kmeans_plot(km.object = ex1_kmeans, x = mtx, export.name = "ex1",
+#'                  plot.ellipse = TRUE,
+#'                  plot.sampleLabel.type = "direct",
+#'                  plot.SymbolSize = 4,
+#'                  plot.xLabelSize = 14, plot.yLabelSize = 14,
+#'                  plot.Width = 140, plot.Height = 150)
+#' }
+#' @export
+rbio_kmeans_plot <- function(km.object,
+                             x, export.name = NULL,
+                             centerScale = TRUE,...,
+                             plot.comps = c(1:2),
+                             plot.Title = NULL,
+                             plot.sampleLabel.type = "none", plot.sampleLabelSize = 2,
+                             plot.sampleLabel.padding = 0.5,
+                             plot.SymbolSize = 2,
+                             plot.ellipse = FALSE, plot.ellipse_conf = 0.95,
+                             plot.xLabelSize = 10, plot.yLabelSize = 10,
+                             plot.xTickLblSize = 10, plot.yTickLblSize = 10,
+                             plot.xAngle = 0, plot.xhAlign = 0.5, plot.xvAlign = 0.5,
+                             plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
+                             plot.rightsideY = FALSE,
+                             plot.fontType = "sans",
+                             plot.Width = 170, plot.Height = 150,
+                             verbose = TRUE){
+  # -- check argument --
+  if (!any(class(x) %in% c("matrix", "data.frame"))) stop("x needs to be a matrix or data frame.")
+  if (any(class(x) %in% "data.frame")){
+    x <- as.matrix(x)
+  } else {
+    x <- x
+  }
+  if (is.null(export.name)) {
+    export.name <- deparse(substitute(x))
+  }
+  if (!any(class(km.object) %in% "kmeans")) stop("km.object needs to be a kmeans class.")
+  # cluster information
+  clusters <- factor(km.object$cluster, levels = unique(km.object$cluster))
+
+  # -- PCA or not --
+  if (ncol(x) <= 2) {
+    pca_on <- FALSE
+  } else {
+    pca_on <- TRUE
+    if (!all(plot.comps %in% seq(ncol(x)))) stop("plot.comps contain non-existant PC.")
+  }
+  if (verbose) cat("PCA:", pca_on, "\n")
+  if (pca_on){
+    PCA <- prcomp(x, scale. = centerScale, center = centerScale, ...)
+    varpp_x <- 100 * summary(PCA)$importance[2, ] # extract and calculate the proportion of variance
+    score_x <- data.frame(PCA$x[, plot.comps, drop = FALSE], check.names = FALSE) # extract rotated sample scores
+    score_x$group <- clusters
+    score_x$sample.label <- rownames(x)
+    var_percentage_x <- varpp_x[paste0("PC", plot.comps)] # extract the proportion of variance for the selected PCs
+    pc_axis_lbl <- paste("PC ", plot.comps, " (", round(var_percentage_x, digits = 2), "%)", sep = "")
+  } else {
+    if (centerScale){
+      x <- RBioFS::center_scale(x)$centerX
+    }
+    score_x <- data.frame(x, check.names = FALSE)
+    pc_axis_lbl <- colnames(x)
+    score_x$group <- clusters
+    score_x$sample.label <- rownames(x)
+  }
+
+  # -- plot --
+  if (pca_on) {
+    if (length(plot.comps) == 1){
+      if (plot.ellipse){
+        cat("ellipse is not applicable when length(plot.comps) == 1. Proceed without one.\n")
+      }
+      score_x$sample <- seq(nrow(score_x))
+      names(score_x)[1] <- "axis1"
+
+      if (verbose) cat(paste("Single PC plot being saved to file: ", export.name, ".kmeans_cluster.pdf...", sep = ""))  # initial message
+      biplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
+        geom_line(aes(colour = group, linetype = group))
+
+      # sample labels
+      if (plot.sampleLabel.type == "direct"){
+        biplt <- biplt +
+          geom_text(aes(colour = group, label = sample.label), size = plot.SymbolSize)
+      } else if (plot.sampleLabel.type == "indirect"){
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group)) +
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                          show.legend = FALSE, size = plot.sampleLabelSize)
+      } else {
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
+      }
+
+      biplt <- biplt +
+        ggtitle(plot.Title) +
+        ylab(pc_axis_lbl[1]) +
+        theme_bw() +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
+              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+
+      # grid.newpage()
+      if (plot.rightsideY){ # add the right-side y axis
+        biplt <- RBioplot::rightside_y(biplt)
+      }
+    } else if (length(plot.comps) == 2){
+      names(score_x)[1:2] <- c("axis1", "axis2")
+
+      if (verbose) cat(paste("plot being saved to file: ", export.name, ".kmeans_cluster.pdf...", sep = ""))  # initial message
+      biplt <- ggplot(score_x, aes(x = axis1, y = axis2))
+
+      # sample labels
+      if (plot.sampleLabel.type == "direct"){
+        biplt <- biplt +
+          geom_text(aes(colour = group, label = sample.label), size = plot.SymbolSize)
+      } else if (plot.sampleLabel.type == "indirect"){
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
+        geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                        show.legend = FALSE, size = plot.sampleLabelSize)
+      } else {
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
+      }
+
+      biplt <- biplt +
+        ggtitle(plot.Title) +
+        xlab(pc_axis_lbl[1]) +
+        ylab(pc_axis_lbl[2]) +
+        theme_bw() +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+
+      if (plot.ellipse){ # circles
+        biplt <- biplt +
+          stat_ellipse(aes(colour = group, group = group), type = "norm", level = plot.ellipse_conf)
+      }
+
+      # grid.newpage()
+      if (plot.rightsideY){ # add the right-side y axis
+        biplt <- RBioplot::rightside_y(biplt)
+      }
+
+    } else if (length(plot.comps) > 2) {
+      if (plot.rightsideY){ # add the right-side y axis
+        cat("Rightside y-axis is not applicable when length(plot.comps) > 2. Proceed without one.\n")
+      }
+
+      # custom functions for the paired scoreplot
+      ellipsefunc <- function(data = score_x, mapping, label.method = plot.sampleLabel.type,
+                              ellipse = plot.ellipse, ellipse_conf = plot.ellipse_conf,
+                              ...){
+        g <- ggplot(data = data, mapping = mapping)
+
+        if (label.method == "direct"){
+          g <- g + geom_text(aes(colour = group, label = sample.label), ...)
+        } else if (label.method == "indirect"){
+          g <- g +  geom_point(...) +
+            scale_shape_manual(values = 1:nlevels(data$group)) +
+            geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                            show.legend = FALSE, size = plot.sampleLabelSize)
+        } else {
+          g <- g + geom_point(...) +
+            scale_shape_manual(values = 1:nlevels(data$group))
+        }
+        if (ellipse){
+          g <- g +
+            stat_ellipse(aes(colour = group, group = group), type = "norm", level = ellipse_conf)
+        }
+        return(g)
+      }
+
+      densityfunc <- function(data = score_x, mapping, alpha = 0.1, densityplot = plot.mtx.densityplot, ...){
+        g <- ggplot(data = data, mapping = mapping)
+        if (densityplot){
+          g <- g + geom_density(alpha = alpha, aes(colour = group, linetype = group, ...))
+        }
+        return(g)
+      }
+
+      # matrix scoreplot
+      if (verbose) cat(paste("plot matrix being saved to file: ", export.name,".kmeans_cluster.pdf...", sep = ""))  # initial message
+      biplt <- ggpairs(score_x, columns = plot.comps, aes(colour = group, shape = group),
+                       axisLabels = "show", columnLabels = pc_axis_lbl,
+                       showStrips = NULL,
+                       lower = list(continuous = ellipsefunc),
+                       upper = list(continuous = ellipsefunc),
+                       diag = list(continuous = densityfunc),
+                       legend = 2)
+      biplt <- biplt +
+        ggtitle(plot.Title) +
+        theme(plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
+              strip.background = element_blank(),  # no strip background colour
+              strip.text = element_text(face = "bold", size = plot.mtx.stripLblSize),
+              panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+      # grid.newpage()
+    }
+    ggsave(filename = paste(export.name,".kmeans_cluster.pdf", sep = ""), plot = biplt,
+           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    if (verbose) cat("Done!\n") # final message
+    grid.draw(biplt)
+  } else {  # without PCA
+    if (ncol(x) == 1){
+      if (plot.ellipse){
+        cat("ellipse is not applicable when length(plot.comps) == 1. Proceed without one.\n")
+      }
+      score_x$sample <- seq(nrow(score_x))
+      names(score_x)[1] <- "axis1"
+
+      if (verbose) cat(paste("Single PC plot being saved to file: ", export.name, ".kmeans_cluster.pdf...", sep = ""))  # initial message
+      biplt <- ggplot(score_x, aes(x = sample, y = axis1)) +
+        geom_line(aes(colour = group, linetype = group))
+
+      # sample labels
+      if (plot.sampleLabel.type == "direct"){
+        biplt <- biplt +
+          geom_text(aes(colour = group, label = sample.label), size = plot.SymbolSize)
+      } else if (plot.sampleLabel.type == "indirect"){
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group)) +
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                          show.legend = FALSE, size = plot.sampleLabelSize)
+      } else {
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
+      }
+
+      biplt <- biplt +
+        ggtitle(plot.Title) +
+        ylab(pc_axis_lbl[1]) +
+        theme_bw() +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
+              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+
+      # grid.newpage()
+      if (plot.rightsideY){ # add the right-side y axis
+        biplt <- RBioplot::rightside_y(biplt)
+      }
+    } else if (ncol(x) == 2){
+      names(score_x)[1:2] <- c("axis1", "axis2")
+
+      if (verbose) cat(paste("plot being saved to file: ", export.name, ".kmeans_cluster.pdf...", sep = ""))  # initial message
+      biplt <- ggplot(score_x, aes(x = axis1, y = axis2))
+
+      # sample labels
+      if (plot.sampleLabel.type == "direct"){
+        biplt <- biplt +
+          geom_text(aes(colour = group, label = sample.label), size = plot.SymbolSize)
+      } else if (plot.sampleLabel.type == "indirect"){
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
+        geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                        show.legend = FALSE, size = plot.sampleLabelSize)
+      } else {
+        biplt <- biplt +
+          geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
+          scale_shape_manual(values=1:nlevels(score_x$group))
+      }
+
+      biplt <- biplt +
+        ggtitle(plot.Title) +
+        xlab(pc_axis_lbl[1]) +
+        ylab(pc_axis_lbl[2]) +
+        theme_bw() +
+        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+              axis.title = element_text(face = "bold", family = plot.fontType),
+              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+
+      if (plot.ellipse){ # circles
+        biplt <- biplt +
+          stat_ellipse(aes(colour = group, group = group), type = "norm", level = plot.ellipse_conf)
+      }
+
+      # grid.newpage()
+      if (plot.rightsideY){ # add the right-side y axis
+        biplt <- RBioplot::rightside_y(biplt)
+      }
+    }
+    ggsave(filename = paste(export.name,".kmeans_cluster.pdf", sep = ""), plot = biplt,
+           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+    if (verbose) cat("Done!\n") # final message
+    grid.draw(biplt)
+  }
 }

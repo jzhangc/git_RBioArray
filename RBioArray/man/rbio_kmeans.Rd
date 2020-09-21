@@ -34,7 +34,7 @@ rbio_kmeans(
 )
 }
 \arguments{
-\item{x}{Matrix or Data frame. The function will cluster row items.}
+\item{x}{Matrix or Data frame. Input data matrix. The function will cluster row items.}
 
 \item{export.name}{Optional user defined export name prefix. Default is \code{NULL}.}
 
@@ -101,4 +101,11 @@ The function does three things:
          For the input \code{x}, it typically does not contain annotation columns for microarray or RNA-seq data sets.
          The function clusters the row items.
          To have proper labels for the cluser plot using \code{rbio_kmeans_plot()}, make sure to have rownames set for \code{x}.
+}
+\examples{
+\dontrun{
+mtx <- group_de_list$ex1$E
+rownames(mtx) <- group_de_list$ex1$genes$SYMBOL
+rbio_kmeans(x = mtx, export.name = "ex1", plot.vline.label = TRUE)
+}
 }
