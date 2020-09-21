@@ -43,7 +43,6 @@ Update log
             
       - New clustering funcions:
         - Bayesian biclustering function rbio_bbc()
-        - K-means clustering function rbio_kmeans()
         - Propotionality correlation function added for CLR transformed RNAseq data
       
       - Updates to microarray functions
