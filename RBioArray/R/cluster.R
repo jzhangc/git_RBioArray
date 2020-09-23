@@ -29,7 +29,7 @@
 #' @export
 rbio_unsupervised_hcluster <- function(object, ...){
   ## check arguments
-  if (!class(object) %in% c("rbioarray_flist", "rbioseq_de")) stop("The input object needs to be either \"rbioarray_flist\" or \"rbioseq_de\" class object.")
+  if (!any(class(object) %in% c("rbioarray_flist", "rbioarray_de", "rbioseq_de"))) stop("The input object needs to be either \"rbioarray_flist\" or \"rbioseq_de\" class object.")
 
   ## use methods
   UseMethod("rbio_unsupervised_hcluster", object)
@@ -67,6 +67,45 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
 
   ## use methods
   rbio_unsupervised_hcluster.default(E = object$E, genes = object$genes,
+                                     input.genes_annotation.control_type = object$genes_annotation.control_type,
+                                     input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
+                                     input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
+                                     input.sample_groups = object$sample_groups,
+                                     sample_id.vector = sample_id.vector, export.name = export.name, ...)
+}
+
+
+#' @title rbio_unsupervised_hcluster.rbioarray_de
+#'
+#' @rdname rbio_unsupervised_hcluster
+#' @method rbio_unsupervised_hcluster rbioarray_de
+#' @param object Input object in \code{rbioarray_de} class.
+#' @param sample_id.var.name Variable name for sample identification, typically from \code{object$targets}.
+#' @param export.name Optional user defined export name prefix. Default is \code{NULL}.
+#' @param ... Additional arguments for the default method.
+#' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+#' @export
+rbio_unsupervised_hcluster.rbioarray_de <- function(object, sample_id.var.name = NULL, export.name = NULL, ...){
+  ## check arguments
+  if (!is.null(sample_id.var.name)){
+    if (!sample_id.var.name %in% names(object$targets)) {
+      cat("The sample_id.var.name not found in targets element of the input object. Proceed without using it.\n")
+      sample_id.vector <- seq(ncol(object$input_data$E))
+    } else {
+      sample_id.vector <- object$targets[, sample_id.var.name]
+    }
+  } else {
+    sample_id.vector <- seq(ncol(object$input_data$E))
+  }
+
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
+
+  ## use methods
+  rbio_unsupervised_hcluster.default(E = object$input_data$E, genes = object$input_data$genes,
                                      input.genes_annotation.control_type = object$genes_annotation.control_type,
                                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,

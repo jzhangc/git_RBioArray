@@ -3,6 +3,7 @@
 \name{rbio_unsupervised_hcluster}
 \alias{rbio_unsupervised_hcluster}
 \alias{rbio_unsupervised_hcluster.rbioarray_flist}
+\alias{rbio_unsupervised_hcluster.rbioarray_de}
 \alias{rbio_unsupervised_hcluster.rbioseq_de}
 \alias{rbio_unsupervised_hcluster.default}
 \title{rbio_unsupervised_hcluster}
@@ -10,6 +11,13 @@
 rbio_unsupervised_hcluster(object, ...)
 
 \method{rbio_unsupervised_hcluster}{rbioarray_flist}(
+  object,
+  sample_id.var.name = NULL,
+  export.name = NULL,
+  ...
+)
+
+\method{rbio_unsupervised_hcluster}{rbioarray_de}(
   object,
   sample_id.var.name = NULL,
   export.name = NULL,
@@ -93,6 +101,8 @@ rbio_unsupervised_hcluster(object, ...)
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
+A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
+
 A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 
 A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.

@@ -75,6 +75,7 @@ Update log
         - A bug fixed for rnaseq_de() where filtering not working properly
 
       - Updates to cluster funcions:
+        - rbio_unsupervised_hcluster() now supports "rbioarray_de" objects
         - rbio_unsupervised_hcluster() now outputs a list object including distance and cluster results (for network analysis)
         - rbio_unsupervised_hcluster() now accepts user defined export name prefix via the export.name argument
         - rbio_supervised_hcluster() now outputs a list object including distance and cluster ressults (for network analysis)
