@@ -88,7 +88,7 @@ rbio_kmeans_plot(
 \item{plot.loadingplot.textsize}{The font size of the loading plot labels. Default is \code{3}.}
 }
 \value{
-Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+A PCA/scatter plot from K means cluster. The format is \code{pdf}.
 }
 \description{
 A plot function for K means cluster results, with or without PCA.

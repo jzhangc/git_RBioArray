@@ -8,11 +8,13 @@ rbio_supervised_corcluster(
   object,
   gene_symbol.only = FALSE,
   cor.method = c("pearson", "spearman"),
+  hclust.heatmap = TRUE,
   map.colour = "PRGn",
   n.map.colour = 11,
   ...,
   heatmap.width = 7,
   heatmap.height = 7,
+  sigplot = TRUE,
   sigplot.adj.p = FALSE,
   sigplot.alpha = 0.05,
   sigplot.sigLabelColour = "red",
@@ -34,6 +36,8 @@ rbio_supervised_corcluster(
 
 \item{cor.method}{The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.}
 
+\item{hclust.heatmap}{Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.}
+
 \item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
 
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
@@ -43,6 +47,8 @@ rbio_supervised_corcluster(
 \item{heatmap.width}{Width for correlation heatmap. Unit is \code{inch}. Default is \code{7}.}
 
 \item{heatmap.height}{Height for correlation heatmap. Unit is \code{inch}. Default is \code{7}.}
+
+\item{sigplot}{If to show significance plot. Default is \code{TRUE}.}
 
 \item{sigplot.adj.p}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
 

@@ -25,14 +25,15 @@ rbio_unsupervised_corcluster(object, ...)
   gene_symbol.only = FALSE,
   input.genes_annotation.gene_symbol.var_name = NULL,
   input.genes_annotation.gene_id.var_name = NULL,
+  export.name = NULL,
+  hclust.heatmap = TRUE,
   map.colour = "PRGn",
   n.map.colour = 11,
   ...,
-  export.name = NULL,
   heatmap.axis.label = FALSE,
   heatmap.width = 7,
   heatmap.height = 7,
-  sigplot = FALSE,
+  sigplot = TRUE,
   sigplot.adj.p = FALSE,
   sigplot.alpha = 0.05,
   sigplot.sigLabelColour = "red",
@@ -56,11 +57,11 @@ rbio_unsupervised_corcluster(object, ...)
 
 \item{genes}{Annotation data frame for genes/probes/genomic features.}
 
-\item{input.sample_groups}{Input \code{factor} object for sample groupping labels.}
+\item{input.sample_groups}{Input \code{factor} object for sample grouping labels.}
 
 \item{n}{Number of genes/probes/genomic features to be clustered, numeric input or \code{"all"}. Default is \code{"all"}.}
 
-\item{cor.method}{The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.}
+\item{cor.method}{The correlation method, options are "spearman" and "pearson". Default is \code{"pearson"}.}
 
 \item{rm.control}{Whether to remove control probes (Agilent platform) or not. Default is \code{TRUE}.}
 
@@ -72,11 +73,13 @@ rbio_unsupervised_corcluster(object, ...)
 
 \item{input.genes_annotation.gene_id.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.}
 
+\item{export.name}{File name for the export \code{pdf} plot file.}
+
+\item{hclust.heatmap}{Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.}
+
 \item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
 
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
-
-\item{export.name}{File name for the export \code{pdf} plot file.}
 
 \item{heatmap.axis.label}{Whether to display label for both x- and y- axes. Default is \code{FALSE}.}
 
@@ -84,7 +87,7 @@ rbio_unsupervised_corcluster(object, ...)
 
 \item{heatmap.height}{Height for correlation heatmap. Unit is \code{inch}. Default is \code{7}.}
 
-\item{sigplot}{If to show significance plot. Default is \code{FALSE}.}
+\item{sigplot}{If to show significance plot. Default is \code{TRUE}.}
 
 \item{sigplot.adj.p}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
 
@@ -108,7 +111,7 @@ rbio_unsupervised_corcluster(object, ...)
 
 \item{sigplot.height}{Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 PDF files for unsupervised correlation heatmap and if set, significance plot. Also CSV files containing unsupervised correlation analysis results.

@@ -574,7 +574,7 @@ rbio_kmeans <- function(x, export.name = NULL,
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
 #' @param plot.yTickLblSize Y-axis tick label size. Default is \code{10}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
-#' @return Outputs a PCA object, a boxplot (proportion of variance) and a biplot from PCA analysis. The format is \code{pdf}.
+#' @return A PCA/scatter plot from K means cluster. The format is \code{pdf}.
 #' @details To have proper labels for the cluser plot using \code{rbio_kmeans_plot()}, make sure to have rownames set for \code{x}.
 #'
 #'          The function automatically detects if PCA is needed:

@@ -44,6 +44,7 @@ Update log
       - New clustering funcions:
         - Bayesian biclustering function rbio_bbc()
         - Propotionality correlation function added for CLR transformed RNAseq data
+        - rbio_kmeans() supports methods for rbioarray_de and rbioseq_de objects for automatic K means cluster
       
       - Updates to microarray functions
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
@@ -61,13 +62,7 @@ Update log
     (ADDED)
       - New clustering funcions:
         - K means clustering function rbio_kmeans()
-          - K means clustering plotting function with PCA functionality rbio_kmeans_plot() added 
-
-      - Update(s) to cluster functions
-        - rbio_unsupervised_corcluster() and rbio_supervised_corcluster() now export correlation results into the environment
-          - With suffixes of "_cor_unsuper" and "_cor_sig", respectively
-        - Manual page updated for rbio_unsupervised_corcluster(), along with its S3 class types
-        - Manual page updated for rbio_unsupervised_hcluster(), along with its S3 class types
+          - K means clustering plotting function with PCA functionality rbio_kmeans_plot() added
       
       - Updates(s) to GSA functions
         - A bug fixed for rbioGS_sp2hsaEntrez() due to updated BiomaRt package
@@ -83,6 +78,11 @@ Update log
         - rbio_unsupervised_hcluster() now outputs a list object including distance and cluster results (for network analysis)
         - rbio_unsupervised_hcluster() now accepts user defined export name prefix via the export.name argument
         - rbio_supervised_hcluster() now outputs a list object including distance and cluster ressults (for network analysis)
+        - rbio_unsupervised_corcluster() and rbio_supervised_corcluster() now export correlation results into the environment
+          - With suffixes of "_cor_unsuper" and "_cor_sig", respectively
+        - rbio_unsupervised_corcluster() and rbio_supervised_corcluster()'s heatmap and sigplot now can be turned off
+        - Manual page updated for rbio_unsupervised_corcluster(), along with its S3 class types
+        - Manual page updated for rbio_unsupervised_hcluster(), along with its S3 class types
       
       - Other fixes
         - Typos fixed for manual pages
