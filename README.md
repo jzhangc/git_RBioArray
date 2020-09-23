@@ -80,7 +80,7 @@ Update log
         - rbio_supervised_hcluster() now outputs a list object including distance and cluster ressults (for network analysis)
         - rbio_unsupervised_corcluster() and rbio_supervised_corcluster() now export correlation results into the environment
           - With suffixes of "_cor_unsuper" and "_cor_sig", respectively
-        - rbio_unsupervised_corcluster() and rbio_supervised_corcluster()'s heatmap and sigplot now can be turned off
+        - rbio_unsupervised_corcluster() and rbio_supervised_corcluster()'s heatmap (and sigplot) now can be turned off
         - Manual page updated for rbio_unsupervised_corcluster(), along with its S3 class types
         - Manual page updated for rbio_unsupervised_hcluster(), along with its S3 class types
       
