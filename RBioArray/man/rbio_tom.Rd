@@ -16,12 +16,12 @@ rbio_tom(
   h = NULL,
   plot.dendro = TRUE,
   plot.export.name = NULL,
-  plot.margins = c(2, 2, 2, 2),
+  plot.margins = c(0.5, 0.5, 0.5, 0.5),
   plot.title = NULL,
   plot.title.size = 16,
   plot.dendroline.size = 0.8,
   plot.dendrolabel = TRUE,
-  plot.dendrolabel.size = 0.8,
+  plot.dendrolabel.size = 1.5,
   plot.dendrolabel.space = 2,
   plot.ylabel.size = 1.5,
   plot.width = 150,
@@ -50,7 +50,7 @@ rbio_tom(
 
 \item{plot.export.name}{String. The prefix for the exported figure file name. Default is \code{NULL}.}
 
-\item{plot.margins}{Numeric vector. Plot margins, unit is "cm". Default is \code{c(2, 2, 2, 2)}.}
+\item{plot.margins}{Numeric vector. Plot margins, unit is "cm", order: \code{t, r, b, l}. Default is \code{c(2, 2, 2, 2)}.}
 
 \item{plot.title}{Boolean. The dendrogram plot title. Default is \code{NULL}.}
 
@@ -83,11 +83,14 @@ TBC
 }
 \examples{
 \dontrun{
-         tom_g <- rbio_tom(mtx = t(mtx), k = 10, plot.export.name = "ex1",
-                           plot.dendroline.size = 0.5,
-                           plot.dendrolabel = TRUE,
-                           plot.dendrolabel.size = 0.2,
-                           plot.dendrolabelspace = 2,
-                           plot.ylabel.size = 1.5)
+           tom_g <- rbio_tom(mtx = t(mtx), k = 10,
+                             plot.export.name = "ex1",
+                             plot.title = "TOM distance hcluster", plot.title.size = 16,
+                             plot.margins = c(0.5 ,0.5, 0.5, 0.5),
+                             plot.dendroline.size = 0.2,
+                             plot.dendrolabel = TRUE,
+                             plot.dendrolabel.size = 1.5,
+                             plot.dendrolabel.space = 2,
+                             plot.ylabel.size = 1.5)
 }
 }

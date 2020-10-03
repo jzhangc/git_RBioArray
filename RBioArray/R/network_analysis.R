@@ -11,7 +11,7 @@
 #' @param h Numeric. TBC.
 #' @param plot.dendro Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.
 #' @param plot.export.name String. The prefix for the exported figure file name. Default is \code{NULL}.
-#' @param plot.margins Numeric vector. Plot margins, unit is "cm". Default is \code{c(2, 2, 2, 2)}.
+#' @param plot.margins Numeric vector. Plot margins, unit is "cm", order: \code{t, r, b, l}. Default is \code{c(2, 2, 2, 2)}.
 #' @param plot.title Boolean. The dendrogram plot title. Default is \code{NULL}.
 #' @param plot.title.size Numeric. The dendrogram plot title size. Default is \code{16}.
 #' @param plot.dendroline.size Numeric. TBC.
@@ -28,18 +28,21 @@
 #'         TBC
 #' @import ggplot2
 #' @import igraph
-#' @importFrom grid grid.draw unit
+#' @importFrom grid grid.draw
 #' @importFrom stringr str_pad
 #' @importFrom WGCNA TOMdist
 #' @importFrom dendextend color_branches as.ggdend
 #' @examples
 #' \dontrun{
-#'          tom_g <- rbio_tom(mtx = t(mtx), k = 10, plot.export.name = "ex1",
-#'                            plot.dendroline.size = 0.5,
-#'                            plot.dendrolabel = TRUE,
-#'                            plot.dendrolabel.size = 0.2,
-#'                            plot.dendrolabelspace = 2,
-#'                            plot.ylabel.size = 1.5)
+#'            tom_g <- rbio_tom(mtx = t(mtx), k = 10,
+#'                              plot.export.name = "ex1",
+#'                              plot.title = "TOM distance hcluster", plot.title.size = 16,
+#'                              plot.margins = c(0.5 ,0.5, 0.5, 0.5),
+#'                              plot.dendroline.size = 0.2,
+#'                              plot.dendrolabel = TRUE,
+#'                              plot.dendrolabel.size = 1.5,
+#'                              plot.dendrolabel.space = 2,
+#'                              plot.ylabel.size = 1.5)
 #' }
 #' @export
 rbio_tom <- function(mtx,
@@ -49,10 +52,11 @@ rbio_tom <- function(mtx,
                      k = NULL, h = NULL,
                      plot.dendro = TRUE,
                      plot.export.name = NULL,
-                     plot.margins = c(2, 2, 2, 2),
+                     plot.margins = c(0.5, 0.5, 0.5, 0.5),
                      plot.title = NULL, plot.title.size = 16,
                      plot.dendroline.size = 0.8,
-                     plot.dendrolabel = TRUE, plot.dendrolabel.size = 0.8,
+                     plot.dendrolabel = TRUE,
+                     plot.dendrolabel.size = 1.5,
                      plot.dendrolabel.space = 2,
                      plot.ylabel.size = 1.5,
                      plot.width = 150, plot.height = 150,
@@ -72,8 +76,7 @@ rbio_tom <- function(mtx,
 
   # - TOM calculation -
   adjmat <- cor(mtx)^power
-  # tom_dist <- TOMdist(adjmat, TOMType = tom_type, ...)  # matrix, array class, here we use dist
-  tom_dist <- TOMdist(adjmat, TOMType = tom_type)  # matrix, array class, here we use dist
+  tom_dist <- TOMdist(adjmat, TOMType = tom_type, ...)  # matrix, array class, here we use dist
   rownames(tom_dist) <- rownames(adjmat)
   colnames(tom_dist) <- colnames(adjmat)
 
@@ -94,24 +97,34 @@ rbio_tom <- function(mtx,
     dendr <- color_branches(tom_dist_hclust, h = h, k = k)
     dendr <- as.ggdend(dendr)
     dendr$segments$lwd <- rep(plot.dendroline.size, times = length(dendr$segments$lwd))  # dendro line size
-    dendr$labels$cex <- rep(plot.dendrolabel.size, times = length(dendr$labels$cex))  # label sizes
-    dendr$labels$label <- foreach(i = as.character(dendr$labels$label), .combine = "c", .export = "dendr") %do% str_pad(i, width = nchar(i) + plot.dendrolabel.space, side = "right", pad = " ")
-    dendr$labels$label <- factor(dendr$labels$label, levels = unique(dendr$labels$label))
-
-    if (plot.dendrolabel) {
-      p <- ggplot(dendr)
-    } else {
-      p <- ggplot(dendr, labels = FALSE)
-    }
+    # dendr$labels$cex <- rep(plot.dendrolabel.size, times = length(dendr$labels$cex))  # label sizes
+    # dendr$labels$label <- foreach(i = as.character(dendr$labels$label), .combine = "c", .export = "dendr") %do% str_pad(i, width = nchar(i) + plot.dendrolabel.space, side = "right", pad = " ")
+    # dendr$labels$label <- factor(dendr$labels$label, levels = unique(dendr$labels$label))
+    # if (plot.dendrolabel) {
+    #   p <- ggplot(dendr)
+    # } else {
+    #   p <- ggplot(dendr, labels = FALSE)
+    # }
+    p <- ggplot(dendr, labels = FALSE)
     p <- p +
       ggtitle(plot.title) +
-      scale_x_continuous(labels = NULL, position = "top") +
+      scale_y_continuous(expand = c(0, 0)) +
       theme_minimal() +
       theme(plot.title = element_text(hjust = 0.5, size = plot.title.size, face = "bold"),
             axis.title = element_blank(),
             axis.text.y = element_text(size = rel(plot.ylabel.size)),
             panel.grid = element_blank(),
-            plot.margin = unit(plot.margins, "cm"))
+            plot.margin = margin(t = plot.margins[1], r = plot.margins[2],
+                                 b = plot.margins[3], l = plot.margins[4],
+                                 unit = "cm"))
+    if (plot.dendrolabel){
+      p <- p +
+        scale_x_continuous(breaks = seq(length(dendr$labels$label)), labels = dendr$labels$label) +
+        theme(axis.text.x = element_text(hjust = 1, vjust = 0.5, angle = 90, size = plot.dendrolabel.size, margin = margin(t = plot.dendrolabel.space)))
+    } else {
+      p <- p +
+        scale_x_continuous(breaks = NULL, labels = NULL)
+    }
     ggsave(filename = paste0(plot.export.name, "_tom_hclust.pdf"), plot = p,
            width = plot.width, height = plot.height, units = "mm", dpi = 600)
     grid.draw(p)
@@ -125,7 +138,7 @@ rbio_tom <- function(mtx,
     weighted = TRUE,
     diag = diag
   ),
-  hclust = tom_dist_hclust,
+  tom_dist_hclust = tom_dist_hclust,
   k = k,
   h = h,
   tom_membership = tom_membership)
