@@ -1,6 +1,6 @@
 #' @title rbio_tom
 #'
-#' @description A plot function for K means cluster results, with or without PCA.
+#' @description TOM (topological overlap measure) analysis.
 #' @param mtx Matrix. TBC.
 #' @param diag Boolean. TBC.
 #' @param power Integer. TBC.
