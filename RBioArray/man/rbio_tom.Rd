@@ -16,6 +16,7 @@ rbio_tom(
   h = NULL,
   plot.dendro = TRUE,
   plot.export.name = NULL,
+  plot.margins = c(2, 2, 2, 2),
   plot.title = NULL,
   plot.title.size = 16,
   plot.dendroline.size = 0.8,
@@ -48,6 +49,8 @@ rbio_tom(
 \item{plot.dendro}{Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.}
 
 \item{plot.export.name}{String. The prefix for the exported figure file name. Default is \code{NULL}.}
+
+\item{plot.margins}{Numeric vector. Plot margins, unit is "cm". Default is \code{c(2, 2, 2, 2)}.}
 
 \item{plot.title}{Boolean. The dendrogram plot title. Default is \code{NULL}.}
 

@@ -11,6 +11,7 @@
 #' @param h Numeric. TBC.
 #' @param plot.dendro Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.
 #' @param plot.export.name String. The prefix for the exported figure file name. Default is \code{NULL}.
+#' @param plot.margins Numeric vector. Plot margins, unit is "cm". Default is \code{c(2, 2, 2, 2)}.
 #' @param plot.title Boolean. The dendrogram plot title. Default is \code{NULL}.
 #' @param plot.title.size Numeric. The dendrogram plot title size. Default is \code{16}.
 #' @param plot.dendroline.size Numeric. TBC.
@@ -27,7 +28,7 @@
 #'         TBC
 #' @import ggplot2
 #' @import igraph
-#' @importFrom grid grid.draw
+#' @importFrom grid grid.draw unit
 #' @importFrom stringr str_pad
 #' @importFrom WGCNA TOMdist
 #' @importFrom dendextend color_branches as.ggdend
@@ -48,6 +49,7 @@ rbio_tom <- function(mtx,
                      k = NULL, h = NULL,
                      plot.dendro = TRUE,
                      plot.export.name = NULL,
+                     plot.margins = c(2, 2, 2, 2),
                      plot.title = NULL, plot.title.size = 16,
                      plot.dendroline.size = 0.8,
                      plot.dendrolabel = TRUE, plot.dendrolabel.size = 0.8,
@@ -81,7 +83,7 @@ rbio_tom <- function(mtx,
 
   # tom_membership and tom similarity
   tom_membership <- cutree(tom_dist_hclust, h = h, k = k)
-  membersihp_for_dendro <- tom_membership
+  # ßmembersihp_for_dendro <- tom_membership
   tom_similarity <- 1 - tom_dist # edge always uses similarity
   g_adjmat <- as.matrix(tom_similarity)
   g_adjmat <- g_adjmat[order(tom_membership), order(tom_membership)]  # reorder it
@@ -108,7 +110,8 @@ rbio_tom <- function(mtx,
       theme(plot.title = element_text(hjust = 0.5, size = plot.title.size, face = "bold"),
             axis.title = element_blank(),
             axis.text.y = element_text(size = rel(plot.ylabel.size)),
-            panel.grid = element_blank())
+            panel.grid = element_blank(),
+            plot.margin = unit(plot.margins, "cm"))
     ggsave(filename = paste0(plot.export.name, "_tom_hclust.pdf"), plot = p,
            width = plot.width, height = plot.height, units = "mm", dpi = 600)
     grid.draw(p)
