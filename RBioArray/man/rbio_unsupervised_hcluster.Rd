@@ -101,14 +101,6 @@ rbio_unsupervised_hcluster(object, ...)
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 }
 \value{
-A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
-
-A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
-
-A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
-
-A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
-
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.
         The function also outputs the column and row distance and cluster objects in a list.
 }

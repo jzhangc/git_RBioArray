@@ -28,8 +28,8 @@ rbio_kmeans(
   plot.yTickItalic = FALSE,
   plot.yTickBold = FALSE,
   plot.rightsideY = TRUE,
-  plot.Width = 170,
-  plot.Height = 150,
+  plot.width = 170,
+  plot.height = 150,
   verbose = TRUE
 )
 }
@@ -80,9 +80,9 @@ rbio_kmeans(
 
 \item{plot.rightsideY}{If to display the right side y-axis. Default is \code{TRUE}.}
 
-\item{plot.Width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
+\item{plot.width}{The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.}
 
-\item{plot.Height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
+\item{plot.height}{The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }

@@ -63,6 +63,10 @@ Update log
       - New clustering funcions:
         - K means clustering function rbio_kmeans()
           - K means clustering plotting function with PCA functionality rbio_kmeans_plot() added
+
+      - New network analysis functions:
+        - rbio_tom_graph() added for TOM (topological overlap measure) analysis
+          - The output "rbio_tom_graph" object contains an igraph object for network visualization
       
       - Updates(s) to GSA functions
         - A bug fixed for rbioGS_sp2hsaEntrez() due to updated BiomaRt package

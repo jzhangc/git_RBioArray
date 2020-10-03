@@ -11,7 +11,7 @@ rbio_kmeans_plot(
   centerScale = TRUE,
   ...,
   plot.comps = c(1:2),
-  plot.Title = NULL,
+  plot.title = NULL,
   plot.sampleLabel.type = "none",
   plot.sampleLabelSize = 2,
   plot.sampleLabel.padding = 0.5,
@@ -29,8 +29,8 @@ rbio_kmeans_plot(
   plot.mtx.stripLblSize = 10,
   plot.rightsideY = FALSE,
   plot.fontType = "sans",
-  plot.Width = 170,
-  plot.Height = 150,
+  plot.width = 170,
+  plot.height = 150,
   verbose = TRUE
 )
 }
@@ -45,7 +45,7 @@ rbio_kmeans_plot(
 
 \item{plot.comps}{Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.}
 
-\item{plot.Title}{The biplot title. Default is \code{NULL}.}
+\item{plot.title}{The biplot title. Default is \code{NULL}.}
 
 \item{plot.sampleLabel.type}{If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.}
 
@@ -77,9 +77,9 @@ rbio_kmeans_plot(
 
 \item{plot.fontType}{Font for the figure texts. Default is \code{"sans"}.}
 
-\item{plot.Width}{The biplot width. Default is \code{170}.}
+\item{plot.width}{The biplot width. Default is \code{170}.}
 
-\item{plot.Height}{The biplot height. Default is \code{150}.}
+\item{plot.height}{The biplot height. Default is \code{150}.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
@@ -107,6 +107,6 @@ rbio_kmeans_plot(km.object = ex1_kmeans, x = mtx, export.name = "ex1",
                  plot.sampleLabel.type = "direct",
                  plot.SymbolSize = 4,
                  plot.xLabelSize = 14, plot.yLabelSize = 14,
-                 plot.Width = 140, plot.Height = 150)
+                 plot.width = 140, plot.height = 150)
 }
 }

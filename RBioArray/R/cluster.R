@@ -6,7 +6,6 @@
 #' @details Since the function depends on the \code{heatmap.2} function from \code{gplots} package,
 #'          arguments can be passed directly, as seen in the examples below.
 #'
-#' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @examples
 #'
 #' \dontrun{
@@ -44,7 +43,6 @@ rbio_unsupervised_hcluster <- function(object, ...){
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$target}.
 #' @param export.name Optional user defined export name prefix. Default is \code{NULL}.
 #' @param ... Additional arguments for the default method.
-#' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @export
 rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.name = NULL, export.name = NULL, ...){
   ## check arguments
@@ -83,7 +81,6 @@ rbio_unsupervised_hcluster.rbioarray_flist <- function(object, sample_id.var.nam
 #' @param sample_id.var.name Variable name for sample identification, typically from \code{object$targets}.
 #' @param export.name Optional user defined export name prefix. Default is \code{NULL}.
 #' @param ... Additional arguments for the default method.
-#' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @export
 rbio_unsupervised_hcluster.rbioarray_de <- function(object, sample_id.var.name = NULL, export.name = NULL, ...){
   ## check arguments
@@ -124,7 +121,6 @@ rbio_unsupervised_hcluster.rbioarray_de <- function(object, sample_id.var.name =
 #' @param ... Additional arguments for the default method.
 #' @details The function uses filtered count data, as opposed to normalized data.
 #'          Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
-#' @return A pdf file containing a heatmap for unsupervised hierarchical clustering analysis.
 #' @export
 rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = NULL, export.name = NULL, ...){
   ## check arguments
@@ -455,8 +451,8 @@ rbio_supervised_hcluster <- function(object,
 #' @param plot.yTickItalic Set y axis tick font to italic. Default is \code{FALSE}.
 #' @param plot.yTickBold Set y axis tick font to bold. Default is \code{FALSE}.
 #' @param plot.rightsideY If to display the right side y-axis. Default is \code{TRUE}.
-#' @param plot.Width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
-#' @param plot.Height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
+#' @param plot.width The width of the plot (unit: mm). Default is 170. Default will fit most of the cases.
+#' @param plot.height The height of the plot (unit: mm). Default is 150. Default will fit most of the cases.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details The function does three things:
 #'          1. Conducts a silhouette score test to find out the optimal K (number of clusters)
@@ -493,7 +489,7 @@ rbio_kmeans <- function(x, export.name = NULL,
                         plot.yLabel = "Average silhouette score", plot.yLabelSize = 10, plot.yTickLblSize = 10, plot.yTickItalic = FALSE,
                         plot.yTickBold = FALSE,
                         plot.rightsideY = TRUE,
-                        plot.Width = 170, plot.Height = 150,
+                        plot.width = 170, plot.height = 150,
                         verbose = TRUE) {
   # -- argument check --
   if (!any(class(x) %in% c("matrix", "data.frame"))) stop("x needs to be a matrix or data frame.")
@@ -578,7 +574,7 @@ rbio_kmeans <- function(x, export.name = NULL,
   # add the right-side y axis
   pltgtb <- RBioplot::rightside_y(baseplt)   # add the right-side y axis
   ggsave(filename = paste0(export.name,".kmeans_silouette.pdf"), plot = pltgtb,
-         width = plot.Width, height = plot.Height, units = "mm",dpi = 600) # export the plot
+         width = plot.width, height = plot.height, units = "mm",dpi = 600) # export the plot
   grid.newpage()
   grid.draw(pltgtb)
 }
@@ -592,7 +588,7 @@ rbio_kmeans <- function(x, export.name = NULL,
 #' @param centerScale Boolean. If to center and scale the x data fro clustering. Default is \code{TRUE}.
 #' @param ... Additional arguments passed to \code{prcomp} function.
 #' @param plot.comps Integer or vector of integers. Index number(s) for principal component(s) to plot. Default is \code{c(1, 2)}.
-#' @param plot.Title The biplot title. Default is \code{NULL}.
+#' @param plot.title The biplot title. Default is \code{NULL}.
 #' @param plot.sampleLabel.type  If to show the sample labels on the graph. Options are \code{"none"}, \code{"direct"} and \code{"indirect"}. Default is \code{"none"}.
 #' @param plot.sampleLabelSize Only set when \code{biplot.sampleLabel.type} is not \code{"none"}, The size of the sample label. Default is \code{2}.
 #' @param plot.sampleLabel.padding Set only when \code{biplot.sampleLabel.type = "indirect"}, the padding between sample symbol and the label. Default is \code{0.5}.
@@ -606,8 +602,8 @@ rbio_kmeans <- function(x, export.name = NULL,
 #' @param plot.loadingplot.textsize The font size of the loading plot labels. Default is \code{3}.
 #' @param plot.mtx.densityplot If to display a density plot on the diagonal for the correlation scoreplot matrix. Default is \code{FALSE}.
 #' @param plot.mtx.stripLblSize The label font size for the correlation scoreplot matrix strips. Default is \code{10}.
-#' @param plot.Width The biplot width. Default is \code{170}.
-#' @param plot.Height The biplot height. Default is \code{150}.
+#' @param plot.width The biplot width. Default is \code{170}.
+#' @param plot.height The biplot height. Default is \code{150}.
 #' @param plot.rightsideY If to show the right side y-axis for both boxplot and biplot. For biplot, only applicable when the length of \code{comps} is less than 2, inclusive. Default is \code{FALSE}.
 #' @param plot.fontType Font for the figure texts. Default is \code{"sans"}.
 #' @param plot.xTickLblSize X-axis tick label size. Default is \code{10}.
@@ -631,14 +627,14 @@ rbio_kmeans <- function(x, export.name = NULL,
 #'                  plot.sampleLabel.type = "direct",
 #'                  plot.SymbolSize = 4,
 #'                  plot.xLabelSize = 14, plot.yLabelSize = 14,
-#'                  plot.Width = 140, plot.Height = 150)
+#'                  plot.width = 140, plot.height = 150)
 #' }
 #' @export
 rbio_kmeans_plot <- function(km.object,
                              x, export.name = NULL,
                              centerScale = TRUE,...,
                              plot.comps = c(1:2),
-                             plot.Title = NULL,
+                             plot.title = NULL,
                              plot.sampleLabel.type = "none", plot.sampleLabelSize = 2,
                              plot.sampleLabel.padding = 0.5,
                              plot.SymbolSize = 2,
@@ -649,7 +645,7 @@ rbio_kmeans_plot <- function(km.object,
                              plot.mtx.densityplot = FALSE, plot.mtx.stripLblSize = 10,
                              plot.rightsideY = FALSE,
                              plot.fontType = "sans",
-                             plot.Width = 170, plot.Height = 150,
+                             plot.width = 170, plot.height = 150,
                              verbose = TRUE){
   # -- check argument --
   if (!any(class(x) %in% c("matrix", "data.frame"))) stop("x needs to be a matrix or data frame.")
@@ -658,10 +654,16 @@ rbio_kmeans_plot <- function(km.object,
   } else {
     x <- x
   }
+  if (is.null(rownames(x))) {
+    if (verbose) cat("No rownames detected for X. Proceed with row numbers as rownames. \n")
+    rownames(x) <- seq(nrow(x))
+    }
   if (is.null(export.name)) {
     export.name <- deparse(substitute(x))
   }
   if (!any(class(km.object) %in% "kmeans")) stop("km.object needs to be a kmeans class.")
+  if (length(km.object$cluster) != nrow(x)) stop("km.object does not mean the data x. ")
+
   # cluster information
   clusters <- factor(km.object$cluster, levels = unique(km.object$cluster))
 
@@ -675,6 +677,7 @@ rbio_kmeans_plot <- function(km.object,
   if (verbose) cat("PCA:", pca_on, "\n")
   if (pca_on){
     PCA <- prcomp(x, scale. = centerScale, center = centerScale, ...)
+    # PCA <- prcomp(x, scale. = centerScale, center = centerScale)
     varpp_x <- 100 * summary(PCA)$importance[2, ] # extract and calculate the proportion of variance
     score_x <- data.frame(PCA$x[, plot.comps, drop = FALSE], check.names = FALSE) # extract rotated sample scores
     score_x$group <- clusters
@@ -721,7 +724,7 @@ rbio_kmeans_plot <- function(km.object,
       }
 
       biplt <- biplt +
-        ggtitle(plot.Title) +
+        ggtitle(plot.title) +
         ylab(pc_axis_lbl[1]) +
         theme_bw() +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
@@ -751,9 +754,9 @@ rbio_kmeans_plot <- function(km.object,
       } else if (plot.sampleLabel.type == "indirect"){
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
-          scale_shape_manual(values=1:nlevels(score_x$group))
-        geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
-                        show.legend = FALSE, size = plot.sampleLabelSize)
+          scale_shape_manual(values=1:nlevels(score_x$group)) +
+          geom_text_repel(aes(label = sample.label), point.padding = unit(plot.sampleLabel.padding, "lines"),
+                          show.legend = FALSE, size = plot.sampleLabelSize)
       } else {
         biplt <- biplt +
           geom_point(aes(shape = group, colour = group), size = plot.SymbolSize) +
@@ -761,7 +764,7 @@ rbio_kmeans_plot <- function(km.object,
       }
 
       biplt <- biplt +
-        ggtitle(plot.Title) +
+        ggtitle(plot.title) +
         xlab(pc_axis_lbl[1]) +
         ylab(pc_axis_lbl[2]) +
         theme_bw() +
@@ -832,7 +835,7 @@ rbio_kmeans_plot <- function(km.object,
                        diag = list(continuous = densityfunc),
                        legend = 2)
       biplt <- biplt +
-        ggtitle(plot.Title) +
+        ggtitle(plot.title) +
         theme(plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
               axis.title = element_text(face = "bold", family = plot.fontType),
               strip.background = element_blank(),  # no strip background colour
@@ -847,7 +850,7 @@ rbio_kmeans_plot <- function(km.object,
       # grid.newpage()
     }
     ggsave(filename = paste(export.name,".kmeans_cluster.pdf", sep = ""), plot = biplt,
-           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+           width = plot.width, height = plot.height, units = "mm",dpi = 600)
     if (verbose) cat("Done!\n") # final message
     grid.draw(biplt)
   } else {  # without PCA
@@ -879,7 +882,7 @@ rbio_kmeans_plot <- function(km.object,
       }
 
       biplt <- biplt +
-        ggtitle(plot.Title) +
+        ggtitle(plot.title) +
         ylab(pc_axis_lbl[1]) +
         theme_bw() +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
@@ -919,7 +922,7 @@ rbio_kmeans_plot <- function(km.object,
       }
 
       biplt <- biplt +
-        ggtitle(plot.Title) +
+        ggtitle(plot.title) +
         xlab(pc_axis_lbl[1]) +
         ylab(pc_axis_lbl[2]) +
         theme_bw() +
@@ -944,7 +947,7 @@ rbio_kmeans_plot <- function(km.object,
       }
     }
     ggsave(filename = paste(export.name,".kmeans_cluster.pdf", sep = ""), plot = biplt,
-           width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
+           width = plot.width, height = plot.height, units = "mm",dpi = 600)
     if (verbose) cat("Done!\n") # final message
     grid.draw(biplt)
   }
