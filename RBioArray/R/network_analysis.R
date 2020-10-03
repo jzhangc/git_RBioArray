@@ -26,8 +26,8 @@
 #' @details
 #'         TBC
 #' @import ggplot2
+#' @import igraph
 #' @importFrom grid grid.draw
-#' @importFrom RBioplot rightside_y
 #' @importFrom stringr str_pad
 #' @importFrom WGCNA TOMdist
 #' @importFrom dendextend color_branches as.ggdend
@@ -42,19 +42,19 @@
 #' }
 #' @export
 rbio_tom <- function(mtx,
-                           diag = FALSE,
-                           power = 6, tom_type = c("unsigned", "signed"), ...,
-                           hclust.method = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
-                           k = NULL, h = NULL,
-                           plot.dendro = TRUE,
-                           plot.export.name = NULL,
-                           plot.title = NULL, plot.title.size = 16,
-                           plot.dendroline.size = 0.8,
-                           plot.dendrolabel = TRUE, plot.dendrolabel.size = 0.8,
-                           plot.dendrolabel.space = 2,
-                           plot.ylabel.size = 1.5,
-                           plot.width = 150, plot.height = 150,
-                           verbose = TRUE) {
+                     diag = FALSE,
+                     power = 6, tom_type = c("unsigned", "signed"), ...,
+                     hclust.method = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
+                     k = NULL, h = NULL,
+                     plot.dendro = TRUE,
+                     plot.export.name = NULL,
+                     plot.title = NULL, plot.title.size = 16,
+                     plot.dendroline.size = 0.8,
+                     plot.dendrolabel = TRUE, plot.dendrolabel.size = 0.8,
+                     plot.dendrolabel.space = 2,
+                     plot.ylabel.size = 1.5,
+                     plot.width = 150, plot.height = 150,
+                     verbose = TRUE) {
   # - argument check -
   if (!any(class(mtx) %in% "matrix")) stop("mtx has to be a matrix.")
   if (is.null(rownames(mtx))) rownames(mtx) <- seq(nrow(mtx))
@@ -79,13 +79,13 @@ rbio_tom <- function(mtx,
   tom_dist <- as.dist(tom_dist)  # convert to an R distance object
   tom_dist_hclust <- hclust(tom_dist, method = hclust.method)
 
-  # membership and tom similarity
-  membership <- cutree(tom_dist_hclust, h = h, k = k)
-  membersihp_for_dendro <- membership
+  # tom_membership and tom similarity
+  tom_membership <- cutree(tom_dist_hclust, h = h, k = k)
+  membersihp_for_dendro <- tom_membership
   tom_similarity <- 1 - tom_dist # edge always uses similarity
   g_adjmat <- as.matrix(tom_similarity)
-  g_adjmat <- g_adjmat[order(membership), order(membership)]  # reorder it
-  membership <- membership[order(membership)] # update membership
+  g_adjmat <- g_adjmat[order(tom_membership), order(tom_membership)]  # reorder it
+  tom_membership <- tom_membership[order(tom_membership)] # update tom_membership
 
   if(plot.dendro) {
     if (verbose) cat("Saving hcluster dendrogram...")
@@ -125,7 +125,7 @@ rbio_tom <- function(mtx,
   hclust = tom_dist_hclust,
   k = k,
   h = h,
-  membership = membership)
+  tom_membership = tom_membership)
   class(out) <- "rbio_tom_graph"
   return(out)
 }
