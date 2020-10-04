@@ -76,7 +76,7 @@ rbio_tom(
 TBC
 }
 \description{
-A plot function for K means cluster results, with or without PCA.
+TOM (topological overlap measure) analysis.
 }
 \details{
 TBC

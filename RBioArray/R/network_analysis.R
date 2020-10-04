@@ -29,7 +29,6 @@
 #' @import ggplot2
 #' @import igraph
 #' @importFrom grid grid.draw
-#' @importFrom stringr str_pad
 #' @importFrom WGCNA TOMdist
 #' @importFrom dendextend color_branches as.ggdend
 #' @examples
@@ -144,4 +143,54 @@ rbio_tom <- function(mtx,
   tom_membership = tom_membership)
   class(out) <- "rbio_tom_graph"
   return(out)
+}
+
+
+#' @title circle_text_func
+#'
+#' @description Companion function for the network visualization function: used for displaying node labels around
+#'              the circular network figures.
+#' @param g igraph object. Input network object.
+#' @param circ_layout layout object. The circular layout object for \code{g}, usually derived from function \code{\link{igraph::layout.circle()}}.
+#' @param text.size numeric. The text size for the labels. Default is \code{0.8}.
+#' @param text.distance numeric. The distance multiplier between label and nodes. Default is \code{1.5}.
+#' @param text.colour string. Label colour. Default is \code{"black"}.
+#' @return Added text on the igraph plot.
+#' @examples
+#' \dontrun{
+#'      # plot the original circular plot
+#'      g_layout <- layout.circle(g)
+#'      plot(
+#'        g,
+#'        layout=g_layout,
+#'        edge.curved=TRUE,
+#'        vertex.size=vSizes,
+#'        vertex.label = NA,
+#'        vertex.label.dist=-1.5,
+#'        vertex.label.color="black",
+#'        vertex.label.cex=0.8,
+#'        asp=FALSE,
+#'        vertex.label.cex=0.6,
+#'        edge.width=edgeweights,
+#'        edge.arrow.mode=0,
+#'        main="")
+#'
+#'     # add labels to the plot
+#'      circle_text_func(g = g, circ_layout = g_layout)
+#' }
+#' @export
+circle_text_func <- function(g, circ_layout, text.size = 0.8, text.distance = 1.5, text.colour = "black"){
+  # - Apply labels manually -
+  # Specify x and y coordinates of labels, adjust outward as desired
+  x = circ_layout[,1]*text.distance
+  y = circ_layout[,2]*text.distance
+
+  # - create vector of angles for text based on number of nodes  -
+  # (flipping the orientation of the words half way around so none appear upside down)
+  angle = ifelse(atan(-(circ_layout[,1]/circ_layout[,2]))*(180/pi) < 0,  90 + atan(-(circ_layout[,1]/circ_layout[,2]))*(180/pi), 270 + atan(-circ_layout[,1]/circ_layout[,2])*(180/pi))
+
+  #Apply the text labels with a loop with angle as srt
+  for (i in 1:length(x)) {
+    text(x=x[i], y=y[i], labels=V(g)$name[i], adj = NULL, pos = NULL, cex = text.size, col = text.colour, srt = angle[i], xpd = T)
+  }
 }
