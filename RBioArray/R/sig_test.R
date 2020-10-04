@@ -1,9 +1,9 @@
 #' @title sig
 #'
 #' @description Significance test function
-#' @param object Object containing DE inforamtion. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.
+#' @param object Object containing DE information. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @return Signifiance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
+#' @return Significance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
 #'
 #'         The \code{sig} object contains the following items;
 #'
@@ -135,12 +135,12 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 #'
 #' @rdname sig
 #' @method sig default
-#' @param input.de.list  Input list cantaining DE dataframes for each comparison.
+#' @param input.de.list  Input list containing DE dataframes for each comparison.
 #' @param input.Fstats.matrix Input dataframe containing F stats.
-#' @param input.genes_annotation.control_type Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.
+#' @param input.genes_annotation.control_type Functional only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.
 #' @param input.fit Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object
 #' @param gene_symbol If to apply gene symbols in the plot and exported results. Default is \code{TRUE}.
-#' @param input.gene_symbol.var.name Input gene sysmbol variable name from the DE dataframes.
+#' @param input.gene_symbol.var.name Input gene symbol variable name from the DE dataframes.
 #' @param experiment Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".
 #' @param FC Threshold for fold change. Default is \code{1.5}.
 #' @param alpha Threshold for p values. Default is \code{0.05}.
@@ -148,12 +148,12 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 #' @param export.name Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.
 #' @param export.mode Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"} and \code{"sig"}. Default is \code{"all"}. See details.
 #' @param plot If to plot volcano plot. Default is \code{TRUE}.
-#' @param plot.top.gene If to display the top gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
+#' @param plot.top.gene If to display the top gene identification, i.e., probe name or gene name, on the plot. Default is \code{FALSE}.
 #' @param plot.top.gene.n When \code{plot.top.gene = TRUE}, to set how many genes to display. Default is \code{5}.
 #' @param plot.top.gene.padding When \code{plot.top.gene = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
 #' @param plot.Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param plot.xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
-#' @param plot.yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
+#' @param plot.yLabel Y-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
 #' @param plot.symbolSize Size of the symbol. Default is \code{2}.
 #' @param plot.sigColour Colour of the significant genes or probes. Default is \code{"red"}.
 #' @param plot.nonsigColour Colour of the non-significant genes or probes. Default is \code{"gray"}.
@@ -162,14 +162,14 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 #' @param plot.Width The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plot.Height The height of the figure for the final output figure file. Default is \code{150}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details Explanation for \code{export.mode} options:
 #'
 #'         \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
 #'
 #'         \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
 #'
-#'         \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
+#'         \code{sig}: export only the significant changes. Gene symbol settings depends on argument \code{gene_symbol}.
 #'
 #'         \code{p_val.correction.method}
 #'

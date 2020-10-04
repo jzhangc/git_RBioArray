@@ -46,6 +46,9 @@ Update log
         - Propotionality correlation function added for CLR transformed RNAseq data
         - rbio_kmeans() supports methods for rbioarray_de and rbioseq_de objects for automatic K means cluster
       
+      - New network analysis functions:
+        - SNF network and network fusion functions
+      
       - Updates to microarray functions
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
         - Relevant functions updated with continuous outcome support
@@ -67,6 +70,7 @@ Update log
       - New network analysis functions:
         - rbio_tom_graph() added for TOM (topological overlap measure) analysis
           - The output "rbio_tom_graph" object contains an igraph object for network visualization
+        - rbio_network() added for network constuction and visualization
       
       - Updates(s) to GSA functions
         - A bug fixed for rbioGS_sp2hsaEntrez() due to updated BiomaRt package

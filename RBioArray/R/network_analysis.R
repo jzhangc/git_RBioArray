@@ -194,3 +194,247 @@ circle_text_func <- function(g, circ_layout, text.size = 0.8, text.distance = 1.
     text(x=x[i], y=y[i], labels=V(g)$name[i], adj = NULL, pos = NULL, cex = text.size, col = text.colour, srt = angle[i], xpd = T)
   }
 }
+
+
+#' @title rbio_network
+#'
+#' @description (UNDER CONSTRUCTION: NOT FUNCTIONAL) Network construction and visualization function
+#' @param object object containing a membership and igraph information.
+#' @param ... Additional arguments for corresponding S3 class methods.
+#' @return TBC
+#' @examples
+#'
+#' \dontrun{
+#' TBC
+#' }
+#'
+#' @export
+rbio_network <- function(object, ...){
+  # - check object -
+  if (!any(class(object) %in% c("rbio_tom_graph"))) stop("object needs to be in correct classes, e.g. rbio_tom_graph.")
+
+  # - use method -
+  UseMethod("rbio_network", object)
+}
+
+
+#' @title rbio_network.rbio_tom_graph
+#' @rdname rbio_network
+#' @method rbio_network rbio_tom_graph
+#' @param object An \code{rbio_tom_graph} object.
+#' @param export.name string. Optional prefix for export file name. Default is \code{NULL}.
+#' @param ... Additional arguments for corresponding S3 class methods.
+#' @return TBC
+#' @examples
+#'
+#' \dontrun{
+#' TBC
+#' }
+#'
+#' @export
+rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
+  # - argument check -
+  if (is.null(export.name)){
+    export.name = deparse(substitute(object))
+  }
+
+  # - feed to the default method -
+  # <TBC: under construction>
+  rbio_netork.default(export.name = export.name, ...)
+}
+
+
+#' @title rbio_network.default
+#'
+#' @rdname rbio_network
+#' @method rbio_network default
+#' @param g  Input list cantaining DE dataframes for each comparison.
+#' @param membership Input dataframe containing F stats.
+#' @param export.name string. Optional prefix for export file name. Default is \code{NULL}.
+#' @param colour_scheme string. The colour set from \code{\link{RColorBrewer}} function. Default is \code{"Accent"}.
+#' @param initial_colour_number int. The number of starting colours to use for the clusters. See details. Default is \code{8}.
+#' @param plot.title. string. <TBC: under construction>
+#' @param plot.margins. numeric four-vector. <TBC: under construction>
+#' @param plot.highlight_membership boolean. <TBC: under construction>
+#' @param plot.layout_type string. <TBC: under construction>
+#' @param plot.vertex.size numeric. <TBC: under construction>
+#' @param plot.vertex.sizeScale numeric two-vector. <TBC: under construction>
+#' @param plot.vertex.label.size numeric. <TBC: under construction>
+#' @param plot.vertex.label.colour string vector. <TBC: under construction>
+#' @param plot.vertex.label.dist numeric. <TBC: under construction>
+#' @param plot.edge.filter numeric: 0~1. <TBC: under construction>
+#' @param plot.edge.weightScale numeric two-vector. <TBC: under construction>
+#' @param plot.edge.arrow.mode boolean. <TBC: under construction>
+#' @param plot.edge.curved boolean. <TBC: under construction>
+#' @param plot.ellipse boolean. <TBC: under construction>
+#' @param plot.width numeric. <TBC: under construction>
+#' @param plot.height numeric. <TBC: under construction>
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @details <TBC: under construction>
+#'          For \code{colour_scheme}, use the following as a guide (name, maximum number of colours):
+#'            Accent	8
+#'            Dark2	8
+#'            Paired	12
+#'            Pastel1	9
+#'            Pastel2	8
+#'            Set1	9
+#'            Set2	8
+#'           Set3	12
+#'          NOTE: The maximum number of colours does not reflect the number of clusters - it is simply what \code{\link{RColorBrewer}} requires.
+#'                The recommended approach is to set \code{n_colours} to this number.
+#' @import ggplot2
+#' @import igraph
+#' @importFrom grid grid.newpage grid.draw grid.grab
+#' @importFrom RColorBrewer brewer.pal
+#'
+#' @export
+rbio_network.default <- function(g,
+                                 membership = NULL,
+                                 export.name = NULL,
+                                 colour_scheme = c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"),
+                                 initial_colour_number = 8,
+                                 plot.title = "Network",
+                                 plot.margins = c(5, 5, 5, 5),
+                                 plot.highlight_membership = TRUE,
+                                 plot.layout_type = "circular",
+                                 plot.vertex.size = NA,
+                                 plot.vertex.sizeScale = c(1, 4),
+                                 plot.vertex.label.size,
+                                 plot.vertex.label.color = "black",
+                                 plot.vertex.label.dist = 0,
+                                 plot.edge.filter = 0.95,
+                                 plot.edge.weightScale = c(1, 4),
+                                 plot.edge.arrow.mode = FALSE,
+                                 plot.edge.curved = FALSE,
+                                 plot.ellipse = FALSE,
+                                 plot.height, plot.width,
+                                 random_state = 1, verbose = TRUE){
+  # - set random state -
+  set.seed(random_state)
+
+  # - argument check -
+  if (any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
+  colour_scheme <- match.arg(colour_scheme, c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"))
+
+  # - inital vertex -
+  if (!is.null(membership) %% length(membership) != length(V(g))){
+    warning("membership length not equal to number of vertecies. \n")
+  } else {
+    n_colours <- length(unique(membership))
+    get_colour_func <- colorRampPalette(brewer.pal(8, "Accent"))
+    colours <- get_colour_func(n_colours)
+    membership_colours <- vector(length = length(membership))
+    for (i in 1:n_colours){
+      membership_colours[membership == i] <- colours[i]
+    }
+    names(membership_colours) <- names(membership)
+    V(g)$color <- membership_colours
+    V(g)$membership <- as_membership(membership)
+  }
+
+  # - edge -
+  # filter edges
+  g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = edge.filter)])
+  edge_df <- as.data.frame(get.edgelist(g))
+
+  if (!is.null(membership)) {
+    if (plot.highlight_membership) {
+      E(g)$color <- foreach(i = seq(nrow(edge_df)), .combine = "c") %do% {
+        if (membership[edge_df[i, 1]] == membership[edge_df[i, 2]]){
+          colours[membership[edge_df[i, 1]]]
+        } else {
+          "#EBECF0"
+        }
+      }
+    } else {
+      E(g)$color <- foreach(i = seq(nrow(edge_df)), .combine = "c") %do% {
+        if (membership[edge_df[i, 1]] == membership[edge_df[i, 2]]){
+          scales::alpha(colours[membership[edge_df[i, 1]]], alpha=0.2)
+          # colours[membership[edge_df[i, 1]]]
+        } else {
+          # scales::alpha("#EBECF0", alpha=0.2)
+          "#3C3C3C"
+        }
+      }
+    }
+  }
+
+  # - filter vertices -
+  g <- delete.vertices(g, degree(g) == 0)
+
+  # - edge weight rescaling -
+  edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weightScale)
+
+  # - plot and export -
+  if (plot.ellipse) {
+    g.cluster <- make_clusters(g, membership = V(g)$membership)
+    if (layout_type == "circular") {
+      g_layout <- layout.circle(g)
+      par(mar=plot.margins)
+      plot(
+        g.cluster, g,
+        layout = g_layout,
+        vertex.size = plot.vertex.size,
+        vertex.label = NA,
+        asp = FALSE,
+        edge.width = edgeweights,
+        edge.arrow.mode = plot.edge.arrow.mode,
+        edge.curved = plot.edge.curved,
+        main = plot.title)
+      circle_text_func(g = g, circ_layout = g_layout, text.colour = vertex.label.color)
+    } else {
+      par(mar=plot.margins)
+      plot(
+        g.cluster, g,
+        layout=g_layout,
+        vertex.size = plot.vertex.size,
+        vertex.label.dist = plot.vertex.label.dist,
+        vertex.label.color = plot.vertex.label.color,
+        vertex.label.cex = plot.vertex.label.size,
+        asp = FALSE,
+        edge.curved = plot.edge.curved,
+        edge.width = edgeweights,
+        edge.arrow.mode = plot.edge.arrow.mode,
+        main = plot.title)
+    }
+  } else {
+    if (layout_type == "circular") {
+      g_layout <- layout.circle(g)
+      par(mar=plot.margins)
+      plot(
+        g,
+        layout = g_layout,
+        vertex.size = vSizes,
+        vertex.label = NA,
+        asp = FALSE,
+        edge.width = edgeweights,
+        edge.arrow.mode = plot.edge.arrow.mode,
+        edge.curved = plot.edge.curved,
+        main = plot.title)
+      circle_text_func(g = g, circ_layout = g_layout, text.colour = vertex.label.color)
+    } else {
+      par(mar=plot.margins)
+      plot(
+        g,
+        layout = g_layout,
+        vertex.size = plot.vertex.size,
+        vertex.label.dist = plot.vertex.label.dist,
+        vertex.label.color = plot.vertex.label.color,
+        vertex.label.cex = plot.vertex.label.size,
+        asp = FALSE,
+        edge.width = edgeweights,
+        edge.arrow.mode = plot.edge.arrow.mode,
+        edge.curved = plot.edge.curved,
+        main=plot.title)
+    }
+  }
+  grid.echo()
+  p <- grid.grab()
+  ggsave(filename = paste0(export.name, "_network.pdf"), plot = p,
+         width = plot.width, height = plot.height, units = "mm", dpi = 600)
+}
