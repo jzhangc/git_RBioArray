@@ -315,6 +315,9 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'            Set3	12
 #'          NOTE: The maximum number of colours does not reflect the number of clusters - it is simply what \code{\link{RColorBrewer}} requires.
 #'                The recommended approach is to set \code{initial_colour_number} to this number.
+#'
+#'          The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
+#'          b: mar[1], l: mar[2], t: mar[3], r: mar[4]
 #' @import ggplot2
 #' @import igraph
 #' @importFrom scales alpha rescale
