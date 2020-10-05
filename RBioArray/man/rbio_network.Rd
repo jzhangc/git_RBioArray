@@ -12,27 +12,26 @@ rbio_network(object, ...)
 
 \method{rbio_network}{default}(
   g,
-  membership = NULL,
   export.name = NULL,
-  colour_scheme = c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2",
-    "Set3"),
-  initial_colour_number = 8,
+  membership = NULL,
+  colour_scheme = "set1",
   plot.title = "Network",
   plot.margins = c(5, 5, 5, 5),
   plot.highlight_membership = TRUE,
   plot.layout_type = "circular",
-  plot.vertex.size = NA,
-  plot.vertex.sizeScale = c(1, 4),
+  plot.vertex.size = NULL,
+  plot.vertex.size.scale = c(1, 4),
   plot.vertex.label.size,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
   plot.edge.filter = 0.95,
-  plot.edge.weightScale = c(1, 4),
+  plot.edge.weight = NULL,
+  plot.edge.weight.scale = c(1, 4),
   plot.edge.arrow.mode = FALSE,
   plot.edge.curved = FALSE,
   plot.ellipse = FALSE,
-  plot.height,
-  plot.width,
+  plot.height = 150,
+  plot.width = 150,
   random_state = 1,
   verbose = TRUE
 )
@@ -50,15 +49,13 @@ rbio_network(object, ...)
 
 \item{colour_scheme}{string. The colour set from \code{\link{RColorBrewer}} function. Default is \code{"Accent"}.}
 
-\item{initial_colour_number}{int. The number of starting colours to use for the clusters. See details. Default is \code{8}.}
-
 \item{plot.highlight_membership}{boolean. <TBC: under construction>}
 
 \item{plot.layout_type}{string. <TBC: under construction>}
 
-\item{plot.vertex.size}{numeric. <TBC: under construction>}
+\item{plot.vertex.size}{numeric vector. <TBC: under construction>}
 
-\item{plot.vertex.sizeScale}{numeric two-vector. <TBC: under construction>}
+\item{plot.vertex.size.scale}{numeric two-vector. <TBC: under construction>}
 
 \item{plot.vertex.label.size}{numeric. <TBC: under construction>}
 
@@ -66,7 +63,9 @@ rbio_network(object, ...)
 
 \item{plot.edge.filter}{numeric: 0~1. <TBC: under construction>}
 
-\item{plot.edge.weightScale}{numeric two-vector. <TBC: under construction>}
+\item{plot.edge.weight}{numeric vector. <TBC: under construction>}
+
+\item{plot.edge.weight.scale}{numeric two-vector. <TBC: under construction>}
 
 \item{plot.edge.arrow.mode}{boolean. <TBC: under construction>}
 
@@ -78,7 +77,11 @@ rbio_network(object, ...)
 
 \item{plot.width}{numeric. <TBC: under construction>}
 
+\item{random_state}{integer. <TBC: under construction>}
+
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+
+\item{initial_colour_number}{int. The number of starting colours to use for the clusters. See details. Default is \code{8}.}
 
 \item{plot.title.}{string. <TBC: under construction>}
 

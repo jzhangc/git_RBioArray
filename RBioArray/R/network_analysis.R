@@ -84,7 +84,7 @@ rbio_tom <- function(mtx,
   tom_dist_hclust <- hclust(tom_dist, method = hclust.method)
 
   # tom_membership and tom similarity
-  tom_membership <- cutree(tom_dist_hclust, h = h, k = k)
+  tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
   # ßmembersihp_for_dendro <- tom_membership
   tom_similarity <- 1 - tom_dist # edge always uses similarity
   g_adjmat <- as.matrix(tom_similarity)
@@ -240,7 +240,9 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 
   # - feed to the default method -
   # <TBC: under construction>
-  rbio_netork.default(export.name = export.name, ...)
+  rbio_netork.default(g = object$g,
+                      memebership = object$tom_membership,
+                      export.name = export.name, ...)
 }
 
 
@@ -257,18 +259,20 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.margins. numeric four-vector. <TBC: under construction>
 #' @param plot.highlight_membership boolean. <TBC: under construction>
 #' @param plot.layout_type string. <TBC: under construction>
-#' @param plot.vertex.size numeric. <TBC: under construction>
-#' @param plot.vertex.sizeScale numeric two-vector. <TBC: under construction>
+#' @param plot.vertex.size numeric vector. <TBC: under construction>
+#' @param plot.vertex.size.scale numeric two-vector. <TBC: under construction>
 #' @param plot.vertex.label.size numeric. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
 #' @param plot.vertex.label.dist numeric. <TBC: under construction>
 #' @param plot.edge.filter numeric: 0~1. <TBC: under construction>
-#' @param plot.edge.weightScale numeric two-vector. <TBC: under construction>
+#' @param plot.edge.weight numeric vector. <TBC: under construction>
+#' @param plot.edge.weight.scale numeric two-vector. <TBC: under construction>
 #' @param plot.edge.arrow.mode boolean. <TBC: under construction>
 #' @param plot.edge.curved boolean. <TBC: under construction>
 #' @param plot.ellipse boolean. <TBC: under construction>
 #' @param plot.width numeric. <TBC: under construction>
 #' @param plot.height numeric. <TBC: under construction>
+#' @param random_state integer. <TBC: under construction>
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details <TBC: under construction>
 #'          For \code{colour_scheme}, use the following as a guide (name, maximum number of colours):
@@ -284,42 +288,41 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'                The recommended approach is to set \code{n_colours} to this number.
 #' @import ggplot2
 #' @import igraph
+#' @importFrom scales alpha rescale
 #' @importFrom grid grid.newpage grid.draw grid.grab
 #' @importFrom RColorBrewer brewer.pal
 #'
 #' @export
 rbio_network.default <- function(g,
-                                 membership = NULL,
                                  export.name = NULL,
-                                 colour_scheme = c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"),
-                                 initial_colour_number = 8,
+                                 membership = NULL, colour_scheme = "set1",
                                  plot.title = "Network",
                                  plot.margins = c(5, 5, 5, 5),
                                  plot.highlight_membership = TRUE,
                                  plot.layout_type = "circular",
-                                 plot.vertex.size = NA,
-                                 plot.vertex.sizeScale = c(1, 4),
+                                 plot.vertex.size = NULL,
+                                 plot.vertex.size.scale = c(1, 4),
                                  plot.vertex.label.size,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
                                  plot.edge.filter = 0.95,
-                                 plot.edge.weightScale = c(1, 4),
+                                 plot.edge.weight = NULL,
+                                 plot.edge.weight.scale = c(1, 4),
                                  plot.edge.arrow.mode = FALSE,
                                  plot.edge.curved = FALSE,
                                  plot.ellipse = FALSE,
-                                 plot.height, plot.width,
+                                 plot.height = 150, plot.width = 150,
                                  random_state = 1, verbose = TRUE){
   # - set random state -
   set.seed(random_state)
 
   # - argument check -
-  if (any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
+  if (!any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
   if (is.null(export.name)){
     export.name <- deparse(substitute(object))
   } else {
     export.name <- export.name
   }
-  colour_scheme <- match.arg(colour_scheme, c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"))
 
   # - inital vertex -
   if (!is.null(membership) %% length(membership) != length(V(g))){
@@ -339,7 +342,7 @@ rbio_network.default <- function(g,
 
   # - edge -
   # filter edges
-  g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = edge.filter)])
+  g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = plot.edge.filter)])
   edge_df <- as.data.frame(get.edgelist(g))
 
   if (!is.null(membership)) {
@@ -354,7 +357,7 @@ rbio_network.default <- function(g,
     } else {
       E(g)$color <- foreach(i = seq(nrow(edge_df)), .combine = "c") %do% {
         if (membership[edge_df[i, 1]] == membership[edge_df[i, 2]]){
-          scales::alpha(colours[membership[edge_df[i, 1]]], alpha=0.2)
+          scales::alpha(colours[membership[edge_df[i, 1]]], alpha = 0.2)
           # colours[membership[edge_df[i, 1]]]
         } else {
           # scales::alpha("#EBECF0", alpha=0.2)
@@ -367,8 +370,21 @@ rbio_network.default <- function(g,
   # - filter vertices -
   g <- delete.vertices(g, degree(g) == 0)
 
-  # - edge weight rescaling -
+  # - edge weight and vertices size rescaling -
+  # edge size
   edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weightScale)
+  if (is.null(plot.edge.weight)) {
+    edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
+  } else {
+    edgeweights <- scales::rescale(plot.edge.weight, to = plot.edge.weight.scale)
+  }
+
+  # vertex size
+  if (is.null(plot.vertex.size)) {
+    vSizes <- scales::rescale(degree(g), to = plot.vertex.size.scale)
+  } else {
+    vSizes <- scales::rescale(plot.vertex.size, to = plot.vertex.size.scale)
+  }
 
   # - plot and export -
   if (plot.ellipse) {
@@ -379,7 +395,7 @@ rbio_network.default <- function(g,
       plot(
         g.cluster, g,
         layout = g_layout,
-        vertex.size = plot.vertex.size,
+        vertex.size = vSizes,
         vertex.label = NA,
         asp = FALSE,
         edge.width = edgeweights,
@@ -392,7 +408,7 @@ rbio_network.default <- function(g,
       plot(
         g.cluster, g,
         layout=g_layout,
-        vertex.size = plot.vertex.size,
+        vertex.size = vSizes,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
@@ -422,7 +438,7 @@ rbio_network.default <- function(g,
       plot(
         g,
         layout = g_layout,
-        vertex.size = plot.vertex.size,
+        vertex.size = vSizes,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
