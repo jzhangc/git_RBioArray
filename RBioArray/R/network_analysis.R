@@ -261,7 +261,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.layout_type string. <TBC: under construction>
 #' @param plot.vertex.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.size.scale numeric two-vector. <TBC: under construction>
-#' @param plot.vertex.label.size numeric. <TBC: under construction>
+#' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
 #' @param plot.vertex.label.dist numeric. <TBC: under construction>
 #' @param plot.edge.filter numeric: 0~1. <TBC: under construction>
