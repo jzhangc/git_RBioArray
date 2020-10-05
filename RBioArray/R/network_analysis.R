@@ -372,7 +372,6 @@ rbio_network.default <- function(g,
 
   # - edge weight and vertices size rescaling -
   # edge size
-  edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weightScale)
   if (is.null(plot.edge.weight)) {
     edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
   } else {
