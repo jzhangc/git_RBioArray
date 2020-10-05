@@ -302,7 +302,7 @@ rbio_network.default <- function(g,
                                  plot.layout_type = "circular",
                                  plot.vertex.size = NULL,
                                  plot.vertex.size.scale = c(1, 4),
-                                 plot.vertex.label.size,
+                                 plot.vertex.label.size = NULL,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
                                  plot.edge.filter = 0.95,
@@ -372,6 +372,7 @@ rbio_network.default <- function(g,
 
   # - edge weight and vertices size rescaling -
   # edge size
+  edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weightScale)
   if (is.null(plot.edge.weight)) {
     edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
   } else {
@@ -383,6 +384,13 @@ rbio_network.default <- function(g,
     vSizes <- scales::rescale(degree(g), to = plot.vertex.size.scale)
   } else {
     vSizes <- scales::rescale(plot.vertex.size, to = plot.vertex.size.scale)
+  }
+
+  # vertex label size
+  if (is.null(plot.vertex.label.size)) {
+    vLabelSize <- 2
+  } else {
+    vLabelSize <- plot.vertex.label.size
   }
 
   # - plot and export -
@@ -408,6 +416,7 @@ rbio_network.default <- function(g,
         g.cluster, g,
         layout=g_layout,
         vertex.size = vSizes,
+        vertex.label.cex = vLabelSize,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
@@ -438,6 +447,7 @@ rbio_network.default <- function(g,
         g,
         layout = g_layout,
         vertex.size = vSizes,
+        vertex.label.cex = vLabelSize,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
@@ -453,3 +463,4 @@ rbio_network.default <- function(g,
   ggsave(filename = paste0(export.name, "_network.pdf"), plot = p,
          width = plot.width, height = plot.height, units = "mm", dpi = 600)
 }
+
