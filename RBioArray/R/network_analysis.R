@@ -335,7 +335,7 @@ rbio_network.default <- function(g,
                                  plot.vertex.size = NULL,
                                  plot.vertex.size.scale = c(1, 4),
                                  plot.vertex.label = NULL,
-                                 plot.vertex.label.size = NULL,
+                                 plot.vertex.label.size = 0.5,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
                                  plot.edge.filter = 0.95,
@@ -350,7 +350,7 @@ rbio_network.default <- function(g,
   set.seed(random_state)
 
   # - argument check -
-  g_membership <- membership
+  g_membership <- g_membership
   colour_scheme <- match.arg(colour_scheme, c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"))
   if (!any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
   if (is.null(export.name)){
@@ -460,6 +460,7 @@ rbio_network.default <- function(g,
                        text.colour = vertex.label.color, text.distance = plot.vertex.label.dist,
                        family = plot.font.family)
     } else {
+      g_layout <- layout.fruchterman.reingold(g, weights=E(g)$weight)
       par(mar = plot.margins)
       plot(
         g.cluster, g,
