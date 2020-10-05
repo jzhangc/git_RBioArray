@@ -7,6 +7,7 @@
 circle_text_func(
   g,
   circ_layout,
+  text.label = NULL,
   text.size = 0.8,
   text.distance = 1.5,
   text.colour = "black"
@@ -17,7 +18,9 @@ circle_text_func(
 
 \item{circ_layout}{layout object. The circular layout object for \code{g}, usually derived from function \code{\link{igraph::layout.circle()}}.}
 
-\item{text.size}{numeric. The text size for the labels. Default is \code{0.8}.}
+\item{text.label}{string vector. TBC}
+
+\item{text.size}{numeric or numeric vector. The text size for the labels. Default is \code{0.8}.}
 
 \item{text.distance}{numeric. The distance multiplier between label and nodes. Default is \code{1.5}.}
 

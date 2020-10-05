@@ -21,7 +21,7 @@ rbio_network(object, ...)
   plot.layout_type = "circular",
   plot.vertex.size = NULL,
   plot.vertex.size.scale = c(1, 4),
-  plot.vertex.label.size,
+  plot.vertex.label.size = NULL,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
   plot.edge.filter = 0.95,
@@ -57,7 +57,7 @@ rbio_network(object, ...)
 
 \item{plot.vertex.size.scale}{numeric two-vector. <TBC: under construction>}
 
-\item{plot.vertex.label.size}{numeric. <TBC: under construction>}
+\item{plot.vertex.label.size}{numeric vector. <TBC: under construction>}
 
 \item{plot.vertex.label.dist}{numeric. <TBC: under construction>}
 

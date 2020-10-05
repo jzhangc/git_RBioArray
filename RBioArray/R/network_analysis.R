@@ -75,7 +75,7 @@ rbio_tom <- function(mtx,
 
   # - TOM calculation -
   adjmat <- cor(mtx)^power
-  tom_dist <- TOMdist(adjmat, TOMType = tom_type, ...)  # matrix, array class, here we use dist
+  tom_dist <- TOMdist(adjmat, TOMType = tom_type, verbose = verbose, ...)  # matrix, array class, here we use dist
   rownames(tom_dist) <- rownames(adjmat)
   colnames(tom_dist) <- colnames(adjmat)
 
@@ -152,10 +152,14 @@ rbio_tom <- function(mtx,
 #'              the circular network figures.
 #' @param g igraph object. Input network object.
 #' @param circ_layout layout object. The circular layout object for \code{g}, usually derived from function \code{\link{igraph::layout.circle()}}.
-#' @param text.size numeric. The text size for the labels. Default is \code{0.8}.
+#' @param text.label string vector. TBC
+#' @param text.size numeric or numeric vector. The text size for the labels. Default is \code{0.8}.
 #' @param text.distance numeric. The distance multiplier between label and nodes. Default is \code{1.5}.
 #' @param text.colour string. Label colour. Default is \code{"black"}.
 #' @return Added text on the igraph plot.
+#' @detals
+#'         The \code{text.size} argument also accepts a vector of sizes with a length equal to the number of vertices.
+#'         When different unequal length is detect, the function uses the first number for a universal text size.
 #' @examples
 #' \dontrun{
 #'      # plot the original circular plot
@@ -179,7 +183,31 @@ rbio_tom <- function(mtx,
 #'      circle_text_func(g = g, circ_layout = g_layout)
 #' }
 #' @export
-circle_text_func <- function(g, circ_layout, text.size = 0.8, text.distance = 1.5, text.colour = "black"){
+circle_text_func <- function(g, circ_layout,
+                             text.label = NULL,
+                             text.size = 0.8, text.distance = 1.5, text.colour = "black"){
+  # - argument check -
+  if (!any(class(g) %in% "igraph")) stop("g needs to be an igraph object.")
+
+  # - text label and size processing -
+  if (is.null(text.label)) { # text labels
+    tLabels <- V(g)$name
+  } else if (length(text.label) != length(V(g))) {
+    warning("text labels not equal length with the verticee, proceeding with the internal vertex names.\n")
+    tLabels <- V(g)$name
+  } else {
+    tLabels <- text.label
+  }
+
+  if (length(text.size) == 1) {  # text sizes
+    tSize <- rep(text.size, times = length(V(g)$names))
+  } else if (length(text.size) != length(V(g)$names)) {
+    warning("text size not equal length with the verticee, proceeding with the first number for text size.\n")
+    tSize <- rep(text.size[1], times = length(V(g)$names))
+  } else {
+      tSize <- text.size
+  }
+
   # - Apply labels manually -
   # Specify x and y coordinates of labels, adjust outward as desired
   x = circ_layout[,1]*text.distance
@@ -191,7 +219,7 @@ circle_text_func <- function(g, circ_layout, text.size = 0.8, text.distance = 1.
 
   #Apply the text labels with a loop with angle as srt
   for (i in 1:length(x)) {
-    text(x=x[i], y=y[i], labels=V(g)$name[i], adj = NULL, pos = NULL, cex = text.size, col = text.colour, srt = angle[i], xpd = T)
+    text(x=x[i], y=y[i], labels=V(g)$name[i], adj = NULL, pos = NULL, cex = tSize[i], col = text.colour, srt = angle[i], xpd = T)
   }
 }
 
@@ -285,7 +313,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'            Set2	8
 #'           Set3	12
 #'          NOTE: The maximum number of colours does not reflect the number of clusters - it is simply what \code{\link{RColorBrewer}} requires.
-#'                The recommended approach is to set \code{n_colours} to this number.
+#'                The recommended approach is to set \code{initial_colour_number} to this number.
 #' @import ggplot2
 #' @import igraph
 #' @importFrom scales alpha rescale
@@ -295,13 +323,16 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @export
 rbio_network.default <- function(g,
                                  export.name = NULL,
-                                 membership = NULL, colour_scheme = "set1",
+                                 membership = NULL,
+                                 colour_scheme = c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"),
+                                 initial_colour_number = 8,
                                  plot.title = "Network",
                                  plot.margins = c(5, 5, 5, 5),
                                  plot.highlight_membership = TRUE,
                                  plot.layout_type = "circular",
                                  plot.vertex.size = NULL,
                                  plot.vertex.size.scale = c(1, 4),
+                                 plot.vertex.label = NULL,
                                  plot.vertex.label.size = NULL,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
@@ -317,6 +348,7 @@ rbio_network.default <- function(g,
   set.seed(random_state)
 
   # - argument check -
+  colour_scheme <- match.arg(colour_scheme, c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"))
   if (!any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
   if (is.null(export.name)){
     export.name <- deparse(substitute(object))
@@ -324,12 +356,12 @@ rbio_network.default <- function(g,
     export.name <- export.name
   }
 
-  # - inital vertex -
+  # - initial vertices -
   if (!is.null(membership) %% length(membership) != length(V(g))){
     warning("membership length not equal to number of vertecies. \n")
   } else {
     n_colours <- length(unique(membership))
-    get_colour_func <- colorRampPalette(brewer.pal(8, "Accent"))
+    get_colour_func <- colorRampPalette(brewer.pal(initial_colour_number, colour_scheme))
     colours <- get_colour_func(n_colours)
     membership_colours <- vector(length = length(membership))
     for (i in 1:n_colours){
@@ -351,7 +383,8 @@ rbio_network.default <- function(g,
         if (membership[edge_df[i, 1]] == membership[edge_df[i, 2]]){
           colours[membership[edge_df[i, 1]]]
         } else {
-          "#EBECF0"
+          scales::alpha("#EBECF0", alpha = 0.5)
+          # "#EBECF0"
         }
       }
     } else {
@@ -372,7 +405,6 @@ rbio_network.default <- function(g,
 
   # - edge weight and vertices size rescaling -
   # edge size
-  edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weightScale)
   if (is.null(plot.edge.weight)) {
     edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
   } else {
@@ -386,6 +418,16 @@ rbio_network.default <- function(g,
     vSizes <- scales::rescale(plot.vertex.size, to = plot.vertex.size.scale)
   }
 
+  # vetex labels
+  if (is.null(plot.vertex.label)) { # text labels
+    vLabel <- V(g)$name
+  } else if (length(text.labels) != length(V(g))) {
+    warning("text labels not equal length with the verticee, proceeding with the internal vertex names.\n")
+    vLabel <- V(g)$name
+  } else {
+    vLabel <- text.labels
+  }
+
   # vertex label size
   if (is.null(plot.vertex.label.size)) {
     vLabelSize <- 2
@@ -394,6 +436,7 @@ rbio_network.default <- function(g,
   }
 
   # - plot and export -
+  grid.newpage()
   if (plot.ellipse) {
     g.cluster <- make_clusters(g, membership = V(g)$membership)
     if (layout_type == "circular") {
@@ -409,13 +452,17 @@ rbio_network.default <- function(g,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
         main = plot.title)
-      circle_text_func(g = g, circ_layout = g_layout, text.colour = vertex.label.color)
+      circle_text_func(g = g, circ_layout = g_layout,
+                       text.label = vLabel,
+                       text.size = plot.vertex.label.size,
+                       text.colour = vertex.label.color, text.distance = plot.vertex.label.dist)
     } else {
-      par(mar=plot.margins)
+      par(mar = plot.margins)
       plot(
         g.cluster, g,
-        layout=g_layout,
+        layout = g_layout,
         vertex.size = vSizes,
+        vertex.label = vLabel,
         vertex.label.cex = vLabelSize,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
@@ -427,9 +474,9 @@ rbio_network.default <- function(g,
         main = plot.title)
     }
   } else {
-    if (layout_type == "circular") {
+    if (plot.layout_type == "circular") {
       g_layout <- layout.circle(g)
-      par(mar=plot.margins)
+      par(mar = plot.margins)
       plot(
         g,
         layout = g_layout,
@@ -440,13 +487,17 @@ rbio_network.default <- function(g,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
         main = plot.title)
-      circle_text_func(g = g, circ_layout = g_layout, text.colour = vertex.label.color)
+      circle_text_func(g = g, circ_layout = g_layout,
+                       text.label = vLabel,
+                       text.size = plot.vertex.label.size,
+                       text.colour = plot.vertex.label.color, text.distance = 1.4)
     } else {
-      par(mar=plot.margins)
+      par(mar = plot.margins)
       plot(
         g,
         layout = g_layout,
         vertex.size = vSizes,
+        vertex.label = vLabel,
         vertex.label.cex = vLabelSize,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
@@ -463,4 +514,5 @@ rbio_network.default <- function(g,
   ggsave(filename = paste0(export.name, "_network.pdf"), plot = p,
          width = plot.width, height = plot.height, units = "mm", dpi = 600)
 }
+
 
