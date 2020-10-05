@@ -334,7 +334,7 @@ rbio_network.default <- function(g,
                                  plot.margins = c(5, 5, 5, 5),
                                  plot.font.family = "sans",
                                  plot.highlight_membership = TRUE,
-                                 plot.layout_type = "circular",
+                                 plot.layout_type = c("circular", "fr", "tree", "nicely", "sphere"),
                                  plot.vertex.size = NULL,
                                  plot.vertex.size.scale = c(1, 4),
                                  plot.vertex.label = NULL,
@@ -361,6 +361,7 @@ rbio_network.default <- function(g,
   } else {
     export.name <- export.name
   }
+  plot.layout_type <- match.arg(plot.layout_type, c("circular", "fr", "tree", "nicely", "sphere"))
 
   # - initial vertices -
   if (!is.null(g_membership) %% length(g_membership) != length(V(g))){
@@ -440,12 +441,24 @@ rbio_network.default <- function(g,
     vLabelSize <- plot.vertex.label.size
   }
 
+  # layout
+  if (plot.layout_type == "circular") {
+    g_layout <- layout_in_circle(g)
+  } else if (plot.layout_type == "fr") {
+    g_layout <- layout_with_fr(g, weights=E(g)$weight)
+  } else if (plot.layout_type == "nicely") {
+    g_layout <- layout_nicely(g)
+  } else if (plot.layout_type == "tree") {
+    g_layout <- layout_as_tree(g)
+  } else if (plot.layout_type == "sphere") {
+    g_layout <- layout_on_sphere(g)
+  }
+
   # - plot and export -
   grid.newpage()
   if (plot.ellipse) {
     g.cluster <- make_clusters(g, membership = V(g)$membership)
-    if (layout_type == "circular") {
-      g_layout <- layout.circle(g)
+    if (plot.layout_type == "circular") {
       par(mar=plot.margins)
       plot(
         g.cluster, g,
@@ -463,7 +476,7 @@ rbio_network.default <- function(g,
                        text.colour = vertex.label.color, text.distance = plot.vertex.label.dist,
                        family = plot.font.family)
     } else {
-      g_layout <- layout.fruchterman.reingold(g, weights=E(g)$weight)
+      g_layout <- layout_with_fr(g, weights=E(g)$weight)
       par(mar = plot.margins)
       plot(
         g.cluster, g,
@@ -483,7 +496,6 @@ rbio_network.default <- function(g,
     }
   } else {
     if (plot.layout_type == "circular") {
-      g_layout <- layout.circle(g)
       par(mar = plot.margins)
       plot(
         g,
@@ -501,7 +513,6 @@ rbio_network.default <- function(g,
                        text.colour = plot.vertex.label.color, text.distance = 1.21,
                        family = plot.font.family)
     } else {
-      g_layout <- layout.fruchterman.reingold(g, weights=E(g)$weight)
       par(mar = plot.margins)
       plot(
         g,
