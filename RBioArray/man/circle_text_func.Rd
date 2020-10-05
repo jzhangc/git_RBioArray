@@ -10,7 +10,8 @@ circle_text_func(
   text.label = NULL,
   text.size = 0.8,
   text.distance = 1.5,
-  text.colour = "black"
+  text.colour = "black",
+  ...
 )
 }
 \arguments{

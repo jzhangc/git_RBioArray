@@ -185,7 +185,7 @@ rbio_tom <- function(mtx,
 #' @export
 circle_text_func <- function(g, circ_layout,
                              text.label = NULL,
-                             text.size = 0.8, text.distance = 1.5, text.colour = "black"){
+                             text.size = 0.8, text.distance = 1.5, text.colour = "black", ...){
   # - argument check -
   if (!any(class(g) %in% "igraph")) stop("g needs to be an igraph object.")
 
@@ -200,8 +200,8 @@ circle_text_func <- function(g, circ_layout,
   }
 
   if (length(text.size) == 1) {  # text sizes
-    tSize <- rep(text.size, times = length(V(g)$names))
-  } else if (length(text.size) != length(V(g)$names)) {
+    tSize <- rep(text.size, times = length(V(g)$name))
+  } else if (length(text.size) != length(V(g)$name)) {
     warning("text size not equal length with the verticee, proceeding with the first number for text size.\n")
     tSize <- rep(text.size[1], times = length(V(g)$names))
   } else {
@@ -219,7 +219,7 @@ circle_text_func <- function(g, circ_layout,
 
   #Apply the text labels with a loop with angle as srt
   for (i in 1:length(x)) {
-    text(x=x[i], y=y[i], labels=V(g)$name[i], adj = NULL, pos = NULL, cex = tSize[i], col = text.colour, srt = angle[i], xpd = T)
+    text(x=x[i], y=y[i], labels=V(g)$name[i], adj = NULL, pos = NULL, cex = tSize[i], col = text.colour, srt = angle[i], xpd = T, ...)
   }
 }
 
@@ -285,6 +285,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param initial_colour_number int. The number of starting colours to use for the clusters. See details. Default is \code{8}.
 #' @param plot.title. string. <TBC: under construction>
 #' @param plot.margins. numeric four-vector. <TBC: under construction>
+#' @param plot.font.family string. The font family of the labels in the plot. Default is \code{"sans"}.
 #' @param plot.highlight_membership boolean. <TBC: under construction>
 #' @param plot.layout_type string. <TBC: under construction>
 #' @param plot.vertex.size numeric vector. <TBC: under construction>
@@ -311,7 +312,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'            Pastel2	8
 #'            Set1	9
 #'            Set2	8
-#'           Set3	12
+#'            Set3	12
 #'          NOTE: The maximum number of colours does not reflect the number of clusters - it is simply what \code{\link{RColorBrewer}} requires.
 #'                The recommended approach is to set \code{initial_colour_number} to this number.
 #' @import ggplot2
@@ -323,11 +324,12 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @export
 rbio_network.default <- function(g,
                                  export.name = NULL,
-                                 membership = NULL,
+                                 g_membership = NULL,
                                  colour_scheme = c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"),
                                  initial_colour_number = 8,
                                  plot.title = "Network",
                                  plot.margins = c(5, 5, 5, 5),
+                                 plot.font.family = "sans",
                                  plot.highlight_membership = TRUE,
                                  plot.layout_type = "circular",
                                  plot.vertex.size = NULL,
@@ -348,6 +350,7 @@ rbio_network.default <- function(g,
   set.seed(random_state)
 
   # - argument check -
+  g_membership <- membership
   colour_scheme <- match.arg(colour_scheme, c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"))
   if (!any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
   if (is.null(export.name)){
@@ -357,31 +360,30 @@ rbio_network.default <- function(g,
   }
 
   # - initial vertices -
-  if (!is.null(membership) %% length(membership) != length(V(g))){
+  if (!is.null(g_membership) %% length(g_membership) != length(V(g))){
     warning("membership length not equal to number of vertecies. \n")
   } else {
-    n_colours <- length(unique(membership))
+    n_colours <- length(unique(g_membership))
     get_colour_func <- colorRampPalette(brewer.pal(initial_colour_number, colour_scheme))
     colours <- get_colour_func(n_colours)
-    membership_colours <- vector(length = length(membership))
+    membership_colours <- vector(length = length(g_membership))
     for (i in 1:n_colours){
-      membership_colours[membership == i] <- colours[i]
+      membership_colours[g_membership == i] <- colours[i]
     }
-    names(membership_colours) <- names(membership)
+    names(membership_colours) <- names(g_membership)
     V(g)$color <- membership_colours
-    V(g)$membership <- as_membership(membership)
+    V(g)$membership <- as_membership(g_membership)
   }
 
   # - edge -
   # filter edges
   g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = plot.edge.filter)])
   edge_df <- as.data.frame(get.edgelist(g))
-
-  if (!is.null(membership)) {
+  if (!is.null(g_membership)) {
     if (plot.highlight_membership) {
       E(g)$color <- foreach(i = seq(nrow(edge_df)), .combine = "c") %do% {
-        if (membership[edge_df[i, 1]] == membership[edge_df[i, 2]]){
-          colours[membership[edge_df[i, 1]]]
+        if (g_membership[edge_df[i, 1]] == g_membership[edge_df[i, 2]]){
+          colours[g_membership[edge_df[i, 1]]]
         } else {
           scales::alpha("#EBECF0", alpha = 0.5)
           # "#EBECF0"
@@ -389,8 +391,8 @@ rbio_network.default <- function(g,
       }
     } else {
       E(g)$color <- foreach(i = seq(nrow(edge_df)), .combine = "c") %do% {
-        if (membership[edge_df[i, 1]] == membership[edge_df[i, 2]]){
-          scales::alpha(colours[membership[edge_df[i, 1]]], alpha = 0.2)
+        if (g_membership[edge_df[i, 1]] == g_membership[edge_df[i, 2]]){
+          scales::alpha(colours[g_membership[edge_df[i, 1]]], alpha = 0.2)
           # colours[membership[edge_df[i, 1]]]
         } else {
           # scales::alpha("#EBECF0", alpha=0.2)
@@ -455,7 +457,8 @@ rbio_network.default <- function(g,
       circle_text_func(g = g, circ_layout = g_layout,
                        text.label = vLabel,
                        text.size = plot.vertex.label.size,
-                       text.colour = vertex.label.color, text.distance = plot.vertex.label.dist)
+                       text.colour = vertex.label.color, text.distance = plot.vertex.label.dist,
+                       family = plot.font.family)
     } else {
       par(mar = plot.margins)
       plot(
@@ -463,6 +466,7 @@ rbio_network.default <- function(g,
         layout = g_layout,
         vertex.size = vSizes,
         vertex.label = vLabel,
+        vertex.label.family = plot.font.family,
         vertex.label.cex = vLabelSize,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
@@ -490,14 +494,17 @@ rbio_network.default <- function(g,
       circle_text_func(g = g, circ_layout = g_layout,
                        text.label = vLabel,
                        text.size = plot.vertex.label.size,
-                       text.colour = plot.vertex.label.color, text.distance = 1.4)
+                       text.colour = plot.vertex.label.color, text.distance = 1.21,
+                       family = plot.font.family)
     } else {
+      g_layout <- layout.fruchterman.reingold(g, weights=E(g)$weight)
       par(mar = plot.margins)
       plot(
         g,
         layout = g_layout,
         vertex.size = vSizes,
         vertex.label = vLabel,
+        vertex.label.family = plot.font.family,
         vertex.label.cex = vLabelSize,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
@@ -506,13 +513,11 @@ rbio_network.default <- function(g,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
-        main=plot.title)
+        main = plot.title)
     }
   }
   grid.echo()
   p <- grid.grab()
-  ggsave(filename = paste0(export.name, "_network.pdf"), plot = p,
+  ggsave(filename = paste0(export.name, "_network3.pdf"), plot = p,
          width = plot.width, height = plot.height, units = "mm", dpi = 600)
 }
-
-

@@ -13,14 +13,18 @@ rbio_network(object, ...)
 \method{rbio_network}{default}(
   g,
   export.name = NULL,
-  membership = NULL,
-  colour_scheme = "set1",
+  g_membership = NULL,
+  colour_scheme = c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2",
+    "Set3"),
+  initial_colour_number = 8,
   plot.title = "Network",
   plot.margins = c(5, 5, 5, 5),
+  plot.font.family = "sans",
   plot.highlight_membership = TRUE,
   plot.layout_type = "circular",
   plot.vertex.size = NULL,
   plot.vertex.size.scale = c(1, 4),
+  plot.vertex.label = NULL,
   plot.vertex.label.size = NULL,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
@@ -45,9 +49,11 @@ rbio_network(object, ...)
 
 \item{g}{Input list cantaining DE dataframes for each comparison.}
 
-\item{membership}{Input dataframe containing F stats.}
-
 \item{colour_scheme}{string. The colour set from \code{\link{RColorBrewer}} function. Default is \code{"Accent"}.}
+
+\item{initial_colour_number}{int. The number of starting colours to use for the clusters. See details. Default is \code{8}.}
+
+\item{plot.font.family}{string. The font family of the labels in the plot. Default is \code{"sans"}.}
 
 \item{plot.highlight_membership}{boolean. <TBC: under construction>}
 
@@ -81,7 +87,7 @@ rbio_network(object, ...)
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
-\item{initial_colour_number}{int. The number of starting colours to use for the clusters. See details. Default is \code{8}.}
+\item{membership}{Input dataframe containing F stats.}
 
 \item{plot.title.}{string. <TBC: under construction>}
 
@@ -107,9 +113,9 @@ TBC
            Pastel2	8
            Set1	9
            Set2	8
-          Set3	12
+           Set3	12
          NOTE: The maximum number of colours does not reflect the number of clusters - it is simply what \code{\link{RColorBrewer}} requires.
-               The recommended approach is to set \code{n_colours} to this number.
+               The recommended approach is to set \code{initial_colour_number} to this number.
 }
 \examples{
 
