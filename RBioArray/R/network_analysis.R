@@ -447,7 +447,6 @@ rbio_network.default <- function(g,
     }
   }
 
-
   # - plot and export -
   # edge weights
   edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
