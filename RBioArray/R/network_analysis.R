@@ -424,7 +424,7 @@ rbio_network.default <- function(g,
     vSizes <- scales::rescale(plot.vertex.size, to = plot.vertex.size.scale)
   }
 
-  # vetex labels
+  # vertex labels
   if (is.null(plot.vertex.label)) { # text labels
     vLabel <- V(g)$name
   } else if (length(text.labels) != length(V(g))) {

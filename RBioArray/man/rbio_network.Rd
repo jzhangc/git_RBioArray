@@ -49,6 +49,8 @@ rbio_network(object, ...)
 
 \item{g}{Input list cantaining DE dataframes for each comparison.}
 
+\item{g_membership}{Input dataframe containing F stats.}
+
 \item{colour_scheme}{string. The colour set from \code{\link{RColorBrewer}} function. Default is \code{"Accent"}.}
 
 \item{initial_colour_number}{int. The number of starting colours to use for the clusters. See details. Default is \code{8}.}
@@ -86,8 +88,6 @@ rbio_network(object, ...)
 \item{random_state}{integer. <TBC: under construction>}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
-
-\item{membership}{Input dataframe containing F stats.}
 
 \item{plot.title.}{string. <TBC: under construction>}
 
