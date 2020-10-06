@@ -21,11 +21,11 @@ rbio_network(object, ...)
   plot.margins = c(5, 5, 5, 5),
   plot.font.family = "sans",
   plot.highlight_membership = TRUE,
-  plot.layout_type = "circular",
+  plot.layout_type = c("circular", "fr", "tree", "nicely", "sphere"),
   plot.vertex.size = NULL,
   plot.vertex.size.scale = c(1, 4),
   plot.vertex.label = NULL,
-  plot.vertex.label.size = NULL,
+  plot.vertex.label.size = 0.5,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
   plot.edge.filter = 0.95,
@@ -116,6 +116,9 @@ TBC
            Set3	12
          NOTE: The maximum number of colours does not reflect the number of clusters - it is simply what \code{\link{RColorBrewer}} requires.
                The recommended approach is to set \code{initial_colour_number} to this number.
+
+         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
+         b: mar[1], l: mar[2], t: mar[3], r: mar[4]
 }
 \examples{
 

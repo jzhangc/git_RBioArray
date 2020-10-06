@@ -268,7 +268,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 
   # - feed to the default method -
   # <TBC: under construction>
-  rbio_netork.default(g = object$g,
+  rbio_network.default(g = object$g,
                       memebership = object$tom_membership,
                       export.name = export.name, ...)
 }
