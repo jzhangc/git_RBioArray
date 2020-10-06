@@ -205,7 +205,7 @@ circle_text_func <- function(g, circ_layout,
     warning("text size not equal length with the verticee, proceeding with the first number for text size.\n")
     tSize <- rep(text.size[1], times = length(V(g)$names))
   } else {
-      tSize <- text.size
+    tSize <- text.size
   }
 
   # - Apply labels manually -
@@ -363,7 +363,7 @@ rbio_network.default <- function(g,
   }
   plot.layout_type <- match.arg(plot.layout_type, c("circular", "fr", "tree", "nicely", "sphere"))
 
-  # - initial vertices -
+  # - initial network  -
   if (!is.null(g_membership) %% length(g_membership) != length(V(g))){
     warning("membership length not equal to number of vertecies. \n")
   } else {
@@ -379,8 +379,46 @@ rbio_network.default <- function(g,
     V(g)$membership <- as_membership(g_membership)
   }
 
-  # - edge -
-  # filter edges
+  # - edge weight and vertices size rescaling -
+  # edge size
+  if (is.null(plot.edge.weight)) {
+    edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
+  } else if (length(plot.edge.weight) != length(E(g)$weight)) {
+    warning("edge weight vector not equal length with the edges, proceeding with the internal edge weights.\n")
+    edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
+  } else {
+    edgeweights <- scales::rescale(plot.edge.weight, to = plot.edge.weight.scale)
+  }
+
+  # vertex size
+  if (is.null(plot.vertex.size)) {
+    vSizes <- scales::rescale(degree(g), to = plot.vertex.size.scale)
+  } else if (length(plot.vertex.size) != length(V(g))) {
+    warning("vertex size vector not equal length with the vertices, proceeding with the degree centrality.\n")
+    vSizes <- scales::rescale(degree(g), to = plot.vertex.size.scale)
+  } else {
+    vSizes <- scales::rescale(plot.vertex.size, to = plot.vertex.size.scale)
+  }
+
+  # vertex labels
+  if (is.null(plot.vertex.label)) { # text labels
+    vLabel <- V(g)$name
+  } else if (length(text.labels) != length(V(g))) {
+    warning("text labels not equal length with the vertices, proceeding with the internal vertex names.\n")
+    vLabel <- V(g)$name
+  } else {
+    vLabel <- text.labels
+  }
+
+  # vertex label size
+  if (length(plot.vertex.label.size) == 1) {
+    vLabelSize <- plot.vertex.label.size
+  } else if (length(plot.vertex.label.size) != length(V(g))) {
+    warning("vertex label size vector not equal length with the vertices, proceeding with the first value in the vector.\n")
+    vLabelSize <- plot.vertex.label.size[1]
+  }
+
+  # - filter edges -
   g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = plot.edge.filter)])
   edge_df <- as.data.frame(get.edgelist(g))
   if (!is.null(g_membership)) {
@@ -409,38 +447,7 @@ rbio_network.default <- function(g,
   # - filter vertices -
   g <- delete.vertices(g, degree(g) == 0)
 
-  # - edge weight and vertices size rescaling -
-  # edge size
-  if (is.null(plot.edge.weight)) {
-    edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
-  } else {
-    edgeweights <- scales::rescale(plot.edge.weight, to = plot.edge.weight.scale)
-  }
-
-  # vertex size
-  if (is.null(plot.vertex.size)) {
-    vSizes <- scales::rescale(degree(g), to = plot.vertex.size.scale)
-  } else {
-    vSizes <- scales::rescale(plot.vertex.size, to = plot.vertex.size.scale)
-  }
-
-  # vertex labels
-  if (is.null(plot.vertex.label)) { # text labels
-    vLabel <- V(g)$name
-  } else if (length(text.labels) != length(V(g))) {
-    warning("text labels not equal length with the verticee, proceeding with the internal vertex names.\n")
-    vLabel <- V(g)$name
-  } else {
-    vLabel <- text.labels
-  }
-
-  # vertex label size
-  if (is.null(plot.vertex.label.size)) {
-    vLabelSize <- 2
-  } else {
-    vLabelSize <- plot.vertex.label.size
-  }
-
+  # - plot and export -
   # layout
   if (plot.layout_type == "circular") {
     g_layout <- layout_in_circle(g)
@@ -454,7 +461,7 @@ rbio_network.default <- function(g,
     g_layout <- layout_on_sphere(g)
   }
 
-  # - plot and export -
+  # plot and export
   grid.newpage()
   if (plot.ellipse) {
     g.cluster <- make_clusters(g, membership = V(g)$membership)
