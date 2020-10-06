@@ -68,7 +68,7 @@ Update log
           - K means clustering plotting function with PCA functionality rbio_kmeans_plot() added
 
       - New network analysis functions:
-        - rbio_tom_graph() added for TOM (topological overlap measure) analysis
+        - rbio_tom() added for TOM (topological overlap measure) analysis
           - The output "rbio_tom_graph" object contains an igraph object for network visualization
         - rbio_network() added for network constuction and visualization
       
