@@ -269,7 +269,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
   # - feed to the default method -
   # <TBC: under construction>
   rbio_network.default(g = object$g,
-                      g_memebership = object$tom_membership,
+                       g_membership = object$tom_membership,
                       export.name = export.name, ...)
 }
 
@@ -279,7 +279,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @rdname rbio_network
 #' @method rbio_network default
 #' @param g  Input list cantaining DE dataframes for each comparison.
-#' @param membership Input dataframe containing F stats.
+#' @param g_membership Input dataframe containing F stats.
 #' @param export.name string. Optional prefix for export file name. Default is \code{NULL}.
 #' @param colour_scheme string. The colour set from \code{\link{RColorBrewer}} function. Default is \code{"Accent"}.
 #' @param initial_colour_number int. The number of starting colours to use for the clusters. See details. Default is \code{8}.
