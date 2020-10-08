@@ -207,7 +207,7 @@ circle_text_func <- function(g, circ_layout,
     warning("text size not equal length with the verticee, proceeding with the first number for text size.\n")
     tSize <- rep(text.size[1], times = length(V(g)$names))
   } else {
-      tSize <- text.size
+    tSize <- text.size
   }
 
   # - Apply labels manually -
@@ -221,7 +221,7 @@ circle_text_func <- function(g, circ_layout,
 
   #Apply the text labels with a loop with angle as srt
   for (i in 1:length(x)) {
-    text(x=x[i], y=y[i], labels=V(g)$name[i], adj = NULL, pos = NULL, cex = tSize[i], col = text.colour, srt = angle[i], xpd = T, ...)
+    text(x=x[i], y=y[i], labels=tLabels[i], adj = NULL, pos = NULL, cex = tSize[i], col = text.colour, srt = angle[i], xpd = T, ...)
   }
 }
 
@@ -290,12 +290,16 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.font.family string. The font family of the labels in the plot. Default is \code{"sans"}.
 #' @param plot.highlight_membership boolean. <TBC: under construction>
 #' @param plot.layout_type string. <TBC: under construction>
+#' @param plot.vertex.remove.zerodegree boolean. If to remove zero degree edges from the graph. Default is \code{TRUE}.
 #' @param plot.vertex.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.size.scale numeric two-vector. <TBC: under construction>
+#' @param plot.vertex.label string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.
+#' @param plot.vertex.label.topvsize boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.
+#' @param plot.vertex.label.topvsize.filter numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.
 #' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
 #' @param plot.vertex.label.dist numeric. <TBC: under construction>
-#' @param plot.edge.filter numeric: 0~1. <TBC: under construction>
+#' @param plot.edge.filter numeric: 0-1. Top percentage edges to keep. Default is \code{0.05}.
 #' @param plot.edge.weight numeric vector. <TBC: under construction>
 #' @param plot.edge.weight.scale numeric two-vector. <TBC: under construction>
 #' @param plot.edge.arrow.mode boolean. <TBC: under construction>
@@ -320,6 +324,8 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'
 #'          The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
 #'          b: mar[1], l: mar[2], t: mar[3], r: mar[4]
+#'
+#'          For \code{plot.vertex.label.topvsize.filter}, the functional will apply the filter per group if g_membership is provided.
 #' @import ggplot2
 #' @import igraph
 #' @importFrom scales alpha rescale
@@ -337,19 +343,22 @@ rbio_network.default <- function(g,
                                  plot.font.family = "sans",
                                  plot.highlight_membership = TRUE,
                                  plot.layout_type = c("circular", "fr", "tree", "nicely", "sphere"),
+                                 plot.vertex.remove.zerodegree = TRUE,
                                  plot.vertex.size = NULL,
                                  plot.vertex.size.scale = c(1, 4),
                                  plot.vertex.label = NULL,
+                                 plot.vertex.label.topvsize = TRUE,
+                                 plot.vertex.label.topvsize.percent = 0.05,
                                  plot.vertex.label.size = 0.5,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
-                                 plot.edge.filter = 0.95,
+                                 plot.edge.filter = 0.05,
                                  plot.edge.weight = NULL,
                                  plot.edge.weight.scale = c(1, 4),
                                  plot.edge.arrow.mode = FALSE,
                                  plot.edge.curved = FALSE,
                                  plot.ellipse = FALSE,
-                                 plot.height = 7, plot.width = 7,
+                                 plot.height = 150, plot.width = 150,
                                  random_state = 1, verbose = TRUE){
   # - set random state -
   set.seed(random_state)
@@ -393,24 +402,27 @@ rbio_network.default <- function(g,
 
   # vertex size
   if (is.null(plot.vertex.size)) {
-    g <- set_vertex_attr(g, name = "vsize", value = scales::rescale(degree(g), to = plot.vertex.size.scale))
+    g <- set_vertex_attr(g, name = "vsize", value = degree(g))
+    vsize_is_degree <- TRUE
   } else {
     if (length(plot.vertex.size) == length(V(g))) {
-      g <- set_vertex_attr(g, name = "vsize", value = scales::rescale(plot.vertex.size, to = plot.vertex.size.scale))
+      g <- set_vertex_attr(g, name = "vsize", value = plot.vertex.size)
+      vsize_is_degree <- FALSE
     } else {
       warning("vertex size vector not equal length with the vertices, proceeding with the degree centrality.\n")
-      g <- set_vertex_attr(g, name = "vsize", value = scales::rescale(degree(g), to = plot.vertex.size.scale))
+      g <- set_vertex_attr(g, name = "vsize", value = degree(g))
+      vsize_is_degree <- TRUE
     }
   }
 
   # vertex labels
   if (is.null(plot.vertex.label)) { # text labels
     g <- set_vertex_attr(g, name = "vlabel", value = V(g)$name)
-  } else if (length(text.labels) != length(V(g))) {
+  } else if (length(plot.vertex.label) != length(V(g))) {
     warning("text labels not equal length with the vertices, proceeding with the internal vertex names.\n")
     g <- set_vertex_attr(g, name = "vlabel", value = V(g)$name)
   } else {
-    g <- set_vertex_attr(g, name = "vlabel", value = text.labels)
+    g <- set_vertex_attr(g, name = "vlabel", value = plot.vertex.label)
   }
 
   # vertex label size
@@ -424,7 +436,7 @@ rbio_network.default <- function(g,
   }
 
   # - filter edges -
-  g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = plot.edge.filter)])
+  g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = 1-plot.edge.filter)])
   edge_df <- as.data.frame(get.edgelist(g))
   if (!is.null(g_membership)) {
     if (plot.highlight_membership) {
@@ -449,14 +461,34 @@ rbio_network.default <- function(g,
     }
   }
 
-  # - plot and export -
-  # edge weights
-  edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
-  if (is.null(plot.vertex.size)) { # refresh degree centrality for vsize if used degree centrality
-    V(g)$vsize <- scales::rescale(degree(g), to = plot.vertex.size.scale)
-  } else if (length(plot.vertex.label.size) != length(V(g))) {
-    V(g)$vsize <- scales::rescale(degree(g), to = plot.vertex.size.scale)
+  # - filer vertices -
+  if (plot.vertex.remove.zerodegree) {
+    g <- delete.vertices(g, degree(g) == 0)
   }
+
+  # - finalize network -
+  # refersh vsize if used degrees
+  if (vsize_is_degree) {
+    V(g)$vsize <- degree(g)
+  }
+
+  # finalize labels
+  if (plot.vertex.label.topvsize) {  # only  display top size nodes
+    if (is.null(g_membership)) {
+      to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.label.topvsize.percent)
+      V(g)$vlabel[to_remove] <- ""
+    } else {
+      for (i in 1:length(unique(V(g)$membership))) {
+        is_member <- V(g)$membership == unique(V(g)$membership)[i]
+        to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.label.topvsize.percent)
+        V(g)$vlabel[is_member][to_remove] <- ""
+      }
+    }
+  }
+
+  # rescale sizes
+  edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
+  V(g)$vsize <- scales::rescale(V(g)$vsize, to = plot.vertex.size.scale)
 
   # layout
   if (plot.layout_type == "circular") {
@@ -471,6 +503,7 @@ rbio_network.default <- function(g,
     g_layout <- layout_on_sphere(g)
   }
 
+  # - plot and export -
   # plot
   g.cluster <- make_clusters(g, membership = V(g)$membership)
   pdf(file = paste0(export.name, "_network.pdf"),

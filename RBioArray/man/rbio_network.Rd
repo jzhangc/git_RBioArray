@@ -22,20 +22,23 @@ rbio_network(object, ...)
   plot.font.family = "sans",
   plot.highlight_membership = TRUE,
   plot.layout_type = c("circular", "fr", "tree", "nicely", "sphere"),
+  plot.vertex.remove.zerodegree = TRUE,
   plot.vertex.size = NULL,
   plot.vertex.size.scale = c(1, 4),
   plot.vertex.label = NULL,
+  plot.vertex.label.topvsize = TRUE,
+  plot.vertex.label.topvsize.percent = 0.05,
   plot.vertex.label.size = 0.5,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
-  plot.edge.filter = 0.95,
+  plot.edge.filter = 0.05,
   plot.edge.weight = NULL,
   plot.edge.weight.scale = c(1, 4),
   plot.edge.arrow.mode = FALSE,
   plot.edge.curved = FALSE,
   plot.ellipse = FALSE,
-  plot.height = 7,
-  plot.width = 7,
+  plot.height = 150,
+  plot.width = 150,
   random_state = 1,
   verbose = TRUE
 )
@@ -61,15 +64,21 @@ rbio_network(object, ...)
 
 \item{plot.layout_type}{string. <TBC: under construction>}
 
+\item{plot.vertex.remove.zerodegree}{boolean. If to remove zero degree edges from the graph. Default is \code{TRUE}.}
+
 \item{plot.vertex.size}{numeric vector. <TBC: under construction>}
 
 \item{plot.vertex.size.scale}{numeric two-vector. <TBC: under construction>}
+
+\item{plot.vertex.label}{string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.}
+
+\item{plot.vertex.label.topvsize}{boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.}
 
 \item{plot.vertex.label.size}{numeric vector. <TBC: under construction>}
 
 \item{plot.vertex.label.dist}{numeric. <TBC: under construction>}
 
-\item{plot.edge.filter}{numeric: 0~1. <TBC: under construction>}
+\item{plot.edge.filter}{numeric: 0-1. Top percentage edges to keep. Default is \code{0.05}.}
 
 \item{plot.edge.weight}{numeric vector. <TBC: under construction>}
 
@@ -92,6 +101,8 @@ rbio_network(object, ...)
 \item{plot.title.}{string. <TBC: under construction>}
 
 \item{plot.margins.}{numeric four-vector. <TBC: under construction>}
+
+\item{plot.vertex.label.topvsize.filter}{numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.}
 
 \item{plot.vertex.label.colour}{string vector. <TBC: under construction>}
 }
@@ -119,6 +130,8 @@ TBC
 
          The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
          b: mar[1], l: mar[2], t: mar[3], r: mar[4]
+
+         For \code{plot.vertex.label.topvsize.filter}, the functional will apply the filter per group if g_membership is provided.
 }
 \examples{
 
