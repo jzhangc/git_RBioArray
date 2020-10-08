@@ -80,6 +80,9 @@ TOM (topological overlap measure) analysis.
 }
 \details{
 TBC
+
+        The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
+        b: mar[1], l: mar[2], t: mar[3], r: mar[4]
 }
 \examples{
 \dontrun{

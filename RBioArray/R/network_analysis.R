@@ -26,6 +26,9 @@
 #'         TBC
 #' @details
 #'         TBC
+#'
+#'         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
+#'         b: mar[1], l: mar[2], t: mar[3], r: mar[4]
 #' @import ggplot2
 #' @import igraph
 #' @importFrom grid grid.draw
@@ -157,8 +160,7 @@ rbio_tom <- function(mtx,
 #' @param text.distance numeric. The distance multiplier between label and nodes. Default is \code{1.5}.
 #' @param text.colour string. Label colour. Default is \code{"black"}.
 #' @return Added text on the igraph plot.
-#' @detals
-#'         The \code{text.size} argument also accepts a vector of sizes with a length equal to the number of vertices.
+#' @detals The \code{text.size} argument also accepts a vector of sizes with a length equal to the number of vertices.
 #'         When different unequal length is detect, the function uses the first number for a universal text size.
 #' @examples
 #' \dontrun{
@@ -270,7 +272,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
   # <TBC: under construction>
   rbio_network.default(g = object$g,
                        g_membership = object$tom_membership,
-                      export.name = export.name, ...)
+                       export.name = export.name, ...)
 }
 
 
@@ -347,7 +349,7 @@ rbio_network.default <- function(g,
                                  plot.edge.arrow.mode = FALSE,
                                  plot.edge.curved = FALSE,
                                  plot.ellipse = FALSE,
-                                 plot.height = 150, plot.width = 150,
+                                 plot.height = 7, plot.width = 7,
                                  random_state = 1, verbose = TRUE){
   # - set random state -
   set.seed(random_state)
@@ -450,6 +452,11 @@ rbio_network.default <- function(g,
   # - plot and export -
   # edge weights
   edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
+  if (is.null(plot.vertex.size)) { # refresh degree centrality for vsize if used degree centrality
+    V(g)$vsize <- scales::rescale(degree(g), to = plot.vertex.size.scale)
+  } else if (length(plot.vertex.label.size) != length(V(g))) {
+    V(g)$vsize <- scales::rescale(degree(g), to = plot.vertex.size.scale)
+  }
 
   # layout
   if (plot.layout_type == "circular") {
@@ -465,17 +472,24 @@ rbio_network.default <- function(g,
   }
 
   # plot
-  grid.newpage()
+  g.cluster <- make_clusters(g, membership = V(g)$membership)
+  pdf(file = paste0(export.name, "_network.pdf"),
+      width = plot.width, height = plot.height)
+  par(mar = plot.margins)
+  # tiff(filename = paste0(export.name, "_network.tiff"),
+  #      width = plot.width, height = plot.height, units = "mm", pointsize = 12,
+  #      compression = "lzw",
+  #      bg = "white", res = 600,
+  #      type = "quartz")
   if (plot.ellipse) {
-    g.cluster <- make_clusters(g, membership = V(g)$membership)
     if (plot.layout_type == "circular") {
-      par(mar=plot.margins)
       plot(
         g.cluster, g,
+        col = V(g)$color,
         layout = g_layout,
         vertex.size = V(g)$vsize,
         vertex.label = NA,
-        asp = FALSE,
+        asp = TRUE,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
@@ -487,9 +501,9 @@ rbio_network.default <- function(g,
                        family = plot.font.family)
     } else {
       g_layout <- layout_with_fr(g, weights=E(g)$weight)
-      par(mar = plot.margins)
       plot(
         g.cluster, g,
+        col = V(g)$color,
         layout = g_layout,
         vertex.size = V(g)$vsize,
         vertex.label = V(g)$vlabel,
@@ -498,7 +512,7 @@ rbio_network.default <- function(g,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
-        asp = FALSE,
+        asp = TRUE,
         edge.curved = plot.edge.curved,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,
@@ -506,13 +520,12 @@ rbio_network.default <- function(g,
     }
   } else {
     if (plot.layout_type == "circular") {
-      par(mar = plot.margins)
       plot(
         g,
         layout = g_layout,
         vertex.size = V(g)$vsize,
         vertex.label = NA,
-        asp = FALSE,
+        asp = TRUE,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
@@ -523,7 +536,6 @@ rbio_network.default <- function(g,
                        text.colour = plot.vertex.label.color, text.distance = 1.21,
                        family = plot.font.family)
     } else {
-      par(mar = plot.margins)
       plot(
         g,
         layout = g_layout,
@@ -534,17 +546,17 @@ rbio_network.default <- function(g,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
-        asp = FALSE,
+        asp = TRUE,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
         main = plot.title)
     }
   }
-
-  # export
-  grid.echo()
-  p <- grid.grab()
-  ggsave(filename = paste0(export.name, "_network3.pdf"), plot = p,
-         width = plot.width, height = plot.height, units = "mm", dpi = 600)
+  # # export
+  # grid.echo()
+  # p <- grid.grab()
+  # ggsave(filename = paste0(export.name, "_network3.pdf"), plot = p,
+  #        width = plot.width, height = plot.height, units = "mm", dpi = 600)
+  dev.off()
 }
