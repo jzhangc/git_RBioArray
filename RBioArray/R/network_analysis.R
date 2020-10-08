@@ -358,7 +358,7 @@ rbio_network.default <- function(g,
                                  plot.edge.arrow.mode = FALSE,
                                  plot.edge.curved = FALSE,
                                  plot.ellipse = FALSE,
-                                 plot.height = 150, plot.width = 150,
+                                 plot.height = 7, plot.width = 7,
                                  random_state = 1, verbose = TRUE){
   # - set random state -
   set.seed(random_state)
