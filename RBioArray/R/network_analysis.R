@@ -140,6 +140,8 @@ rbio_tom <- function(mtx,
     weighted = TRUE,
     diag = diag
   ),
+  tom_distance = tom_dist,
+  tom_affinity = tom_affinity,
   tom_dist_hclust = tom_dist_hclust,
   k = k,
   h = h,
