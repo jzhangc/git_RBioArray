@@ -72,7 +72,7 @@ Update log
           - The output "rbio_tom_graph" object contains an igraph object for network visualization
         - rbio_network() added for network constuction and visualization
       
-      - Updates(s) to GSA functions
+      - Updates to GSA functions
         - A bug fixed for rbioGS_sp2hsaEntrez() due to updated BiomaRt package
         - Manual page updated for rbioGS_sp2hsaEntrez() to reflect the new S3 DE classes
       
