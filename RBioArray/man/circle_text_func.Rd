@@ -34,6 +34,10 @@ Added text on the igraph plot.
 Companion function for the network visualization function: used for displaying node labels around
              the circular network figures.
 }
+\details{
+The \code{text.size} argument also accepts a vector of sizes with a length equal to the number of vertices.
+        When different unequal length is detect, the function uses the first number for a universal text size.
+}
 \examples{
 \dontrun{
      # plot the original circular plot

@@ -122,6 +122,8 @@ Significance test results as \code{csv} files and volcano plots to the working d
         \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
                                            i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
 
+        \code{thresholding_summary}: a list of boolean vectors with the length of the features, including whicih ones passed the thresholding.
+
         \code{export.mode}
 
         \code{experiment}

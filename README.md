@@ -81,6 +81,10 @@ Update log
 
       - Updates to RNAseq functions
         - A bug fixed for rnaseq_de() where filtering not working properly
+      
+      - Updates to DE significant test functions
+        - The "sig" objects from sig() function now includes F_stats in the input_data item
+        - Manual updated with added explanation on the "thresholding_summary" 
 
       - Updates to cluster funcions:
         - rbio_unsupervised_hcluster() now supports "rbioarray_de" objects

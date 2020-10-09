@@ -10,6 +10,8 @@
 #'         \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
 #'                                            i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
 #'
+#'         \code{thresholding_summary}: a list of boolean vectors with the length of the features, including whicih ones passed the thresholding.
+#'
 #'         \code{export.mode}
 #'
 #'         \code{experiment}
@@ -73,6 +75,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                      targets = object$targets,
                      sample_groups = object$sample_groups,
+                     F_stats = object$F_stats,
                      comparisons = object$comparisons,
                      full_de_results = object$DE_results)
 
@@ -122,6 +125,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                      targets = object$targets,
                      sample_groups = object$sample_groups,
+                     F_stats = object$F_stats,
                      comparisons = object$comparisons,
                      full_de_results = object$DE_results)
 
@@ -236,7 +240,6 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   pcutoff_vector <- vector(length = length(input.de.list))
   cutoff_list <- vector(mode = "list", length = length(input.de.list))
   names(cutoff_list) <- names(input.de.list)
-
   for (i in seq(length(input.de.list))) {
     sig_dfm <- de_list[[i]]
     # cut off
@@ -359,7 +362,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
       write.csv(file = paste0(export.name, "_", names(input.de.list)[i], "_de_all.csv"), input.de.list[[i]], row.names = FALSE)
       if (verbose) cat("Done!\n")
     }
-  } else if (export.mode == "all.gene_symbol") {  # use the subsetted DE dataframes
+  } else if (export.mode == "all.gene_symbol") {  # use the subset DE dataframes
     for (i in seq(length(input.de.list))) {
       if (verbose) cat(paste0("Exporting all results for genes/probes/features with a symbol to file: ", export.name, "_", names(de_list)[i], "_de_gene_symbol.csv..."))
       write.csv(file = paste0(export.name, "_", names(de_list)[i], "_de_gene_symbol.csv"), de_list[[i]], row.names = FALSE)

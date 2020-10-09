@@ -162,7 +162,7 @@ rbio_tom <- function(mtx,
 #' @param text.distance numeric. The distance multiplier between label and nodes. Default is \code{1.5}.
 #' @param text.colour string. Label colour. Default is \code{"black"}.
 #' @return Added text on the igraph plot.
-#' @detals The \code{text.size} argument also accepts a vector of sizes with a length equal to the number of vertices.
+#' @details The \code{text.size} argument also accepts a vector of sizes with a length equal to the number of vertices.
 #'         When different unequal length is detect, the function uses the first number for a universal text size.
 #' @examples
 #' \dontrun{
@@ -568,7 +568,7 @@ rbio_network.default <- function(g,
       circle_text_func(g = g, circ_layout = g_layout,
                        text.label = V(g)$vlabel,
                        text.size = V(g)$vlabelsize,
-                       text.colour = plot.vertex.label.color, text.distance = 1.21,
+                       text.colour = plot.vertex.label.color, text.distance = plot.vertex.label.dist,
                        family = plot.font.family)
     } else {
       plot(

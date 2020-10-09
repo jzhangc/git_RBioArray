@@ -262,6 +262,7 @@ rnaseq_de.default <- function(x, y = NULL,
   return(out)
 }
 
+
 #' @export
 print.rbioseq_de <- function(x, ...){
   cat("\n")
