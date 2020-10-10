@@ -85,6 +85,8 @@ Update log
       - Updates to DE significant test functions
         - The "sig" objects from sig() function now includes F_stats in the input_data item
         - Manual updated with added explanation on the "thresholding_summary" 
+        - When gene_symbol = TRUE, sig() will only remove genes without a symbol from the volcano plot. 
+          All other results items still contain the results for all genes. 
 
       - Updates to cluster funcions:
         - rbio_unsupervised_hcluster() now supports "rbioarray_de" objects
@@ -94,6 +96,7 @@ Update log
         - rbio_unsupervised_corcluster() and rbio_supervised_corcluster() now export correlation results into the environment
           - With suffixes of "_cor_unsuper" and "_cor_sig", respectively
         - rbio_unsupervised_corcluster() and rbio_supervised_corcluster()'s heatmap (and sigplot) now can be turned off
+        - rbio_supervised_hcluster() how automatically cluster f_stats significant results 
         - Manual page updated for rbio_unsupervised_corcluster(), along with its S3 class types
         - Manual page updated for rbio_unsupervised_hcluster(), along with its S3 class types
       

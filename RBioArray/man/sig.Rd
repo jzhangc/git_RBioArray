@@ -143,19 +143,26 @@ Significance test results as \code{csv} files and volcano plots to the working d
 Significance test function
 }
 \details{
+The \code{normE} for \code{sig.rbioarray_de} method is the \code{E}  object from rbioarray_de, which is indeed normalized.
+
 Explanation for \code{export.mode} options:
 
-        \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
+            \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
 
-        \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
+            \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
 
-        \code{sig}: export only the significant changes. Gene symbol settings depends on argument \code{gene_symbol}.
+            \code{sig}: export only the significant changes. Gene symbol settings depends on argument \code{gene_symbol}.
 
-        \code{p_val.correction.method}
+            \code{p_val.correction.method}
 
         The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
 
         The \code{input.E} and \code{input.genes} are only used for output, not part of the sig processing.
+
+        Threshoding on the F_stats will only use the p value threshold, as there is no fold change for F stats.
+
+        \code{gene_symbol = TRUE} will only impact the volcano plot by remvoing genes without a gene symbol,
+        all the other results will contain full list of genes.
 }
 \examples{
 

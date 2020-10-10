@@ -378,15 +378,22 @@ rbio_supervised_hcluster <- function(object,
   }
 
   if (gene_symbol.only) {
-    dfm <- dfm[complete.cases(dfm[, input.genes_annotation.gene_symbol.var_name]),]
+    cat("gene_symbol.only = TRUE, genes without a gene symbol are removed from clustering.\n\n")
     row.lab.var_name <- input.genes_annotation.gene_symbol.var_name
   }
 
   ## subsetting and plotting
   sig_dist_clust_list <- vector(mode = "list", length = length(comparisons))
+  # pair-wise comparison
   for (i in seq(length(comparisons))) {
     # set up plotting matrix
-    plt_dfm <- dfm[as.logical(thresholding_summary[[i]]), ]
+    is_test <- thresholding_summary[[i]]
+    de_probes <- object$input_data$full_de_results[[comparisons[i]]]$PROBE_ID[is_test]
+    plt_dfm <- dfm[dfm$PROBE_ID %in% de_probes, ]
+    if (gene_symbol.only) {
+      plt_dfm <- plt_dfm[complete.cases(plt_dfm$SYMBOL), ]
+    }
+
     plt_mtx <- as.matrix(plt_dfm[, !names(plt_dfm) %in% names(genes)])
     colnames(plt_mtx) <- sample_id.vector
     rownames(plt_mtx) <- plt_dfm[, row.lab.var_name]
@@ -419,6 +426,50 @@ rbio_supervised_hcluster <- function(object,
     dev.off()
   }
   names(sig_dist_clust_list) <- comparisons
+
+  # F stats clustering
+  f_is_test <- thresholding_summary[["F_stats"]]
+  f_de_probes <- object$input_data$full_de_results[["F_stats"]]$PROBE_ID[f_is_test]
+  f_plt_dfm <- dfm[dfm$PROBE_ID %in% f_de_probes, ]
+
+  if (gene_symbol.only) {
+    f_plt_dfm <- f_plt_dfm[complete.cases(f_plt_dfm$SYMBOL), ]
+  }
+
+  f_plt_mtx <- as.matrix(f_plt_dfm[, !names(f_plt_dfm) %in% names(genes)])
+  colnames(f_plt_mtx) <- sample_id.vector
+  rownames(f_plt_mtx) <- f_plt_dfm[, row.lab.var_name]
+  f_row.lab <- f_plt_dfm[, row.lab.var_name]
+
+  # set ColSideColors
+  f_colGroup <- length(unique(object$input_data$sample_groups))
+  f_col_dist <- distfunc(t(f_plt_mtx))
+  f_col_cluster <- clustfunc(f_col_dist)
+  f_colG <- cutree(f_col_cluster, f_colGroup) # column group
+  f_colC <- brewer.pal(ifelse(f_colGroup < 3, 3, f_colGroup), col.colour) # column colour
+  f_col_cluster_list <- list(col_dist = f_col_dist, col_hclust = f_col_cluster)
+
+  # row cluster (genes/features)
+  f_row_dist <- distfunc(f_plt_mtx)
+  f_row_cluster <- clustfunc(f_row_dist)
+  f_row_cluster_list <- list(row_dist = f_row_dist, row_hclust = f_row_cluster)
+
+  # output
+  sig_dist_clust_list[["F_stats"]] <- list(sig_col_dist_clust = f_col_cluster_list, sig_row_dist_clust = f_row_cluster_list)
+
+  # draw heatmap
+  if (verbose) cat(paste0("Sig data hierarchical clustering heatmap saved to: ", "fstats_sig_heatmap.pdf..."))
+  pdf(file = paste0("fstats_sig_heatmap.pdf"), width = plot.width, height = plot.height)
+  heatmap.2(f_plt_mtx, distfun = distfunc, hclustfun = clustfunc,
+            labRow = f_row.lab,
+            col = brewer.pal(n.map.colour, map.colour), ColSideColors = f_colC[f_colG], ...)
+  # heatmap.2(f_plt_mtx, distfun = distfunc, hclustfun = clustfunc,
+  #           labRow = f_row.lab,
+  #           col = brewer.pal(n.map.colour, map.colour), ColSideColors = f_colC[f_colG])
+  if (verbose) cat("Done!\n")
+  dev.off()
+
+  ## save and export
   sig_dist_clust_list$distance_method <- distance
   sig_dist_clust_list$cluster_method <- clust
   assign(paste0(export.name, "_sig_dist_clust"), sig_dist_clust_list, envir = .GlobalEnv)
