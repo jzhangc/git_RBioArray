@@ -91,7 +91,7 @@ rbio_tom <- function(mtx,
 
   # tom_membership and tom similarity
   tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
-  if (is.null(attributes(tom_membership)[["Labels"]])) names(tom_membership) <- as.character(seq(length(tom_membership)))
+  if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
   # tom_membersihp_for_dendro <- tom_membership
   tom_similarity <- 1 - tom_dist # edge always uses similarity
   g_adjmat <- as.matrix(tom_similarity)
