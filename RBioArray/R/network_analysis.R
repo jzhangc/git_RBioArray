@@ -8,6 +8,8 @@
 #' @param tom_type string. TBC.
 #' @param ... Additional arguments passed to \code{TOMdist()} function.
 #' @param hclust.method String.
+#' @param cutree.method String. Method to find the optimal k. Default is \code{"silhouette"}.
+#' @param dynamictree.min.size Integer. When \code{cutree.method = "dynamic"}, the minimum cluster size. Default is \code{20}.
 #' @param k integer. TBC.
 #' @param h numeric. TBC.
 #' @param plot.dendro Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.
@@ -30,10 +32,15 @@
 #'
 #'         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
 #'         b: mar[1], l: mar[2], t: mar[3], r: mar[4]
+#'
+#'         The function uses the \code{"tree"} method from the \code{\link{dynamicTreeCut::cutreeDynamic()}} to cut the tree when
+#'         \code{cutree.method = "dynamic"}.
 #' @import ggplot2
 #' @import igraph
 #' @importFrom grid grid.draw
+#' @importFrom cluster silhouette
 #' @importFrom WGCNA TOMdist
+#' @importFrom dynamicTreeCut cutreeDynamic
 #' @importFrom dendextend color_branches as.ggdend
 #' @examples
 #' \dontrun{
@@ -53,6 +60,8 @@ rbio_tom <- function(mtx,
                      cor_method = c("pearson", "kendall", "spearman"),
                      power = 6, tom_type = c("unsigned", "signed"), ...,
                      hclust.method = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
+                     cutree.method = c("manual", "silhouette", "dynamic"),
+                     dynamictree.min.size = 20,
                      k = NULL, h = NULL,
                      plot.dendro = TRUE,
                      plot.export.name = NULL,
@@ -72,6 +81,7 @@ rbio_tom <- function(mtx,
   cor_method <- match.arg(cor_method, c("pearson", "kendall", "spearman"))
   tom_type <- match.arg(tom_type, c("unsigned", "signed"))
   hclust.method <- match.arg(hclust.method, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
+  cutree.method <- match.arg(cutree.method, c("manual", "silhouette", "dynamic"))
   if (is.null(plot.export.name)){
     plot.export.name <- deparse(substitute(mtx))
   } else {
@@ -89,10 +99,40 @@ rbio_tom <- function(mtx,
   tom_dist <- as.dist(tom_dist)  # convert to an R distance object
   tom_dist_hclust <- hclust(tom_dist, method = hclust.method)
 
-  # tom_membership and tom similarity
-  tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
-  if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
-  # tom_membersihp_for_dendro <- tom_membership
+  # decide k or h
+  if (cutree.method == "dynamic") {
+    if (verbose) cat("Dynamic tree cutting...")
+    tom_membership <- cutreeDynamic(tom_dist_hclust, method = "tree", deepSplit = TRUE, minClusterSize = dynamictree.min.size)
+    names(tom_membership) <- tom_dist_hclust$labels
+    k <- max(tom_membership)
+    if (any(tom_membership == 0)) {
+      n <- length(tom_membership[tom_membership == 0])
+      tom_membership[tom_membership == 0] <- seq(from = k+1, to = k+n)
+    } else {
+      n <- 0
+    }
+    if (verbose) cat(paste0(k, " clusters, ", n, " items unassigned. \n\n"))
+  } else if (cutree.method == "silhouette") {
+    if (verbose) cat("Silhouette tree cutting...")
+    k_range <- 2:(ncol(adjmat)-1)
+    ss_mean <- foreach(i = k_range, .combine = "c") %do% {
+      sil_m <- cutree(tom_dist_hclust, k = i)
+      ss <- cluster::silhouette(sil_m, tom_dist)
+      mean(ss[, 3])
+    }
+    names(ss_mean) <- k_range
+    k <- as.integer(names(ss_mean)[ss_mean == max(ss_mean)])
+    if (verbose) cat(paste0(k, " clusters. \n\n"))
+    tom_membership <- stats::cutree(tom_dist_hclust, k = k)
+    if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
+  } else {
+    h <- h
+    k <- h
+    tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
+    if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
+  }
+
+  # igraph and final membership construction
   tom_similarity <- 1 - tom_dist # edge always uses similarity
   g_adjmat <- as.matrix(tom_similarity)
   g_adjmat <- g_adjmat[order(tom_membership), order(tom_membership)]  # reorder it

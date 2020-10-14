@@ -13,6 +13,8 @@ rbio_tom(
   ...,
   hclust.method = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty",
     "median", "centroid"),
+  cutree.method = c("manual", "silhouette", "dynamic"),
+  dynamictree.min.size = 20,
   k = NULL,
   h = NULL,
   plot.dendro = TRUE,
@@ -44,6 +46,10 @@ rbio_tom(
 \item{...}{Additional arguments passed to \code{TOMdist()} function.}
 
 \item{hclust.method}{String.}
+
+\item{cutree.method}{String. Method to find the optimal k. Default is \code{"silhouette"}.}
+
+\item{dynamictree.min.size}{Integer. When \code{cutree.method = "dynamic"}, the minimum cluster size. Default is \code{20}.}
 
 \item{k}{integer. TBC.}
 
@@ -86,6 +92,9 @@ TBC
 
         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
         b: mar[1], l: mar[2], t: mar[3], r: mar[4]
+
+        The function uses the \code{"tree"} method from the \code{\link{dynamicTreeCut::cutreeDynamic()}} to cut the tree when
+        \code{cutree.method = "dynamic"}.
 }
 \examples{
 \dontrun{
