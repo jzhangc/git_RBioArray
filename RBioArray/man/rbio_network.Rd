@@ -28,7 +28,7 @@ rbio_network(object, ...)
   plot.vertex.label = NULL,
   plot.vertex.label.topvsize = TRUE,
   plot.vertex.label.topvsize.percent = 0.05,
-  plot.vertex.color.highlighttopvisze = TRUE,
+  plot.vertex.color.highlighttopvsize = TRUE,
   plot.vertex.label.size = 0.5,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
@@ -37,7 +37,7 @@ rbio_network(object, ...)
   plot.edge.weight.scale = c(1, 4),
   plot.edge.arrow.mode = FALSE,
   plot.edge.curved = FALSE,
-  plot.edge.color.highlighttopvise = TRUE,
+  plot.edge.color.highlighttopvsize = TRUE,
   plot.ellipse = FALSE,
   plot.height = 7,
   plot.width = 7,
@@ -76,7 +76,7 @@ rbio_network(object, ...)
 
 \item{plot.vertex.label.topvsize}{Boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.}
 
-\item{plot.vertex.color.highlighttopvisze}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.}
+\item{plot.vertex.color.highlighttopvsize}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.}
 
 \item{plot.vertex.label.size}{numeric vector. <TBC: under construction>}
 
@@ -92,7 +92,7 @@ rbio_network(object, ...)
 
 \item{plot.edge.curved}{Boolean. <TBC: under construction>}
 
-\item{plot.edge.color.highlighttopvise}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.}
+\item{plot.edge.color.highlighttopvsize}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.}
 
 \item{plot.ellipse}{Boolean. <TBC: under construction>}
 
