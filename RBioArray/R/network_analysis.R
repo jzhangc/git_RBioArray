@@ -112,6 +112,7 @@ rbio_tom <- function(mtx,
       n <- 0
     }
     if (verbose) cat(paste0(k, " clusters, ", n, " items unassigned. \n\n"))
+    ss_mean <- NULL
   } else if (cutree.method == "silhouette") {
     if (verbose) cat("Silhouette tree cutting...")
     k_range <- 2:(ncol(adjmat)-1)
@@ -125,11 +126,15 @@ rbio_tom <- function(mtx,
     if (verbose) cat(paste0(k, " clusters. \n\n"))
     tom_membership <- stats::cutree(tom_dist_hclust, k = k)
     if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
+    dynamictree.min.size <- NULL
   } else {
+    if (is.null(h) && is.null(k)) stop("Manually set h or k when cutree.method = \"manual\".")
     h <- h
     k <- k
     tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
     if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
+    ss_mean <- NULL
+    dynamictree.min.size <- NULL
   }
 
   # igraph and final membership construction
@@ -187,6 +192,9 @@ rbio_tom <- function(mtx,
   tom_distance = tom_dist,
   tom_affinity = tom_similarity,
   tom_dist_hclust = tom_dist_hclust,
+  cutree_method = cutree.method,
+  dynamictree_min_size = dynamictree.min.size,
+  silhouette_score_mean = ss_mean,
   k = k,
   h = h,
   tom_membership = tom_membership)
