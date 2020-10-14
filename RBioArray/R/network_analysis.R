@@ -352,7 +352,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.vertex.label string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.
 #' @param plot.vertex.label.topvsize Boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.
 #' @param plot.vertex.label.topvsize.filter numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.
-#' @param plot.vertex.color.highlighttopvisze Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.
+#' @param plot.vertex.color.highlighttopvsize Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.
 #' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
 #' @param plot.vertex.label.dist numeric. <TBC: under construction>
@@ -361,7 +361,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.edge.weight.scale numeric two-vector. <TBC: under construction>
 #' @param plot.edge.arrow.mode Boolean. <TBC: under construction>
 #' @param plot.edge.curved Boolean. <TBC: under construction>
-#' @param plot.edge.color.highlighttopvise Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.
+#' @param plot.edge.color.highlighttopvsize Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.
 #' @param plot.ellipse Boolean. <TBC: under construction>
 #' @param plot.width numeric. <TBC: under construction>
 #' @param plot.height numeric. <TBC: under construction>
@@ -407,7 +407,7 @@ rbio_network.default <- function(g,
                                  plot.vertex.label = NULL,
                                  plot.vertex.label.topvsize = TRUE,
                                  plot.vertex.label.topvsize.percent = 0.05,
-                                 plot.vertex.color.highlighttopvisze = TRUE,
+                                 plot.vertex.color.highlighttopvsize = TRUE,
                                  plot.vertex.label.size = 0.5,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
@@ -416,7 +416,7 @@ rbio_network.default <- function(g,
                                  plot.edge.weight.scale = c(1, 4),
                                  plot.edge.arrow.mode = FALSE,
                                  plot.edge.curved = FALSE,
-                                 plot.edge.color.highlighttopvise = TRUE,
+                                 plot.edge.color.highlighttopvsize = TRUE,
                                  plot.ellipse = FALSE,
                                  plot.height = 7, plot.width = 7,
                                  random_state = 1, verbose = TRUE){
@@ -553,7 +553,7 @@ rbio_network.default <- function(g,
       V(g)$vlabel[to_remove] <- ""
     }
 
-    if (plot.vertex.color.highlighttopvisze) {  # only to display colour for top size vertices
+    if (plot.vertex.color.highlighttopvsize) {  # only to display colour for top size vertices
       V(g)$color[to_remove] <- alpha(V(g)$color[to_remove], alpha = 0.2)
       V(g)$vframecolour[to_remove] <- "NA"
     }
@@ -568,13 +568,13 @@ rbio_network.default <- function(g,
         V(g)$vlabel[is_member][to_remove] <- ""
       }
 
-      if (plot.vertex.color.highlighttopvisze) {
+      if (plot.vertex.color.highlighttopvsize) {
         V(g)$color[is_member][to_remove] <- alpha(V(g)$color[is_member][to_remove], alpha = 0.2)
         V(g)$vframecolour[is_member][to_remove] <- "NA"
       }
     }
   }
-  if (plot.edge.color.highlighttopvise) {
+  if (plot.edge.color.highlighttopvsize) {
     E(g)$color <- alpha(E(g)$color , alpha = 0.2)
   }
 
@@ -590,12 +590,12 @@ rbio_network.default <- function(g,
   #     }
   #   }
   #
-  #   if (plot.vertex.color.highlighttopvisze) {
+  #   if (plot.vertex.color.highlighttopvsize) {
   #     V(g)$color[V(g)$vlabel == ""] <- alpha(V(g)$color[V(g)$vlabel == ""], alpha = 0.2)
   #     V(g)$vframecolour[V(g)$vlabel == ""] <- "NA"
   #   }
   #
-  #   if (plot.edge.color.highlighttopvise) {
+  #   if (plot.edge.color.highlighttopvsize) {
   #     E(g)$color <- alpha(E(g)$color , alpha = 0.2)
   #   }
   # }
