@@ -48,6 +48,7 @@ Update log
       
       - New network analysis functions:
         - SNF network and network fusion functions
+        - KNN graph construction
       
       - Updates to microarray functions
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()

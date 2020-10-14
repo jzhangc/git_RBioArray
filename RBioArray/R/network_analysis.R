@@ -1,26 +1,27 @@
 #' @title rbio_tom
 #'
 #' @description TOM (topological overlap measure) analysis.
-#' @param mtx Matrix. TBC.
-#' @param diag Boolean. TBC.
-#' @param power Integer. TBC.
-#' @param tom_type String. TBC.
+#' @param mtx matrix. TBC.
+#' @param diag Boolean. If to include diagonal for igraph construction. Default is \code{FALSE}.
+#' @param cor_method String. Correlation method. Default is \code{"pearson"}.
+#' @param power integer. TBC.
+#' @param tom_type string. TBC.
 #' @param ... Additional arguments passed to \code{TOMdist()} function.
 #' @param hclust.method String.
-#' @param k Integer. TBC.
-#' @param h Numeric. TBC.
+#' @param k integer. TBC.
+#' @param h numeric. TBC.
 #' @param plot.dendro Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.
-#' @param plot.export.name String. The prefix for the exported figure file name. Default is \code{NULL}.
-#' @param plot.margins Numeric vector. Plot margins, unit is "cm", order: \code{t, r, b, l}. Default is \code{c(2, 2, 2, 2)}.
+#' @param plot.export.name string. The prefix for the exported figure file name. Default is \code{NULL}.
+#' @param plot.margins numeric vector. Plot margins, unit is "cm", order: \code{t, r, b, l}. Default is \code{c(2, 2, 2, 2)}.
 #' @param plot.title Boolean. The dendrogram plot title. Default is \code{NULL}.
-#' @param plot.title.size Numeric. The dendrogram plot title size. Default is \code{16}.
-#' @param plot.dendroline.size Numeric. TBC.
+#' @param plot.title.size numeric. The dendrogram plot title size. Default is \code{16}.
+#' @param plot.dendroline.size numeric. TBC.
 #' @param plot.dendrolabel Boolean. TBC.
-#' @param plot.dendrolabel.size Numeric. TBC.
-#' @param plot.dendrolabel.space Numeric. TBC.
-#' @param plot.ylabel.size Numeric. TBC.
-#' @param plot.width The dendrogram plot width. Default is \code{170}.
-#' @param plot.height The dendrogram plot height. Default is \code{150}.
+#' @param plot.dendrolabel.size mumeric. TBC.
+#' @param plot.dendrolabel.space numeric. TBC.
+#' @param plot.ylabel.size numeric. TBC.
+#' @param plot.width numeric. The dendrogram plot width. Default is \code{170}.
+#' @param plot.height numeric. The dendrogram plot height. Default is \code{150}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return
 #'         TBC
@@ -49,6 +50,7 @@
 #' @export
 rbio_tom <- function(mtx,
                      diag = FALSE,
+                     cor_method = c("pearson", "kendall", "spearman"),
                      power = 6, tom_type = c("unsigned", "signed"), ...,
                      hclust.method = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                      k = NULL, h = NULL,
@@ -67,6 +69,7 @@ rbio_tom <- function(mtx,
   if (!any(class(mtx) %in% "matrix")) stop("mtx has to be a matrix.")
   if (is.null(rownames(mtx))) rownames(mtx) <- seq(nrow(mtx))
   if (is.null(colnames(mtx))) rownames(mtx) <- paste0("f_", seq(ncol(mtx)))
+  cor_method <- match.arg(cor_method, c("pearson", "kendall", "spearman"))
   tom_type <- match.arg(tom_type, c("unsigned", "signed"))
   hclust.method <- match.arg(hclust.method, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
   if (is.null(plot.export.name)){
@@ -77,7 +80,7 @@ rbio_tom <- function(mtx,
   if (!is.null(k) && k > ncol(mtx)) stop(paste0("k cannot be greater than the number of items for correlating/clustering, i.e. ncol(mtx) = ", ncol(mtx)))
 
   # - TOM calculation -
-  adjmat <- cor(mtx)^power
+  adjmat <- cor(mtx, method = cor_method)^power
   tom_dist <- TOMdist(adjmat, TOMType = tom_type, verbose = verbose, ...)  # matrix, array class, here we use dist
   rownames(tom_dist) <- rownames(adjmat)
   colnames(tom_dist) <- colnames(adjmat)
@@ -88,7 +91,8 @@ rbio_tom <- function(mtx,
 
   # tom_membership and tom similarity
   tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
-  # ßmembersihp_for_dendro <- tom_membership
+  if (is.null(attributes(tom_membership)[["Labels"]])) names(tom_membership) <- as.character(seq(length(tom_membership)))
+  # tom_membersihp_for_dendro <- tom_membership
   tom_similarity <- 1 - tom_dist # edge always uses similarity
   g_adjmat <- as.matrix(tom_similarity)
   g_adjmat <- g_adjmat[order(tom_membership), order(tom_membership)]  # reorder it
@@ -217,13 +221,15 @@ circle_text_func <- function(g, circ_layout,
   x = circ_layout[,1]*text.distance
   y = circ_layout[,2]*text.distance
 
-  # - create vector of angles for text based on number of nodes  -
+  # - create vector of angles and justification for text based on number of nodes  -
   # (flipping the orientation of the words half way around so none appear upside down)
   angle = ifelse(atan(-(circ_layout[,1]/circ_layout[,2]))*(180/pi) < 0,  90 + atan(-(circ_layout[,1]/circ_layout[,2]))*(180/pi), 270 + atan(-circ_layout[,1]/circ_layout[,2])*(180/pi))
+  # justification
+  adj_val = ifelse(circ_layout[,1] > 0 & circ_layout[,2] > -1,  0, 1)
 
   #Apply the text labels with a loop with angle as srt
   for (i in 1:length(x)) {
-    text(x=x[i], y=y[i], labels=tLabels[i], adj = NULL, pos = NULL, cex = tSize[i], col = text.colour, srt = angle[i], xpd = T, ...)
+    text(x=x[i], y=y[i], labels=tLabels[i], adj = adj_val[i], pos = NULL, cex = tSize[i], col = text.colour, srt = angle[i], xpd = T, ...)
   }
 }
 
@@ -296,17 +302,19 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.vertex.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.size.scale numeric two-vector. <TBC: under construction>
 #' @param plot.vertex.label string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.
-#' @param plot.vertex.label.topvsize boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.
+#' @param plot.vertex.label.topvsize Boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.
 #' @param plot.vertex.label.topvsize.filter numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.
+#' @param plot.vertex.color.highlighttopvisze Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.
 #' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
 #' @param plot.vertex.label.dist numeric. <TBC: under construction>
 #' @param plot.edge.filter numeric: 0-1. Top percentage edges to keep. Default is \code{0.05}.
 #' @param plot.edge.weight numeric vector. <TBC: under construction>
 #' @param plot.edge.weight.scale numeric two-vector. <TBC: under construction>
-#' @param plot.edge.arrow.mode boolean. <TBC: under construction>
-#' @param plot.edge.curved boolean. <TBC: under construction>
-#' @param plot.ellipse boolean. <TBC: under construction>
+#' @param plot.edge.arrow.mode Boolean. <TBC: under construction>
+#' @param plot.edge.curved Boolean. <TBC: under construction>
+#' @param plot.edge.color.highlighttopvise Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.
+#' @param plot.ellipse Boolean. <TBC: under construction>
 #' @param plot.width numeric. <TBC: under construction>
 #' @param plot.height numeric. <TBC: under construction>
 #' @param random_state integer. <TBC: under construction>
@@ -351,6 +359,7 @@ rbio_network.default <- function(g,
                                  plot.vertex.label = NULL,
                                  plot.vertex.label.topvsize = TRUE,
                                  plot.vertex.label.topvsize.percent = 0.05,
+                                 plot.vertex.color.highlighttopvisze = TRUE,
                                  plot.vertex.label.size = 0.5,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
@@ -359,6 +368,7 @@ rbio_network.default <- function(g,
                                  plot.edge.weight.scale = c(1, 4),
                                  plot.edge.arrow.mode = FALSE,
                                  plot.edge.curved = FALSE,
+                                 plot.edge.color.highlighttopvise = TRUE,
                                  plot.ellipse = FALSE,
                                  plot.height = 7, plot.width = 7,
                                  random_state = 1, verbose = TRUE){
@@ -366,7 +376,18 @@ rbio_network.default <- function(g,
   set.seed(random_state)
 
   # - argument check -
-  g_membership <- g_membership
+  # if (is.null(V(g)$name)) {
+  #   warning("No vertex name detected, proceed with index numbers")
+  #   V(g)$name <- seq(length(V(g)))
+  # }
+  if (!is.null(g_membership)) {
+    if (length(g_membership) != length(V(g))) stop("membership length not equal to number of vertecies. \n")
+    if (is.null(names(g_membership))) {
+      warning("membership has no vertex indices. Proceed with vertex names.\n")
+      names(g_membership) <- V(g)$name
+    }
+  }
+
   colour_scheme <- match.arg(colour_scheme, c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"))
   if (!any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
   if (is.null(export.name)){
@@ -377,9 +398,7 @@ rbio_network.default <- function(g,
   plot.layout_type <- match.arg(plot.layout_type, c("circular", "fr", "tree", "nicely", "sphere"))
 
   # - initial network  -
-  if (!is.null(g_membership) %% length(g_membership) != length(V(g))){
-    warning("membership length not equal to number of vertecies. \n")
-  } else {
+  if (!is.null(g_membership)){
     n_colours <- length(unique(g_membership))
     get_colour_func <- colorRampPalette(brewer.pal(initial_colour_number, colour_scheme))
     colours <- get_colour_func(n_colours)
@@ -437,6 +456,9 @@ rbio_network.default <- function(g,
     g <- set_vertex_attr(g, name = "vlabelsize", value = plot.vertex.label.size)
   }
 
+  # vertex frame (outline) colour
+  g <- set_vertex_attr(g, name = "vframecolour", value = rep("black", times = length(V(g))))
+
   # - filter edges -
   g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = 1-plot.edge.filter)])
   edge_df <- as.data.frame(get.edgelist(g))
@@ -474,19 +496,61 @@ rbio_network.default <- function(g,
     V(g)$vsize <- degree(g)
   }
 
-  # finalize labels
-  if (plot.vertex.label.topvsize) {  # only  display top size nodes
-    if (is.null(g_membership)) {
-      to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.label.topvsize.percent)
+  # finalize labels (if to selectively display labels and colours)
+  if (is.null(g_membership)) {
+    to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.label.topvsize.percent)
+    # V(g)$vlabel[to_remove] <- ""
+
+    if (plot.vertex.label.topvsize) { # only to display label for top size vertices
       V(g)$vlabel[to_remove] <- ""
-    } else {
-      for (i in 1:length(unique(V(g)$membership))) {
-        is_member <- V(g)$membership == unique(V(g)$membership)[i]
-        to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.label.topvsize.percent)
+    }
+
+    if (plot.vertex.color.highlighttopvisze) {  # only to display colour for top size vertices
+      V(g)$color[to_remove] <- alpha(V(g)$color[to_remove], alpha = 0.2)
+      V(g)$vframecolour[to_remove] <- "NA"
+    }
+  } else {
+    for (i in 1:length(unique(V(g)$membership))) {
+      is_member <- V(g)$membership == unique(V(g)$membership)[i]
+      to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.label.topvsize.percent)
+
+      # V(g)$vlabel[is_member][to_remove] <- ""
+
+      if (plot.vertex.label.topvsize) {  # only display label for top size vertices
         V(g)$vlabel[is_member][to_remove] <- ""
+      }
+
+      if (plot.vertex.color.highlighttopvisze) {
+        V(g)$color[is_member][to_remove] <- alpha(V(g)$color[is_member][to_remove], alpha = 0.2)
+        V(g)$vframecolour[is_member][to_remove] <- "NA"
       }
     }
   }
+  if (plot.edge.color.highlighttopvise) {
+    E(g)$color <- alpha(E(g)$color , alpha = 0.2)
+  }
+
+  # if (plot.vertex.label.topvsize) {  # only  display top size nodes
+  #   if (is.null(g_membership)) {
+  #     to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.label.topvsize.percent)
+  #     V(g)$vlabel[to_remove] <- ""
+  #   } else {
+  #     for (i in 1:length(unique(V(g)$membership))) {
+  #       is_member <- V(g)$membership == unique(V(g)$membership)[i]
+  #       to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.label.topvsize.percent)
+  #       V(g)$vlabel[is_member][to_remove] <- ""
+  #     }
+  #   }
+  #
+  #   if (plot.vertex.color.highlighttopvisze) {
+  #     V(g)$color[V(g)$vlabel == ""] <- alpha(V(g)$color[V(g)$vlabel == ""], alpha = 0.2)
+  #     V(g)$vframecolour[V(g)$vlabel == ""] <- "NA"
+  #   }
+  #
+  #   if (plot.edge.color.highlighttopvise) {
+  #     E(g)$color <- alpha(E(g)$color , alpha = 0.2)
+  #   }
+  # }
 
   # rescale sizes
   edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
@@ -524,6 +588,7 @@ rbio_network.default <- function(g,
         layout = g_layout,
         vertex.size = V(g)$vsize,
         vertex.label = NA,
+        vertex.frame.color = V(g)$vframecolour,
         asp = TRUE,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,
@@ -532,7 +597,7 @@ rbio_network.default <- function(g,
       circle_text_func(g = g, circ_layout = g_layout,
                        text.label = V(g)$vlabel,
                        text.size = V(g)$vlabelsize,
-                       text.colour = vertex.label.color, text.distance = plot.vertex.label.dist,
+                       text.colour = plot.vertex.label.color, text.distance = plot.vertex.label.dist,
                        family = plot.font.family)
     } else {
       g_layout <- layout_with_fr(g, weights=E(g)$weight)
@@ -547,6 +612,7 @@ rbio_network.default <- function(g,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
+        vertex.frame.color = V(g)$vframecolour,
         asp = TRUE,
         edge.curved = plot.edge.curved,
         edge.width = edgeweights,
@@ -560,6 +626,7 @@ rbio_network.default <- function(g,
         layout = g_layout,
         vertex.size = V(g)$vsize,
         vertex.label = NA,
+        vertex.frame.color = V(g)$vframecolour,
         asp = TRUE,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,
@@ -581,6 +648,7 @@ rbio_network.default <- function(g,
         vertex.label.dist = plot.vertex.label.dist,
         vertex.label.color = plot.vertex.label.color,
         vertex.label.cex = plot.vertex.label.size,
+        vertex.frame.color = V(g)$vframecolour,
         asp = TRUE,
         edge.width = edgeweights,
         edge.arrow.mode = plot.edge.arrow.mode,

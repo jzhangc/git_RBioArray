@@ -7,6 +7,7 @@
 rbio_tom(
   mtx,
   diag = FALSE,
+  cor_method = c("pearson", "kendall", "spearman"),
   power = 6,
   tom_type = c("unsigned", "signed"),
   ...,
@@ -30,45 +31,47 @@ rbio_tom(
 )
 }
 \arguments{
-\item{mtx}{Matrix. TBC.}
+\item{mtx}{matrix. TBC.}
 
-\item{diag}{Boolean. TBC.}
+\item{diag}{Boolean. If to include diagonal for igraph construction. Default is \code{FALSE}.}
 
-\item{power}{Integer. TBC.}
+\item{cor_method}{String. Correlation method. Default is \code{"pearson"}.}
 
-\item{tom_type}{String. TBC.}
+\item{power}{integer. TBC.}
+
+\item{tom_type}{string. TBC.}
 
 \item{...}{Additional arguments passed to \code{TOMdist()} function.}
 
 \item{hclust.method}{String.}
 
-\item{k}{Integer. TBC.}
+\item{k}{integer. TBC.}
 
-\item{h}{Numeric. TBC.}
+\item{h}{numeric. TBC.}
 
 \item{plot.dendro}{Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.}
 
-\item{plot.export.name}{String. The prefix for the exported figure file name. Default is \code{NULL}.}
+\item{plot.export.name}{string. The prefix for the exported figure file name. Default is \code{NULL}.}
 
-\item{plot.margins}{Numeric vector. Plot margins, unit is "cm", order: \code{t, r, b, l}. Default is \code{c(2, 2, 2, 2)}.}
+\item{plot.margins}{numeric vector. Plot margins, unit is "cm", order: \code{t, r, b, l}. Default is \code{c(2, 2, 2, 2)}.}
 
 \item{plot.title}{Boolean. The dendrogram plot title. Default is \code{NULL}.}
 
-\item{plot.title.size}{Numeric. The dendrogram plot title size. Default is \code{16}.}
+\item{plot.title.size}{numeric. The dendrogram plot title size. Default is \code{16}.}
 
-\item{plot.dendroline.size}{Numeric. TBC.}
+\item{plot.dendroline.size}{numeric. TBC.}
 
 \item{plot.dendrolabel}{Boolean. TBC.}
 
-\item{plot.dendrolabel.size}{Numeric. TBC.}
+\item{plot.dendrolabel.size}{mumeric. TBC.}
 
-\item{plot.dendrolabel.space}{Numeric. TBC.}
+\item{plot.dendrolabel.space}{numeric. TBC.}
 
-\item{plot.ylabel.size}{Numeric. TBC.}
+\item{plot.ylabel.size}{numeric. TBC.}
 
-\item{plot.width}{The dendrogram plot width. Default is \code{170}.}
+\item{plot.width}{numeric. The dendrogram plot width. Default is \code{170}.}
 
-\item{plot.height}{The dendrogram plot height. Default is \code{150}.}
+\item{plot.height}{numeric. The dendrogram plot height. Default is \code{150}.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
