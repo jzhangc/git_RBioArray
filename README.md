@@ -71,7 +71,7 @@ Update log
       - New network analysis functions:
         - rbio_tom() added for TOM (topological overlap measure) analysis
           - The output "rbio_tom_graph" object contains an igraph object for network visualization
-          - The function also supports WGCNA's dynamic tree cutting technique
+          - The function also supports multiple automated tree cuting techniques, such as WGCNA's dynamic tree cutting
         - rbio_network() added for network constuction and visualization
       
       - Updates to GSA functions
