@@ -127,7 +127,7 @@ rbio_tom <- function(mtx,
     if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
   } else {
     h <- h
-    k <- h
+    k <- k
     tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
     if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
   }
