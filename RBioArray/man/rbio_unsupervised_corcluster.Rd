@@ -27,6 +27,8 @@ rbio_unsupervised_corcluster(object, ...)
   input.genes_annotation.gene_id.var_name = NULL,
   export.name = NULL,
   hclust.heatmap = TRUE,
+  hclust.method = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty",
+    "median", "centroid"),
   map.colour = "PRGn",
   n.map.colour = 11,
   ...,
@@ -76,6 +78,8 @@ rbio_unsupervised_corcluster(object, ...)
 \item{export.name}{File name for the export \code{pdf} plot file.}
 
 \item{hclust.heatmap}{Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.}
+
+\item{hclust.method}{String. Method for hclust function. Default is \code{"complete"}.}
 
 \item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
 

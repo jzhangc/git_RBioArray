@@ -9,6 +9,8 @@ rbio_supervised_corcluster(
   gene_symbol.only = FALSE,
   cor.method = c("pearson", "spearman"),
   hclust.heatmap = TRUE,
+  hclust.method = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty",
+    "median", "centroid"),
   map.colour = "PRGn",
   n.map.colour = 11,
   ...,
@@ -37,6 +39,8 @@ rbio_supervised_corcluster(
 \item{cor.method}{The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.}
 
 \item{hclust.heatmap}{Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.}
+
+\item{hclust.method}{String. Method for hclust function. Default is \code{"complete"}.}
 
 \item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
 

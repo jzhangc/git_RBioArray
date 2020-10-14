@@ -42,7 +42,7 @@ Update log
             (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol"
             
       - New clustering funcions:
-        - Bayesian biclustering function rbio_bbc()
+        - Bayesian biclustering function rbio_bb()
         - Propotionality correlation function added for CLR transformed RNAseq data
         - rbio_kmeans() supports methods for rbioarray_de and rbioseq_de objects for automatic K means cluster
       
@@ -71,6 +71,7 @@ Update log
       - New network analysis functions:
         - rbio_tom() added for TOM (topological overlap measure) analysis
           - The output "rbio_tom_graph" object contains an igraph object for network visualization
+          - The function also supports WGCNA's dynamic tree cutting technique
         - rbio_network() added for network constuction and visualization
       
       - Updates to GSA functions
@@ -98,6 +99,7 @@ Update log
           - With suffixes of "_cor_unsuper" and "_cor_sig", respectively
         - rbio_unsupervised_corcluster() and rbio_supervised_corcluster()'s heatmap (and sigplot) now can be turned off
         - rbio_supervised_hcluster() how automatically cluster f_stats significant results 
+        - hcluster methods added for rbio_unsupervised_corcluster() and rbio_supervised_corcluster()
         - Manual page updated for rbio_unsupervised_corcluster(), along with its S3 class types
         - Manual page updated for rbio_unsupervised_hcluster(), along with its S3 class types
       

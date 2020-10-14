@@ -153,6 +153,7 @@ rbio_unsupervised_corcluster.rbioseq_de <- function(object, sample_id.var.name =
 #' @param cor.method The correlation method, options are "spearman" and "pearson". Default is \code{"pearson"}.
 #' @param export.name File name for the export \code{pdf} plot file.
 #' @param hclust.heatmap Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.
+#' @param hclust.method String. Method for hclust function. Default is \code{"complete"}.
 #' @param map.colour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n.map.colour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
 #' @param heatmap.axis.label Whether to display label for both x- and y- axes. Default is \code{FALSE}.
@@ -187,6 +188,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
                                                  input.genes_annotation.gene_id.var_name = NULL,
                                                  export.name = NULL,
                                                  hclust.heatmap = TRUE,
+                                                 hclust.method = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                                                  map.colour = "PRGn", n.map.colour = 11, ...,
                                                  heatmap.axis.label = FALSE, heatmap.width = 7, heatmap.height = 7,
                                                  sigplot = TRUE,
@@ -219,6 +221,9 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
 
   ## variables
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
+
+  # hclust function
+  clustfunc <- function(x)hclust(x, method = hclust.method)
 
   ## prepare dfm for clustering
   dfm <- data.frame(genes, E, check.names = FALSE)
@@ -270,6 +275,8 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
       if (verbose) cat(paste0("Correlation heatmap saved to file: ", cor_sample_level, "_cor.unsuper.heatmap.pdf..."))
       pdf(file = paste0(cor_sample_level, "_cor.unsuper.heatmap.pdf"), width = heatmap.width, height = heatmap.width)
       heatmap.2(corcoef, symm = TRUE, trace = "none",
+                distfun = function(x)as.dist(1-corcoef),
+                hclustfun = clustfunc,
                 col = brewer.pal(n.map.colour, map.colour), labRow = heatmap.labRow, labCol = heatmap.labCol,
                 ...)
       dev.off()
@@ -362,6 +369,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
 #' @param gene_symbol.only If to only use probes/genes/genomic features with a gene sybmol id. Default is \code{FALSE}.
 #' @param cor.method The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.
 #' @param hclust.heatmap Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.
+#' @param hclust.method String. Method for hclust function. Default is \code{"complete"}.
 #' @param map.colour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n.map.colour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
@@ -408,6 +416,7 @@ rbio_supervised_corcluster <- function(object,
                                        gene_symbol.only = FALSE,
                                        cor.method = c("pearson", "spearman"),
                                        hclust.heatmap = TRUE,
+                                       hclust.method = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                                        map.colour = "PRGn", n.map.colour = 11, ...,
                                        heatmap.width = 7, heatmap.height = 7,
                                        sigplot = TRUE,
@@ -454,6 +463,9 @@ rbio_supervised_corcluster <- function(object,
     comparison_levels <- comparison_levels[-comp_to_remove]
     thresholding_summary <- thresholding_summary[-comp_to_remove]
   }
+
+  # hclust function
+  clustfunc <- function(x)hclust(x, method = hclust.method)
 
   # prepare dfm for clustering
   dfm <- data.frame(genes, E, check.names = FALSE)
@@ -505,7 +517,10 @@ rbio_supervised_corcluster <- function(object,
         if (verbose) cat(paste0("Correlation heatmap saved to file: ", comparisons[[i]], "_", comparison_levels[[i]][j], "_cor.heatmap.pdf..."))
         pdf(file = paste0(comparisons[[i]], "_", comparison_levels[[i]][j], "_cor.heatmap.pdf"), width = heatmap.width, height = heatmap.width)
         heatmap.2(corcoef, symm = TRUE, trace = "none",
-                  col = brewer.pal(n.map.colour, map.colour), labRow = rownames(corcoef), labCol = colnames(corcoef),
+                  col = brewer.pal(n.map.colour, map.colour),
+                  distfun = function(x)as.dist(1-corcoef),
+                  hclustfun = clustfunc,
+                  labRow = rownames(corcoef), labCol = colnames(corcoef),
                   ...)
         dev.off()
         if (verbose) cat("Done!\n")
