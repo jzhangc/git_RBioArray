@@ -347,7 +347,7 @@ print.rbioseq_count <- function(x, ...){
 #' @param species Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".
 #' @param target.annot.file Annotation file describing filenames and targets, and should be in \code{csv} format.
 #' @param sample_groups.var.name Sample group annotation variable name in the \code{target.annot.file}.
-#' @param gtf.matrix Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
+#' @param gtf Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
 #' @param raw.file.ext Raw file extention. Default is \code{".txt"}.
 #' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
 #' @param raw.file.source Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.
@@ -398,7 +398,7 @@ print.rbioseq_count <- function(x, ...){
 rbioseq_de_analysis <- function(raw.file.path, raw.file.ext = ".txt", raw.file.sep = "", raw.file.source = "htseq-count",
                                 species,
                                 target.annot.file, sample_groups.var.name = NULL,
-                                gtf.matrix,
+                                gtf,
                                 filter.threshold.min.count = 10,
                                 filter.threshold.min.sample = NULL,
                                 design, contra,
@@ -415,7 +415,7 @@ rbioseq_de_analysis <- function(raw.file.path, raw.file.ext = ".txt", raw.file.s
                                 species = species,
                                 target.annot.file = target.annot.file,
                                 sample_groups.var.name = sample_groups.var.name,
-                                gtf.matrix = gtf.matrix,
+                                gtf = gtf,
                                 parallelComputing = parallelComputing, clusterType = clusterType,
                                 verbose = verbose)
   # export
