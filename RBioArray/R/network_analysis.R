@@ -90,10 +90,14 @@ rbio_tom <- function(mtx,
   if (!is.null(k) && k > ncol(mtx)) stop(paste0("k cannot be greater than the number of items for correlating/clustering, i.e. ncol(mtx) = ", ncol(mtx)))
 
   # - TOM calculation -
+  if (verbose) cat("TOM calulation...")
   adjmat <- cor(mtx, method = cor_method)^power
-  tom_dist <- TOMdist(adjmat, TOMType = tom_type, verbose = verbose, ...)  # matrix, array class, here we use dist
+  tom_dist <- TOMdist(adjmat, TOMType = tom_type, verbose = FALSE, ...)  # matrix, array class, here we use dist
+  # tom_dist <- TOMdist(adjmat, TOMType = tom_type, verbose = FALSE)  # matrix, array class, here we use dist
   rownames(tom_dist) <- rownames(adjmat)
   colnames(tom_dist) <- colnames(adjmat)
+  tom_similarity <- 1 - tom_dist # convert to similarity matrix
+  if (verbose) cat("Done!\n")
 
   # - TOM hclust -
   tom_dist <- as.dist(tom_dist)  # convert to an R distance object
@@ -102,7 +106,8 @@ rbio_tom <- function(mtx,
   # decide k or h
   if (cutree.method == "dynamic") {
     if (verbose) cat("Dynamic tree cutting...")
-    tom_membership <- cutreeDynamic(tom_dist_hclust, method = "tree", deepSplit = TRUE, minClusterSize = dynamictree.min.size)
+    tom_membership <- cutreeDynamic(tom_dist_hclust, method = "tree", deepSplit = TRUE, minClusterSize = dynamictree.min.size, verbose = FALSE)
+    if (all(tom_membership == 0)) stop("Dynamic tree cut failed to identify any functional clusters. Try changing the hcluster.method, minClusterSize, or cutree.method. ")
     names(tom_membership) <- tom_dist_hclust$labels
     k <- max(tom_membership)
     if (any(tom_membership == 0)) {
@@ -111,7 +116,7 @@ rbio_tom <- function(mtx,
     } else {
       n <- 0
     }
-    if (verbose) cat(paste0(k, " clusters, ", n, " items unassigned. \n\n"))
+    if (verbose) cat(paste0(k, " clusters, ", n, " items unassigned.\n\n"))
     ss_mean <- NULL
   } else if (cutree.method == "silhouette") {
     if (verbose) cat("Silhouette tree cutting...")
@@ -138,8 +143,7 @@ rbio_tom <- function(mtx,
   }
 
   # igraph and final membership construction
-  tom_similarity <- 1 - tom_dist # edge always uses similarity
-  g_adjmat <- as.matrix(tom_similarity)
+  g_adjmat <- as.matrix(tom_similarity)  # igraph edge always uses similarity matrix
   g_adjmat <- g_adjmat[order(tom_membership), order(tom_membership)]  # reorder it
   tom_membership <- tom_membership[order(tom_membership)] # update tom_membership
 
@@ -350,8 +354,8 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.vertex.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.size.scale numeric two-vector. <TBC: under construction>
 #' @param plot.vertex.label string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.
+#' @param plot.vertex.topvsize.filter numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.
 #' @param plot.vertex.label.topvsize Boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.
-#' @param plot.vertex.label.topvsize.filter numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.
 #' @param plot.vertex.color.highlighttopvsize Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.
 #' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
@@ -406,7 +410,7 @@ rbio_network.default <- function(g,
                                  plot.vertex.size.scale = c(1, 4),
                                  plot.vertex.label = NULL,
                                  plot.vertex.label.topvsize = TRUE,
-                                 plot.vertex.label.topvsize.percent = 0.05,
+                                 plot.vertex.topvsize.filter = 0.05,
                                  plot.vertex.color.highlighttopvsize = TRUE,
                                  plot.vertex.label.size = 0.5,
                                  plot.vertex.label.color = "black",
@@ -546,7 +550,7 @@ rbio_network.default <- function(g,
 
   # finalize labels (if to selectively display labels and colours)
   if (is.null(g_membership)) {
-    to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.label.topvsize.percent)
+    to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.topvsize.filter)
     # V(g)$vlabel[to_remove] <- ""
 
     if (plot.vertex.label.topvsize) { # only to display label for top size vertices
@@ -560,7 +564,7 @@ rbio_network.default <- function(g,
   } else {
     for (i in 1:length(unique(V(g)$membership))) {
       is_member <- V(g)$membership == unique(V(g)$membership)[i]
-      to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.label.topvsize.percent)
+      to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
 
       # V(g)$vlabel[is_member][to_remove] <- ""
 
@@ -580,12 +584,12 @@ rbio_network.default <- function(g,
 
   # if (plot.vertex.label.topvsize) {  # only  display top size nodes
   #   if (is.null(g_membership)) {
-  #     to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.label.topvsize.percent)
+  #     to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.topvsize.filter)
   #     V(g)$vlabel[to_remove] <- ""
   #   } else {
   #     for (i in 1:length(unique(V(g)$membership))) {
   #       is_member <- V(g)$membership == unique(V(g)$membership)[i]
-  #       to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.label.topvsize.percent)
+  #       to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
   #       V(g)$vlabel[is_member][to_remove] <- ""
   #     }
   #   }

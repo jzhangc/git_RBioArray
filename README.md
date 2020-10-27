@@ -82,6 +82,11 @@ Update log
         - rbioarray_transfo_normalize() now only supports quantile method for normalization
 
       - Updates to RNAseq functions
+        - rbioseq_import_count() function now requre sample id variable name
+        - The "rbioseq_count" object now have the same sample order for raw_read_count and targets
+        - rbioseq_import_gtf() not outputs a data frame
+        - rbioseq_import_gtf() now outputs feature length
+        - rnaseq_de() now supports CPM and RPKM within sample normalization
         - A bug fixed for rnaseq_de() where filtering not working properly
       
       - Updates to DE significant test functions

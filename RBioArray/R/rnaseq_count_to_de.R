@@ -81,8 +81,9 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #' @param y.gene_symbol.var.name Variable name for gene (i.e. target) symbols. Default is \code{"genes"}.
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
-#' @param annot.group Ssample group annotation object. Can be a \code{factor} or \code{vector} object.
-#' @param library.size.scale.method Library size scaling method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
+#' @param annot.group Sample group annotation object. Can be a \code{factor} or \code{vector} object.
+#' @param within.sample.norm.method Within sample normalization method. Default is \code{none}.
+#' @param library.size.scale.method aka between sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param qc.plot QC plot for the input read counts
@@ -101,7 +102,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'         \code{filter_results}: A list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample}, \code{filter_summary} and \code{filtered_counts}.
 #'                                Note: \code{filtered_counts} is a \code{DGEList} class from \code{edgeR} package.
 #'
-#'         \code{normalization_results}
+#'         \code{normalization_method}
 #'
 #'         \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
 #'                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.
@@ -120,8 +121,9 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'
 #'         \code{sample_groups}
 #'
+#' @import foreach
 #' @importFrom limma lmFit eBayes topTable contrasts.fit voomWithQualityWeights
-#' @importFrom edgeR DGEList calcNormFactors cpm
+#' @importFrom edgeR DGEList calcNormFactors cpm rpkm
 #'
 #' @export
 rnaseq_de.default <- function(x, y = NULL,
@@ -129,7 +131,8 @@ rnaseq_de.default <- function(x, y = NULL,
                               y.gene_symbol.var.name = "genes",
                               filter.threshold.cpm = "none",
                               filter.threshold.min.sample = NULL, annot.group = NULL,
-                              library.size.scale.method = "TMM",
+                              within.sample.norm.method = c("cpm", "rpkm", "none"),
+                              library.size.scale.method = c("TMM", "RLE", "upperquartile", "none"),
                               design, contra, qc.plot = TRUE, verbose = TRUE){
   ## check the key arguments
   if (!any(class(x) %in% c("data.frame", "matrix"))){
@@ -179,10 +182,9 @@ rnaseq_de.default <- function(x, y = NULL,
   if (is.null(contra)){
     stop("Please set contrast object.")
   }
-
-  if (!library.size.scale.method %in% c("none", "TMM","RLE", "upperquartile")){
-    stop("Please set the library.size.scale.method with exactly one of the following: \"none\", \"TMM\", \"RLE\", or \"upperquartile\".")
-  }
+  # no need to put choices argument below as the match.arg grabs from the top
+  within.sample.norm.method <- match.arg(within.sample.norm.method)
+  library.size.scale.method <- match.arg(library.size.scale.method)
 
   ## extract coefficients
   cf <- colnames(contra) # extract coefficient
@@ -194,7 +196,7 @@ rnaseq_de.default <- function(x, y = NULL,
 
   ## DE
   if (verbose) cat("Data filtering and normalization...") # message
-  dge <- DGEList(counts = x, genes = y)
+  dge <- DGEList(counts = x, genes = y, group = annot.group)
 
   if (filter.threshold.cpm != "none"){ # set the count threshold for filtering
     isexpr <- rowSums(cpm(dge$counts) > filter.threshold.cpm) >= filter.threshold.min.sample  # cpm threshold, cite the paper
@@ -229,7 +231,18 @@ rnaseq_de.default <- function(x, y = NULL,
   }
 
   # library size scaling normalization
-  dgenormf <- calcNormFactors(dge, method = library.size.scale.method)  # between-genes
+  # if (within.sample.norm.method == "cpm") {
+  #   dge$counts <- cpm(dge$counts)
+  # } else if (within.sample.norm.method == "rpkm") {
+  #   dge$counts <- rpkm(dge$counts, gene.length = as.numeric(y$length)[isexpr])
+  # }
+  new_counts <- switch(within.sample.norm.method,
+                       cpm = cpm(dge$counts),
+                       rpkm = rpkm(dge$counts, gene.length = as.numeric(y$length)[isexpr]),
+                       none = dge$counts)
+  dge$counts <- new_counts
+  dgenormf <- calcNormFactors(dge, method = library.size.scale.method)  # between samples
+
   # between-genes: Voom normalization with quality weights
   # vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile") # old
   vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalize.method = "quantile")
@@ -252,7 +265,9 @@ rnaseq_de.default <- function(x, y = NULL,
   comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
   out <- list(filter_results = filter_results,
-              normalization_method = list(library_scalling = library.size.scale.method, between_genes = "voom process with quantile normalization"),
+              normalization_method = list(within_sample_method = within.sample.norm.method,
+                                          library_scalling = library.size.scale.method,
+                                          between_genes = "voom process with quantile normalization"),
               normalized_data = vmwt,
               genes_annotation.gene_id.var_name = y.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = y.gene_symbol.var.name,
@@ -275,7 +290,8 @@ print.rbioseq_de <- function(x, ...){
   cat(paste0("\tRemaining genes: ", x$filter_results$filter_summary[2], "\n"))
   cat("\n")
   cat("Reads normalization methods: \n")
-  cat(paste0("\tLibrary size-scaling: ", x$normalization_method$library_scalling, "\n"))
+  cat(paste0("\tWithin sample method: ", x$normalization_method$within_sample_method, "\n"))
+    cat(paste0("\tLibrary size-scaling: ", x$normalization_method$library_scalling, "\n"))
   cat(paste0("\tBetween-genes: ", x$normalization_method$between_genes, "\n"))
   cat("\n")
   cat("Comparisons assessed: \n")

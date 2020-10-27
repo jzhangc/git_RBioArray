@@ -8,8 +8,9 @@ rbioseq_import_count(
   path = getwd(),
   species = NULL,
   target.annot.file = NULL,
+  sample_id.var.name = NULL,
   sample_groups.var.name = NULL,
-  gtf.matrix = NULL,
+  gtf = NULL,
   raw.file.ext = ".txt",
   raw.file.sep = "",
   raw.file.source = "htseq-count",
@@ -25,9 +26,11 @@ rbioseq_import_count(
 
 \item{target.annot.file}{Annotation file describing filenames and targets, and should be in \code{csv} format.}
 
+\item{sample_id.var.name}{Sample id variable name in the \code{target.annot.file}.}
+
 \item{sample_groups.var.name}{Sample group annotation variable name in the \code{target.annot.file}.}
 
-\item{gtf.matrix}{Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.}
+\item{gtf}{matrix or data.frame. Parsed gtf/gff annotation. Can be obtained by function \code{\link{rbioseq_import_gtf}}.}
 
 \item{raw.file.ext}{Raw file extention. Default is \code{".txt"}.}
 
@@ -84,7 +87,17 @@ When \code{raw.file.source = "htseq-count"}, the function will cut off the last 
 
          \code{chromosome}
 
-         Since the current HTSeq-count setting is to examine genes, NOT transcript, the \code{transcript_id} item will not be used.
+         \code{start}
+
+         \code{end}
+
+         \code{length}
+
+         Since the current HTSeq-count setting is to examine genes, NOT transcript.
+         The \code{transcript_id} item is used to find the gene length.
+         Specifically, the gene length is the length from the record where \code{transcript_id == gene_id}
+
+
          Transcript assessment will be added through future updates.
 }
 \examples{
@@ -92,7 +105,7 @@ When \code{raw.file.source = "htseq-count"}, the function will cut off the last 
 mrna_count <- rbioseq_import_count(path = "~/dataset/",
                                    species = "hsa",
                                    target.annot.file = "target.csv", sample_groups.var.name = "condition",
-                                   gtf.matrix = gtf,
+                                   gtf = gtf,
                                    raw.file.ext = ".out", raw.file.sep = "",
                                    raw.file.source = "htseq-count",
                                    parallelComputing = TRUE, clusterType = "FORK")

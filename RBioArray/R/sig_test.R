@@ -78,7 +78,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
                      targets = object$targets,
                      sample_groups = object$sample_groups,
                      comparisons = object$comparisons,
-                     full_de_results = ofull_de_results)
+                     full_de_results = full_de_results)
 
   out$input_data <- input.data
   class(out) <- "sig"

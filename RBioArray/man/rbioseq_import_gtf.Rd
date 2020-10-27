@@ -10,9 +10,13 @@ rbioseq_import_gtf(file, verbose = TRUE)
 \item{file}{GTF/GFF file. Add path if needed.}
 
 \item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+
+\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+
+\item{cluterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
-A matrix with items from GTF/GFF file.
+A data frame with items from GTF/GFF file.
 }
 \description{
 Import GTF/GFF files

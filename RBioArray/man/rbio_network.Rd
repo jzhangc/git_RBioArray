@@ -27,7 +27,7 @@ rbio_network(object, ...)
   plot.vertex.size.scale = c(1, 4),
   plot.vertex.label = NULL,
   plot.vertex.label.topvsize = TRUE,
-  plot.vertex.label.topvsize.percent = 0.05,
+  plot.vertex.topvsize.filter = 0.05,
   plot.vertex.color.highlighttopvsize = TRUE,
   plot.vertex.label.size = 0.5,
   plot.vertex.label.color = "black",
@@ -76,6 +76,8 @@ rbio_network(object, ...)
 
 \item{plot.vertex.label.topvsize}{Boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.}
 
+\item{plot.vertex.topvsize.filter}{numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.}
+
 \item{plot.vertex.color.highlighttopvsize}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.}
 
 \item{plot.vertex.label.size}{numeric vector. <TBC: under construction>}
@@ -107,8 +109,6 @@ rbio_network(object, ...)
 \item{plot.title.}{string. <TBC: under construction>}
 
 \item{plot.margins.}{numeric four-vector. <TBC: under construction>}
-
-\item{plot.vertex.label.topvsize.filter}{numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.}
 
 \item{plot.vertex.label.colour}{string vector. <TBC: under construction>}
 }

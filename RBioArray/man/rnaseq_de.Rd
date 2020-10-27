@@ -31,7 +31,8 @@ rnaseq_de(object, ...)
   filter.threshold.cpm = "none",
   filter.threshold.min.sample = NULL,
   annot.group = NULL,
-  library.size.scale.method = "TMM",
+  within.sample.norm.method = c("cpm", "rpkm", "none"),
+  library.size.scale.method = c("TMM", "RLE", "upperquartile", "none"),
   design,
   contra,
   qc.plot = TRUE,
@@ -57,9 +58,11 @@ rnaseq_de(object, ...)
 
 \item{filter.threshold.cpm}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}
 
-\item{annot.group}{Ssample group annotation object. Can be a \code{factor} or \code{vector} object.}
+\item{annot.group}{Sample group annotation object. Can be a \code{factor} or \code{vector} object.}
 
-\item{library.size.scale.method}{Library size scaling method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
+\item{within.sample.norm.method}{Within sample normalization method. Default is \code{none}.}
+
+\item{library.size.scale.method}{aka between sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
 
 \item{design}{Design matrix.}
 
@@ -77,7 +80,7 @@ A list containing core elements of a \code{rbioseq_de} class. The items of a \co
         \code{filter_results}: A list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample}, \code{filter_summary} and \code{filtered_counts}.
                                Note: \code{filtered_counts} is a \code{DGEList} class from \code{edgeR} package.
 
-        \code{normalization_results}
+        \code{normalization_method}
 
         \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.

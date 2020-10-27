@@ -1,16 +1,16 @@
 #' @title rbioseq_clr_ilr_transfo
 #'
-#' @description Log ratio tansformation function for read count data. Row: sample, column: features.
+#' @description Log ratio transformation function for read count data. Row: sample, column: features.
 #' @param x Input read count data matrix.
 #' @param offset Read count offset value added to avoid zero. Default is \code{1}.
 #' @param mode Log ratio transformation method. Options are "clr" (centered log transformation) and "ilr" (isometric log transformation). Default is \code{"clr"}.
 #' @param ilr.method.fast Useful only when \code{mode = "ilr"}. Default is \code{TRUE}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return A data matrix with log ratio transformed values.
-#' @details This funciton is needed as part of the data pre-processing procedure to run multivariate and machine learning analysis featured in \code{RBioFS} package.
+#' @details This function is needed as part of the data pre-processing procedure to run multivariate and machine learning analysis featured in \code{RBioFS} package.
 #'
 #'          As per Quinn et al. (2018), NGS data can be considered as compositional data. As such, data must be transformed for usual statistical analysis and visualization.
-#'          Log ratio transfromation serves such purpose. Note that the number of features will be one less when using "ilr" method.
+#'          Log ratio transformation serves such purpose. Note that the number of features will be one less when using "ilr" method.
 #'
 #'          It is not to be combined with the other normalization methods featured in the \code{\link{rbioseq_DE}}.
 #'
@@ -66,8 +66,10 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = c("clr", "ilr"), ilr.m
 #'
 #' @description Import GTF/GFF files
 #' @param file GTF/GFF file. Add path if needed.
+#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param cluterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @return A matrix with items from GTF/GFF file.
+#' @return A data frame with items from GTF/GFF file.
 #' @details The following items are extracted from GTF/GFF file: \code{chromosome}, \code{gene_id}, \code{gene_type}, and \code{gene_name}.
 #' @examples
 #'
@@ -76,10 +78,11 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = c("clr", "ilr"), ilr.m
 #' }
 #'
 #' @export
-rbioseq_import_gtf <- function(file, verbose = TRUE){
-  # open connection
+rbioseq_import_gtf <- function(file,
+                               verbose = TRUE){
+  # open
   gtf_gff <- file(file)
-
+  # gtf_gff <- file("/Users/jingzhang/OneDrive/my papers/my papers/(published)human_RNAseq_paper/dataset/gtf/gencode_v19.gtf")
   # check if the file can be read
   filecheck <- try(suppressWarnings(open(gtf_gff)), silent = TRUE)
 
@@ -89,44 +92,49 @@ rbioseq_import_gtf <- function(file, verbose = TRUE){
   } else {
     if (verbose) cat("Loading GTF/GFF file (speed depending on the hardware configurations)...")
     tmpfile <- scan(gtf_gff, what = "", quiet = TRUE, sep = "\n")
+    # close connection
+    close(gtf_gff)
     # tmpfile <- data.table::fread(file = file, sep = "\n", header = FALSE)
     tmpfile <- tmpfile[-c(1:5)]
     if (verbose) cat("Done!\n")
     if (verbose) cat("Parsing annotation information (speed depending on the hardware configurations)...")
-    out_mtx <- matrix(ncol = 4, nrow = length(tmpfile))
+
+    out_mtx <- matrix(ncol = 8, nrow = length(tmpfile))
     for (i in seq(length(tmpfile))) {
       tmp <- tmpfile[i]
       # below: column 1-8 parsing
       tmp1 <- unlist(strsplit(tmp, split = "\t"))[1]
+      tmp4_start <- as.numeric(unlist(strsplit(tmp, split = "\t"))[4])
+      tmp5_end <- as.numeric(unlist(strsplit(tmp, split = "\t"))[5])
+      tmp_length <- tmp5_end - tmp4_start + 1
 
       # below: column 9 parsing
       tmp9 <- unlist(strsplit(tmp, split = "\t"))[9]  # column 9, which contains all the annotation info
       tmp9 <- gsub("\"", "", tmp9)  # remove the \" pattern
       tmp9 <- gsub("; ", ";", tmp9)  # remove the first space in each string
       tmp9 <- unlist(strsplit(tmp9, split = ";", fixed = TRUE))
-      tmp9 <- tmp9[c(1, 3, 5)]  # only the fisrt 8 are useful
+      tmp9 <- tmp9[c(1, 2, 3, 5)]  # only the fisrt 8 are useful
       tmp9 <- strsplit(tmp9, split = " ", fixed = TRUE)
-      tmp_colnames9 <- vector(length = 3)  # will be used outside of the loop
-      tmpout9 <- vector(length = 3)
+      tmp_colnames9 <- vector(length = 4)  # will be used outside of the loop
+      tmpout9 <- vector(length = 4)
       for (j in 1:length(tmpout9)){
         tmp_colnames9[j] <- tmp9[[j]][1]
         tmpout9[j] <- tmp9[[j]][2]
       }
       # output
-      tmpout <- c(tmpout9, tmp1)
+      tmpout <- c(tmpout9, tmp1, tmp4_start, tmp5_end, tmp_length)
       out_mtx[i, ] <- tmpout
     }
-    out_colnames <- c(tmp_colnames9, "chromosome")
+    out_colnames <- c(tmp_colnames9, "chromosome", "start", "end", "length")
     colnames(out_mtx) <- out_colnames
     out_mtx <- unique(out_mtx)
+    out_dfm <- as.data.frame(out_mtx)
     if (verbose) cat("Done!\n")
   }
-  # close connection
-  close(gtf_gff)
 
   # output
-  if (verbose) cat(paste(nrow(out_mtx), " records sucessfully loaded from the inoput GTF/GFF file.", sep = ""))
-  return(out_mtx)
+  if (verbose) cat(paste(nrow(out_dfm), " records sucessfully loaded from the inoput GTF/GFF file.", sep = ""))
+  return(out_dfm)
 }
 
 
@@ -136,8 +144,9 @@ rbioseq_import_gtf <- function(file, verbose = TRUE){
 #' @param path Path to raw files. Default is the system working directory.
 #' @param species Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".
 #' @param target.annot.file Annotation file describing filenames and targets, and should be in \code{csv} format.
+#' @param sample_id.var.name Sample id variable name in the \code{target.annot.file}.
 #' @param sample_groups.var.name Sample group annotation variable name in the \code{target.annot.file}.
-#' @param gtf.matrix Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
+#' @param gtf matrix or data.frame. Parsed gtf/gff annotation. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
 #' @param raw.file.ext Raw file extention. Default is \code{".txt"}.
 #' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
 #' @param raw.file.source Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.
@@ -162,7 +171,17 @@ rbioseq_import_gtf <- function(file, verbose = TRUE){
 #'
 #'          \code{chromosome}
 #'
-#'          Since the current HTSeq-count setting is to examine genes, NOT transcript, the \code{transcript_id} item will not be used.
+#'          \code{start}
+#'
+#'          \code{end}
+#'
+#'          \code{length}
+#'
+#'          Since the current HTSeq-count setting is to examine genes, NOT transcript.
+#'          The \code{transcript_id} item is used to find the gene length.
+#'          Specifically, the gene length is the length from the record where \code{transcript_id == gene_id}
+#'
+#'
 #'          Transcript assessment will be added through future updates.
 #'
 #' @return Outputs a \code{rbioseq_count} object with merged read counts from mutliple files, with annotation. The \code{rbioseq_count} object contains the following:
@@ -193,15 +212,17 @@ rbioseq_import_gtf <- function(file, verbose = TRUE){
 #' mrna_count <- rbioseq_import_count(path = "~/dataset/",
 #'                                    species = "hsa",
 #'                                    target.annot.file = "target.csv", sample_groups.var.name = "condition",
-#'                                    gtf.matrix = gtf,
+#'                                    gtf = gtf,
 #'                                    raw.file.ext = ".out", raw.file.sep = "",
 #'                                    raw.file.source = "htseq-count",
 #'                                    parallelComputing = TRUE, clusterType = "FORK")
 #' }
 #' @export
 rbioseq_import_count <- function(path = getwd(), species = NULL,
-                                 target.annot.file = NULL, sample_groups.var.name = NULL,
-                                 gtf.matrix = NULL,
+                                 target.annot.file = NULL,
+                                 sample_id.var.name = NULL,
+                                 sample_groups.var.name = NULL,
+                                 gtf = NULL,
                                  raw.file.ext = ".txt", raw.file.sep = "", raw.file.source = "htseq-count",
                                  parallelComputing = FALSE, clusterType = "FORK",
                                  verbose = TRUE){
@@ -221,8 +242,9 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
   }
 
   if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
-  if (!sample_groups.var.name %in% names(tgt)){
-    stop("Sample group annotation variable not found in the target annotation file.")
+  if (is.null(sample_id.var.name)) stop("Please provide sample_id.var.name.")
+  if (!all(c(sample_groups.var.name, sample_id.var.name) %in% names(tgt))){
+    stop("Sample id or group annotation variables not found in the target annotation file.")
   } else {
     sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
   }
@@ -273,16 +295,24 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
   out_dfm[is.na(out_dfm) == TRUE] <- 0
 
   # check and load gtf/gff annotation
-  if (is.null(gtf.matrix)){
+  if (is.null(gtf)){
     features <- out_dfm[, 1]
   } else {
-    gtf_dfm <- data.frame(gtf.matrix, stringsAsFactors = FALSE)
-    feature_out_dfm <- merge(gtf_dfm, out_dfm)
-    features <- feature_out_dfm[, c("gene_id", "gene_type", "gene_name", "chromosome")]
+    if (any(class(gtf) %in% "matrix")) {
+      gtf_dfm <- as.data.frame(gtf, stringsAsFactors = FALSE)
+    } else {
+      gtf_dfm <- gtf
+    }
+
+    gtf_dfm_working <- gtf_dfm[gtf_dfm$transcript_id %in% out_dfm$gene_id, ]
+    feature_out_dfm <- merge(gtf_dfm_working, out_dfm)
+    features <- feature_out_dfm[, c("gene_id", "gene_type", "gene_name", "chromosome", "start", "end", "length")]
   }
+
   ## output
   counts <- out_dfm[, -1]
   counts <- as.matrix(counts)
+  counts <- counts[, tgt[, sample_id.var.name]]
   lib_size <- colSums(counts)
   out <- list(raw_read_count = counts,
               sample_library_sizes = lib_size,
@@ -290,7 +320,7 @@ rbioseq_import_count <- function(path = getwd(), species = NULL,
               sample_groups = sample.groups,
               genes = features,
               count_source = raw.file.source,
-              GTF_annotation = ifelse(is.null(gtf.matrix), FALSE, TRUE),
+              GTF_annotation = ifelse(is.null(gtf), FALSE, TRUE),
               species = species,
               files_processed = filename)
   class(out) <- "rbioseq_count"
