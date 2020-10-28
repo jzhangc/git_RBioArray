@@ -360,7 +360,8 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
 #' @param plot.vertex.label.dist numeric. <TBC: under construction>
-#' @param plot.edge.filter numeric: 0-1. Top percentage edges to keep. Default is \code{0.05}.
+#' @param plot.edge.filter numeric: 0-1. Percentage edges to keep. Default is \code{0.05}.
+#' @param plot.edge.filter.direction string. Edge filter direction, top or bottom. Default is \code{"top"}.
 #' @param plot.edge.weight numeric vector. <TBC: under construction>
 #' @param plot.edge.weight.scale numeric two-vector. <TBC: under construction>
 #' @param plot.edge.arrow.mode Boolean. <TBC: under construction>
@@ -416,6 +417,7 @@ rbio_network.default <- function(g,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
                                  plot.edge.filter = 0.05,
+                                 plot.edge.filter.direction = c("top", "bottom"),
                                  plot.edge.weight = NULL,
                                  plot.edge.weight.scale = c(1, 4),
                                  plot.edge.arrow.mode = FALSE,
@@ -440,14 +442,15 @@ rbio_network.default <- function(g,
     }
   }
 
-  colour_scheme <- match.arg(colour_scheme, c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2", "Set3"))
+  colour_scheme <- match.arg(colour_scheme)
   if (!any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
   if (is.null(export.name)){
     export.name <- deparse(substitute(object))
   } else {
     export.name <- export.name
   }
-  plot.layout_type <- match.arg(plot.layout_type, c("circular", "fr", "tree", "nicely", "sphere"))
+  plot.layout_type <- match.arg(plot.layout_type)
+  plot.edge.filter.direction <- match.arg(plot.edge.filter.direction)
 
   # - initial network  -
   if (!is.null(g_membership)){
@@ -512,7 +515,12 @@ rbio_network.default <- function(g,
   g <- set_vertex_attr(g, name = "vframecolour", value = rep("black", times = length(V(g))))
 
   # - filter edges -
-  g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = 1-plot.edge.filter)])
+  if (plot.edge.filter.direction == "top") {
+    g <- delete_edges(g, E(g)[E(g)$weight <= quantile(E(g)$weight, p = 1-plot.edge.filter)])
+  } else {
+    g <- delete_edges(g, E(g)[E(g)$weight >= quantile(E(g)$weight, p = plot.edge.filter)])
+  }
+
   edge_df <- as.data.frame(get.edgelist(g))
   if (!is.null(g_membership)) {
     if (plot.highlight_membership) {
@@ -564,7 +572,7 @@ rbio_network.default <- function(g,
   } else {
     for (i in 1:length(unique(V(g)$membership))) {
       is_member <- V(g)$membership == unique(V(g)$membership)[i]
-      to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
+      to_remove <- V(g)$vsize[is_member] <= quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
 
       # V(g)$vlabel[is_member][to_remove] <- ""
 

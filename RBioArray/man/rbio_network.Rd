@@ -33,6 +33,7 @@ rbio_network(object, ...)
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
   plot.edge.filter = 0.05,
+  plot.edge.filter.direction = c("top", "bottom"),
   plot.edge.weight = NULL,
   plot.edge.weight.scale = c(1, 4),
   plot.edge.arrow.mode = FALSE,
@@ -84,7 +85,9 @@ rbio_network(object, ...)
 
 \item{plot.vertex.label.dist}{numeric. <TBC: under construction>}
 
-\item{plot.edge.filter}{numeric: 0-1. Top percentage edges to keep. Default is \code{0.05}.}
+\item{plot.edge.filter}{numeric: 0-1. Percentage edges to keep. Default is \code{0.05}.}
+
+\item{plot.edge.filter.direction}{string. Edge filter direction, top or bottom. Default is \code{"top"}.}
 
 \item{plot.edge.weight}{numeric vector. <TBC: under construction>}
 
