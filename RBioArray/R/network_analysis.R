@@ -516,9 +516,9 @@ rbio_network.default <- function(g,
 
   # - filter edges -
   if (plot.edge.filter.direction == "top") {
-    g <- delete_edges(g, E(g)[E(g)$weight <= quantile(E(g)$weight, p = 1-plot.edge.filter)])
+    g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = 1-plot.edge.filter)])
   } else {
-    g <- delete_edges(g, E(g)[E(g)$weight >= quantile(E(g)$weight, p = plot.edge.filter)])
+    g <- delete_edges(g, E(g)[E(g)$weight > quantile(E(g)$weight, p = plot.edge.filter)])
   }
 
   edge_df <- as.data.frame(get.edgelist(g))
@@ -572,7 +572,7 @@ rbio_network.default <- function(g,
   } else {
     for (i in 1:length(unique(V(g)$membership))) {
       is_member <- V(g)$membership == unique(V(g)$membership)[i]
-      to_remove <- V(g)$vsize[is_member] <= quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
+      to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
 
       # V(g)$vlabel[is_member][to_remove] <- ""
 
