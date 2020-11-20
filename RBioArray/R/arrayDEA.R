@@ -564,7 +564,6 @@ rbioarray_filter_combine <- function(object,
     out_E <- flt_E_avg
     out_genes <- flt_genes_avg
   }
-
   ## output
   if (verbose) cat("Constucting rbioarray_flist...")
   filter.results <- list(neg_control_used = neg_control_used,
