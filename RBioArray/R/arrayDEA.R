@@ -158,16 +158,16 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     }
 
     # set up output annotation information
-    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
-    genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
+    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names, drop = FALSE]
+    genes <- genes[, !names(genes) %in% c("merge_id", "row_id"), drop = FALSE]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
   } else {
-    E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name]) # remove annotation columns
+    E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name, drop = FALSE]) # remove annotation columns
     rownames(E) <- NULL
 
     cat("Note: extra.gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
     gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
-    genes <- raw.dataframe[, raw.annot.var.name]
+    genes <- raw.dataframe[, raw.annot.var.name, drop = FALSE]
     gene.symbol <- FALSE
   }
 
@@ -500,7 +500,7 @@ rbioarray_filter_combine <- function(object,
 
   # filter
   flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name]
+  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name, drop = FALSE]
   if (verbose) cat("Done!\n")
 
   ## averaging technical replicates
