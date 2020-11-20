@@ -464,6 +464,8 @@ rbio_network.default <- function(g,
     names(membership_colours) <- names(g_membership)
     V(g)$color <- membership_colours
     V(g)$membership <- as_membership(g_membership)
+  } else {
+    V(g)$color <- rep("blue", times = length(V(g)))
   }
 
   # - edge weight and vertices size rescaling -
@@ -543,6 +545,8 @@ rbio_network.default <- function(g,
         }
       }
     }
+  } else {
+    E(g)$color <-rep("#EBECF0", times = nrow(edge_df))
   }
 
   # - filer vertices -

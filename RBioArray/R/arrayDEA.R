@@ -506,7 +506,7 @@ rbioarray_filter_combine <- function(object,
   ## averaging technical replicates
   if (verbose) cat("Averaging technical replicates...")
   flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
-  flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), ])
+  flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), , drop = FALSE])
   if (verbose) cat("Done!\n")
 
   ## combine duplicate genes if set

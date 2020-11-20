@@ -199,6 +199,7 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
                                                  sigplot.width = 7, sigplot.height = 7, verbose = TRUE){
   ## check arguments
   cor.method <- match.arg(tolower(cor.method), c("pearson", "spearman"))
+  hclust.method <- match.arg(hclust.method)
 
   if (n != "all" && n %% 1 != 0) stop("Argument n needs to be either \"all\" or an integer number.")
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
