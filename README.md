@@ -80,6 +80,7 @@ Update log
       
       - Updates to microarray functions
         - rbioarray_transfo_normalize() now only supports quantile method for normalization
+        - rbioarray_filter_combine() now can deal with "none or all" filtered situations
 
       - Updates to RNAseq functions
         - rbioseq_import_count() function now requre sample id variable name

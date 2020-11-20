@@ -486,7 +486,16 @@ rbioarray_filter_combine <- function(object,
     filter.threshold.min.sample <- min(table(object$sample_groups))
   }
   isexpr <- rowSums(object$E > LE_cutoff) >= filter.threshold.min.sample
+
   flt_summary <- as.numeric(table(isexpr))
+  isexpr_fact <- factor(isexpr, levels = unique(isexpr))
+  if (length(levels(isexpr_fact)) == 1){
+    if (levels(isexpr_fact) == "TRUE"){
+      flt_summary <- c(0, flt_summary)
+    } else {
+      flt_summary <- c(flt_summary, 0)
+    }
+  }
   names(flt_summary) <- c("filtered", "remaning")
 
   # filter
