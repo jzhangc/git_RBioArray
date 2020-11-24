@@ -87,7 +87,7 @@ Update log
         - The "rbioseq_count" object now have the same sample order for raw_read_count and targets
         - rbioseq_import_gtf() not outputs a data frame
         - rbioseq_import_gtf() now outputs feature length
-        - rnaseq_de() now supports CPM and RPKM within sample normalization
+        - rnaseq_de() now supports CPM and RPKM within sample normalization, ONLY for mRNA-seq (rbioseq_count objects), NOT miRNA-seq (mir_count object)
         - A bug fixed for rnaseq_de() where filtering not working properly
       
       - Updates to DE significant test functions

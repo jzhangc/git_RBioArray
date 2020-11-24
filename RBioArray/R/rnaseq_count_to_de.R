@@ -25,7 +25,7 @@ rnaseq_de <- function(object, ...){
 #' @rdname rnaseq_de
 #' @method rnaseq_de mir_count
 #' @param object A \code{mir_count} object from the \code{mirProcess} function of \code{RBioMIR} package.
-#' @param filter.threshold.min.count Minimum count for the smallest library for filter thresholding. Default is \code{10}.
+#' @param filter.threshold.min.count Minimum count for the smallest library for filter threshold. Default is \code{10}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param ... Additional arguments for \code{\link{rnaseq_de.default}}.
 #'
@@ -33,6 +33,7 @@ rnaseq_de <- function(object, ...){
 rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
   ## for setting up comparison groups info and minimum sample number
   annot.group <- object$sample_groups
+  if (within.sample.norm.method == "rpkm") stop("within.sample.norm.method = \"rpkm\" is not supported for mir_count object")
 
   ## construct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
@@ -59,7 +60,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
   ## for setting up comparison groups info and minimum sample number
   annot.group <- object$sample_groups
 
-  ## contruct rbioseq_de object
+  ## construct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
                            y.gene_id.var.name = "gene_id", y.gene_symbol.var.name = "gene_name",
                            filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
