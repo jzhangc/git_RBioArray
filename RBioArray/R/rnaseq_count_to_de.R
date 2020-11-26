@@ -98,9 +98,9 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'          using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
 #'
 #'
-#'          It absolutely important to note that VOOM (other any other full-fledged RNA-seq methods like DEseq2) DOES NOT use FPKM for DE analysis
+#'          It absolutely important to note that VOOM (or any other full-fledged RNA-seq methods like DEseq2) DOES NOT use FPKM for DE analysis
 #'          VOOM uses logCPM with library size scaling, e.g. TMM.
-#'          In fact, FPKM/RPKM/TPM are not suiable for DE anlaysis as they are designed to compare WITHIN sample genes, i.e. gene A vs gene B in one sample
+#'          In fact, FPKM/RPKM/TPM are not suiable for DE anlaysis as they are designed to compare WITHIN sample genes, i.e. gene A vs gene B in one sample.
 #'          Further, users DO NOT need to convert their raw reads beforehand. VOOM will do the conversion for you.
 #'
 #'          SO, ONLY supply raw read counts to the function.
