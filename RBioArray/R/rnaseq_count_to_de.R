@@ -83,12 +83,11 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
 #' @param annot.group Sample group annotation object. Can be a \code{factor} or \code{vector} object.
-#' @param within.sample.norm.method Within sample normalization method. Default is \code{none}.
 #' @param library.size.scale.method aka between sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.
 #' @param design Design matrix.
 #' @param contra Contrast matrix.
 #' @param qc.plot QC plot for the input read counts
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details \code{filter.threshold.cpm.count} uses CPM (counts per million) as the basis for filtering. The rule of thumb is to filter reads independently from the groupping information.
 #'
 #'          The default is based on the paper by Chen et al (2016):
@@ -97,6 +96,14 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'
 #'          Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
 #'          using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
+#'
+#'
+#'          It absolutely important to note that VOOM (other any other full-fledged RNA-seq methods like DEseq2) DOES NOT use FPKM for DE analysis
+#'          VOOM uses logCPM with library size scaling, e.g. TMM.
+#'          In fact, FPKM/RPKM/TPM are not suiable for DE anlaysis as they are designed to compare WITHIN sample genes, i.e. gene A vs gene B in one sample
+#'          Further, users DO NOT need to convert their raw reads beforehand. VOOM will do the conversion for you.
+#'
+#'          SO, ONLY supply raw read counts to the function.
 #'
 #' @return A list containing core elements of a \code{rbioseq_de} class. The items of a \code{rbioseq_de} class are following:
 #'
@@ -132,7 +139,6 @@ rnaseq_de.default <- function(x, y = NULL,
                               y.gene_symbol.var.name = "genes",
                               filter.threshold.cpm = "none",
                               filter.threshold.min.sample = NULL, annot.group = NULL,
-                              within.sample.norm.method = c("cpm", "rpkm", "none"),
                               library.size.scale.method = c("TMM", "RLE", "upperquartile", "none"),
                               design, contra, qc.plot = TRUE, verbose = TRUE){
   ## check the key arguments
@@ -184,7 +190,6 @@ rnaseq_de.default <- function(x, y = NULL,
     stop("Please set contrast object.")
   }
   # no need to put choices argument below as the match.arg grabs from the top
-  within.sample.norm.method <- match.arg(within.sample.norm.method)
   library.size.scale.method <- match.arg(library.size.scale.method)
 
   ## extract coefficients
@@ -231,21 +236,15 @@ rnaseq_de.default <- function(x, y = NULL,
     filter_results <- NULL
   }
 
-  # library size scaling normalization
-  # if (within.sample.norm.method == "cpm") {
-  #   dge$counts <- cpm(dge$counts)
-  # } else if (within.sample.norm.method == "rpkm") {
-  #   dge$counts <- rpkm(dge$counts, gene.length = as.numeric(y$length)[isexpr])
-  # }
-  new_counts <- switch(within.sample.norm.method,
-                       cpm = cpm(dge$counts),
-                       rpkm = rpkm(dge$counts, gene.length = as.numeric(y$length)[isexpr]),
-                       none = dge$counts)
-  dge$counts <- new_counts
+  # library size scaling normalization: within sample
+  # new_counts <- switch(within.sample.norm.method,
+  #                      cpm = cpm(dge$counts),
+  #                      rpkm = rpkm(dge$counts, gene.length = as.numeric(y$length)[isexpr]),
+  #                      none = dge$counts)
+  # dge$counts <- new_counts
   dgenormf <- calcNormFactors(dge, method = library.size.scale.method)  # between samples
 
   # between-genes: Voom normalization with quality weights
-  # vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalization = "quantile") # old
   vmwt <- voomWithQualityWeights(dgenormf, design = design, plot = qc.plot, normalize.method = "quantile")
   if (verbose) cat("DONE!\n") # message
 
@@ -266,7 +265,7 @@ rnaseq_de.default <- function(x, y = NULL,
   comparisons <- list(comparisons = cf, comparison_levels = contra_levels)
 
   out <- list(filter_results = filter_results,
-              normalization_method = list(within_sample_method = within.sample.norm.method,
+              normalization_method = list(within_sample_method = "(automatic) CPM, logCPM",
                                           library_scalling = library.size.scale.method,
                                           between_genes = "voom process with quantile normalization"),
               normalized_data = vmwt,
@@ -291,7 +290,7 @@ print.rbioseq_de <- function(x, ...){
   cat(paste0("\tRemaining genes: ", x$filter_results$filter_summary[2], "\n"))
   cat("\n")
   cat("Reads normalization methods: \n")
-  cat(paste0("\tWithin sample method: ", x$normalization_method$within_sample_method, "\n"))
+  cat(paste0("\tWithin sample method (automatic): CPM, logCPM. \n"))
     cat(paste0("\tLibrary size-scaling: ", x$normalization_method$library_scalling, "\n"))
   cat(paste0("\tBetween-genes: ", x$normalization_method$between_genes, "\n"))
   cat("\n")

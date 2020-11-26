@@ -31,7 +31,6 @@ rnaseq_de(object, ...)
   filter.threshold.cpm = "none",
   filter.threshold.min.sample = NULL,
   annot.group = NULL,
-  within.sample.norm.method = c("cpm", "rpkm", "none"),
   library.size.scale.method = c("TMM", "RLE", "upperquartile", "none"),
   design,
   contra,
@@ -60,8 +59,6 @@ rnaseq_de(object, ...)
 
 \item{annot.group}{Sample group annotation object. Can be a \code{factor} or \code{vector} object.}
 
-\item{within.sample.norm.method}{Within sample normalization method. Default is \code{none}.}
-
 \item{library.size.scale.method}{aka between sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
 
 \item{design}{Design matrix.}
@@ -70,7 +67,7 @@ rnaseq_de(object, ...)
 
 \item{qc.plot}{QC plot for the input read counts}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 A differential expression result object.
@@ -111,6 +108,14 @@ Generic RNAseq statistical analysis function
 
          Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
          using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
+
+
+         It absolutely important to note that VOOM (other any other full-fledged RNA-seq methods like DEseq2) DOES NOT use FPKM for DE analysis
+         VOOM uses logCPM with library size scaling, e.g. TMM.
+         In fact, FPKM/RPKM/TPM are not suiable for DE anlaysis as they are designed to compare WITHIN sample genes, i.e. gene A vs gene B in one sample
+         Further, users DO NOT need to convert their raw reads beforehand. VOOM will do the conversion for you.
+
+         SO, ONLY supply raw read counts to the function.
 }
 \examples{
 
