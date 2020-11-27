@@ -56,6 +56,7 @@ Update log
         
       - Updates to RNAseq functions
         - Relevant functions updated with continuous outcome support
+        - rnaseq_de() output "rbioseq_de" class now includes "voom_output" and "calcNormFactors_outpout" (filtered raw count with lib size)
         
       - Revamp GS functions
       

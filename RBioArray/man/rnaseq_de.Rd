@@ -79,7 +79,11 @@ A list containing core elements of a \code{rbioseq_de} class. The items of a \co
 
         \code{normalization_method}
 
-        \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
+        \code{calcNormFactors_output}: \code{edgeR} function \code{calcNormFactors} output. A DGElist with \code{object$samples$norm.factors}.
+                                       Good for \code{cpm()} conversion for PCA, clustering, etc. The data is filtered.
+                                       A "filtered raw count with lib size" object.
+
+        \code{voom_output}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.
 
         \code{genes_annotation.gene_id.var_name}

@@ -112,7 +112,11 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'
 #'         \code{normalization_method}
 #'
-#'         \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
+#'         \code{calcNormFactors_output}: \code{edgeR} function \code{calcNormFactors} output. A DGElist with \code{object$samples$norm.factors}.
+#'                                        Good for \code{cpm()} conversion for PCA, clustering, etc. The data is filtered.
+#'                                        A "filtered raw count with lib size" object.
+#'
+#'         \code{voom_output}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
 #'                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.
 #'
 #'         \code{genes_annotation.gene_id.var_name}
@@ -268,12 +272,14 @@ rnaseq_de.default <- function(x, y = NULL,
               normalization_method = list(within_sample_method = "(automatic) CPM, logCPM",
                                           library_scalling = library.size.scale.method,
                                           between_genes = "voom process with quantile normalization"),
-              normalized_data = vmwt,
+              calcNormFactors_output = dgenormf,
+              voom_output = vmwt,
               genes_annotation.gene_id.var_name = y.gene_id.var.name,
               genes_annotation.gene_symbol.var_name = y.gene_symbol.var.name,
               F_stats = f_stats,
               DE_results = de_list,
               comparisons = comparisons)
+  class(out) <- "rbioseq_de"
   return(out)
 }
 
