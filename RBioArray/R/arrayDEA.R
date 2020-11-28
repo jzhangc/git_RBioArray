@@ -1,8 +1,8 @@
 #' @title rbioarray_rlist
 #'
-#' @description Function to constuct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
+#' @description Function to construct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
 #' @param object Input object.
-#' @details When \code{object} is missing, the default fuction is used - make sure to pass all the arguments.
+#' @details When \code{object} is missing, the default function is used - make sure to pass all the arguments.
 #'
 #'          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 #'
@@ -10,7 +10,7 @@
 #'
 #'         \code{E}: raw expression matrix (i.e. hybridization signal)
 #'
-#'         \code{E_background}: background signal marix if applicable
+#'         \code{E_background}: background signal matrix if applicable
 #'
 #'         \code{raw_file.gene_annotation.var_name}
 #'
@@ -25,7 +25,7 @@
 #'         \code{genes_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 #'
 #'         \code{genes_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
-#'                                                    This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
+#'                                                    This is important if starting with \code{EListRaw} object, since array positional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
 #'
 #'         \code{targets}: the sample annotation data frame.
 #'
@@ -97,7 +97,8 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
 #' @param sample_groups.var.name The variable name for sample grouping information from \code{target.annot.file}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
-#' @details The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package.
+#' @details The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package,
+#'          and using \code{bgc.method = "subtract"} for the \link\code{rbioarray_transfo_normalize()} function.
 #'
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 #'
