@@ -36,7 +36,7 @@ rbioarray_rlist(object, ...)
 
 \item{raw.dataframe}{Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.}
 
-\item{raw.background.signal.matrix}{A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.}
+\item{raw.background.signal.matrix}{A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.}
 
 \item{raw.annot.var.name}{A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.}
 
@@ -62,9 +62,9 @@ rbioarray_rlist(object, ...)
 
 \item{target.annot.file.path}{The directory for \code{target.annot.file}. Default is \code{getwd()}.}
 
-\item{sample_groups.var.name}{The variable name for sample groupping information from \code{target.annot.file}.}
+\item{sample_groups.var.name}{The variable name for sample grouping information from \code{target.annot.file}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the following items:
@@ -100,7 +100,7 @@ When \code{object} is missing, the default fuction is used - make sure to pass a
 
          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 
-The \code{raw.background.signal.matrix} is usefual when processing a \code{EListRaw} class object from \code{limma} package.
+The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package.
 
          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 

@@ -82,7 +82,7 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @rdname rbioarray_rlist
 #' @method rbioarray_rlist default
 #' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
-#' @param raw.background.signal.matrix A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
+#' @param raw.background.signal.matrix A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.
 #' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
 #' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
 #' @param extra.gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
@@ -95,9 +95,9 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param gene.annot.rm.var.name Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.
 #' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
 #' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
-#' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details The \code{raw.background.signal.matrix} is usefual when processing a \code{EListRaw} class object from \code{limma} package.
+#' @param sample_groups.var.name The variable name for sample grouping information from \code{target.annot.file}.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package.
 #'
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 #'
