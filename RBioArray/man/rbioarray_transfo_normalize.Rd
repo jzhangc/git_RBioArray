@@ -62,8 +62,13 @@ Data log transformation and normalization function for microarray.
 }
 \details{
 The expression matrix will be normalized and then log2 transformed for output.
-         The function currently only supports \code{"quantile"} method.
 
+         A note on the \code{bgc.method}: "subtract" or "normexp"?
+         In most cases, we use "normexp" (or "auto" without providing a background matrix).
+         However the \code{limma} manual provided a table of background matrix information for the popular microarray platforms.
+         If available, we can use "subtract" (or "auto" with the correct background matrix).
+
+         The function currently only supports \code{"quantile"} method for between array normalization.
          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
             However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning this function will not
@@ -84,7 +89,7 @@ The expression matrix will be normalized and then log2 transformed for output.
          unlogged data or converts \code{ElistRaw} objects into to a \code{matrix}.
 
          The \code{limma} author suggests doing quantile on logged or unlogged data remains to be debatable, but "slowly leaning towards"
-         quantile on raw and then log transfom. As such, the \code{rbioarray_transfo_normalize}will first conduct normalization then log2
+         quantile on raw and then log transform. As such, the \code{rbioarray_transfo_normalize}will first conduct normalization then log2
          transform the data.
 
 The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.

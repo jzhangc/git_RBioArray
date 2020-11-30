@@ -98,7 +98,7 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param sample_groups.var.name The variable name for sample grouping information from \code{target.annot.file}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package,
-#'          and using \code{bgc.method = "subtract"} for the \link\code{rbioarray_transfo_normalize()} function.
+#'          and using \code{bgc.method = "subtract"} for the \code{\link{rbioarray_transfo_normalize()}} function.
 #'
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 #'
@@ -264,8 +264,13 @@ print.rbioarray_rlist <- function(x, ...){
 #' @param object Input object with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
 #' @details The expression matrix will be normalized and then log2 transformed for output.
-#'          The function currently only supports \code{"quantile"} method.
 #'
+#'          A note on the \code{bgc.method}: "subtract" or "normexp"?
+#'          In most cases, we use "normexp" (or "auto" without providing a background matrix).
+#'          However the \code{limma} manual provided a table of background matrix information for the popular microarray platforms.
+#'          If available, we can use "subtract" (or "auto" with the correct background matrix).
+#'
+#'          The function currently only supports \code{"quantile"} method for between array normalization.
 #'          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
 #'          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
 #'             However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning this function will not
@@ -286,7 +291,7 @@ print.rbioarray_rlist <- function(x, ...){
 #'          unlogged data or converts \code{ElistRaw} objects into to a \code{matrix}.
 #'
 #'          The \code{limma} author suggests doing quantile on logged or unlogged data remains to be debatable, but "slowly leaning towards"
-#'          quantile on raw and then log transfom. As such, the \code{rbioarray_transfo_normalize}will first conduct normalization then log2
+#'          quantile on raw and then log transform. As such, the \code{rbioarray_transfo_normalize}will first conduct normalization then log2
 #'          transform the data.
 #'
 #'

@@ -101,7 +101,7 @@ When \code{object} is missing, the default function is used - make sure to pass 
          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 
 The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package,
-         and using \code{bgc.method = "subtract"} for the \link\code{rbioarray_transfo_normalize()} function.
+         and using \code{bgc.method = "subtract"} for the \code{\link{rbioarray_transfo_normalize()}} function.
 
          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 
