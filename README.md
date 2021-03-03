@@ -65,6 +65,9 @@ Update log
         - Combine documentation for methods of different classes 
     
     (ADDED)
+      - New RNAseq functions
+        - rbioseq_gtf(): a faster function to replace rbioseq_import_gtf()
+
       - New clustering funcions:
         - K means clustering function rbio_kmeans()
           - K means clustering plotting function with PCA functionality rbio_kmeans_plot() added
@@ -86,8 +89,10 @@ Update log
       - Updates to RNAseq functions
         - rbioseq_import_count() function now requre sample id variable name
         - The "rbioseq_count" object now have the same sample order for raw_read_count and targets
-        - rbioseq_import_gtf() not outputs a data frame
-        - rbioseq_import_gtf() now outputs feature length
+        - Updates to rbioseq_import_gtf()
+          - it is now a legacy function for comptability
+          - rbioseq_import_gtf() not outputs a data frame
+          - rbioseq_import_gtf() now outputs feature length
         - A bug fixed for rnaseq_de() where filtering not working properly
       
       - Updates to DE significant test functions

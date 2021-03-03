@@ -62,79 +62,94 @@ rbioseq_clr_ilr_transfo <- function(x, offset = 1, mode = c("clr", "ilr"), ilr.m
 }
 
 
-#' Title rbioseq_import_gtf
+#' Title rbioseq_gtf
 #'
 #' @description Import GTF/GFF files
 #' @param file GTF/GFF file. Add path if needed.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param n_cores Only set when \code{parallelComputing = TRUE}, number of cores to use. When \code{NULL}, the function uses max-1.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @return A data frame with items from GTF/GFF file.
-#' @details The following items are extracted from GTF/GFF file: \code{chromosome}, \code{gene_id}, \code{gene_type}, and \code{gene_name}.
+#' @details The following items are extracted from GTF/GFF file: \code{gene_id}, \code{gene_name}, \code{transcript_id}, \code{transcript_name}, \code{chr}, \code{type}, .
+#' @import foreach
+#' @import doParallel
+#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom data.table fread
 #' @examples
 #'
 #' \dontrun{
-#' gtf <- rbioseq_import_gtf(file = "gencode_v19.gtf")
+#' gtf <- rbioseq_gtf(file = "gencode_v19.gtf")
 #' }
 #'
 #' @export
-rbioseq_import_gtf <- function(file,
-                               verbose = TRUE){
-  # open
-  gtf_gff <- file(file)
-  # gtf_gff <- file("/Users/jingzhang/OneDrive/my papers/my papers/(published)human_RNAseq_paper/dataset/gtf/gencode_v19.gtf")
-  # check if the file can be read
-  filecheck <- try(suppressWarnings(open(gtf_gff)), silent = TRUE)
-
-  # load file
+rbioseq_gtf <- function(file, verbose = TRUE, parallelComputing = FALSE, clusterType = "FORK", n_cores = NULL){
+  # -- check file --
+  f_check <- file(file)
+  filecheck <- try(suppressWarnings(open(f_check)), silent = TRUE)
+  close(f_check)
   if (any(class(filecheck) == "try-error")) {
-    stop("Bad gtf/gff file.")
-  } else {
-    if (verbose) cat("Loading GTF/GFF file (speed depending on the hardware configurations)...")
-    tmpfile <- scan(gtf_gff, what = "", quiet = TRUE, sep = "\n")
-    # close connection
-    close(gtf_gff)
-    # tmpfile <- data.table::fread(file = file, sep = "\n", header = FALSE)
-    tmpfile <- tmpfile[-c(1:5)]
-    if (verbose) cat("Done!\n")
-    if (verbose) cat("Parsing annotation information (speed depending on the hardware configurations)...")
-
-    out_mtx <- matrix(ncol = 8, nrow = length(tmpfile))
-    for (i in seq(length(tmpfile))) {
-      tmp <- tmpfile[i]
-      # below: column 1-8 parsing
-      tmp1 <- unlist(strsplit(tmp, split = "\t"))[1]
-      tmp4_start <- as.numeric(unlist(strsplit(tmp, split = "\t"))[4])
-      tmp5_end <- as.numeric(unlist(strsplit(tmp, split = "\t"))[5])
-      tmp_length <- tmp5_end - tmp4_start + 1
-
-      # below: column 9 parsing
-      tmp9 <- unlist(strsplit(tmp, split = "\t"))[9]  # column 9, which contains all the annotation info
-      tmp9 <- gsub("\"", "", tmp9)  # remove the \" pattern
-      tmp9 <- gsub("; ", ";", tmp9)  # remove the first space in each string
-      tmp9 <- unlist(strsplit(tmp9, split = ";", fixed = TRUE))
-      tmp9 <- tmp9[c(1, 2, 3, 5)]  # only the fisrt 8 are useful
-      tmp9 <- strsplit(tmp9, split = " ", fixed = TRUE)
-      tmp_colnames9 <- vector(length = 4)  # will be used outside of the loop
-      tmpout9 <- vector(length = 4)
-      for (j in 1:length(tmpout9)){
-        tmp_colnames9[j] <- tmp9[[j]][1]
-        tmpout9[j] <- tmp9[[j]][2]
-      }
-      # output
-      tmpout <- c(tmpout9, tmp1, tmp4_start, tmp5_end, tmp_length)
-      out_mtx[i, ] <- tmpout
-    }
-    out_colnames <- c(tmp_colnames9, "chromosome", "start", "end", "length")
-    colnames(out_mtx) <- out_colnames
-    out_mtx <- unique(out_mtx)
-    out_dfm <- as.data.frame(out_mtx)
-    if (verbose) cat("Done!\n")
+    stop("Bad gtf file.")
   }
 
-  # output
-  if (verbose) cat(paste(nrow(out_dfm), " records sucessfully loaded from the inoput GTF/GFF file.", sep = ""))
-  return(out_dfm)
+  # -- open file --
+  if (verbose) cat("Loading GTF file (speed depending on the hardware configurations)...")
+  gtf <- suppressWarnings(fread(file, verbose = FALSE))
+  setnames(gtf , names(gtf), c("chr", "source", "type", "start", "end", "score", "strand", "phase", "attributes") )
+  if (verbose) cat("Done!\n")
+  if (verbose) cat("Parsing annotation information (speed depending on the hardware configurations)...")
+  # -- attributes --
+  att <- gtf$attributes
+  attr_names <- c("gene_id", "gene_name" , "transcript_id", "transcript_type", "transcript_name")
+  if (parallelComputing) {
+    # set clusters
+    if (!is.null(n_cores)) {
+      n_cores = n_cores
+    } else {
+      n_cores <- detectCores() - 1
+    }
+    cl <- makeCluster(n_cores, clusterType = clusterType)
+    registerDoParallel(cl)
+    on.exit(stopCluster(cl)) # close connect when exiting the function
+
+    # computing
+    att_df <- foreach(i = att, .combine = "rbind") %dopar% {
+      input_r <- i
+      tmpatt <- strsplit(input_r, "; ")
+      tmpatt <- gsub("\"", "", unlist(tmpatt))
+
+      tmp_o <- foreach(j = attr_names, .combine = "cbind") %do% {
+        if(!is.null(unlist(strsplit(tmpatt[grep(j, tmpatt)], " ")))){
+          return(unlist(strsplit(tmpatt[grep(j, tmpatt)], " "))[2])
+        }else{
+          return(NA)
+        }
+      }
+      tmp_o
+    }
+  } else {
+    att_df <- foreach(i = att, .combine = "rbind") %do% {
+      input_r <- i
+      tmpatt <- strsplit(input_r, "; ")
+      tmpatt <- gsub("\"", "", unlist(tmpatt))
+
+      tmp_o <- foreach(j = attr_names, .combine = "cbind") %do% {
+        if(!is.null(unlist(strsplit(tmpatt[grep(j, tmpatt)], " ")))){
+          return(unlist(strsplit(tmpatt[grep(j, tmpatt)], " "))[2])
+        }else{
+          return(NA)
+        }
+      }
+      tmp_o
+    }
+  }
+  colnames(att_df) <- attr_names
+  if (verbose) cat("Done!\n")
+
+  # -- out --
+  out <- data.frame(cbind(att_df, gtf[, c("chr", "type")]))
+  out <- unique(out)
+  return(out)
 }
 
 
