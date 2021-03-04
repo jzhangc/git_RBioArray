@@ -388,10 +388,19 @@ rbio_supervised_hcluster <- function(object,
   for (i in seq(length(comparisons))) {
     # set up plotting matrix
     is_test <- thresholding_summary[[i]]
-    de_probes <- object$input_data$full_de_results[[comparisons[i]]]$PROBE_ID[is_test]
-    plt_dfm <- dfm[dfm$PROBE_ID %in% de_probes, ]
-    if (gene_symbol.only) {
-      plt_dfm <- plt_dfm[complete.cases(plt_dfm$SYMBOL), ]
+
+    if (is.null(object$input_data$full_de_results[[comparisons[i]]]$PROBE_ID)) {  # for RNAseq data
+      de_probes <- object$input_data$full_de_results[[comparisons[i]]]$gene_id[is_test]
+      plt_dfm <- dfm[dfm$gene_id %in% de_probes, ]
+      if (gene_symbol.only) {
+        plt_dfm <- plt_dfm[complete.cases(plt_dfm$gene_name), ]
+      }
+    } else {
+      de_probes <- object$input_data$full_de_results[[comparisons[i]]]$PROBE_ID[is_test]
+      plt_dfm <- dfm[dfm$PROBE_ID %in% de_probes, ]
+      if (gene_symbol.only) {
+        plt_dfm <- plt_dfm[complete.cases(plt_dfm$SYMBOL), ]
+      }
     }
 
     plt_mtx <- as.matrix(plt_dfm[, !names(plt_dfm) %in% names(genes)])
@@ -432,9 +441,16 @@ rbio_supervised_hcluster <- function(object,
   f_de_probes <- object$input_data$full_de_results[["F_stats"]]$PROBE_ID[f_is_test]
   f_plt_dfm <- dfm[dfm$PROBE_ID %in% f_de_probes, ]
 
-  if (gene_symbol.only) {
-    f_plt_dfm <- f_plt_dfm[complete.cases(f_plt_dfm$SYMBOL), ]
+  if (is.null(f_plt_dfm$SYMBOL)){  # for RNAseq data
+    if (gene_symbol.only) {
+      f_plt_dfm <- f_plt_dfm[complete.cases(f_plt_dfm$gene_name), ]
+    }
+  } else {
+    if (gene_symbol.only) {
+      f_plt_dfm <- f_plt_dfm[complete.cases(f_plt_dfm$SYMBOL), ]
+    }
   }
+
 
   f_plt_mtx <- as.matrix(f_plt_dfm[, !names(f_plt_dfm) %in% names(genes)])
   colnames(f_plt_mtx) <- sample_id.vector

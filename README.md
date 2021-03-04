@@ -115,6 +115,7 @@ Update log
         - hcluster methods added for rbio_unsupervised_corcluster() and rbio_supervised_corcluster()
         - Manual page updated for rbio_unsupervised_corcluster(), along with its S3 class types
         - Manual page updated for rbio_unsupervised_hcluster(), along with its S3 class types
+        - Fixed a bug for rbio_supervised_hcluster() where RNAseq data cannot be processed
       
       - Other fixes
         - Typos fixed for manual pages
