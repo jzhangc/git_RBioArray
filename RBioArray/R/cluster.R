@@ -438,8 +438,14 @@ rbio_supervised_hcluster <- function(object,
 
   # F stats clustering
   f_is_test <- thresholding_summary[["F_stats"]]
-  f_de_probes <- object$input_data$full_de_results[["F_stats"]]$PROBE_ID[f_is_test]
-  f_plt_dfm <- dfm[dfm$PROBE_ID %in% f_de_probes, ]
+
+  if (is.null(object$input_data$full_de_results[["F_stats"]]$PROBE_ID)){
+    f_de_probes <- object$input_data$full_de_results[["F_stats"]]$gene_id[f_is_test]
+    f_plt_dfm <- dfm[dfm$gene_id %in% f_de_probes, ]
+  } else {
+    f_de_probes <- object$input_data$full_de_results[["F_stats"]]$PROBE_ID[f_is_test]
+    f_plt_dfm <- dfm[dfm$PROBE_ID %in% f_de_probes, ]
+  }
 
   if (is.null(f_plt_dfm$SYMBOL)){  # for RNAseq data
     if (gene_symbol.only) {
