@@ -88,12 +88,14 @@ Update log
 
       - Updates to RNAseq functions
         - rbioseq_import_count() function now requre sample id variable name
+        - rbioseq_import_count() function now accepts data.frames
         - The "rbioseq_count" object now have the same sample order for raw_read_count and targets
         - Updates to rbioseq_import_gtf()
           - it is now a legacy function for comptability
           - rbioseq_import_gtf() not outputs a data frame
           - rbioseq_import_gtf() now outputs feature length
         - A bug fixed for rnaseq_de() where filtering not working properly
+        - A bug fixed for sig.rbioseq_de() where the voom output was not used as normalized E matrix
       
       - Updates to DE significant test functions
         - The "sig" objects from sig() function now includes F_stats in the input_data item

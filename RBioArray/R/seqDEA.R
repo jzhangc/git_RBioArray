@@ -162,18 +162,18 @@ rbioseq_gtf <- function(file, verbose = TRUE, parallelComputing = FALSE, cluster
 #' @param sample_id.var.name Sample id variable name in the \code{target.annot.file}.
 #' @param sample_groups.var.name Sample group annotation variable name in the \code{target.annot.file}.
 #' @param gtf matrix or data.frame. Parsed gtf/gff annotation. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
-#' @param raw.file.ext Raw file extention. Default is \code{".txt"}.
-#' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
 #' @param raw.file.source Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param raw.file.ext Raw file extension. Default is \code{".txt"}.
+#' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary rows.
 #'
 #'          For \code{target.annot.file}, the argument doesn't accept full file path.
 #'          The function will only seek the file under working directory. So, the file should be placed under working directory.
 #'
-#'          Since the HTSeq-count program uses GTF/GFF annotation file for read couting,
+#'          Since the HTSeq-count program uses GTF/GFF annotation file for read counting,
 #'          the results will always contain "\code{gene_id}" as the gene identification item.
 #'          Therefore, when and \code{count_source = "htseq-count"} and \code{gtf.matrix} is set,
 #'          the rest of the GTF/GFF information is merged into the \code{genes} item in the resulting \code{rbioseq_count} class object.

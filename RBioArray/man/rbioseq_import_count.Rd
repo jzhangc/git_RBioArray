@@ -32,15 +32,15 @@ rbioseq_import_count(
 
 \item{gtf}{matrix or data.frame. Parsed gtf/gff annotation. Can be obtained by function \code{\link{rbioseq_import_gtf}}.}
 
-\item{raw.file.ext}{Raw file extention. Default is \code{".txt"}.}
+\item{raw.file.ext}{Raw file extension. Default is \code{".txt"}.}
 
 \item{raw.file.sep}{Raw read count file separators. Default is \code{""\"\"}, i.e. white space.}
 
 \item{raw.file.source}{Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
 \item{cluterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
@@ -69,12 +69,12 @@ Outputs a \code{rbioseq_count} object with merged read counts from mutliple file
 Data pre-processing for RNA-seq read count files.
 }
 \details{
-When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
+When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary rows.
 
          For \code{target.annot.file}, the argument doesn't accept full file path.
          The function will only seek the file under working directory. So, the file should be placed under working directory.
 
-         Since the HTSeq-count program uses GTF/GFF annotation file for read couting,
+         Since the HTSeq-count program uses GTF/GFF annotation file for read counting,
          the results will always contain "\code{gene_id}" as the gene identification item.
          Therefore, when and \code{count_source = "htseq-count"} and \code{gtf.matrix} is set,
          the rest of the GTF/GFF information is merged into the \code{genes} item in the resulting \code{rbioseq_count} class object.

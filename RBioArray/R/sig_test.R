@@ -70,7 +70,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
   full_de_results <- object$DE_results
   full_de_results[["F_stats"]] <- object$F_stats
   input.data <- list(filtered_E = object$filter_results$filtered_counts$counts,
-                     norm_E = object$normalized_data$E,
+                     norm_E = object$voom_output$E,
                      genes = object$filter_results$filtered_counts$genes,
                      input.genes_annotation.control_type = NULL,
                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
