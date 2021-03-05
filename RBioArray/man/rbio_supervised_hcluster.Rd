@@ -6,6 +6,7 @@
 \usage{
 rbio_supervised_hcluster(
   object,
+  export.name = NULL,
   gene_symbol.only = FALSE,
   sample_id.var.name = NULL,
   distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),

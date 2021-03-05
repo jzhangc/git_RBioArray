@@ -299,6 +299,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @importFrom RColorBrewer brewer.pal
 #' @export
 rbio_supervised_hcluster <- function(object,
+                                     export.name = NULL,
                                      gene_symbol.only = FALSE,
                                      sample_id.var.name = NULL,
                                      distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
@@ -307,6 +308,12 @@ rbio_supervised_hcluster <- function(object,
                                      plot.width = 7, plot.height = 7,
                                      verbose = TRUE){
   ## check arguments
+  if (is.null(export.name)){
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
+
   distance <- match.arg(tolower(distance), c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
   clust <- match.arg(clust, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
 
@@ -481,7 +488,7 @@ rbio_supervised_hcluster <- function(object,
 
   # draw heatmap
   if (verbose) cat(paste0("Sig data hierarchical clustering heatmap saved to: ", "fstats_sig_heatmap.pdf..."))
-  pdf(file = paste0("fstats_sig_heatmap.pdf"), width = plot.width, height = plot.height)
+  pdf(file = paste0(export.name, "_sig_heatmap.pdf"), width = plot.width, height = plot.height)
   heatmap.2(f_plt_mtx, distfun = distfunc, hclustfun = clustfunc,
             labRow = f_row.lab,
             col = brewer.pal(n.map.colour, map.colour), ColSideColors = f_colC[f_colG], ...)
