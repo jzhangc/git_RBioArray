@@ -409,7 +409,7 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
                gtf_dfm <- gtf
              }
              features <- count_df[, names(count_df) %in% count_df.all_feature.var]
-             gtf_dfm_working <- gtf_dfm[gtf_dfm[, gtf.gene_id.var] %in% features[, count_df.gene_id.var], , drop = FALSE]
+             gtf_dfm_working <- gtf_dfm[gtf_dfm[, "gene_id"] %in% features[, count_df.gene_id.var], , drop = FALSE]
              if (nrow(gtf_dfm_working) < 1) {
                warning("No features matched from the GTF file. Proceed without GTF file information.\n")
                features <- count_df[, names(count_df) %in% count_df.all_feature.var, drop = FALSE]
@@ -511,15 +511,32 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
 
   ## output
   lib_size <- colSums(counts)
-  out <- list(raw_read_count = counts,
-              sample_library_sizes = lib_size,
-              targets = tgt,
-              sample_groups = sample_groups,
-              genes = features,
-              count_source = count_data_type,
-              GTF_annotation = ifelse(is.null(gtf), FALSE, TRUE),
-              species = species,
-              files_processed = filename)
+  switch(count_data_type,
+         count_df = {
+           out <- list(raw_read_count = counts,
+                       sample_library_sizes = lib_size,
+                       targets = tgt,
+                       sample_groups = sample_groups,
+                       genes = features,
+                       count_source = count_data_type,
+                       GTF_annotation = ifelse(is.null(gtf), FALSE, TRUE),
+                       species = species,
+                       files_processed = NULL)
+         },
+         htseq = {
+           out <- list(raw_read_count = counts,
+                       sample_library_sizes = lib_size,
+                       targets = tgt,
+                       sample_groups = sample_groups,
+                       genes = features,
+                       count_source = count_data_type,
+                       GTF_annotation = ifelse(is.null(gtf), FALSE, TRUE),
+                       species = species,
+                       files_processed = filename)
+         })
+
+
+
   class(out) <- "rbioseq_count"
   return(out)
 }
@@ -528,6 +545,8 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
 #' @export
 print.rbioseq_count <- function(x, ...){
   cat("RNAseq raw reads processing summary:\n")
+  cat("\n")
+  cat(paste0(" count data type: ", x$count_source))
   cat("\n")
   cat(paste0(" Total number of genomic features: ", ifelse(x$GTF_annotation, nrow(x$genes), length(x$genes)), "\n"))
   cat("\n")
