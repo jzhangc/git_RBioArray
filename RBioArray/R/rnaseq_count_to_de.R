@@ -156,48 +156,71 @@ rbioseq_gtf <- function(file, verbose = TRUE, parallelComputing = FALSE, cluster
 #' @title rbioseq_import_count
 #'
 #' @description Data pre-processing for RNA-seq read count files.
-#' @param path Path to raw files. Default is the system working directory.
-#' @param species Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".
-#' @param target.annot.file Annotation file describing filenames and targets, and should be in \code{csv} format.
-#' @param sample_id.var.name Sample id variable name in the \code{target.annot.file}.
-#' @param sample_groups.var.name Sample group annotation variable name in the \code{target.annot.file}.
+#' @param count_data_type Raw file source, i.e. program used to generate read counts. Currently supports \code{"count_df" and "htseq"}.
+#' @param count_df Set when \code{count_data_type = "count_df"}, mandatory, a dataframe containing feature annotation and count data.
+#' @param count_df.gene_id.var Set when \code{count_data_type = "count_df"}, mandatory, gene id var name.
+#' @param count_df.gene_type.var Set when \code{count_data_type = "count_df"}, optional, gene type var name.
+#' @param count_df.gene_name.var Set when \code{count_data_type = "count_df"}, optional, gene name (symbol) var name.
+#' @param count_df.chromosome.var Set when \code{count_data_type = "count_df"}, optional, chromosome var name.
+#' @param count_df.start.var Set when \code{count_data_type = "count_df"}, optional, start var name.
+#' @param count_df.end.var Set when \code{count_data_type = "count_df"}, optional, end var name.
+#' @param count_df.length.var Set when \code{count_data_type = "count_df"}, optional, length var name.
+#' @param count_df.all_feature.var Set when \code{count_data_type = "count_df"}, mandatory, all feature var names in a string vector.
+#' @param count_df.sample.annot.df Set when \code{count_data_type = "count_df"}, mandatory, sample annotation data frame.
+#' @param count_df.sample.annot.sample_id.var Set when \code{count_data_type = "count_df"}, mandatory, sample id var name.
+#' @param count_df.sample.annot.group.var Set when \code{count_data_type = "count_df"}, mandatory, sample group var name. ,
+#' @param htseq_file_dir Set when \code{count_data_type = "htseq"}, path to raw files. Default is the system working directory.
+#' @param htseq_file.ext Set when \code{count_data_type = "htseq"}, raw file extension. Default is \code{".txt"}.
+#' @param htseq_file.sep Set when \code{count_data_type = "htseq"}, raw read count file separators. Default is \code{""\"\"}, i.e. white space.
+#' @param htseq_sample.annot.file Set when \code{count_data_type = "htseq"}, annotation file describing filenames and targets, and should be in \code{csv} format.
+#' @param htseq_sample.annot.file.sep Set when \code{count_data_type = "htseq"},
+#' @param htseq_sample.annot.filename.var Set when \code{count_data_type = "htseq"},
+#' @param htseq_sample.annot.sample_id.var Sample id variable name in the \code{htseq_sample.annot.file}.
+#' @param htseq_sample.annot.group.var Sample group annotation variable name in the \code{htseq_sample.annot.file}.
+#' @param parallelComputing Whether to use parallel computing or not. This is only applicable when \code{count_data_type = "htseq"}. Default is \code{TRUE}.
+#' @param cluterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. This is only applicable when \code{count_data_type = "htseq"}. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param gtf matrix or data.frame. Parsed gtf/gff annotation. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
-#' @param raw.file.source Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.
-#' @param raw.file.ext Raw file extension. Default is \code{".txt"}.
-#' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
-#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
-#' @param cluterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
+#' @param species Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
-#' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary rows.
-#'
-#'          For \code{target.annot.file}, the argument doesn't accept full file path.
-#'          The function will only seek the file under working directory. So, the file should be placed under working directory.
-#'
-#'          Since the HTSeq-count program uses GTF/GFF annotation file for read counting,
-#'          the results will always contain "\code{gene_id}" as the gene identification item.
-#'          Therefore, when and \code{count_source = "htseq-count"} and \code{gtf.matrix} is set,
-#'          the rest of the GTF/GFF information is merged into the \code{genes} item in the resulting \code{rbioseq_count} class object.
-#'
-#'          The items from GTF/GFF information are as following:
-#'
-#'          \code{gene_name}
-#'
-#'          \code{gene_type}
-#'
-#'          \code{chromosome}
-#'
-#'          \code{start}
-#'
-#'          \code{end}
-#'
-#'          \code{length}
-#'
-#'          Since the current HTSeq-count setting is to examine genes, NOT transcript.
-#'          The \code{transcript_id} item is used to find the gene length.
-#'          Specifically, the gene length is the length from the record where \code{transcript_id == gene_id}
+#' @details 1. When \code{count_data_type = "count_df"}, the \code{count_df} format is rows: features, columns: feature names + samples.
+#'             Column names of the samples should be the sample id used in \code{count_df.sample.annot.df}.
 #'
 #'
-#'          Transcript assessment will be added through future updates.
+#'          2. When \code{count_data_type = "htseq"}, the function will cut off the last five summary rows.#'
+#'             For \code{htseq_sample.annot.file}, the argument doesn't accept full file path.
+#'             The function will only seek the file under working directory. So, the file should be placed under working directory.
+#'
+#'          3. Since the HTSeq-count program uses GTF/GFF annotation file for read counting, the results will always contain "\code{gene_id}"
+#'             as the gene identification item.
+#'
+#'             Therefore, when and \code{count_source = "htseq-count"} and \code{gtf} is set,
+#'             the rest of the GTF/GFF information is merged into the \code{genes} item in the resulting \code{rbioseq_count} class object.
+#'
+#'          4. The items from GTF/GFF information are as following:
+#'
+#'             \code{gene_id}
+#'
+#'             \code{gene_name}
+#'
+#'             \code{gene_type}
+#'
+#'             \code{chromosome}
+#'
+#'             \code{start}
+#'
+#'             \code{end}
+#'
+#'             \code{length}
+#'
+#'          5. If \code{gtf=NULL}, the features and the associated names will be from the items listed in 4.
+#'
+#'          6. When \code{count_data_type = "htseq"}, since the current HTSeq-count setting is to examine genes, NOT transcript.
+#'             The \code{transcript_id} item is used to find the gene length.
+#'             Specifically, the gene length is the length from the record where \code{transcript_id == gene_id}
+#'
+#'          7. Regression type data will be added through future updates. #'
+#'
+#'          8. Transcript assessment will be added through future updates.
 #'
 #' @return Outputs a \code{rbioseq_count} object with merged read counts from mutliple files, with annotation. The \code{rbioseq_count} object contains the following:
 #'
@@ -224,117 +247,276 @@ rbioseq_gtf <- function(file, verbose = TRUE, parallelComputing = FALSE, cluster
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @examples
 #' \dontrun{
-#' mrna_count <- rbioseq_import_count(path = "~/dataset/",
-#'                                    species = "hsa",
-#'                                    target.annot.file = "target.csv", sample_groups.var.name = "condition",
+#' # count_df
+#' mrna_count <- rbioseq_import_count(count_data_type = "count_df",
+#'                                    count_df = fc,
+#'                                    count_df.gene_id.var = "geneid",
+#'                                    count_df.gene_type.var = NULL,
+#'                                    count_df.gene_name.var = NULL,
+#'                                    count_df.chromosome.var = "chr",
+#'                                    count_df.start.var = NULL,
+#'                                    count_df.end.var = NULL,
+#'                                    count_df.length.var = "length",
+#'                                    count_df.all_feature.var = c("geneid", "chr", "length"),
+#'                                    count_df.sample.annot.df = annot,
+#'                                    count_df.sample.annot.sample_id.var = "subject_id",
+#'                                    count_df.sample.annot.group.var = "complete_course",
 #'                                    gtf = gtf,
-#'                                    raw.file.ext = ".out", raw.file.sep = "",
-#'                                    raw.file.source = "htseq-count",
+#'                                    spcies = "hsa")
+#'
+#' # htseq
+#' mrna_count <- rbioseq_import_count(count_data_type =  "htseq",
+#'                                    htseq_file_dir = "~/dataset/",
+#'                                    species = "hsa",
+#'                                    htseq_sample.annot.file = "target.csv", htseq_sample.annot.filename.var = "condition",
+#'                                    htseq_file.ext = ".out", htseq_file.ext = "",
+#'                                    gtf = gtf,
 #'                                    parallelComputing = TRUE, clusterType = "FORK")
 #' }
 #' @export
-rbioseq_import_count <- function(path = getwd(), species = NULL,
-                                 target.annot.file = NULL,
-                                 sample_id.var.name = NULL,
-                                 sample_groups.var.name = NULL,
-                                 gtf = NULL,
-                                 raw.file.ext = ".txt", raw.file.sep = "", raw.file.source = "htseq-count",
+rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
+                                 count_df = NULL,
+                                 count_df.gene_id.var = NULL,
+                                 count_df.gene_type.var = NULL,
+                                 count_df.gene_name.var = NULL,
+                                 count_df.chromosome.var = NULL,
+                                 count_df.start.var = NULL,
+                                 count_df.end.var = NULL,
+                                 count_df.length.var = NULL,
+                                 count_df.all_feature.var = NULL,
+                                 count_df.sample.annot.df = NULL,
+                                 count_df.sample.annot.sample_id.var = NULL,
+                                 count_df.sample.annot.group.var = NULL,
+
+                                 htseq_file_dir = getwd(),
+                                 htseq_file.ext = ".txt", htseq_file.sep = "",
+                                 htseq_sample.annot.file = NULL, htseq_sample.annot.file.sep = ",",
+                                 htseq_sample.annot.filename.var = NULL,
+                                 htseq_sample.annot.sample_id.var = NULL,
+                                 htseq_sample.annot.group.var = NULL,
                                  parallelComputing = FALSE, clusterType = "FORK",
+
+                                 gtf = NULL,
+                                 species = NULL,
                                  verbose = TRUE){
-  ## check argument
-  if (is.null(target.annot.file)){  # check and load target (sample) annotation
-    stop("Please provide a target annotation file for target.annot.file arugment.")
-  } else {
-    target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
-    target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
-    if (target.annot_ext != "csv") {
-      stop("target.annot.file is not in csv format.")
-    } else {
-      if (verbose) cat("Loading target annotation file...")
-      tgt <- read.csv(file = target.annot.file, header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
-      if (verbose) cat("Done!\n")
+  ## check arguments
+  if (!is.null(gtf)) {
+    if (all(c("gene_id", "gene_type", "gene_name", "chromosome", "start", "end", "length") %in% colnames(gtf))) {
+      stop("Make sure gtf has the following colnames: \"gene_id\", \"gene_type\", \"gene_name\", \"chromosome\", \"start\", \"end\", \"length\". ")
     }
   }
 
-  if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
-  if (is.null(sample_id.var.name)) stop("Please provide sample_id.var.name.")
-  if (!all(c(sample_groups.var.name, sample_id.var.name) %in% names(tgt))){
-    stop("Sample id or group annotation variables not found in the target annotation file.")
-  } else {
-    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
-  }
+  count_data_type <- match.arg(tolower(count_data_type), c("count_df", "htseq"))
+  switch(count_data_type,
+         count_df = {
+           # print("count_df")
+           # argument check
+           if (any(sapply(list(count_df, count_df.gene_id.var, count_df.all_feature.var, count_df.sample.annot.df), is.null))) {
+             stop("Please set these essential count_df arguments: count_df, count_df.gene_id.var, count_df.all_feature.var, count_df.sample.annot.df")
+           } else {
+             tgt <- count_df.sample.annot.df
+           }
 
-  ## load files
-  # set read files
-  filename <- list.files(path = path, pattern = raw.file.ext)
-  filename_wo_ext <- sub("[.][^.]*$", "", filename)  # general expression to remove extension, i.e. a.b.c becomes a.b
+           if (!all(c(count_df.gene_id.var, count_df.all_feature.var) %in% colnames(count_df))) {
+             stop("All count_df vars should be found in the colnames of count_df.")
+           }
 
-  # load reads
-  if (verbose) cat("Processing read count files...")
+           if (nrow(tgt) != ncol(count_df[, !colnames(count_df) %in% count_df.all_feature.var])) {
+             stop("Please make sure count_df has the same number of samples as count_df.sample.annot.df.")
+           } else if (!all(c(count_df.sample.annot.group.var, count_df.sample.annot.sample_id.var) %in% colnames(tgt))) {
+             stop("All count_df.sample.annot vars should be found in count_df.sample.annot.df")
+           } else if (!all(colnames(count_df[, !colnames(count_df) %in% count_df.all_feature.var]) %in% tgt[, count_df.sample.annot.sample_id.var])) {
+             stop("Sample IDs from count_df.sample.annot.df should be the same as colnames of the sample counts from count_df.")
+           } else {
+             sample_groups <- factor(tgt[, count_df.sample.annot.group.var], levels = unique(tgt[, count_df.sample.annot.group.var]))
+           }
 
-  raw_list <- vector(mode = "list", length = length(filename))
-  if (!parallelComputing){ # single core
-    raw_list[] <- foreach(i = seq(length(filename))) %do% {
-      tmp <- read.table(file = paste0(path, "/", filename[i]), header = FALSE, sep = raw.file.sep, stringsAsFactors = FALSE,
-                        col.names = c("gene_id", filename_wo_ext[i]), row.names = NULL)
-      if (raw.file.source == "htseq-count") tmp <- head(tmp, n = -5)  # remove last five rows from htseq-count results
-      tmp
-    }
-  } else {  # parallel
-    # set clusters
-    n_cores <- detectCores() - 1
-    cl <- makeCluster(n_cores, clusterType = clusterType)
-    registerDoParallel(cl)
-    on.exit(stopCluster(cl)) # close connect when exiting the function
+           # below: optional var names
+           if (!is.null(count_df.gene_type.var) && !count_df.gene_type.var %in% colnames(count_df)) {
+             stop("count_df.gene_type.var is not NULL and not found in count_df.")
+           }
+           if (!is.null(count_df.gene_name.var) && !count_df.gene_name.var %in% colnames(count_df)) {
+             stop("count_df.gene_name.var is not NULL and not found in count_df.")
+           }
+           if (!is.null(count_df.chromosome.var) && !count_df.chromosome.var %in% colnames(count_df)) {
+             stop("count_df.chromosome.var is not NULL and not found in count_df.")
+           }
+           if (!is.null(count_df.start.var) && !count_df.start.var %in% colnames(count_df)) {
+             stop("count_df.start.var is not NULL and not found in count_df.")
+           }
+           if (!is.null(count_df.end.var) && !count_df.end.var %in% colnames(count_df)) {
+             stop("count_df.end.var.var is not NULL and not found in count_df.")
+           }
+           if (!is.null(count_df.length.var) && !count_df.length.var %in% colnames(count_df)) {
+             stop("count_df.length.var is not NULL and not found in count_df.")
+           }
+         },
+         htseq = {
+           # print("htseq")
+           # argument check
+           if (any(sapply(list(htseq_sample.annot.file, htseq_sample.annot.filename.var, htseq_sample.annot.sample_id.var, htseq_sample.annot.group.var), is.null))){
+             stop("Please set all the htseq argument.")
+           } else if (htseq) {
+             if (verbose) cat("Loading target annotation file...")
+             tgt <- read.table(file = htseq_sample.annot.file, header = TRUE,
+                               sep = htseq_sample.annot.file.sep,
+                               stringsAsFactors = FALSE, check.names = FALSE)
+             if (verbose) cat("Done!\n")
+           } else if (!all(c(htseq_sample.annot.filename.var, htseq_sample.annot.sample_id.var, htseq_sample.annot.group.var) %in% colnames(tgt))){
+             stop("All htseq_sample annot vars should be found in the htseq_sample.annot.file.")
+           } else {
+             sample_groups <- factor(tgt[, htseq_sample.annot.group.var], levels = unique(tgt[, htseq_sample.annot.group.var]))
+           }
+         })
 
-    # file processing
-    raw_list[] <- foreach(i = seq(length(filename)), .packages = "foreach") %dopar% {
-      tmp <- read.table(file = paste0(path, "/", filename[i]), header = FALSE, sep = raw.file.sep, stringsAsFactors = FALSE,
-                        col.names = c("gene_id", filename_wo_ext[i]), row.names = NULL)
-      if (raw.file.source == "htseq-count") tmp <- head(tmp, n = -5)  # remove last five rows from htseq-count results
-      tmp
-    }
-  }
-  names(raw_list) <- filename_wo_ext
-  if (verbose) cat("Done!\n")
+  ## load count data
+  switch(count_data_type,
+         count_df = {
+           # finalize count data
+           counts <- count_df[, !names(count_df) %in% count_df.all_feature.var]
+           counts <- as.matrix(counts)
+           counts <- counts[, tgt[, count_df.sample.annot.sample_id.var]]
 
-  # file loaded message
-  if (verbose) cat("\n")
-  if (verbose) cat("Files loaded: \n")
-  for (i in filename){
-    if (verbose) cat(paste0("\t", i, "\n"))
-  }
+           # check and load gtf data
+           if (is.null(gtf)){
+             features <- count_df[, names(count_df) %in% count_df.all_feature.var, drop = FALSE]
+             colnames(features)[colnames(features) == count_df.gene_id.var] <- "gene_id"
 
-  # merge reads
-  out_dfm <- Reduce(function(i, j)merge(i, j, all = TRUE), raw_list)
-  out_dfm[is.na(out_dfm) == TRUE] <- 0
+             # below: optional var names
+             if (!is.null(count_df.gene_type.var)) {
+               colnames(features)[colnames(features) == count_df.gene_type.var] <- "gene_type"
+             }
+             if (!is.null(count_df.gene_name.var)) {
+               colnames(features)[colnames(features) == count_df.gene_name.var] <- "gene_name"
+             }
+             if (!is.null(count_df.chromosome.var)) {
+               colnames(features)[colnames(features) == count_df.chromosome.var] <- "chromosome"
+             }
+             if (!is.null(count_df.start.var)) {
+               colnames(features)[colnames(features) == count_df.start.var] <- "start"
+             }
+             if (!is.null(count_df.end.var)) {
+               colnames(features)[colnames(features) == count_df.end.var] <- "end"
+             }
+             if (!is.null(count_df.length.var)) {
+               colnames(features)[colnames(features) == count_df.length.var] <- "length"
+             }
 
-  # check and load gtf/gff annotation
-  if (is.null(gtf)){
-    features <- out_dfm[, 1]
-  } else {
-    if (any(class(gtf) %in% "matrix")) {
-      gtf_dfm <- as.data.frame(gtf, stringsAsFactors = FALSE)
-    } else {
-      gtf_dfm <- gtf
-    }
+           } else {
+             if (any(class(gtf) %in% "matrix")) {
+               gtf_dfm <- as.data.frame(gtf, stringsAsFactors = FALSE)
+             } else {
+               gtf_dfm <- gtf
+             }
+             features <- count_df[, names(count_df) %in% count_df.all_feature.var]
+             gtf_dfm_working <- gtf_dfm[gtf_dfm[, gtf.gene_id.var] %in% features[, count_df.gene_id.var], , drop = FALSE]
+             if (nrow(gtf_dfm_working) < 1) {
+               warning("No features matched from the GTF file. Proceed without GTF file information.\n")
+               features <- count_df[, names(count_df) %in% count_df.all_feature.var, drop = FALSE]
+               colnames(features)[colnames(features) == count_df.gene_id.var] <- "gene_id"
 
-    gtf_dfm_working <- gtf_dfm[gtf_dfm$transcript_id %in% out_dfm$gene_id, ]
-    feature_out_dfm <- merge(gtf_dfm_working, out_dfm)
-    features <- feature_out_dfm[, c("gene_id", "gene_type", "gene_name", "chromosome", "start", "end", "length")]
-  }
+               if (!is.null(count_df.gene_type.var)) {
+                 colnames(features)[colnames(features) == count_df.gene_type.var] <- "gene_type"
+               }
+               if (!is.null(count_df.gene_name.var)) {
+                 colnames(features)[colnames(features) == count_df.gene_name.var] <- "gene_name"
+               }
+               if (!is.null(count_df.chromosome.var)) {
+                 colnames(features)[colnames(features) == count_df.chromosome.var] <- "chromosome"
+               }
+               if (!is.null(count_df.start.var)) {
+                 colnames(features)[colnames(features) == count_df.start.var] <- "start"
+               }
+               if (!is.null(count_df.end.var)) {
+                 colnames(features)[colnames(features) == count_df.end.var] <- "end"
+               }
+               if (!is.null(count_df.length.var)) {
+                 colnames(features)[colnames(features) == count_df.length.var] <- "length"
+               }
+             } else {
+               features <- gtf_dfm_working[, c("gene_id", "gene_type", "gene_name", "chromosome", "start", "end", "length")]
+             }
+           }
+         },
+         htseq = {
+           ## load files
+           # set read files
+           filename <- list.files(path = htseq_file_dir, pattern = htseq_file.ext)
+           filename_wo_ext <- sub("[.][^.]*$", "", filename)  # general expression to remove extension, i.e. a.b.c becomes a.b
+
+           # load reads
+           if (verbose) cat("Processing read count files...")
+           raw_list <- vector(mode = "list", length = length(filename))
+           if (!parallelComputing){ # single core
+             raw_list[] <- foreach(i = seq(length(filename))) %do% {
+               tmp <- read.table(file = paste0(htseq_file_dir, "/", filename[i]), header = FALSE, sep = raw.file.sep, stringsAsFactors = FALSE,
+                                 col.names = c("gene_id", filename_wo_ext[i]), row.names = NULL)
+               if (count_data_type == "htseq-count") tmp <- head(tmp, n = -5)  # remove last five rows from htseq-count results
+               tmp
+             }
+           } else {  # parallel
+             # set clusters
+             n_cores <- detectCores() - 1
+             cl <- makeCluster(n_cores, clusterType = clusterType)
+             registerDoParallel(cl)
+             on.exit(stopCluster(cl)) # close connect when exiting the function
+
+             # file processing
+             raw_list[] <- foreach(i = seq(length(filename)), .packages = "foreach") %dopar% {
+               tmp <- read.table(file = paste0(htseq_file_dir, "/", filename[i]), header = FALSE, sep = raw.file.sep, stringsAsFactors = FALSE,
+                                 col.names = c("gene_id", filename_wo_ext[i]), row.names = NULL)
+               if (count_data_type == "htseq-count") tmp <- head(tmp, n = -5)  # remove last five rows from htseq-count results
+               tmp
+             }
+           }
+           names(raw_list) <- filename_wo_ext
+           if (verbose) cat("Done!\n")
+
+           # file loaded message
+           if (verbose) cat("\n")
+           if (verbose) cat("Files loaded: \n")
+           for (i in filename){
+             if (verbose) cat(paste0("\t", i, "\n"))
+           }
+
+           # merge reads
+           out_dfm <- Reduce(function(i, j)merge(i, j, all = TRUE), raw_list)
+           out_dfm[is.na(out_dfm) == TRUE] <- 0
+
+           # check and load gtf/gff annotation
+           if (is.null(gtf)){
+             features <- out_dfm[, 1, drop = FALSE]
+           } else {
+             if (any(class(gtf) %in% "matrix")) {
+               gtf_dfm <- as.data.frame(gtf, stringsAsFactors = FALSE)
+             } else {
+               gtf_dfm <- gtf
+             }
+
+             gtf_dfm_working <- gtf_dfm[gtf_dfm$transcript_id %in% out_dfm$gene_id, ]
+             if (nrow(gtf_dfm_working) < 1) {
+               warning("No features matched from the GTF file. Proceed without GTF file information.\n")
+               features <- out_dfm[, 1, drop = FALSE]
+             } else {
+               feature_out_dfm <- merge(gtf_dfm_working, out_dfm)
+               features <- feature_out_dfm[, c("gene_id", "gene_type", "gene_name", "chromosome", "start", "end", "length")]
+             }
+           }
+
+           # finalize count matrix
+           counts <- out_dfm[, -1]
+           counts <- as.matrix(counts)
+           counts <- counts[, tgt[, htseq_sample.annot.sample_id.var]]
+         })
 
   ## output
-  counts <- out_dfm[, -1]
-  counts <- as.matrix(counts)
-  counts <- counts[, tgt[, sample_id.var.name]]
   lib_size <- colSums(counts)
   out <- list(raw_read_count = counts,
               sample_library_sizes = lib_size,
               targets = tgt,
-              sample_groups = sample.groups,
+              sample_groups = sample_groups,
               genes = features,
-              count_source = raw.file.source,
+              count_source = count_data_type,
               GTF_annotation = ifelse(is.null(gtf), FALSE, TRUE),
               species = species,
               files_processed = filename)

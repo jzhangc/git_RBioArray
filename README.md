@@ -87,9 +87,10 @@ Update log
         - rbioarray_filter_combine() now can deal with "none or all" filtered situations
 
       - Updates to RNAseq functions
-        - rbioseq_import_count() function now requre sample id variable name
-        - rbioseq_import_count() function now accepts data.frames
-        - The "rbioseq_count" object now have the same sample order for raw_read_count and targets
+        - rbioseq_import_count() re-written:
+          - rbioseq_import_count() function now requre sample id variable name
+          - rbioseq_import_count() function now accepts data.frames
+          - The "rbioseq_count" object now have the same sample order for raw_read_count and targets
         - Updates to rbioseq_import_gtf()
           - it is now a legacy function for comptability
           - rbioseq_import_gtf() not outputs a data frame

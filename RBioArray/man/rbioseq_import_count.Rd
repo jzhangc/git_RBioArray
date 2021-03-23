@@ -5,44 +5,86 @@
 \title{rbioseq_import_count}
 \usage{
 rbioseq_import_count(
-  path = getwd(),
-  species = NULL,
-  target.annot.file = NULL,
-  sample_id.var.name = NULL,
-  sample_groups.var.name = NULL,
-  gtf = NULL,
-  raw.file.ext = ".txt",
-  raw.file.sep = "",
-  raw.file.source = "htseq-count",
+  count_data_type = c("count_df", "htseq"),
+  count_df = NULL,
+  count_df.gene_id.var = NULL,
+  count_df.gene_type.var = NULL,
+  count_df.gene_name.var = NULL,
+  count_df.chromosome.var = NULL,
+  count_df.start.var = NULL,
+  count_df.end.var = NULL,
+  count_df.length.var = NULL,
+  count_df.all_feature.var = NULL,
+  count_df.sample.annot.df = NULL,
+  count_df.sample.annot.sample_id.var = NULL,
+  count_df.sample.annot.group.var = NULL,
+  htseq_file_dir = getwd(),
+  htseq_file.ext = ".txt",
+  htseq_file.sep = "",
+  htseq_sample.annot.file = NULL,
+  htseq_sample.annot.file.sep = ",",
+  htseq_sample.annot.filename.var = NULL,
+  htseq_sample.annot.sample_id.var = NULL,
+  htseq_sample.annot.group.var = NULL,
   parallelComputing = FALSE,
   clusterType = "FORK",
+  gtf = NULL,
+  species = NULL,
   verbose = TRUE
 )
 }
 \arguments{
-\item{path}{Path to raw files. Default is the system working directory.}
+\item{count_data_type}{Raw file source, i.e. program used to generate read counts. Currently supports \code{"count_df" and "htseq"}.}
 
-\item{species}{Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".}
+\item{count_df}{Set when \code{count_data_type = "count_df"}, mandatory, a dataframe containing feature annotation and count data.}
 
-\item{target.annot.file}{Annotation file describing filenames and targets, and should be in \code{csv} format.}
+\item{count_df.gene_id.var}{Set when \code{count_data_type = "count_df"}, mandatory, gene id var name.}
 
-\item{sample_id.var.name}{Sample id variable name in the \code{target.annot.file}.}
+\item{count_df.gene_type.var}{Set when \code{count_data_type = "count_df"}, optional, gene type var name.}
 
-\item{sample_groups.var.name}{Sample group annotation variable name in the \code{target.annot.file}.}
+\item{count_df.gene_name.var}{Set when \code{count_data_type = "count_df"}, optional, gene name (symbol) var name.}
+
+\item{count_df.chromosome.var}{Set when \code{count_data_type = "count_df"}, optional, chromosome var name.}
+
+\item{count_df.start.var}{Set when \code{count_data_type = "count_df"}, optional, start var name.}
+
+\item{count_df.end.var}{Set when \code{count_data_type = "count_df"}, optional, end var name.}
+
+\item{count_df.length.var}{Set when \code{count_data_type = "count_df"}, optional, length var name.}
+
+\item{count_df.all_feature.var}{Set when \code{count_data_type = "count_df"}, mandatory, all feature var names in a string vector.}
+
+\item{count_df.sample.annot.df}{Set when \code{count_data_type = "count_df"}, mandatory, sample annotation data frame.}
+
+\item{count_df.sample.annot.sample_id.var}{Set when \code{count_data_type = "count_df"}, mandatory, sample id var name.}
+
+\item{count_df.sample.annot.group.var}{Set when \code{count_data_type = "count_df"}, mandatory, sample group var name. ,}
+
+\item{htseq_file_dir}{Set when \code{count_data_type = "htseq"}, path to raw files. Default is the system working directory.}
+
+\item{htseq_file.ext}{Set when \code{count_data_type = "htseq"}, raw file extension. Default is \code{".txt"}.}
+
+\item{htseq_file.sep}{Set when \code{count_data_type = "htseq"}, raw read count file separators. Default is \code{""\"\"}, i.e. white space.}
+
+\item{htseq_sample.annot.file}{Set when \code{count_data_type = "htseq"}, annotation file describing filenames and targets, and should be in \code{csv} format.}
+
+\item{htseq_sample.annot.file.sep}{Set when \code{count_data_type = "htseq"},}
+
+\item{htseq_sample.annot.filename.var}{Set when \code{count_data_type = "htseq"},}
+
+\item{htseq_sample.annot.sample_id.var}{Sample id variable name in the \code{htseq_sample.annot.file}.}
+
+\item{htseq_sample.annot.group.var}{Sample group annotation variable name in the \code{htseq_sample.annot.file}.}
+
+\item{parallelComputing}{Whether to use parallel computing or not. This is only applicable when \code{count_data_type = "htseq"}. Default is \code{TRUE}.}
 
 \item{gtf}{matrix or data.frame. Parsed gtf/gff annotation. Can be obtained by function \code{\link{rbioseq_import_gtf}}.}
 
-\item{raw.file.ext}{Raw file extension. Default is \code{".txt"}.}
-
-\item{raw.file.sep}{Raw read count file separators. Default is \code{""\"\"}, i.e. white space.}
-
-\item{raw.file.source}{Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.}
-
-\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
+\item{species}{Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 
-\item{cluterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
+\item{cluterType}{Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. This is only applicable when \code{count_data_type = "htseq"}. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
 Outputs a \code{rbioseq_count} object with merged read counts from mutliple files, with annotation. The \code{rbioseq_count} object contains the following:
@@ -69,45 +111,72 @@ Outputs a \code{rbioseq_count} object with merged read counts from mutliple file
 Data pre-processing for RNA-seq read count files.
 }
 \details{
-When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary rows.
-
-         For \code{target.annot.file}, the argument doesn't accept full file path.
-         The function will only seek the file under working directory. So, the file should be placed under working directory.
-
-         Since the HTSeq-count program uses GTF/GFF annotation file for read counting,
-         the results will always contain "\code{gene_id}" as the gene identification item.
-         Therefore, when and \code{count_source = "htseq-count"} and \code{gtf.matrix} is set,
-         the rest of the GTF/GFF information is merged into the \code{genes} item in the resulting \code{rbioseq_count} class object.
-
-         The items from GTF/GFF information are as following:
-
-         \code{gene_name}
-
-         \code{gene_type}
-
-         \code{chromosome}
-
-         \code{start}
-
-         \code{end}
-
-         \code{length}
-
-         Since the current HTSeq-count setting is to examine genes, NOT transcript.
-         The \code{transcript_id} item is used to find the gene length.
-         Specifically, the gene length is the length from the record where \code{transcript_id == gene_id}
+1. When \code{count_data_type = "count_df"}, the \code{count_df} format is rows: features, columns: feature names + samples.
+            Column names of the samples should be the sample id used in \code{count_df.sample.annot.df}.
 
 
-         Transcript assessment will be added through future updates.
+         2. When \code{count_data_type = "htseq"}, the function will cut off the last five summary rows.#'
+            For \code{htseq_sample.annot.file}, the argument doesn't accept full file path.
+            The function will only seek the file under working directory. So, the file should be placed under working directory.
+
+         3. Since the HTSeq-count program uses GTF/GFF annotation file for read counting, the results will always contain "\code{gene_id}"
+            as the gene identification item.
+
+            Therefore, when and \code{count_source = "htseq-count"} and \code{gtf} is set,
+            the rest of the GTF/GFF information is merged into the \code{genes} item in the resulting \code{rbioseq_count} class object.
+
+         4. The items from GTF/GFF information are as following:
+
+            \code{gene_id}
+
+            \code{gene_name}
+
+            \code{gene_type}
+
+            \code{chromosome}
+
+            \code{start}
+
+            \code{end}
+
+            \code{length}
+
+         5. If \code{gtf=NULL}, the features and the associated names will be from the items listed in 4.
+
+         6. When \code{count_data_type = "htseq"}, since the current HTSeq-count setting is to examine genes, NOT transcript.
+            The \code{transcript_id} item is used to find the gene length.
+            Specifically, the gene length is the length from the record where \code{transcript_id == gene_id}
+
+         7. Regression type data will be added through future updates. #'
+
+         8. Transcript assessment will be added through future updates.
 }
 \examples{
 \dontrun{
-mrna_count <- rbioseq_import_count(path = "~/dataset/",
-                                   species = "hsa",
-                                   target.annot.file = "target.csv", sample_groups.var.name = "condition",
+# count_df
+mrna_count <- rbioseq_import_count(count_data_type = "count_df",
+                                   count_df = fc,
+                                   count_df.gene_id.var = "geneid",
+                                   count_df.gene_type.var = NULL,
+                                   count_df.gene_name.var = NULL,
+                                   count_df.chromosome.var = "chr",
+                                   count_df.start.var = NULL,
+                                   count_df.end.var = NULL,
+                                   count_df.length.var = "length",
+                                   count_df.all_feature.var = c("geneid", "chr", "length"),
+                                   count_df.sample.annot.df = annot,
+                                   count_df.sample.annot.sample_id.var = "subject_id",
+                                   count_df.sample.annot.group.var = "complete_course",
                                    gtf = gtf,
-                                   raw.file.ext = ".out", raw.file.sep = "",
-                                   raw.file.source = "htseq-count",
+                                   spcies = "hsa")
+
+# htseq
+mrna_count <- rbioseq_import_count(count_data_type =  "htseq",
+                                   htseq_file_dir = "~/dataset/",
+                                   species = "hsa",
+                                   htseq_sample.annot.file = "target.csv", htseq_sample.annot.filename.var = "condition",
+                                   htseq_file.ext = ".out", htseq_file.ext = "",
+                                   gtf = gtf,
                                    parallelComputing = TRUE, clusterType = "FORK")
 }
 }
