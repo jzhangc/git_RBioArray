@@ -68,9 +68,9 @@ rbioseq_import_count(
 
 \item{htseq_sample.annot.file}{Set when \code{count_data_type = "htseq"}, annotation file describing filenames and targets, and should be in \code{csv} format.}
 
-\item{htseq_sample.annot.file.sep}{Set when \code{count_data_type = "htseq"},}
+\item{htseq_sample.annot.file.sep}{Set when \code{count_data_type = "htseq"}, htseq_sample.annot.file separation character.}
 
-\item{htseq_sample.annot.filename.var}{Set when \code{count_data_type = "htseq"},}
+\item{htseq_sample.annot.filename.var}{Set when \code{count_data_type = "htseq"}, count file name var name.}
 
 \item{htseq_sample.annot.sample_id.var}{Sample id variable name in the \code{htseq_sample.annot.file}.}
 

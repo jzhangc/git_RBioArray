@@ -173,8 +173,8 @@ rbioseq_gtf <- function(file, verbose = TRUE, parallelComputing = FALSE, cluster
 #' @param htseq_file.ext Set when \code{count_data_type = "htseq"}, raw file extension. Default is \code{".txt"}.
 #' @param htseq_file.sep Set when \code{count_data_type = "htseq"}, raw read count file separators. Default is \code{""\"\"}, i.e. white space.
 #' @param htseq_sample.annot.file Set when \code{count_data_type = "htseq"}, annotation file describing filenames and targets, and should be in \code{csv} format.
-#' @param htseq_sample.annot.file.sep Set when \code{count_data_type = "htseq"},
-#' @param htseq_sample.annot.filename.var Set when \code{count_data_type = "htseq"},
+#' @param htseq_sample.annot.file.sep Set when \code{count_data_type = "htseq"}, htseq_sample.annot.file separation character.
+#' @param htseq_sample.annot.filename.var Set when \code{count_data_type = "htseq"}, count file name var name.
 #' @param htseq_sample.annot.sample_id.var Sample id variable name in the \code{htseq_sample.annot.file}.
 #' @param htseq_sample.annot.group.var Sample group annotation variable name in the \code{htseq_sample.annot.file}.
 #' @param parallelComputing Whether to use parallel computing or not. This is only applicable when \code{count_data_type = "htseq"}. Default is \code{TRUE}.
