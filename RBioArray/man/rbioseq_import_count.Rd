@@ -168,7 +168,7 @@ mrna_count <- rbioseq_import_count(count_data_type = "count_df",
                                    count_df.sample.annot.sample_id.var = "subject_id",
                                    count_df.sample.annot.group.var = "complete_course",
                                    gtf = gtf,
-                                   spcies = "hsa")
+                                   species = "hsa")
 
 # htseq
 mrna_count <- rbioseq_import_count(count_data_type =  "htseq",

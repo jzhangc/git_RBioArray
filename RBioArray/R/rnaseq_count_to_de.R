@@ -262,7 +262,7 @@ rbioseq_gtf <- function(file, verbose = TRUE, parallelComputing = FALSE, cluster
 #'                                    count_df.sample.annot.sample_id.var = "subject_id",
 #'                                    count_df.sample.annot.group.var = "complete_course",
 #'                                    gtf = gtf,
-#'                                    spcies = "hsa")
+#'                                    species = "hsa")
 #'
 #' # htseq
 #' mrna_count <- rbioseq_import_count(count_data_type =  "htseq",
@@ -301,7 +301,7 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
                                  verbose = TRUE){
   ## check arguments
   if (!is.null(gtf)) {
-    if (all(c("gene_id", "gene_type", "gene_name", "chromosome", "start", "end", "length") %in% colnames(gtf))) {
+    if (!all(c("gene_id", "gene_type", "gene_name", "chromosome", "start", "end", "length") %in% colnames(gtf))) {
       stop("Make sure gtf has the following colnames: \"gene_id\", \"gene_type\", \"gene_name\", \"chromosome\", \"start\", \"end\", \"length\". ")
     }
   }
