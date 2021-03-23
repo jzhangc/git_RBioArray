@@ -25,17 +25,17 @@ rbioGS(
 
 \item{idVar}{Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.}
 
-\item{method_p}{Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}, and can be set as \code{NULL}.}
+\item{method_p}{Gene set enrichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}, and can be set as \code{NULL}.}
 
 \item{pVar}{Set only method_p is not NULL, DE p values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.}
 
 \item{logFCVar}{Set only method_p is not NULL, DE logFC (log fold change). Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.}
 
-\item{method_t}{Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.}
+\item{method_t}{Gene set enrichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.}
 
 \item{tVar}{Set only method_t is not NULL, DE t values. Gene leve t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.}
 
-\item{...}{Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.}
+\item{...}{Arguments to pass to \code{runGSA} function from \code{piano} package. See the corresponding help page from of \code{piano} for details.}
 
 \item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 
@@ -45,7 +45,7 @@ rbioGS(
 Outputs a \code{list} object with GSA results, both for p value based and t value based.
 }
 \description{
-Add Human entrez ID to the DE dataframe
+gene set analysis using piano
 }
 \details{
 The function is based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.

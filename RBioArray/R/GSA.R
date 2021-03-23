@@ -1,15 +1,20 @@
 #' @title rbioGS_sp2hsaEntrez
 #'
-#' @description Using up-to-date ensembl database, convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
-#' @param DElst The list with DE result, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
-#' @param tgtSpecies The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.
+#' @description Using up-to-date ensembl database, convert from human/mouse/rat ensemble transcript/gene/entrez ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
+#' @param DElst The list with DE result, from legacy functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param inputSpecies The input species. Options are \code{"hsa"}, \code{"mmu"}, \code{"rno"} and \code{"medaka"}.
 #' @param ensemblTransVar The name of the variable from DE list containing ensembl transcript ID.
+#' @param ensemblGeneVar The name of the variable from DE list containing ensembl gene ID.
 #' @param entrezVar The name of the variable from DE list containing entrez gene ID.
 #' @param parallelComputing If to use parallel computing. Default is \code{FALSE}.
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
 #'          When using legacy functions, the DElst can be from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #'          When using the new \code{rbioseq_de} or \code{rbioarray_de}, the DElst is \code{object$DE_results}
+#'
+#'          For the new DE classes from the current version of pacakge, such as \code{rbioseq_de} class, the DElist is the \code{DE_results} item.
+#'
+#'          If multiple ID var names are provided, the function follows this order to process: ensemblTransVar -> ensemblGeneVar -> entrezVar.
 #'
 #' @return Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
 #' @import doParallel
@@ -18,69 +23,101 @@
 #' @importFrom biomaRt useMart getBM
 #' @examples
 #' \dontrun{
-#' rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemblTransVar = "EnsemblID")
+#' rbioGS_sp2hsaEntrez(DElst = comparison_DE, inputSpecies = "mmu", ensemblTransVar = "EnsemblID")
 #' }
 #' @export
-rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "rat", "medaka", "olatipes"),
+rbioGS_sp2hsaEntrez <- function(DElst, inputSpecies = c("hsa", "human", "mmu", "mouse", "rno", "rat", "medaka", "olatipes"),
                                 ensemblTransVar = NULL,
+                                ensemblGeneVar = NULL,
                                 entrezVar = NULL,
-                                parallelComputing = FALSE, clusterType = "PSOCK"){
+                                parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE){
   ## check the arguments
-  tgtSpecies <- match.arg(tolower(tgtSpecies), c("mmu", "mouse", "rno", "rat", "medaka", "olatipes"))
-  if (is.null(ensemblTransVar) & is.null(entrezVar)){
-    stop("Please set the variable name for the ensembl transcript ID or entrezID.")
+  inputSpecies <- match.arg(tolower(inputSpecies), c("hsa", "mmu", "mouse", "rno", "rat", "medaka", "olatipes"))
+  if (is.null(ensemblTransVar) && is.null(entrezVar) && is.null(ensemblGeneVar)){
+    stop("Please set the variable name for the ensembl transcript ID, ensembl gene ID, or entrezID.")
   }
 
   ## prepare reference hsa entrezID
   # set the target species
-  if (tgtSpecies %in% c("mmu", "mouse")){
+  if (inputSpecies %in% c("mmu", "mouse")){
     sp <- "mmusculus"
-  } else if (tgtSpecies %in% c("rno", "rat")){
+  } else if (inputSpecies %in% c("rno", "rat")){
     sp <- "rnorvegicus"
-  } else if (tgtSpecies %in% c("medaka", "olatipes")){
+  } else if (inputSpecies %in% c("medaka", "olatipes")){
     sp <- "olatipes"
+  } else if (inputSpecies %in% c("hsa", "human")) {
+    sp <- "hsapiens"
   }
 
   # extract hsa ortholog information
+  if (verbose) cat("Retriving info from bioMart...")
   sp_ensembl <- useMart("ensembl", dataset = paste0(sp, "_gene_ensembl"))
-  attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
+  if (sp == "hsapiens") {
+    attr <- c("ensembl_gene_id", "ensembl_transcript_id")
+  } else {
+    attr <- c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene", "ensembl_transcript_id")
+  }
   attr_entrezgene <- c("ensembl_transcript_id", "entrezgene_id")
-  sp_tmp <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
-                       mart = sp_ensembl)
-  sp_entrezgene <- getBM(attr_entrezgene, filters = "with_hsapiens_homolog", values = TRUE,
-                        mart = sp_ensembl) # extract entrezgene info for the species of interest
-  sp_hsa_orth <- merge(sp_tmp, sp_entrezgene, by  = "ensembl_transcript_id", all.x = TRUE) # merge to have entrezgene in the hsa orth dataframe
-  names(sp_hsa_orth)[names(sp_hsa_orth) == "ensembl_transcript_id"] <- paste0(tgtSpecies, "_ensembl_transcript_id") # generalized term for change column names
-  names(sp_hsa_orth)[names(sp_hsa_orth) == "entrezgene_id"] <- paste0(tgtSpecies, "_entrezgene")
+  if (verbose) cat("Done!\n")
 
-  # extract hsa entrezgene ID
-  hsa_ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl") # establish the human set
-  attr_hsa <- c("ensembl_gene_id", "entrezgene_id")
-  hsa_entrez <- getBM(attr_hsa, filters = "", values = TRUE,
-                      mart = hsa_ensembl)
+  if (sp == "hsapiens") {
+    sp_tmp <- getBM(attr, values = TRUE, mart = sp_ensembl)
+    sp_entrezgene <- getBM(attr_entrezgene, mart = sp_ensembl) # extract entrezgene info for the species of interest
+  } else {
+    sp_tmp <- getBM(attr, filters = "with_hsapiens_homolog", values = TRUE,
+                    mart = sp_ensembl)
+    sp_entrezgene <- getBM(attr_entrezgene, filters = "with_hsapiens_homolog", values = TRUE,
+                           mart = sp_ensembl) # extract entrezgene info for the species of interest
+  }
+
+  sp_hsa_orth <- merge(sp_tmp, sp_entrezgene, by  = "ensembl_transcript_id", all.x = TRUE) # merge to have entrezgene in the hsa orth dataframe
+  names(sp_hsa_orth)[names(sp_hsa_orth) == "ensembl_transcript_id"] <- paste0(inputSpecies, "_ensembl_transcript_id") # generalized term for change column names
+  names(sp_hsa_orth)[names(sp_hsa_orth) == "entrezgene_id"] <- paste0(inputSpecies, "_entrezgene")
 
   # merge the two dataframes
-  sp_hsa_orth_entrez <- merge(sp_hsa_orth, hsa_entrez,
-                              by.x = "hsapiens_homolog_ensembl_gene", by.y = "ensembl_gene_id",
-                              all.x = TRUE)
-  names(sp_hsa_orth_entrez)[names(sp_hsa_orth_entrez) == "entrezgene_id"] <- "hsa_entrezgene"
-  sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez[, paste0(tgtSpecies, "_ensembl_transcript_id")]), ]
+  if (sp == "hsapiens") {
+    sp_hsa_orth_entrez <- sp_hsa_orth
+  } else {
+    # extract hsa entrezgene ID
+    hsa_ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl") # establish the human set
+    attr_hsa <- c("ensembl_gene_id", "entrezgene_id")
+    hsa_entrez <- getBM(attr_hsa, filters = "", values = TRUE,
+                        mart = hsa_ensembl)
+
+    # merge
+    sp_hsa_orth_entrez <- merge(sp_hsa_orth, hsa_entrez,
+                                by.x = "hsapiens_homolog_ensembl_gene", by.y = "ensembl_gene_id",
+                                all.x = TRUE)
+    names(sp_hsa_orth_entrez)[names(sp_hsa_orth_entrez) == "entrezgene_id"] <- "hsa_entrezgene"
+  }
+  sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez[, paste0(inputSpecies, "_ensembl_transcript_id")]), ]
+
 
   ## add the hsa entrez ID to the non-hsa DElist
   # temp func for adding the variable, i is the DE dataframe
+  if (verbose) cat("Mapping to human entrez ID...")
   if (!is.null(ensemblTransVar)){ # merge by ensemble
     tmpfunc <- function(i){
       j <- merge(i, sp_hsa_orth_entrez,
-                 by.x = ensemblTransVar, by.y = paste0(tgtSpecies, "_ensembl_transcript_id"), all.x = TRUE)
+                 by.x = ensemblTransVar, by.y = paste0(inputSpecies, "_ensembl_transcript_id"), all.x = TRUE)
+      return(j)
+    }
+  } else if (!is.null(ensemblGeneVar)) {
+    tmpfunc <- function(i){
+      j <- merge(i, sp_hsa_orth_entrez,
+                 by.x = ensemblGeneVar, by.y = "ensembl_gene_id", all.x = TRUE)
+      if (verbose) cat("\nRemovingi ensembl transcript ID...")
+      j$hsa_ensembl_transcript_id <- NULL
+      j <- unique(j)
       return(j)
     }
   } else if (!is.null(entrezVar)){ # merge by entrez
-    sp_hsa_orth_entrez <- sp_hsa_orth_entrez[, !names(sp_hsa_orth_entrez) %in% paste0(tgtSpecies, "_ensembl_transcript_id")]
-    sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez[, paste0(tgtSpecies, "_entrezgene")]), ]
+    sp_hsa_orth_entrez <- sp_hsa_orth_entrez[, !names(sp_hsa_orth_entrez) %in% paste0(inputSpecies, "_ensembl_transcript_id")]
+    sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez[, paste0(inputSpecies, "_entrezgene")]), ]
 
     tmpfunc <- function(i){
       j <- merge(i, sp_hsa_orth_entrez,
-                 by.x = entrezVar, by.y = paste0(tgtSpecies, "_entrezgene"), all.x = TRUE)
+                 by.x = entrezVar, by.y = paste0(inputSpecies, "_entrezgene"), all.x = TRUE)
       return(j)
     }
   }
@@ -113,30 +150,31 @@ rbioGS_sp2hsaEntrez <- function(DElst, tgtSpecies = c("mmu", "mouse", "rno", "ra
       out[] <- foreach(i = DElst) %dopar% {
         tmpout <- tmpfunc(i) }
 
-      } else { # macOS and Unix-like only
-        out[] <- mclapply(DElst, FUN = tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
-      }
+    } else { # macOS and Unix-like only
+      out[] <- mclapply(DElst, FUN = tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
+    }
   }
+  if (verbose) cat("Done!")
 
   ## output
   assign(paste(deparse(substitute(DElst)), "_hsaEntrez",sep = ""), out, envir = .GlobalEnv)
   ## message
-  message(cat("Human entrez ID has been added as variable \"hsa_entrezgene\". "))
+  message(cat("\nHuman entrez ID has been added as variable \"hsa_entrezgene\". "))
 }
 
 
 #' @title rbioGS
 #'
-#' @description Add Human entrez ID to the DE dataframe
+#' @description gene set analysis using piano
 #' @param GS pre-loaded gene set objects. Default is \code{NULL}.
 #' @param GSfile GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param idVar Gene IDs. Could be, but not exclusive to, a variable of a dataframe. Must be the same length as \code{pVar}, \code{logFCVar} and \code{tVar}. Currently only takes \code{Entrez ID}.
-#' @param method_p Gene set ernichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}, and can be set as \code{NULL}.
+#' @param method_p Gene set enrichment methods that takes \code{p value} and \code{logFC}. Default is \code{c("fisher", "stouffer", "reporter", "tailStrength", "wilcoxon")}, and can be set as \code{NULL}.
 #' @param pVar Set only method_p is not NULL, DE p values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.
 #' @param logFCVar Set only method_p is not NULL, DE logFC (log fold change). Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.
-#' @param method_t Gene set ernichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.
+#' @param method_t Gene set enrichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.
 #' @param tVar Set only method_t is not NULL, DE t values. Gene leve t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.
-#' @param ... Arguments to pass to \code{runGSA} function from \code{piano} pacakge. See the corresponding help page from of \code{piano} for details.
+#' @param ... Arguments to pass to \code{runGSA} function from \code{piano} package. See the corresponding help page from of \code{piano} for details.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @details The function is based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA.
@@ -522,10 +560,10 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL, statsVar = "logFC",
 #'
 #' @description All-in-one wrapper for GSA and plotting.
 #' @param objTitle Object title for the output GS analysis list from \code{piano} package.
-#' @param DElst The input list with DE result, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+#' @param DElst The input list with DE result, from legacy functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
 #' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
 #' @param GS Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.
-#' @param GSfile GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
+#' @param GSfile GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param ... Arguments to pass to \code{\link{rbioGS}}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -550,7 +588,12 @@ rbioGS_kegg <- function(dfm, entrezVar = NULL, statsVar = "logFC",
 #' @param plotMethod When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the p methods. Options are \code{"median"} and \code{"mean"}. Default is \code{"median"}.
 #' @param plotPadjust When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set if to use FDR adjusted p value or not. Default is \code{TRUE}.
 #' @param plotGSname When \code{boxplot = TRUE} and/or \code{scatterplot = TRUE}, to set the GS name in the file name. Default is \code{"GS"}.
-#' @details This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
+#' @details This is an all-in-one function for GS analysis based on piano package.
+#'          It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable).
+#'
+#'          See arguments for \code{\link{rbioGS}} for details.
+#'
+#'          For the new DE classes from the current version of package, such as \code{rbioseq_de} class, the DElist is the \code{DE_results} item.
 #' @return Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 #' @import doParallel
 #' @import foreach
