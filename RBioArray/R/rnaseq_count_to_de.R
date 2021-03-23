@@ -521,7 +521,7 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
                        count_source = count_data_type,
                        GTF_annotation = ifelse(is.null(gtf), FALSE, TRUE),
                        species = species,
-                       files_processed = NULL)
+                       files_processed = "NA")
          },
          htseq = {
            out <- list(raw_read_count = counts,
@@ -534,9 +534,6 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
                        species = species,
                        files_processed = filename)
          })
-
-
-
   class(out) <- "rbioseq_count"
   return(out)
 }

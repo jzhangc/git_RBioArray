@@ -66,13 +66,13 @@ rbioseq_de_analysis <- function(raw.file.path, raw.file.ext = ".txt", raw.file.s
                                 parallelComputing = FALSE, clusterType = "FORK", verbose = TRUE){
   ## import raw reads
   # import
-  count <- rbioseq_import_count(path = raw.file.path,
-                                raw.file.ext = raw.file.ext,
-                                raw.file.sep = raw.file.sep,
-                                raw.file.source = raw.file.source,
+  count <- rbioseq_import_count(htseq_file_dir = raw.file.path,
+                                htseq_file.ext = raw.file.ext,
+                                htseq_file.sep = raw.file.sep,
+                                count_data_type = raw.file.source,
                                 species = species,
-                                target.annot.file = target.annot.file,
-                                sample_groups.var.name = sample_groups.var.name,
+                                htseq_sample.annot.file = target.annot.file,
+                                htseq_sample.annot.group.var = sample_groups.var.name,
                                 gtf = gtf,
                                 parallelComputing = parallelComputing, clusterType = clusterType,
                                 verbose = verbose)
