@@ -247,11 +247,13 @@ rbioGS <- function(GS = NULL, GSfile = NULL, idVar = NULL,
     p <- gStats$p_value
     logfc <- gStats$logFC
     GS_S.i <- runGSA(p, logfc, geneSetStat = GSmethod_p[i], ...)
+    return(GS_S.i)
   }
 
   tmpfunc_t <- function(i, GSmethod_t, ...){
     t <- gStats$t_value
     GS_S.i <- runGSA(t, geneSetStat = GSmethod_t[i], ...)
+    return(GS_S.i)
   }
 
   if (!parallelComputing){
@@ -285,7 +287,7 @@ rbioGS <- function(GS = NULL, GSfile = NULL, idVar = NULL,
       registerDoParallel(cl) # part of doParallel package
       on.exit(stopCluster(cl)) # close connect when exiting the function
 
-      # run functioins
+      # run functions
       if (!is.null(method_p)){
         GS_list_p[] <- foreach(i = 1: length(GSigM_p), .packages = "piano") %dopar% {
           out <- tmpfunc_p(i, GSmethod_p = GSigM_p, gsc = tmpGS, ...)
