@@ -11,7 +11,7 @@ microarray_de(object, contra, verbose = TRUE)
 
 \item{contra}{contra Contrast matrix.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 A \code{rbioarray_de} class object with DE results, containing the following core items:
@@ -20,7 +20,7 @@ A \code{rbioarray_de} class object with DE results, containing the following cor
 
         \code{DE_results}: a list containing the DE results
 
-        \code{comparisons}: a list with comparisons and comparison levles
+        \code{comparisons}: a list with comparisons and comparison levels
 
         \code{fit}: the limma fitted DE object as a reference
 

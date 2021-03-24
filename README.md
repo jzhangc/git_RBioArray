@@ -4,7 +4,7 @@ Simple to use package for both microarray and RNAseq data analysis (limma based)
 To cite in publication:
   
     Zhang J, Hadj-Moussa H, Storey KB. 2020. Marine periwinkle stress-responsive microRNAs: a potential factor to reflect anoxia and freezing survival adaptations. GENOMICS. 2020 Jul 27: S0888-7543(20)30169-5. doi: 10.1016/j.ygeno.2020.07.036.
-    Zhang J, Wallace SJ, Shiu MY, Smith I, Rhind SG, Langlois VS. 2017.  Human hair follicle transcriptome profiling: a minimally invasive tool to assess molecular adaptations upon low-volume, high-intensity interval training. Physiological Reports. 5(23) pii: e13534. doi: 10.14814/phy2.13534.
+    Zhang J, Wallace SJ, Shiu MY, Smith I, Rhind SG, Langlois VS. 2017. Human hair follicle transcriptome profiling: a minimally invasive tool to assess molecular adaptations upon low-volume, high-intensity interval training. Physiological Reports. 5(23) pii: e13534. doi: 10.14814/phy2.13534.
 
 Installation:
 
@@ -28,6 +28,64 @@ Installation:
         devtools::install_github("jzhangc/git_RBioArray/RBioArray", repos = BiocManager::repositories(), ref = "beta")  
 
 Update log
+
+    0.5.4 (March.24.2021)
+      - New RNAseq functions
+        - rbioseq_gtf(): a faster function to replace rbioseq_import_gtf()
+
+      - New clustering funcions:
+        - K means clustering function rbio_kmeans()
+          - K means clustering plotting function with PCA functionality rbio_kmeans_plot() added
+
+      - New network analysis functions:
+        - rbio_tom() added for TOM (topological overlap measure) analysis
+          - The output "rbio_tom_graph" object contains an igraph object for network visualization
+          - The function also supports multiple automated tree cuting techniques, such as WGCNA's dynamic tree cutting
+        - rbio_network() added for network constuction and visualization
+      
+      - Updates to GSA functions
+        - A bug fixed for rbioGS_sp2hsaEntrez() due to updated BiomaRt package
+        - Manual page updated for rbioGS_sp2hsaEntrez() to reflect the new S3 DE classes
+      
+      - Updates to microarray functions
+        - rbioarray_transfo_normalize() now only supports quantile method for normalization
+        - rbioarray_filter_combine() now can deal with "none or all" filtered situations
+
+      - Updates to RNAseq functions
+        - rbioseq_import_count() re-written:
+          - rbioseq_import_count() function now requre sample id variable name
+          - rbioseq_import_count() function now accepts data.frames
+          - The "rbioseq_count" object now have the same sample order for raw_read_count and targets
+        - Updates to rbioseq_import_gtf()
+          - it is now a legacy function for comptability
+          - rbioseq_import_gtf() not outputs a data frame
+          - rbioseq_import_gtf() now outputs feature length
+        - A bug fixed for rnaseq_de() where filtering not working properly
+        - A bug fixed for sig.rbioseq_de() where the voom output was not used as normalized E matrix
+      
+      - Updates to DE significant test functions
+        - The "sig" objects from sig() function now includes F_stats in the input_data item
+        - Manual updated with added explanation on the "thresholding_summary" 
+        - When gene_symbol = TRUE, sig() will only remove genes without a symbol from the volcano plot. 
+          All other results items still contain the results for all genes. 
+
+      - Updates to cluster funcions:
+        - rbio_unsupervised_hcluster() now supports "rbioarray_de" objects
+        - rbio_unsupervised_hcluster() now outputs a list object including distance and cluster results (for network analysis)
+        - rbio_unsupervised_hcluster() now accepts user defined export name prefix via the export.name argument
+        - rbio_supervised_hcluster() now outputs a list object including distance and cluster ressults (for network analysis)
+        - rbio_unsupervised_corcluster() and rbio_supervised_corcluster() now export correlation results into the environment
+          - With suffixes of "_cor_unsuper" and "_cor_sig", respectively
+        - rbio_unsupervised_corcluster() and rbio_supervised_corcluster()'s heatmap (and sigplot) now can be turned off
+        - rbio_supervised_hcluster() how automatically cluster f_stats significant results 
+        - hcluster methods added for rbio_unsupervised_corcluster() and rbio_supervised_corcluster()
+        - Manual page updated for rbio_unsupervised_corcluster(), along with its S3 class types
+        - Manual page updated for rbio_unsupervised_hcluster(), along with its S3 class types
+        - Fixed a bug for rbio_supervised_hcluster() where RNAseq data cannot be processed
+      
+      - Other fixes
+        - Typos fixed for manual pages
+        
 
     0.5.3 (Aug.6.2020)
       - General updates
@@ -296,135 +354,39 @@ Update log
       - Missing depndencies for parallel computing added for various functions
       - Bug fixes
       
-    
-    0.1.34 
+
+    0.1.1 - 0.1.34
       - Elist objects now can be properly recognized by all the functions
-      
-
-    0.1.33
       - Help page for unsupervised heat map updated
-      
-
-    0.1.32
       - Users can now choose to keep or remove the control probes (Agilent microarray platform) for rbioarray_hcluster() function
-      
-    
-    0.1.31
       - FC filter added for supervised hclust heatmap function
-      
-
-    0.1.30
       - Volcano dots colours are now user customizable
       - Volcano dots annotation functionality added
       - KEGG visualization function updated
-      - Bug fixes and other improvements
-      
-      
-    0.1.29
       - Code redundancy further reduced for array DE function
-      
-
-    0.1.28
       - Array DE function re-written with better parallel computing (doParallel and foreach), 
-      greatly reduced code redundancy, and backend prepration for plot annotation functionality
-      - Bug fixes
-      
-      
-    0.1.27
       - Supervised hclust heatmap function updated for label display functionality
-      - Bug fixes
-      
-      
-    0.1.26
       - Supervised hclust heatmap function added
-      - Bug fixes
-      
-      
-    0.1.25
       - Stand alone GSA and GSA plotting functions added
-      - Bug fixes
-      
-      
-    0.1.23 - 0.1.24
       - All-in-one GSA function re-written
-      - Bug fixes
-      
-      
-    0.1.22
-      - GS plotting function updated
-      - Bug fixes
-      
-      
-    0.1.21
       - rbioGS_boxplot, rbioGS_scatter and rbioGS_all functions updated
-      - bug fixes
-      
-      
-    0.1.20
       - GSA methods for GS functions are now user customizable
-      - Bug fixes
-      
-      
-    0.1.19
       - Preliminary all-in-one GS function added
-      - Bug fixes
-      
-      
-    0.1.17 - 0.1.18
       - GS plotting functions added
-      - Bug fixes
-      
-      
-    0.1.15 - 0.1.16
       - GS function re-written
-      - Bug fixes
-      
-      
-    0.1.14
       - Part of the array DE function re-written
-      - Bug fixees
-      
-      
-    0.1.13
       - Plot section of the array DE function improved
-      - Bug fixes
-      
-      
-    0.1.10 - 0.1.12
       - Log transformation for array functionality added
       - hclust heatmap function added
-      - Bug fixes
-      
-      
-    0.1.9
       - Volcano plot functionality added for array DE function
-      - Bug fixes
-      
-      
-    0.1.8
       - Fit and contrasts re-written for array DE function
-      
-      
-    0.1.7
-      - Preparation work for the next update
-      - Bug fixes
-      
-      
-    0.1.6
       - Array DE function updated
-      - Bug fixes
-      
-      
-    0.1.5
       - Array DE function added
-      
-    
-    0.1.2 - 0.1.4
       - Preliminary microarray functions added
       - Bug fixes
       
       
-    0.1.0 - 0.1.1
+    0.1.0
       - Initial seq functions added
       - Initial GS functions added
       - Initial commit

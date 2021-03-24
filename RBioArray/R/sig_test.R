@@ -1,14 +1,16 @@
 #' @title sig
 #'
 #' @description Significance test function
-#' @param object Object containing DE inforamtion. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.
+#' @param object Object containing DE information. Currently the function supports \code{rbioseq_de} and \code{rbioarray_de} objects.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @return Signifiance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
+#' @return Significance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
 #'
 #'         The \code{sig} object contains the following items;
 #'
 #'         \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
 #'                                            i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
+#'
+#'         \code{thresholding_summary}: a list of boolean vectors with the length of the features, including whicih ones passed the thresholding.
 #'
 #'         \code{export.mode}
 #'
@@ -65,8 +67,10 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
                      experiment = "rnaseq", export.name = export.name,
                      p.val.correction.method = p.val.correction.method, ...)
 
+  full_de_results <- object$DE_results
+  full_de_results[["F_stats"]] <- object$F_stats
   input.data <- list(filtered_E = object$filter_results$filtered_counts$counts,
-                     norm_E = object$normalized_data$E,
+                     norm_E = object$voom_output$E,
                      genes = object$filter_results$filtered_counts$genes,
                      input.genes_annotation.control_type = NULL,
                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
@@ -74,7 +78,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
                      targets = object$targets,
                      sample_groups = object$sample_groups,
                      comparisons = object$comparisons,
-                     full_de_results = object$DE_results)
+                     full_de_results = full_de_results)
 
   out$input_data <- input.data
   class(out) <- "sig"
@@ -90,6 +94,8 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
 #' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
 #' @param p.val.correction.method A character string describing the p value correction method used for significant test. Options are \code{"fdr"}, \code{"spikein"} and \code{"none"}. Default is \code{"fdr"}.
 #' @param ... Additional arguments for \code{\link{sig.default}}.
+#'
+#' @details The \code{normE} for \code{sig.rbioarray_de} method is the \code{E}  object from rbioarray_de, which is indeed normalized.
 #'
 #' @export
 sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein", "none"), export.name = NULL, ...){
@@ -116,6 +122,8 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
                      experiment = "microarray", export.name = export.name,
                      p.val.correction.method = p.val.correction.method, ...)
 
+  full_de_results <- object$DE_results
+  full_de_results[["F_stats"]] <- object$F_stats
   input.data <- list(norm_E = object$input_data$E, filtered_E = NULL, genes = object$input_data$genes,
                      input.genes_annotation.control_type = object$genes_annotation.control_type,
                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
@@ -123,7 +131,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
                      targets = object$targets,
                      sample_groups = object$sample_groups,
                      comparisons = object$comparisons,
-                     full_de_results = object$DE_results)
+                     full_de_results = full_de_results)
 
   out$input_data <- input.data
   class(out) <- "sig"
@@ -135,12 +143,12 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 #'
 #' @rdname sig
 #' @method sig default
-#' @param input.de.list  Input list cantaining DE dataframes for each comparison.
+#' @param input.de.list  Input list containing DE dataframes for each comparison.
 #' @param input.Fstats.matrix Input dataframe containing F stats.
-#' @param input.genes_annotation.control_type Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.
+#' @param input.genes_annotation.control_type Functional only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.
 #' @param input.fit Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object
 #' @param gene_symbol If to apply gene symbols in the plot and exported results. Default is \code{TRUE}.
-#' @param input.gene_symbol.var.name Input gene sysmbol variable name from the DE dataframes.
+#' @param input.gene_symbol.var.name Input gene symbol variable name from the DE dataframes.
 #' @param experiment Character string describing the experiment used to generate data, e.g. "microarray", "RNAseq".
 #' @param FC Threshold for fold change. Default is \code{1.5}.
 #' @param alpha Threshold for p values. Default is \code{0.05}.
@@ -148,12 +156,12 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 #' @param export.name Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.
 #' @param export.mode Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"} and \code{"sig"}. Default is \code{"all"}. See details.
 #' @param plot If to plot volcano plot. Default is \code{TRUE}.
-#' @param plot.top.gene If to display the top gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.
+#' @param plot.top.gene If to display the top gene identification, i.e., probe name or gene name, on the plot. Default is \code{FALSE}.
 #' @param plot.top.gene.n When \code{plot.top.gene = TRUE}, to set how many genes to display. Default is \code{5}.
 #' @param plot.top.gene.padding When \code{plot.top.gene = TRUE}, to set the distance between the dot and the gene symbol. Default is \code{0.5}.
 #' @param plot.Title Figure title. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
 #' @param plot.xLabel X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.
-#' @param plot.yLabel Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
+#' @param plot.yLabel Y-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}
 #' @param plot.symbolSize Size of the symbol. Default is \code{2}.
 #' @param plot.sigColour Colour of the significant genes or probes. Default is \code{"red"}.
 #' @param plot.nonsigColour Colour of the non-significant genes or probes. Default is \code{"gray"}.
@@ -162,20 +170,25 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 #' @param plot.Width The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plot.Height The height of the figure for the final output figure file. Default is \code{150}.
 #' @param genesymbolVar The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details Explanation for \code{export.mode} options:
 #'
-#'         \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
+#'             \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
 #'
-#'         \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
+#'             \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
 #'
-#'         \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
+#'             \code{sig}: export only the significant changes. Gene symbol settings depends on argument \code{gene_symbol}.
 #'
-#'         \code{p_val.correction.method}
+#'             \code{p_val.correction.method}
 #'
 #'         The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
 #'
 #'         The \code{input.E} and \code{input.genes} are only used for output, not part of the sig processing.
+#'
+#'         Threshoding on the F_stats will only use the p value threshold, as there is no fold change for F stats.
+#'
+#'         \code{gene_symbol = TRUE} will only impact the volcano plot by remvoing genes without a gene symbol,
+#'         all the other results will contain full list of genes.
 #'
 #' @import ggplot2
 #' @importFrom RBioplot rightside_y
@@ -215,6 +228,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     cat("NOTE: plot.top.gene automatically set to FALSE when gene_symbol = FALSE.\n")
     plot.top.gene = FALSE
   }
+  if (gene_symbol) cat("gene_symbol = TRUE, genes without a gene symbol removed from the volcano plots. \n")
 
   ## sig test
   # set up data.frames
@@ -222,21 +236,20 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   de_list[] <- foreach(i = seq(length(input.de.list))) %do% {
     # set up DE dfm
     de_dfm <- input.de.list[[i]]
-    if (gene_symbol){  # if to display gene name, then subset
-      de_dfm <- de_dfm[complete.cases(de_dfm[, input.gene_symbol.var.name]), ]
-    }
+    # if (gene_symbol){  # if to display gene name, then subset
+    #   de_dfm <- de_dfm[complete.cases(de_dfm[, input.gene_symbol.var.name]), ]
+    # }
     de_dfm
   }
   names(de_list) <- names(input.de.list)
 
-  # set the cutoff and summary matrix
+  # set the de (pair-wise) cutoff and summary matrix
   sig_summary_mtx <- matrix(nrow = length(input.de.list), ncol = 7)  # initiate summary matrix
   colnames(sig_summary_mtx) <- c("comparisons", "raw.p.value.threshold", "fold.change.threshold", "alpha", "FDR", "True", "False")
 
   pcutoff_vector <- vector(length = length(input.de.list))
-  cutoff_list <- vector(mode = "list", length = length(input.de.list))
-  names(cutoff_list) <- names(input.de.list)
-
+  de_cutoff_list <- vector(mode = "list", length = length(input.de.list))
+  names(de_cutoff_list) <- names(input.de.list)
   for (i in seq(length(input.de.list))) {
     sig_dfm <- de_list[[i]]
     # cut off
@@ -250,19 +263,19 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                    ". \nPlease consider using another thresholding method. For now, alpha is applied to the raw p.values.\n"))
         pcutoff <- alpha
         fdr.stats <- FALSE
-        cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff)
+        cutoff <- abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff
       } else {
         pcutoff <- max(sig_dfm[sig_dfm$adj.P.Val < alpha, ]$P.Value)
         fdr.stats <- TRUE
-        cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value <= pcutoff)
+        cutoff <- abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value <= pcutoff
       }
     } else {
       pcutoff <- alpha
       fdr.stats <- FALSE
-      cutoff <- as.factor(abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff)
+      cutoff <- abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff
     }
 
-    cutoff_list[[i]] <- cutoff
+    de_cutoff_list[[i]] <- cutoff
 
     # store pcutoffs
     pcutoff_vector[i] <- pcutoff
@@ -280,14 +293,56 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     sig_summary_mtx[i, ] <- sig.summary
   }
 
+  # F stats thresholding
+  if (p.val.correction.method == "spikein"){
+    ifelse(min(PCntl$p.value[, names(input.de.list)[i]]) > alpha, pcutoff <- alpha, pcutoff <- min(PCntl$p.value[, names(input.de.list)[i]]))
+    f_cutoff <- input.Fstats.matrix$P.Value < pcutoff
+    f_fdr.stats <- "spikein"
+  } else if (p.val.correction.method == "fdr") {
+    if (length(which(input.Fstats.matrix$adj.P.Val < alpha)) == 0){
+      cat(paste0("No FDR corrected p-values found less than alpha for the comparison: ", names(input.de.list)[i],
+                 ". \nPlease consider using another thresholding method. For now, alpha is applied to the raw p.values.\n"))
+      f_pcutoff <- alpha
+      f_fdr.stats <- FALSE
+      f_cutoff <- input.Fstats.matrix$P.Value < f_pcutoff
+    } else {
+      f_pcutoff <- max(input.Fstats.matrix[input.Fstats.matrix$adj.P.Val < alpha, ]$P.Value)
+      f_fdr.stats <- TRUE
+      f_cutoff <- input.Fstats.matrix$P.Value <= f_pcutoff
+    }
+  } else {
+    f_pcutoff <- alpha
+    f_fdr.stats <- FALSE
+    f_cutoff <- input.Fstats.matrix$P.Value < f_pcutoff
+  }
+
+  if (length(levels(f_cutoff)) == 1){
+    if (levels(f_cutoff) == "TRUE"){
+      f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], 0)
+    } else {
+      f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, 0, summary(f_cutoff)[["FALSE"]])
+    }
+  } else {
+    f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], summary(f_cutoff)[["FALSE"]])
+  }
+
+  sig_summary_mtx <- rbind(sig_summary_mtx, f_sig.summary)  # append with F stats information
+  rownames(sig_summary_mtx) <- NULL
+  de_cutoff_list[["F_stats"]] <- f_cutoff
+  de_cutoff_list <- lapply(de_cutoff_list, FUN = as.logical)
+
   ## plot
   if (plot){
     plt_list <- vector(mode = "list", length = length(input.de.list))
     plt_list[] <- foreach(i = seq(length(input.de.list))) %do% {
       plt_dfm <- de_list[[i]]
-      plt_cutoff <- cutoff_list[[i]]
-      plt_pcutoff <- pcutoff_vector[i]
+      plt_cutoff <- de_cutoff_list[[i]]
 
+      if (gene_symbol){  # if to display gene name, then subset
+        plt_dfm <- plt_dfm[complete.cases(de_list[[i]][, input.gene_symbol.var.name]), ]
+        plt_cutoff <- plt_cutoff[complete.cases(de_list[[i]][, input.gene_symbol.var.name])]
+      }
+      plt_pcutoff <- pcutoff_vector[i]
       loclEnv <- environment()
       plt <- ggplot(plt_dfm, aes(x = logFC, y = -log10(P.Value)), environment = loclEnv) +
         geom_point(alpha = 0.4, size = plot.symbolSize , aes(colour = plt_cutoff)) +
@@ -332,13 +387,13 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
   ## output
   sig_out_list <- vector(mode = "list", length = length(input.de.list))
   sig_out_list[] <- foreach(i = seq(length(input.de.list))) %do% {
-    out_dfm <- de_list[[i]][as.logical(cutoff_list[[i]]), ]
+    out_dfm <- de_list[[i]][as.logical(de_cutoff_list[[i]]), ]
     out_dfm
   }
   names(sig_out_list) <- names(input.de.list)
 
   out <- list(significant_change_summary = sig_summary_mtx,
-              thresholding_summary = cutoff_list,
+              thresholding_summary = de_cutoff_list,
               export.mode = export.mode,
               significant_change_results = sig_out_list,
               p_val.correction.method = p.val.correction.method,
@@ -359,7 +414,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
       write.csv(file = paste0(export.name, "_", names(input.de.list)[i], "_de_all.csv"), input.de.list[[i]], row.names = FALSE)
       if (verbose) cat("Done!\n")
     }
-  } else if (export.mode == "all.gene_symbol") {  # use the subsetted DE dataframes
+  } else if (export.mode == "all.gene_symbol") {  # use the subset DE dataframes
     for (i in seq(length(input.de.list))) {
       if (verbose) cat(paste0("Exporting all results for genes/probes/features with a symbol to file: ", export.name, "_", names(de_list)[i], "_de_gene_symbol.csv..."))
       write.csv(file = paste0(export.name, "_", names(de_list)[i], "_de_gene_symbol.csv"), de_list[[i]], row.names = FALSE)

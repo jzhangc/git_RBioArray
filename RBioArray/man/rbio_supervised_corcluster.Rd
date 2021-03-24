@@ -8,11 +8,15 @@ rbio_supervised_corcluster(
   object,
   gene_symbol.only = FALSE,
   cor.method = c("pearson", "spearman"),
+  hclust.heatmap = TRUE,
+  hclust.method = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty",
+    "median", "centroid"),
   map.colour = "PRGn",
   n.map.colour = 11,
   ...,
   heatmap.width = 7,
   heatmap.height = 7,
+  sigplot = TRUE,
   sigplot.adj.p = FALSE,
   sigplot.alpha = 0.05,
   sigplot.sigLabelColour = "red",
@@ -34,6 +38,10 @@ rbio_supervised_corcluster(
 
 \item{cor.method}{The correlation method, options are "pearson", "spearman" and "pearson". Default is \code{"pearson"}.}
 
+\item{hclust.heatmap}{Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.}
+
+\item{hclust.method}{String. Method for hclust function. Default is \code{"complete"}.}
+
 \item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
 
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
@@ -43,6 +51,8 @@ rbio_supervised_corcluster(
 \item{heatmap.width}{Width for correlation heatmap. Unit is \code{inch}. Default is \code{7}.}
 
 \item{heatmap.height}{Height for correlation heatmap. Unit is \code{inch}. Default is \code{7}.}
+
+\item{sigplot}{If to show significance plot. Default is \code{TRUE}.}
 
 \item{sigplot.adj.p}{If to use FDR corrected correlation p value to plot sigPlot. Default is \code{FALSE}.}
 
@@ -66,19 +76,21 @@ rbio_supervised_corcluster(
 
 \item{sigplot.height}{Height for correlation significance plot. Unit is \code{inch}. Default is \code{7}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
-A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correaltion coefficient and p value matrices. The function also outputs a significance plot.
+A supervised heatmap based on hierarchical clustering analysis in \code{pdf} format, along with correlation coefficient and p value matrices.
+        The function also outputs a significance plot.
+        The function also generates two list objects containing correlation results
 }
 \description{
 Supervised correlation clustering analysis and heatmap visualization for both microarray and RNAseq, for gene co-expression analysis.
 }
 \details{
 The function takes \code{sig} class object. It behaves in the following ways:
-         1. heatmap uses \code{heatmap.2} function from \code{gplots} package.
+         1. heatmap uses \code{heatmap.2()} function from \code{gplots} package.
          2. significance plot uses \code{corrplot} package
-         3. the function will use normalized and filtered expression data for both RNAseq and micaorray
+         3. the function will use normalized and filtered expression data for both RNAseq and microaorray
          4. the function will automatically subset data using \code{thresholding_summary} from \code{sig} class input
          5. the function will automatically subset and plot for each group under each comparison
 }

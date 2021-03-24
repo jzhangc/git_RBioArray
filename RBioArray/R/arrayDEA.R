@@ -1,8 +1,8 @@
 #' @title rbioarray_rlist
 #'
-#' @description Function to constuct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
+#' @description Function to construct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
 #' @param object Input object.
-#' @details When \code{object} is missing, the default fuction is used - make sure to pass all the arguments.
+#' @details When \code{object} is missing, the default function is used - make sure to pass all the arguments.
 #'
 #'          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 #'
@@ -10,7 +10,7 @@
 #'
 #'         \code{E}: raw expression matrix (i.e. hybridization signal)
 #'
-#'         \code{E_background}: background signal marix if applicable
+#'         \code{E_background}: background signal matrix if applicable
 #'
 #'         \code{raw_file.gene_annotation.var_name}
 #'
@@ -25,7 +25,7 @@
 #'         \code{genes_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 #'
 #'         \code{genes_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
-#'                                                    This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
+#'                                                    This is important if starting with \code{EListRaw} object, since array positional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
 #'
 #'         \code{targets}: the sample annotation data frame.
 #'
@@ -82,7 +82,7 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @rdname rbioarray_rlist
 #' @method rbioarray_rlist default
 #' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
-#' @param raw.background.signal.matrix A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
+#' @param raw.background.signal.matrix A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.
 #' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
 #' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
 #' @param extra.gene.annot.dataframe Optional annotation data frame for gene/probe/genomic feature annotation.
@@ -95,9 +95,10 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param gene.annot.rm.var.name Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.
 #' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
 #' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
-#' @param sample_groups.var.name The variable name for sample groupping information from \code{target.annot.file}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details The \code{raw.background.signal.matrix} is usefual when processing a \code{EListRaw} class object from \code{limma} package.
+#' @param sample_groups.var.name The variable name for sample grouping information from \code{target.annot.file}.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package,
+#'          and using \code{bgc.method = "subtract"} for the \code{\link{rbioarray_transfo_normalize()}} function.
 #'
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 #'
@@ -158,16 +159,16 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     }
 
     # set up output annotation information
-    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]
-    genes <- genes[, !names(genes) %in% c("merge_id", "row_id")]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
+    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names, drop = FALSE]
+    genes <- genes[, !names(genes) %in% c("merge_id", "row_id"), drop = FALSE]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
   } else {
-    E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name]) # remove annotation columns
+    E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name, drop = FALSE]) # remove annotation columns
     rownames(E) <- NULL
 
     cat("Note: extra.gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
     gene.annot.gene_id.var.name <- raw.gene_id.var.name
     gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
-    genes <- raw.dataframe[, raw.annot.var.name]
+    genes <- raw.dataframe[, raw.annot.var.name, drop = FALSE]
     gene.symbol <- FALSE
   }
 
@@ -259,32 +260,46 @@ print.rbioarray_rlist <- function(x, ...){
 
 #' @title rbioarray_transfo_normalize
 #'
-#' @description Data log transformation and nomalization function for microarray.
-#' @param object Input obejct with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
+#' @description Data log transformation and normalization function for microarray.
+#' @param object Input object with raw data and annotation information. Should be a \code{rbioarray_rlist} class.
 #' @param ... Additional arguments for corresponding S3 class methods.
-#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
+#' @details The expression matrix will be normalized and then log2 transformed for output.
 #'
-#'          The expression matrix will be normalized and then log2 tranformed for output.
+#'          A note on the \code{bgc.method}: "subtract" or "normexp"?
+#'          In most cases, we use "normexp" (or "auto" without providing a background matrix).
+#'          However the \code{limma} manual provided a table of background matrix information for the popular microarray platforms.
+#'          If available, we can use "subtract" (or "auto" with the correct background matrix).
 #'
+#'          The function currently only supports \code{"quantile"} method for between array normalization.
 #'          A note to the \code{normalizeBetweenArrays} function from \code{limma} package:
 #'          The function normalizes data BEFORE log2 transformation when the input is \code{EListRaw} object.
-#'          However, when input is \code{matrix}, it assumes the data has already been log2 tranformed, meaning normalization will
-#'          be done AFTER log2 transformation.
-#'             After comparision, these two methods will NOT produce the same results for the same expression data:
+#'             However, when input is \code{matrix}, it assumes the data has already been log2 transformed, meaning this function will not
+#'          log2 transform the data after normalization.
+#'             After comparison, these two methods will NOT produce the same results for the same expression data:
 #'          In other words, applying \code{normalizeBetweenArrays} directly to log2 transformed E matrix is NOT the same as apply the function
 #'          to the \code{EListRaw} that contains E.
+#'
 #'             In fact, when using \code{"quantile"} method, applying \code{normalizeBetweenArrays} to log2 transformed E matrix is the
 #'          same as applying \code{normalizeBetweenArrays} to the \code{EListRaw} that has object$E using \code{"cyclicloess"} method.
-#'          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is appled BEFORE
+#'          Indeed, the source code of \code{normalizeBetweenArrays} suggests that's the case since log2 transformation is applied BEFORE
 #'          \code{"cyclicloess"} normalization. However, transformation happens AFTER normalization for \code{"quantile"} and other methods.
 #'
+#'          In \code{limma}, the \code{EListRaw} is data before log2 transformation, whereas \code{EList} contains log2 transformed data.
+#'
+#'          To avoid such confusion and provide a unified experience, the current \code{rbioarray_transfo_normalize.rbioarray_rlist} method only
+#'          treats input E data as a matrix, which is ensured by the \code{rbioarray_rlist} function. The \code{rbioarray_rlist} accepts
+#'          unlogged data or converts \code{ElistRaw} objects into to a \code{matrix}.
+#'
+#'          The \code{limma} author suggests doing quantile on logged or unlogged data remains to be debatable, but "slowly leaning towards"
+#'          quantile on raw and then log transform. As such, the \code{rbioarray_transfo_normalize}will first conduct normalization then log2
+#'          transform the data.
 #'
 #'
 #' @return A \code{rbioarray_plist} class object with the following items:
 #'
 #'         \code{E}: Normalized and then log2 transformed expression matrix
 #'
-#'         \code{design}: Microrray experiment sample design matrix
+#'         \code{design}: Microarray experiment sample design matrix
 #'
 #'         \code{ArrayWeight}
 #'
@@ -315,10 +330,10 @@ rbioarray_transfo_normalize <- function(object, ...){
 #'
 #' @rdname rbioarray_transfo_normalize
 #' @method rbioarray_transfo_normalize rbioarray_rlist
-#' @param object Input obejct with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
-#' @param design Microarray experiment sample design matrix. Make sure the design colnames are the same as the levles of \code{object$sample_groups}.
+#' @param object Input object with raw data and annotation information. Could be \code{rbioarray_rlist}, \code{Elist} or \code{MAList} classes.
+#' @param design Microarray experiment sample design matrix. Make sure the design colnames are the same as the levels of \code{object$sample_groups}.
 #' @param ... Additional arguments the default method \code{\link{rbioarray_transfo_normalize.default}}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
 #' @return A \code{rbioarray_plist} class object.
 #'
@@ -341,15 +356,14 @@ rbioarray_transfo_normalize.rbioarray_rlist <- function(object, design, ..., ver
 #'
 #' @rdname rbioarray_transfo_normalize
 #' @method rbioarray_transfo_normalize default
-#' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genomic features.
-#' @param E.background A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.
+#' @param E Input raw expression value matrix with columns for samples, rows for genes/probes/genome features.
+#' @param E.background A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.
 #' @param bgc.method Background correction method. Default is \code{"auto"}. See \code{backgroundCorrect()} function from \code{limma} package for details.
 #' @param between.sample.norm.method Normalization method. Default is \code{"quantile"}. See \code{normalizeBetweenArrays()} function from \code{limma} package for details.
-#' @param between.sample.weight.design Microarray experiment sample design matrix for beteween sample weight calculation.
+#' @param between.sample.weight.design Microarray experiment sample design matrix for between sample weight calculation.
 #' @param ... Additional arguments the default method \code{backgroundCorrect.matrix} function from \code{limma} package.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details The \code{rbioarray_rlist} object can be obtained from \code{\link{rbioarray_rlist}} function.
-#'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genome feature.
 #'          ADD the fact that \code{normalizeBetweenArrays} function is where \code{limma} log transforms data.
 #' @return A list with the core items for a \code{rbioarray_plist} class.
 #' @importFrom limma backgroundCorrect normalizeBetweenArrays backgroundCorrect.matrix arrayWeights
@@ -362,20 +376,21 @@ rbioarray_transfo_normalize.default <- function(E, E.background = NULL,
   ## check arguments
   bgc.methd <- match.arg(tolower(bgc.method), c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
   between.sample.norm.method <- match.arg(between.sample.norm.method, c("quantile", "Aquantile"))
-  # if (!bgc.method %in% c("auto", "auto", "none", "subtract", "half", "minimum", "movingmin", "edwards", "normexp"))
-  #   stop("Agument bgc.method needs to be set with one of \"auto\", \"auto\", \"none\", \"subtract\", \"half\", \"minimum\", \"movingmin\", \"edwards\", and \"normexp\" exactly.")
-  # if (!between.sample.norm.method %in% c("quantile", "Aquantile")) stop("Argument between.sample.norm.method needs to be set with ")
+  if (between.sample.norm.method != "quantile") {
+    stop("Currently the function only supports quantile method")
+  }
   if (is.null(between.sample.weight.design)) stop("Please provide the microarray design matrix for between.sample.weight.design argument.")
 
   ## pre-processing
   if (verbose) cat("Background correction: \n")
+  # E_gbc is a "matrix" "array" object
   E_bgc <- backgroundCorrect.matrix(E = E, Eb = E.background, method = bgc.method, ...) #background correction
   if (verbose) cat("Done!\n")
 
   ## normalization
   if (verbose) cat("\n")
   if (verbose) cat(paste0("Data normalization using ", between.sample.norm.method, " method..."))
-  Norm <- log2(normalizeBetweenArrays(E_bgc, between.sample.norm.method)) # quantile normalization
+  Norm <- log2(normalizeBetweenArrays(E_bgc, between.sample.norm.method)) # quantile normalization then log2 transformation
   Wgt <- arrayWeights(Norm, design = between.sample.weight.design) # array weight
   if (verbose) cat("Done!\n")
 
@@ -408,24 +423,25 @@ print.rbioarray_plist <- function(x, ...){
 
 #' @title rbioarray_filter_combine
 #'
-#' @description Function to filter, averaging and (if set) combine genes/probes/genomic features from the \code{rbioarray_plist} objects.
+#' @description Function to filter, averaging and (if set) combine genes/probes/genome features from the \code{rbioarray_plist} objects.
 #' @param object Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.
 #' @param filter.percentile The percentile threshold for filtering. Default is \code{0.05}. See details for more.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the filtering threshold. Default is \code{NULL}. See details for more.
-#' @param combine.gene.duplicate If to combine different transcripts from the same gene/genomic feature. Default is \code{FALSE}. See details for more.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param combine.gene.duplicate If to combine different transcripts from the same gene/genome feature. Default is \code{FALSE}. See details for more.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
-#' @details For \code{filter.percentile}, when the input data has negative probes, the value is sete to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
+#' @details For \code{filter.percentile}, when the input data has negative probes, the value is set to \code{0.95} so that the 95 percentile of the negative values is the considered the threhold
 #'          When there is no negative control probes, the value is set to \code{0.05}, so that the 5 percentile of the entire data is considered the lower threshold
 #'
 #'          For \code{filter.threshold.min.sample}, usually make sure to ensure the target gene has at least three samples, so that stats can be done.
 #'
-#'          When \code{combine.gene.duplicate = TRUE}
+#'          When \code{combine.gene.duplicate = TRUE},the function combines the expression values from different probes from the same gene.
+#'          This depends on if the input object has a valid gene symbol variable.
 #'
 #' @return A \code{rbioarray_flist} class, including the following core items:
 #'
-#'         \code{E}: filtered (and if set, combined) and normlized expression matrix
+#'         \code{E}: filtered (and if set, combined) and normalized expression matrix
 #'
 #'         \code{genes}: gene annotation with same row number as E
 #'
@@ -476,18 +492,27 @@ rbioarray_filter_combine <- function(object,
     filter.threshold.min.sample <- min(table(object$sample_groups))
   }
   isexpr <- rowSums(object$E > LE_cutoff) >= filter.threshold.min.sample
+
   flt_summary <- as.numeric(table(isexpr))
+  isexpr_fact <- factor(isexpr, levels = unique(isexpr))
+  if (length(levels(isexpr_fact)) == 1){
+    if (levels(isexpr_fact) == "TRUE"){
+      flt_summary <- c(0, flt_summary)
+    } else {
+      flt_summary <- c(flt_summary, 0)
+    }
+  }
   names(flt_summary) <- c("filtered", "remaning")
 
   # filter
   flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name]
+  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name, drop = FALSE]
   if (verbose) cat("Done!\n")
 
   ## averaging technical replicates
   if (verbose) cat("Averaging technical replicates...")
   flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
-  flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), ])
+  flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), , drop = FALSE])
   if (verbose) cat("Done!\n")
 
   ## combine duplicate genes if set
@@ -545,7 +570,6 @@ rbioarray_filter_combine <- function(object,
     out_E <- flt_E_avg
     out_genes <- flt_genes_avg
   }
-
   ## output
   if (verbose) cat("Constucting rbioarray_flist...")
   filter.results <- list(neg_control_used = neg_control_used,
@@ -582,14 +606,14 @@ print.rbioarray_flist <- function(x, ...){
 #' @description Function that performs statistical analysis for microarray data from \code{rbioarray_flist} class object.
 #' @param object The input \code{rbioarray_flist} object.
 #' @param contra contra Contrast matrix.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return A \code{rbioarray_de} class object with DE results, containing the following core items:
 #'
 #'         \code{F_stats}
 #'
 #'         \code{DE_results}: a list containing the DE results
 #'
-#'         \code{comparisons}: a list with comparisons and comparison levles
+#'         \code{comparisons}: a list with comparisons and comparison levels
 #'
 #'         \code{fit}: the limma fitted DE object as a reference
 #'

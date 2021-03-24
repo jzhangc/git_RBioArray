@@ -12,7 +12,7 @@ rbioseq_de_analysis(
   species,
   target.annot.file,
   sample_groups.var.name = NULL,
-  gtf.matrix,
+  gtf,
   filter.threshold.min.count = 10,
   filter.threshold.min.sample = NULL,
   design,
@@ -43,7 +43,7 @@ rbioseq_de_analysis(
 
 \item{sample_groups.var.name}{Sample group annotation variable name in the \code{target.annot.file}.}
 
-\item{gtf.matrix}{Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.}
+\item{gtf}{Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.}
 
 \item{filter.threshold.min.sample}{Minimum number of samples meeting the count threshold. Default is \code{NULL}.}
 

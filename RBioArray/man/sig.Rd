@@ -62,13 +62,13 @@ sig(object, ...)
 
 \item{p.val.correction.method}{A character string describing the p value correction method used for significant test.}
 
-\item{input.de.list}{Input list cantaining DE dataframes for each comparison.}
+\item{input.de.list}{Input list containing DE dataframes for each comparison.}
 
-\item{input.gene_symbol.var.name}{Input gene sysmbol variable name from the DE dataframes.}
+\item{input.gene_symbol.var.name}{Input gene symbol variable name from the DE dataframes.}
 
 \item{input.Fstats.matrix}{Input dataframe containing F stats.}
 
-\item{input.genes_annotation.control_type}{Functinal only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.}
+\item{input.genes_annotation.control_type}{Functional only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.}
 
 \item{input.fit}{Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object}
 
@@ -84,7 +84,7 @@ sig(object, ...)
 
 \item{plot}{If to plot volcano plot. Default is \code{TRUE}.}
 
-\item{plot.top.gene}{If to display the top gene identification, i.e., probem name or gene name, on the plot. Default is \code{FALSE}.}
+\item{plot.top.gene}{If to display the top gene identification, i.e., probe name or gene name, on the plot. Default is \code{FALSE}.}
 
 \item{plot.top.gene.n}{When \code{plot.top.gene = TRUE}, to set how many genes to display. Default is \code{5}.}
 
@@ -94,7 +94,7 @@ sig(object, ...)
 
 \item{plot.xLabel}{X-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{NULL}.}
 
-\item{plot.yLabel}{Y-axis label. Make sure to use quotatio marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
+\item{plot.yLabel}{Y-axis label. Make sure to use quotation marks. Use \code{NULL} to hide. Default is \code{"Mean Decrease in Accurac"}}
 
 \item{plot.symbolSize}{Size of the symbol. Default is \code{2}.}
 
@@ -110,17 +110,19 @@ sig(object, ...)
 
 \item{plot.Height}{The height of the figure for the final output figure file. Default is \code{150}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
 \item{genesymbolVar}{The name of the variable for gene symbols from the \code{annot} object. Only set this argument when \code{geneName = TRUE}. Default is \code{NULL}.}
 }
 \value{
-Signifiance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
+Significance test results as \code{csv} files and volcano plots to the working directory, as well as a \code{sig} object to the environment.
 
         The \code{sig} object contains the following items;
 
         \code{significant_change_summary}: the output of summary goes with the \code{gene_sysmbol} argument,
                                            i.e. the output will be based on the subset of the data with gene symbol when \code{gene_symbol = TRUE}.
+
+        \code{thresholding_summary}: a list of boolean vectors with the length of the features, including whicih ones passed the thresholding.
 
         \code{export.mode}
 
@@ -141,19 +143,26 @@ Signifiance test results as \code{csv} files and volcano plots to the working di
 Significance test function
 }
 \details{
+The \code{normE} for \code{sig.rbioarray_de} method is the \code{E}  object from rbioarray_de, which is indeed normalized.
+
 Explanation for \code{export.mode} options:
 
-        \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
+            \code{all}: export all results for all probes/features with or without name (e.g. gene symbol, gene name, etc.) annotations.
 
-        \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
+            \code{all.gene_symbol}: export all results for probes/features only with name (e.g. gene symbol, gene name, etc.) annotations.
 
-        \code{sig}: export only the signifiant changes. Gene symbol settings depends on argument \code{gene_symbol}.
+            \code{sig}: export only the significant changes. Gene symbol settings depends on argument \code{gene_symbol}.
 
-        \code{p_val.correction.method}
+            \code{p_val.correction.method}
 
         The option \code{p.val.correction.method = "spikein"} only applies to \code{microarray_de} objects.
 
         The \code{input.E} and \code{input.genes} are only used for output, not part of the sig processing.
+
+        Threshoding on the F_stats will only use the p value threshold, as there is no fold change for F stats.
+
+        \code{gene_symbol = TRUE} will only impact the volcano plot by remvoing genes without a gene symbol,
+        all the other results will contain full list of genes.
 }
 \examples{
 

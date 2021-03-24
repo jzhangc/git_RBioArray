@@ -6,19 +6,23 @@
 \usage{
 rbioGS_sp2hsaEntrez(
   DElst,
-  tgtSpecies = c("mmu", "mouse", "rno", "rat", "medaka", "olatipes"),
+  inputSpecies = c("hsa", "human", "mmu", "mouse", "rno", "rat", "medaka", "olatipes"),
   ensemblTransVar = NULL,
+  ensemblGeneVar = NULL,
   entrezVar = NULL,
   parallelComputing = FALSE,
-  clusterType = "PSOCK"
+  clusterType = "PSOCK",
+  verbose = TRUE
 )
 }
 \arguments{
-\item{DElst}{The list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
+\item{DElst}{The list with DE result, from legacy functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
-\item{tgtSpecies}{The target species. Options are \code{"mmu"}, \code{"rno"} and \code{"medaka"}.}
+\item{inputSpecies}{The input species. Options are \code{"hsa"}, \code{"mmu"}, \code{"rno"} and \code{"medaka"}.}
 
 \item{ensemblTransVar}{The name of the variable from DE list containing ensembl transcript ID.}
+
+\item{ensemblGeneVar}{The name of the variable from DE list containing ensembl gene ID.}
 
 \item{entrezVar}{The name of the variable from DE list containing entrez gene ID.}
 
@@ -30,13 +34,19 @@ rbioGS_sp2hsaEntrez(
 Outputs a DE \code{list} object with human Entrez ID for each dataframe. This list has the exact same format as the input DE list.
 }
 \description{
-Using up-to-date ensembl database, convert from mouse/rat ensemble transcript ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
+Using up-to-date ensembl database, convert from human/mouse/rat ensemble transcript/gene/entrez ID to and add Human entrez ID to the DE list from the DE functions, i.e. \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}, as human EntrezID is needed for GS analysis if using human gene sets.
 }
 \details{
 IMPORTANT: this function requires an internet connection as it retrieves information from ensembl website for human gene orthologs.
+         When using legacy functions, the DElst can be from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.
+         When using the new \code{rbioseq_de} or \code{rbioarray_de}, the DElst is \code{object$DE_results}
+
+         For the new DE classes from the current version of pacakge, such as \code{rbioseq_de} class, the DElist is the \code{DE_results} item.
+
+         If multiple ID var names are provided, the function follows this order to process: ensemblTransVar -> ensemblGeneVar -> entrezVar.
 }
 \examples{
 \dontrun{
-rbioGS_sp2hsaEntrez(DElst = comparison_DE, tgtSpecies = "mmu", ensemblTransVar = "EnsemblID")
+rbioGS_sp2hsaEntrez(DElst = comparison_DE, inputSpecies = "mmu", ensemblTransVar = "EnsemblID")
 }
 }

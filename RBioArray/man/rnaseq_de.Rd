@@ -31,7 +31,7 @@ rnaseq_de(object, ...)
   filter.threshold.cpm = "none",
   filter.threshold.min.sample = NULL,
   annot.group = NULL,
-  library.size.scale.method = "TMM",
+  library.size.scale.method = c("TMM", "RLE", "upperquartile", "none"),
   design,
   contra,
   qc.plot = TRUE,
@@ -57,9 +57,9 @@ rnaseq_de(object, ...)
 
 \item{filter.threshold.cpm}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}
 
-\item{annot.group}{Ssample group annotation object. Can be a \code{factor} or \code{vector} object.}
+\item{annot.group}{Sample group annotation object. Can be a \code{factor} or \code{vector} object.}
 
-\item{library.size.scale.method}{Library size scaling method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
+\item{library.size.scale.method}{aka between sample normalization method. Options are: \code{"none"}, \code{"TMM"}, \code{"RLE"}, \code{"upperquartile"}. Default is \code{"TMM"}.}
 
 \item{design}{Design matrix.}
 
@@ -67,7 +67,7 @@ rnaseq_de(object, ...)
 
 \item{qc.plot}{QC plot for the input read counts}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 A differential expression result object.
@@ -77,9 +77,13 @@ A list containing core elements of a \code{rbioseq_de} class. The items of a \co
         \code{filter_results}: A list containing \code{filter_threshold_cpm}, \code{filter_threshold_min_sample}, \code{filter_summary} and \code{filtered_counts}.
                                Note: \code{filtered_counts} is a \code{DGEList} class from \code{edgeR} package.
 
-        \code{normalization_results}
+        \code{normalization_method}
 
-        \code{normalized_data}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
+        \code{calcNormFactors_output}: \code{edgeR} function \code{calcNormFactors} output. A DGElist with \code{object$samples$norm.factors}.
+                                       Good for \code{cpm()} conversion for PCA, clustering, etc. The data is filtered.
+                                       A "filtered raw count with lib size" object.
+
+        \code{voom_output}: A \code{EList} generated from \code{voomWithQualityWeights} function from \code{limma} package.
                                 Note: The \code{targets} is NOT the same as the \code{targets} outside.
 
         \code{genes_annotation.gene_id.var_name}
@@ -108,6 +112,14 @@ Generic RNAseq statistical analysis function
 
          Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
          using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
+
+
+         It absolutely important to note that VOOM (or any other full-fledged RNA-seq methods like DEseq2) DOES NOT use FPKM for DE analysis
+         VOOM uses logCPM with library size scaling, e.g. TMM.
+         In fact, FPKM/RPKM/TPM are not suitable for DE analysis as they are designed to compare WITHIN sample genes, i.e. gene A vs gene B in one sample.
+         Further, users DO NOT need to convert their raw reads beforehand. VOOM will do the conversion for you.
+
+         SO, ONLY supply raw read counts to the function.
 }
 \examples{
 

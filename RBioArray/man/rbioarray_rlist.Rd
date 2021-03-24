@@ -36,7 +36,7 @@ rbioarray_rlist(object, ...)
 
 \item{raw.dataframe}{Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.}
 
-\item{raw.background.signal.matrix}{A opttional matrix containing background signals. The dimesnion should be the same as the input expression data without annotation columns.}
+\item{raw.background.signal.matrix}{A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.}
 
 \item{raw.annot.var.name}{A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.}
 
@@ -62,16 +62,16 @@ rbioarray_rlist(object, ...)
 
 \item{target.annot.file.path}{The directory for \code{target.annot.file}. Default is \code{getwd()}.}
 
-\item{sample_groups.var.name}{The variable name for sample groupping information from \code{target.annot.file}.}
+\item{sample_groups.var.name}{The variable name for sample grouping information from \code{target.annot.file}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the following items:
 
         \code{E}: raw expression matrix (i.e. hybridization signal)
 
-        \code{E_background}: background signal marix if applicable
+        \code{E_background}: background signal matrix if applicable
 
         \code{raw_file.gene_annotation.var_name}
 
@@ -86,21 +86,22 @@ A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the f
         \code{genes_annotation.control_type}: if \code{gene.annot.control_type.var.name} is set, a list containing all the control type information
 
         \code{genes_annotation.to_remove.var.name}: variable names (string or string vector) to remove from the final output \code{gene} element.
-                                                   This is important if starting with \code{EListRaw} object, since array posititional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
+                                                   This is important if starting with \code{EListRaw} object, since array positional variables need to be remove for \code{\link{rbioarray_filter_combine}} function.
 
         \code{targets}: the sample annotation data frame.
 
         \code{sample_groups}
 }
 \description{
-Function to constuct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
+Function to construct \code{rbioarray_rlist} class object from microarary and annotation data. The \code{rbioarray_rlist} object is the starting point for all microarray data analysis.
 }
 \details{
-When \code{object} is missing, the default fuction is used - make sure to pass all the arguments.
+When \code{object} is missing, the default function is used - make sure to pass all the arguments.
 
          To keep things consistent with the \code{Elist} from the dependent \code{limma} package. The \code{rbioarray_rlist} class contains many common elements from \code{Elist} class.
 
-The \code{raw.background.signal.matrix} is usefual when processing a \code{EListRaw} class object from \code{limma} package.
+The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package,
+         and using \code{bgc.method = "subtract"} for the \code{\link{rbioarray_transfo_normalize()}} function.
 
          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 

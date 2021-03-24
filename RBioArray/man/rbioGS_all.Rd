@@ -39,13 +39,13 @@ rbioGS_all(
 \arguments{
 \item{objTitle}{Object title for the output GS analysis list from \code{piano} package.}
 
-\item{DElst}{The input list with DE reuslt, from functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
+\item{DElst}{The input list with DE result, from legacy functions \code{\link{rbioarray_DE}} or \code{\link{rbioseq_DE}}.}
 
 \item{entrezVar}{Name of the EntrezID variable in the \code{DElst} object.}
 
 \item{GS}{Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.}
 
-\item{GSfile}{GS databae file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
+\item{GSfile}{GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
 
 \item{...}{Arguments to pass to \code{\link{rbioGS}}.}
 
@@ -102,7 +102,12 @@ Outputs  \code{csv} files and \code{pdf} figure files with GSA results.
 All-in-one wrapper for GSA and plotting.
 }
 \details{
-This is an all-in-one function for GS anlyasis based on piano package. It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable). See arguments for \code{\link{rbioGS}} for details.
+This is an all-in-one function for GS analysis based on piano package.
+         It runs "fisher", "stouffer", "reporter", "tailStrength", "wilcoxon" for p value based GSA, and "page", "gsea", "maxmean" for t value based GSA (customizable).
+
+         See arguments for \code{\link{rbioGS}} for details.
+
+         For the new DE classes from the current version of package, such as \code{rbioseq_de} class, the DElist is the \code{DE_results} item.
 }
 \examples{
 \dontrun{
