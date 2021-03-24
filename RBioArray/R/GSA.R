@@ -75,6 +75,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, inputSpecies = c("hsa", "human", "mmu", "
   names(sp_hsa_orth)[names(sp_hsa_orth) == "entrezgene_id"] <- paste0(inputSpecies, "_entrezgene")
 
   # merge the two dataframes
+  if (verbose) cat("Processing info from bioMart...")
   if (sp == "hsapiens") {
     sp_hsa_orth_entrez <- sp_hsa_orth
   } else {
@@ -91,7 +92,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, inputSpecies = c("hsa", "human", "mmu", "
     names(sp_hsa_orth_entrez)[names(sp_hsa_orth_entrez) == "entrezgene_id"] <- "hsa_entrezgene"
   }
   sp_hsa_orth_entrez <- sp_hsa_orth_entrez[!duplicated(sp_hsa_orth_entrez[, paste0(inputSpecies, "_ensembl_transcript_id")]), ]
-
+  if (verbose) cat("Done!\n")
 
   ## add the hsa entrez ID to the non-hsa DElist
   # temp func for adding the variable, i is the DE dataframe
@@ -106,7 +107,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, inputSpecies = c("hsa", "human", "mmu", "
     tmpfunc <- function(i){
       j <- merge(i, sp_hsa_orth_entrez,
                  by.x = ensemblGeneVar, by.y = "ensembl_gene_id", all.x = TRUE)
-      if (verbose) cat("\nRemovingi ensembl transcript ID...")
+      if (verbose) cat("\nRemoving ensembl transcript ID...")
       j$hsa_ensembl_transcript_id <- NULL
       j <- unique(j)
       return(j)
