@@ -280,7 +280,6 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @description Supersived hierarchical clustering function.
 #' @param object Input \code{sig} class object.
 #' @param gene_symbol.only Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
-#' @param sample_id.vector A \code{vector} containing names to display for each heatmap column. Default is \code{NULL} and the function will use the column name from the input.
 #' @param distance Distance calculation method. Default is \code{"euclidean"}. See \code{\link{dist}} for more.
 #' @param clust Clustering method. Default is \code{"complete"}. See \code{\link{hclust}} for more.
 #' @param col.colour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
@@ -291,9 +290,8 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microaray.
-#'          The column colour group is usually 2, since the function only outputs
+#'          The column colour group is usually 2, since the function only outputs pair-wise comparison clusters
 #'
-#'          NOTE: this function only outputs the pair-wise comparison clusters.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #' @importFrom gplots heatmap.2
 #' @importFrom RColorBrewer brewer.pal
