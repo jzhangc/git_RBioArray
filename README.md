@@ -62,7 +62,11 @@ Update log
       
       - Other updates
         - Functions updated for R Notebook/Markdown compatibility
-        - Combine documentation for methods of different classes 
+        - Combine documentation for methods of different classes
+
+    (ADDED)
+      - Updates to clustering funcions:
+        - rbio_supervised_hcluster() code base updated for better data compatibility
         
 
     0.5.4 (March.24.2021)

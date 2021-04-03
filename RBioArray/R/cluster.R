@@ -341,13 +341,21 @@ rbio_supervised_hcluster <- function(object,
   ## variables
   E <- object$input_data$norm_E
   genes <- object$input_data$genes
-  input.genes_annotation.gene_symbol.var_name = object$input_data$input.genes_annotation.gene_symbol.var_name
+  input.genes_annotation.gene_symbol.var_name <- object$input_data$input.genes_annotation.gene_symbol.var_name
   if (gene_symbol.only && ! input.genes_annotation.gene_symbol.var_name %in% names(object$input_data$genes)) {
     cat("Argument input.genes_annotation.gene_symbol.var_name not found in genes data frame when gene_symbol.only = TRUE, automatically set gene_symbol.only = FALSE.\n\n")
     gene_symbol.only <- FALSE
+  } else if (is.null(input.genes_annotation.gene_symbol.var_name)) {
+    cat("input.genes_annotation.gene_symbol.var_name is NULL, automatically set gene_symbol.only = FALSE.\n\n")
+    gene_symbol.only <- FALSE
   }
   input.genes_annotation.gene_id.var_name = object$input_data$input.genes_annotation.gene_id.var_name
-  export.name <- deparse(substitute(object))
+  if (is.null(export.name)) {
+    cat("Object/file export name prefix automatically set to the input object name. \n")
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
   input.sample_groups <- object$input_data$sample_groups
   input.genes_annotation.control_type <- object$input_data$input.genes_annotation.control_type
   comparisons <- object$input_data$comparisons$comparisons
@@ -379,11 +387,13 @@ rbio_supervised_hcluster <- function(object,
   dfm <- data.frame(genes, E, check.names = FALSE)
 
   if (rm.control){ # remove control
-    dfm <- dfm[dfm[, input.genes_annotation.control_type$control_type.var_name] == input.genes_annotation.control_type$exp_type.value, ]
+    is.control <- dfm[, input.genes_annotation.control_type$control_type.var_name] == input.genes_annotation.control_type$exp_type.value
+    dfm <- dfm[is.control, ]
+    cat(paste0("Number of control targets removed: ", length(which(is.control)), "\n"))
   }
 
   if (gene_symbol.only) {
-    cat("gene_symbol.only = TRUE, genes without a gene symbol are removed from clustering.\n\n")
+    cat("gene_symbol.only = TRUE, any genes without a gene symbol are removed from clustering.\n\n")
     row.lab.var_name <- input.genes_annotation.gene_symbol.var_name
   }
 
