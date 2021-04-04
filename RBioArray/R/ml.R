@@ -149,13 +149,13 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
   E_working <- t(E_working)
   E_rffs_raw <- E_working  # for output
 
-  if (center.scale){
+  if (rffs.center_scale){
     if (verbose) cat(paste0("Data centered with scaling prior to RF-FS.\n"))
     centered_X <- center_scale(E_working, scale = TRUE)  # center data with the option of scaling
     E_working <- centered_X$centerX
   }
 
-  if (quantileNorm){
+  if (rffs.quantile){
     if (verbose) cat(paste("Quantile normalization...", sep = ""))  # initial message
     E_working <- t(fs_data)
     E_working <- RBioFS::rbioNorm(E_working, correctBG = FALSE)
