@@ -17,7 +17,7 @@
 #' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Set when \code{parallelComputing = TRUE}, number of CPU threads/cores for parallel computing.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @return A \code{rbio_rffs} object..
+#' @return Export an \code{rbio_rffs} object to the global environment.
 #' @details The resulting \code{rbio_rffs} object contains the following items:
 #'          \code{rffs_raw_dataframe} Raw data dataframe for RFFS. Data not normalized or center.scaled by the function.
 #'                                    The data is usually previously normalized or processed.
@@ -217,5 +217,5 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
   )
 
   class(out) <- "rbio_rffs"
-  return(out)
+  assign(paste0(export.name, "_rffs"), out, envir = .GlobalEnv)
 }

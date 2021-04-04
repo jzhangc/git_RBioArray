@@ -57,7 +57,7 @@ rbio_randomforest_fs(
 \item{cluterType}{clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.}
 }
 \value{
-A \code{rbio_rffs} object..
+Export an \code{rbio_rffs} object to the global environment.
 }
 \description{
 Supervised feature selection with recursive random forest (RFFS)
