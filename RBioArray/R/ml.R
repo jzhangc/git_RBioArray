@@ -189,7 +189,7 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
                       parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                       plot = FALSE, verbose = FALSE) # initial FS
   rffs.initial_res <- get(paste0(export.name, "_initial_FS"))
-  fs <- rffs.initial_res$training_initial_FS$feature_initial_FS
+  fs <- rffs.initial_res$feature_initial_FS
   cat(paste("Done!\n", sep = ""))  # final message
 
 
@@ -201,7 +201,8 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
                   y = sample_group, nTimes = rffs.ntimes, nTree = rffs.sfs_ntree,
                   parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                   plot = FALSE, verbose = FALSE) # SFS
-    fs <- rffs.sfs_res$rffs_sfs_results$selected_features
+    rffs.sfs_res <- get(paste0(export.name, "_SFS"))
+    fs <- rffs.sfs_res$selected_features
     cat(paste("Done!\n", sep = ""))  # final message
   } else {
     rffs.sfs_res <- NULL
