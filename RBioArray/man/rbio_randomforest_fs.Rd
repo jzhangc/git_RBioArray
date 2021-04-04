@@ -11,7 +11,7 @@ rbio_randomforest_fs(
   export.name = NULL,
   gene_symbol.only = FALSE,
   fs_on_de = FALSE,
-  rffs.center_scale = TRUE,
+  rffs.center_scale = FALSE,
   rffs.quantile = FALSE,
   rffs.ntimes = 50,
   rffs.inital_fs.ntree = 501,

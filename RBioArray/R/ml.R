@@ -43,7 +43,7 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
                                  export.name = NULL,
                                  gene_symbol.only = FALSE,
                                  fs_on_de = FALSE,
-                                 rffs.center_scale = TRUE, rffs.quantile = FALSE,
+                                 rffs.center_scale = FALSE, rffs.quantile = FALSE,
                                  rffs.ntimes = 50,
                                  rffs.inital_fs.ntree = 501, rffs.inital_fs.mtry = NULL,
                                  rffs.sfs =  FALSE, rffs.sfs_ntree = 501,
