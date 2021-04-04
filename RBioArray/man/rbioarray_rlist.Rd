@@ -109,6 +109,8 @@ The \code{raw.background.signal.matrix} is useful when processing a \code{EListR
          It is noted that \code{extra.gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
          The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+
+         Make sure the sample annotation id variable has the same (or corresponding) order as the column order (or name) of the E matrix
 }
 \examples{
 \dontrun{

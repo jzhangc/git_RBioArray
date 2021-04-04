@@ -74,6 +74,10 @@ Update log
         
 
     0.5.4 (March.24.2021)
+      - General updates
+        - Typo fixed
+        - Help page updated for data input functions regarding data column (sample) order/name and the sample/name order from the annotation data
+      
       - New RNAseq functions
         - rbioseq_gtf(): a faster function to replace rbioseq_import_gtf()
 

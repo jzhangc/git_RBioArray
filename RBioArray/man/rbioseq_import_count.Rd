@@ -114,7 +114,6 @@ Data pre-processing for RNA-seq read count files.
 1. When \code{count_data_type = "count_df"}, the \code{count_df} format is rows: features, columns: feature names + samples.
             Column names of the samples should be the sample id used in \code{count_df.sample.annot.df}.
 
-
          2. When \code{count_data_type = "htseq"}, the function will cut off the last five summary rows.#'
             For \code{htseq_sample.annot.file}, the argument doesn't accept full file path.
             The function will only seek the file under working directory. So, the file should be placed under working directory.

@@ -14,6 +14,7 @@
 #' @param rffs.inital_fs.mtry Integer. mtry setting for the RFFS initial selection. Default is \code{NULL}.
 #' @param rffs.sfs Boolean. Whether to run the secondary sequential forward selection (SFS). Default is \code{FALSE}.
 #' @param rffs.sfs_ntree Integer. Set when \code{rffs.sfs = TRUE}, ntree setting for the RFFS SFS step. Default is \code{501}.
+#' @param rffs.randomstate Integer. Set random state for RFFS. If \code{0}, the random state is off. Default is \code{0}.
 #' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param n_cores Set when \code{parallelComputing = TRUE}, number of CPU threads/cores for parallel computing.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -47,6 +48,7 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
                                  rffs.ntimes = 50,
                                  rffs.inital_fs.ntree = 501, rffs.inital_fs.mtry = NULL,
                                  rffs.sfs =  FALSE, rffs.sfs_ntree = 501,
+                                 rffs.randomstate = 0,
                                  parallelComputing = TRUE, n_cores = parallel::detectCores() - 1, clusterType = "FORK") {
   # - check arguments -
   if (!any(class(object) %in% c("sig"))) stop("The input object needs to be an \"sig\" class.")
@@ -60,6 +62,9 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
   } else if (!sample_group.var %in% names(object$input_data$targets)) {
     stop("Provided sample_group.var not found in the input object (check: names(object$input_data$targets)).")
   }
+
+  # - random state -
+  if (rffs.randomstate) set.seed(rffs.randomstate)
 
   # - set up data vars -
   E <- object$input_data$norm_E
@@ -213,7 +218,8 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
     rffs_ntimes = rffs.ntimes,
     rffs_inital_ntree = rffs.inital_fs.ntree,
     rffs_inital_mtry = initial_fs_mtry,
-    rffs_sfs =  FALSE, rffs_sfs_ntree = rffs.sfs_ntree
+    rffs_sfs =  FALSE, rffs_sfs_ntree = rffs.sfs_ntree,
+    rffs_randomstate = ifelse(rffs.randomstate, rffs.randomstate, "not set")
   )
 
   class(out) <- "rbio_rffs"

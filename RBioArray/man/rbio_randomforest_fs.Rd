@@ -18,6 +18,7 @@ rbio_randomforest_fs(
   rffs.inital_fs.mtry = NULL,
   rffs.sfs = FALSE,
   rffs.sfs_ntree = 501,
+  rffs.randomstate = 0,
   parallelComputing = TRUE,
   n_cores = parallel::detectCores() - 1,
   clusterType = "FORK"
@@ -47,6 +48,8 @@ rbio_randomforest_fs(
 \item{rffs.sfs}{Boolean. Whether to run the secondary sequential forward selection (SFS). Default is \code{FALSE}.}
 
 \item{rffs.sfs_ntree}{Integer. Set when \code{rffs.sfs = TRUE}, ntree setting for the RFFS SFS step. Default is \code{501}.}
+
+\item{rffs.randomstate}{Integer. Set random state for RFFS. If \code{0}, the random state is off. Default is \code{0}.}
 
 \item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
