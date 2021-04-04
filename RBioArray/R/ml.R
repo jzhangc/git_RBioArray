@@ -20,16 +20,19 @@
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @return Export an \code{rbio_rffs} object to the global environment.
 #' @details The resulting \code{rbio_rffs} object contains the following items:
-#'          \code{rffs_raw_dataframe} Raw data dataframe for RFFS. Data not normalized or center.scaled by the function.
+#'          \code{ml_raw_dataframe} Raw data dataframe for RFFS. Data not normalized or center.scaled by the function.
 #'                                    The data is usually previously normalized or processed.
 #'                                    The E data is from \code{object$input_data$norm_E} from the input \code{sig} object.
+#'                                    It is noted the data may be subset with only the DE features according to the \code{fs_on_de} setting.
+#'                                    This data frame can be used as input data for other ML purpouses featured in the \code{RBioFS} packages.
 #'          \code{rffs_working_data} It is list containing the follow items:
 #'              \code{rffs_working_E} Working datafarme as the \code{x} input for RFFS. Columns: features; Rows: samples. Normalized/center.scaled when set.
-#'              \code{rffs_working_y}  Working vector (\code{factor}) as the \code{y} input for RFFS.
+#'              \code{rffs_working_y}  Working vector (\code{factor}) as the \code{y} input for RFFS.#'
 #'              \code{center_scale} Center.scale setting.
-#'              \code{quantile}  Quantile setting.
+#'              \code{quantile} Quantile setting.
 #'          \code{rffs_initial_results}
 #'          \code{rffs_sfs_results}
+#'          \code{rffs_subset_dataframe}: Input data subset with only the RFFS selected features. No data or fas
 #'          \code{rffs_ntimes}
 #'          \code{rffs_inital_ntree}
 #'          \code{rffs_inital_mtry}
@@ -150,7 +153,6 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
     rownames(E_working) <- dfm_working[, input.genes_annotation.gene_id.var_name]
   }
 
-
   E_working <- t(E_working)
   E_rffs_raw <- E_working  # for output
 
@@ -187,6 +189,7 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
                       parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                       plot = FALSE, verbose = FALSE) # initial FS
   rffs.initial_res <- get(paste0(export.name, "_initial_FS"))
+  fs <- rffs.initial_res$training_initial_FS$feature_initial_FS
   cat(paste("Done!\n", sep = ""))  # final message
 
 
@@ -198,15 +201,19 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
                   y = sample_group, nTimes = rffs.ntimes, nTree = rffs.sfs_ntree,
                   parallelComputing = parallelComputing, n_cores = n_cores, clusterType = clusterType,
                   plot = FALSE, verbose = FALSE) # SFS
-    rffs.sfs_res <- get(paste0(export.name, "_SFS"))
+    fs <- rffs.sfs_res$rffs_sfs_results$selected_features
     cat(paste("Done!\n", sep = ""))  # final message
   } else {
     rffs.sfs_res <- NULL
   }
 
   # - output -
+  rffs_subset_dfm <- data.frame(sample_id = sample_id,
+                                sample_group = sample_group,
+                                E_rffs_raw[, fs, drop = FALSE])  # for output
+
   out <- list(
-    rffs_raw_dataframe = rffs_raw_dfm,
+    ml_raw_dataframe = rffs_raw_dfm,
     rffs_working_data = list(
       rffs_working_E = E_working,
       rffs_working_y = sample_group,
@@ -215,6 +222,7 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
     ),
     rffs_initial_results = rffs.initial_res,
     rffs_sfs_results = rffs.sfs_res,
+    rffs_subset_dataframe = rffs_subset_dfm,
     rffs_ntimes = rffs.ntimes,
     rffs_inital_ntree = rffs.inital_fs.ntree,
     rffs_inital_mtry = initial_fs_mtry,
