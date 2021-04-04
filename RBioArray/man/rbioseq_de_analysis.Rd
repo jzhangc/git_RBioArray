@@ -31,7 +31,7 @@ rbioseq_de_analysis(
 \arguments{
 \item{raw.file.path}{Path to raw files. Default is the system working directory.}
 
-\item{raw.file.ext}{Raw file extention. Default is \code{".txt"}.}
+\item{raw.file.ext}{Raw file extension. Default is \code{".txt"}.}
 
 \item{raw.file.sep}{Raw read count file separators. Default is \code{""\"\"}, i.e. white space.}
 
@@ -39,7 +39,7 @@ rbioseq_de_analysis(
 
 \item{species}{Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".}
 
-\item{target.annot.file}{Annotation file describing filenames and targets, and should be in \code{csv} format.}
+\item{target.annot.file}{Annotation file describing file names and targets, and should be in \code{csv} format.}
 
 \item{sample_groups.var.name}{Sample group annotation variable name in the \code{target.annot.file}.}
 
@@ -63,9 +63,9 @@ rbioseq_de_analysis(
 
 \item{...}{Additional arguments for \code{\link{sig}} function.}
 
-\item{parallelComputing}{Wether to use parallel computing or not. Default is \code{TRUE}.}
+\item{parallelComputing}{Whether to use parallel computing or not. Default is \code{TRUE}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
 \item{filter.threshold.cpm}{Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.}
 

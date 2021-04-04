@@ -180,7 +180,7 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 #' @param export.name File name for the export \code{pdf} plot file.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 #'         The function also outputs the column and row distance and cluster objects in a list.
 #' @importFrom gplots heatmap.2
@@ -289,7 +289,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
-#' @details Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microaray.
+#' @details Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microarray.
 #'          The column colour group is usually 2, since the function only outputs pair-wise comparison clusters
 #'
 #' @return A heatmap based on hierarchical clustering analysis in \code{pdf} format.

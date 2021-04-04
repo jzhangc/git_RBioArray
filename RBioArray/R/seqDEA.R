@@ -3,10 +3,10 @@
 #' @description All-in-one wrapper for RNAseq differential expression (DE) analysis, i.e. from read count files to volcano plots.
 #' @param raw.file.path Path to raw files. Default is the system working directory.
 #' @param species Optional species code, following the traditional abbreviated naming convention, e.g. "hsa", "mmu".
-#' @param target.annot.file Annotation file describing filenames and targets, and should be in \code{csv} format.
+#' @param target.annot.file Annotation file describing file names and targets, and should be in \code{csv} format.
 #' @param sample_groups.var.name Sample group annotation variable name in the \code{target.annot.file}.
 #' @param gtf Parsed gtf/gff annotation matirx. Can be obtained by function \code{\link{rbioseq_import_gtf}}.
-#' @param raw.file.ext Raw file extention. Default is \code{".txt"}.
+#' @param raw.file.ext Raw file extension. Default is \code{".txt"}.
 #' @param raw.file.sep Raw read count file separators. Default is \code{""\"\"}, i.e. white space.
 #' @param raw.file.source Raw file source, i.e. program used to generate read counts. Currently only supports \code{"htseq-count"}.
 #' @param filter.threshold.cpm Filtering threshold for counts based on CPM (counts per million). Default is \code{"none"}.
@@ -19,9 +19,9 @@
 #' @param export.name Name used for output objects to the environment and directory. Not optional. Default is \code{NULL}.
 #' @param export.mode Mode used to export results to the directory. Options are \code{"all"}, \code{"all.gene_symbol"}, \code{"sig"}. Default is \code{"all"}. See details.
 #' @param ... Additional arguments for \code{\link{sig}} function.
-#' @param parallelComputing Wether to use parallel computing or not. Default is \code{TRUE}.
+#' @param parallelComputing Whether to use parallel computing or not. Default is \code{TRUE}.
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
-#' @param verbose Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
+#' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details When \code{raw.file.source = "htseq-count"}, the function will cut off the last five summary raws.
 #'
 #'          For more on the classes \code{rbioseq_count}, \code{rbioseq_de} and \code{sig}, see the help pages for functions \code{\link{rbioseq_import_count}}, \code{\link{rnaseq_de}} and \code{\link{sig}}, respectively.

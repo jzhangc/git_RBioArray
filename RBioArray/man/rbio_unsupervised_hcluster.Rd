@@ -98,7 +98,7 @@ rbio_unsupervised_hcluster(object, ...)
 
 \item{plot.height}{Height of the plot. Unit is \code{inch}. Default is \code{7}.}
 
-\item{verbose}{Wether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
+\item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
 A heatmap based on hierarchical clustering analysis in \code{pdf} format.

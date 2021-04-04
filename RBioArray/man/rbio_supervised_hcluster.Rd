@@ -51,6 +51,6 @@ A heatmap based on hierarchical clustering analysis in \code{pdf} format.
 Supersived hierarchical clustering function.
 }
 \details{
-Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microaray.
+Unlike the unsupervised veresion, the sig data hcluster uses normalized expression data for both RNAseq and microarray.
          The column colour group is usually 2, since the function only outputs pair-wise comparison clusters
 }
