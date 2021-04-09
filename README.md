@@ -71,6 +71,9 @@ Update log
         
       - Updates to clustering funcions:
         - rbio_supervised_hcluster() code base updated for better data compatibility
+      
+      - Updates to DE significant test functions
+        - sig() updated so that the volcano plots would have the export.name as part of the file name
         
 
     0.5.4 (March.24.2021)
