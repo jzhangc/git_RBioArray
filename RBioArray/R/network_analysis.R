@@ -128,7 +128,7 @@ rbio_tom <- function(mtx,
     }
     names(ss_mean) <- k_range
     k <- as.integer(names(ss_mean)[ss_mean == max(ss_mean)])
-    if (verbose) cat(paste0(k, " clusters. \n\n"))
+    if (verbose) cat(paste0(k, " clusters..."))
     tom_membership <- stats::cutree(tom_dist_hclust, k = k)
     if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
     dynamictree.min.size <- NULL
@@ -141,7 +141,7 @@ rbio_tom <- function(mtx,
     ss_mean <- NULL
     dynamictree.min.size <- NULL
   }
-  if (verbose) cat("Done!\n")
+  if (verbose) cat("Done!\n\n")
 
   # igraph and final membership construction
   g_adjmat <- as.matrix(tom_similarity)  # igraph edge always uses similarity matrix
