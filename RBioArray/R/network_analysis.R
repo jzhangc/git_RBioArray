@@ -141,7 +141,7 @@ rbio_tom <- function(mtx,
     ss_mean <- NULL
     dynamictree.min.size <- NULL
   }
-  if (verbose) cat("Done!\n\n")
+  if (verbose) cat("Done!\n")
 
   # igraph and final membership construction
   g_adjmat <- as.matrix(tom_similarity)  # igraph edge always uses similarity matrix
@@ -184,7 +184,9 @@ rbio_tom <- function(mtx,
     ggsave(filename = paste0(plot.export.name, "_tom_hclust.pdf"), plot = p,
            width = plot.width, height = plot.height, units = "mm", dpi = 600)
     grid.draw(p)
-    if (verbose) cat("Done!\n")
+    if (verbose) cat("Done!\n\n")
+  } else {
+    if (verbose) cat("\n")
   }
 
   # - igraph -
