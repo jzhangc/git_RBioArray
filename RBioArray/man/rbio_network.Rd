@@ -75,7 +75,7 @@ rbio_network(object, ...)
 
 \item{plot.vertex.label}{string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.}
 
-\item{plot.vertex.label.topvsize}{Boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.}
+\item{plot.vertex.label.topvsize}{Boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.}
 
 \item{plot.vertex.topvsize.filter}{numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.}
 
@@ -99,13 +99,13 @@ rbio_network(object, ...)
 
 \item{plot.edge.color.highlighttopvsize}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.}
 
-\item{plot.ellipse}{Boolean. <TBC: under construction>}
+\item{plot.ellipse}{Boolean. If to show member groups with ellipse. Default is \code{FALSE}.}
 
-\item{plot.height}{numeric. <TBC: under construction>}
+\item{plot.height}{numeric. Plot height. Default is \code{7}.}
 
-\item{plot.width}{numeric. <TBC: under construction>}
+\item{plot.width}{numeric. Plot width. Default is \code{7}.}
 
-\item{random_state}{integer. <TBC: under construction>}
+\item{random_state}{integer. Random state for randomly generated network plot arrangement. Default is \code{1}.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.}
 
@@ -141,6 +141,8 @@ TBC
          b: mar[1], l: mar[2], t: mar[3], r: mar[4]
 
          For \code{plot.vertex.label.topvsize.filter}, the functional will apply the filter per group if g_membership is provided.
+
+         When \code{random_state = 0}, no random state is set.
 }
 \examples{
 

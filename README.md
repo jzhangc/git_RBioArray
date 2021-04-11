@@ -71,6 +71,10 @@ Update log
         
       - Updates to clustering funcions:
         - rbio_supervised_hcluster() code base updated for better data compatibility
+      
+      - Updates to network analysis function(s):
+        - rbio_network() udpated with better random state implementation
+        - Mannual page updated for rbio_network()
         
 
     0.5.4 (March.24.2021)

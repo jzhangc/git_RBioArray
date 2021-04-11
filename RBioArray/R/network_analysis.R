@@ -355,7 +355,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.vertex.size.scale numeric two-vector. <TBC: under construction>
 #' @param plot.vertex.label string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.
 #' @param plot.vertex.topvsize.filter numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.
-#' @param plot.vertex.label.topvsize Boolean. If to display labels with a threshold on vertex size. \code{default is FALSE}.
+#' @param plot.vertex.label.topvsize Boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.
 #' @param plot.vertex.color.highlighttopvsize Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.
 #' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
@@ -367,10 +367,10 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.edge.arrow.mode Boolean. <TBC: under construction>
 #' @param plot.edge.curved Boolean. <TBC: under construction>
 #' @param plot.edge.color.highlighttopvsize Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.
-#' @param plot.ellipse Boolean. <TBC: under construction>
-#' @param plot.width numeric. <TBC: under construction>
-#' @param plot.height numeric. <TBC: under construction>
-#' @param random_state integer. <TBC: under construction>
+#' @param plot.ellipse Boolean. If to show member groups with ellipse. Default is \code{FALSE}.
+#' @param plot.width numeric. Plot width. Default is \code{7}.
+#' @param plot.height numeric. Plot height. Default is \code{7}.
+#' @param random_state integer. Random state for randomly generated network plot arrangement. Default is \code{1}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messeages.
 #' @details <TBC: under construction>
 #'          For \code{colour_scheme}, use the following as a guide (name, maximum number of colours):
@@ -389,6 +389,8 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'          b: mar[1], l: mar[2], t: mar[3], r: mar[4]
 #'
 #'          For \code{plot.vertex.label.topvsize.filter}, the functional will apply the filter per group if g_membership is provided.
+#'
+#'          When \code{random_state = 0}, no random state is set.
 #' @import ggplot2
 #' @import igraph
 #' @importFrom scales alpha rescale
@@ -427,7 +429,9 @@ rbio_network.default <- function(g,
                                  plot.height = 7, plot.width = 7,
                                  random_state = 1, verbose = TRUE){
   # - set random state -
-  set.seed(random_state)
+  if (random_state != 0) {
+    set.seed(random_state)
+  }
 
   # - argument check -
   # if (is.null(V(g)$name)) {
