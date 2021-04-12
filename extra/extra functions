@@ -1,0 +1,49 @@
+Add to dependency: pathview (>= 1.12.0)
+
+#' @title rbioGS_kegg
+#' 
+#' @description Download and generate DE results masked kegg pathway figures, using pathview package
+#' @param dfm GS dataframe with \code{ENTREZID} and \code{logFC} variables.
+#' @param entrezVar Name of the EntrezID variable in the \code{DElst} object.
+#' @param statsVar Name of the stats variable that will be masked on the figure, such as FC, p-value, etc. Default is \code{"logFC"}
+#' @param keggID Make sure to have quotation marks around the ID number.
+#' @param suffix Output file name suffix. Make sure to put it in quotation marks.
+#' @param species Set the species. Default is \code{"hsa"}. Visit kegg website for details.
+#' @param ... Additinal arguments for \code{pathview()} from \code{pathview} package.
+#' @details GSrank takes the resulted object generated from the piano function consensusScores().
+#' @return Outputs a \code{list} kegg object, as well as masked figure files in \code{pdf} format.
+#' @details Visit website \url{http://www.genome.jp/kegg/pathway.html} for kegg IDs.
+#' @importFrom pathview pathview
+#' @examples
+#' \dontrun{
+#' 
+#'  rbioGS_kegg(all_DE4GSA_flt, keggID = "04060") # Cytokine-cytokine receptor interaction, disdn + mixdn + nd
+#' 
+#' }
+#' @export
+rbioGS_kegg <- function(dfm, entrezVar = NULL, statsVar = "logFC",
+                        keggID, suffix, species = "hsa", ...){
+  # check entrez ID variable name
+  if (is.null(entrezVar) | !entrezVar %in% names(dfm)){
+    stop("Entrez ID variable not found in the input dataframe")
+  }
+
+  if (!statsVar %in% names(dfm)){
+    stop("Stats variable not found in the input dataframe.")
+  }
+
+  # extract the complete case
+  working_dfm <- dfm
+
+  # prepare objects
+  stats_mtx <- working_dfm[, statsVar]
+  names(stats_mtx) <- working_dfm[, entrezVar]
+
+  # visualize
+  KEGG <- pathview(gene.data = stats_mtx, pathway.id = keggID, species = species,
+                   out.suffix = suffix, keys.align = "y", match.data = FALSE,
+                   key.pos = "topright", ...)
+
+  # set the .GlobalEnv to the envir argument so that the assign function will assign the value to a global object, aka outside the function
+  return(assign(paste("kegg_", keggID, "_" , deparse(substitute(dfm)), sep = ""), KEGG, envir = .GlobalEnv))
+}

@@ -79,6 +79,10 @@ Update log
         
       - Updates to DE significant test functions
         - sig() updated so that the volcano plots would have the export.name as part of the file name
+        
+      - Updates to GSA function(s):
+        - rbioGS_kegg() moved to legacy functions, and temporarily diabled due to a fatal bug in the org.Hs.eg.db pacakge. Funtion will be re-enabled once the issue is resolved. 
+          - Accordingly, pathview (>= 1.12.0) dependency temporarilty removed
 
 
     0.5.4 (March.24.2021)
