@@ -73,9 +73,11 @@ Update log
         - rbio_supervised_hcluster() code base updated for better data compatibility
       
       - Updates to network analysis function(s):
-        - rbio_network() udpated with better random state implementation
-        - Mannual page updated for rbio_network()
+        - rbio_tom() updated with user customizable g_membership
         - Verbose settings updated for rbio_tom()
+        - Manual page updated for rbio_tom()
+        - rbio_network() udpated with better random state implementation
+        - Manual page updated for rbio_network()
         
       - Updates to DE significant test functions
         - sig() updated so that the volcano plots would have the export.name as part of the file name

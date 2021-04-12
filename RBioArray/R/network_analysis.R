@@ -1,34 +1,55 @@
 #' @title rbio_tom
 #'
 #' @description TOM (topological overlap measure) analysis.
-#' @param mtx matrix. TBC.
+#' @param mtx matrix. Input data matrix. The function calculates TOM distance/affinity for the columns items (or features).
 #' @param diag Boolean. If to include diagonal for igraph construction. Default is \code{FALSE}.
 #' @param cor_method String. Correlation method. Default is \code{"pearson"}.
-#' @param power integer. TBC.
-#' @param tom_type string. TBC.
+#' @param power integer. The power to the correlation coefficients. Default is \code{6}.
+#' @param tom_type string. Directionality of the TOM analysis. Default is \code{"unsigned}.
 #' @param ... Additional arguments passed to \code{TOMdist()} function.
 #' @param hclust.method String.
 #' @param cutree.method String. Method to find the optimal k. Default is \code{"silhouette"}.
 #' @param dynamictree.min.size Integer. When \code{cutree.method = "dynamic"}, the minimum cluster size. Default is \code{20}.
-#' @param k integer. TBC.
-#' @param h numeric. TBC.
+#' @param k integer. Set when \code{cutree.method = "manual"}, manually set number of groups to cut to.
+#' @param h numeric. Set when \code{cutree.method = "manual"}, cut tree height.
 #' @param plot.dendro Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.
 #' @param plot.export.name string. The prefix for the exported figure file name. Default is \code{NULL}.
 #' @param plot.margins numeric vector. Plot margins, unit is "cm", order: \code{t, r, b, l}. Default is \code{c(2, 2, 2, 2)}.
 #' @param plot.title Boolean. The dendrogram plot title. Default is \code{NULL}.
 #' @param plot.title.size numeric. The dendrogram plot title size. Default is \code{16}.
-#' @param plot.dendroline.size numeric. TBC.
-#' @param plot.dendrolabel Boolean. TBC.
-#' @param plot.dendrolabel.size mumeric. TBC.
-#' @param plot.dendrolabel.space numeric. TBC.
-#' @param plot.ylabel.size numeric. TBC.
+#' @param plot.dendroline.size numeric. The dendrogram plot line size. Default is \code{1.5}.
+#' @param plot.dendrolabel Boolean. If to display dendrogram label. Default is \code{TRUE}.
+#' @param plot.dendrolabel.size numeric. Set when \code{plot.dendrolabel = TRUE}, dendrogram label size. Default is \code{1.5}.
+#' @param plot.dendrolabel.space numeric. Set when \code{plot.dendrolabel = TRUE}, dendrogram label space. Default is \code{2}.
+#' @param plot.ylabel.size numeric. Dendrogram y label size. Default is \code{1.5}.
 #' @param plot.width numeric. The dendrogram plot width. Default is \code{170}.
 #' @param plot.height numeric. The dendrogram plot height. Default is \code{150}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return
-#'         TBC
+#'         An \code{rbio_tom} object with the following items:
+#'
+#'         \code{g}: an igraph object for network analysis and visualization.
+#'
+#'         \code{tom_distance}: a \code{dist} object for TOM distance.
+#'
+#'         \code{tom_affinity}: a \code{matrix} object for TOM affinity.
+#'
+#'         \code{tom_dist_hclust}: a \code{hclust} object for TOM distance.
+#'
+#'         \code{cutree_method}: method used to cut hclust tree, to generate g membership.
+#'
+#'         \code{dynamictree_min_size}: when {cutree.method = "dynamic"}, the minimum tree size for dynamic tree cutting.
+#'
+#'         \code{silhouette_score_mean}: when {cutree.method = "silhouette"}, the mean silhouette score.
+#'
+#'         \code{k}: when \code{cutree.method = "manual"}, manually set number of groups to cut to.
+#'
+#'         \code{h}: when \code{cutree.method = "manual"}, cut tree height.
+#'
+#'         \code{tom_membership}: a \code{named vector} containing membership for each features clustered
+#'
 #' @details
-#'         TBC
+#'         When \code{cutree.method = "manual"}, \code{h} and \code{k} are mutually exclusive. Set one, but not both.
 #'
 #'         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
 #'         b: mar[1], l: mar[2], t: mar[3], r: mar[4]

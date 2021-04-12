@@ -33,15 +33,15 @@ rbio_tom(
 )
 }
 \arguments{
-\item{mtx}{matrix. TBC.}
+\item{mtx}{matrix. Input data matrix. The function calculates TOM distance/affinity for the columns items (or features).}
 
 \item{diag}{Boolean. If to include diagonal for igraph construction. Default is \code{FALSE}.}
 
 \item{cor_method}{String. Correlation method. Default is \code{"pearson"}.}
 
-\item{power}{integer. TBC.}
+\item{power}{integer. The power to the correlation coefficients. Default is \code{6}.}
 
-\item{tom_type}{string. TBC.}
+\item{tom_type}{string. Directionality of the TOM analysis. Default is \code{"unsigned}.}
 
 \item{...}{Additional arguments passed to \code{TOMdist()} function.}
 
@@ -51,9 +51,9 @@ rbio_tom(
 
 \item{dynamictree.min.size}{Integer. When \code{cutree.method = "dynamic"}, the minimum cluster size. Default is \code{20}.}
 
-\item{k}{integer. TBC.}
+\item{k}{integer. Set when \code{cutree.method = "manual"}, manually set number of groups to cut to.}
 
-\item{h}{numeric. TBC.}
+\item{h}{numeric. Set when \code{cutree.method = "manual"}, cut tree height.}
 
 \item{plot.dendro}{Boolean. Whether to plot a dendrogram. Default is \code{TRUE}.}
 
@@ -65,15 +65,15 @@ rbio_tom(
 
 \item{plot.title.size}{numeric. The dendrogram plot title size. Default is \code{16}.}
 
-\item{plot.dendroline.size}{numeric. TBC.}
+\item{plot.dendroline.size}{numeric. The dendrogram plot line size. Default is \code{1.5}.}
 
-\item{plot.dendrolabel}{Boolean. TBC.}
+\item{plot.dendrolabel}{Boolean. If to display dendrogram label. Default is \code{TRUE}.}
 
-\item{plot.dendrolabel.size}{mumeric. TBC.}
+\item{plot.dendrolabel.size}{numeric. Set when \code{plot.dendrolabel = TRUE}, dendrogram label size. Default is \code{1.5}.}
 
-\item{plot.dendrolabel.space}{numeric. TBC.}
+\item{plot.dendrolabel.space}{numeric. Set when \code{plot.dendrolabel = TRUE}, dendrogram label space. Default is \code{2}.}
 
-\item{plot.ylabel.size}{numeric. TBC.}
+\item{plot.ylabel.size}{numeric. Dendrogram y label size. Default is \code{1.5}.}
 
 \item{plot.width}{numeric. The dendrogram plot width. Default is \code{170}.}
 
@@ -82,13 +82,33 @@ rbio_tom(
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
-TBC
+An \code{rbio_tom} object with the following items:
+
+        \code{g}: an igraph object for network analysis and visualization.
+
+        \code{tom_distance}: a \code{dist} object for TOM distance.
+
+        \code{tom_affinity}: a \code{matrix} object for TOM affinity.
+
+        \code{tom_dist_hclust}: a \code{hclust} object for TOM distance.
+
+        \code{cutree_method}: method used to cut hclust tree, to generate g membership.
+
+        \code{dynamictree_min_size}: when {cutree.method = "dynamic"}, the minimum tree size for dynamic tree cutting.
+
+        \code{silhouette_score_mean}: when {cutree.method = "silhouette"}, the mean silhouette score.
+
+        \code{k}: when \code{cutree.method = "manual"}, manually set number of groups to cut to.
+
+        \code{h}: when \code{cutree.method = "manual"}, cut tree height.
+
+        \code{tom_membership}: a \code{named vector} containing membership for each features clustered
 }
 \description{
 TOM (topological overlap measure) analysis.
 }
 \details{
-TBC
+When \code{cutree.method = "manual"}, \code{h} and \code{k} are mutually exclusive. Set one, but not both.
 
         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
         b: mar[1], l: mar[2], t: mar[3], r: mar[4]

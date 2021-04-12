@@ -20,23 +20,33 @@
 #' @param cluterType clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @return Export an \code{rbio_rffs} object to the global environment.
 #' @details The resulting \code{rbio_rffs} object contains the following items:
+#'
 #'          \code{ml_raw_dataframe} Raw data dataframe for RFFS. Data not normalized or center.scaled by the function.
 #'                                    The data is usually previously normalized or processed.
 #'                                    The E data is from \code{object$input_data$norm_E} from the input \code{sig} object.
 #'                                    It is noted the data may be subset with only the DE features according to the \code{fs_on_de} setting.
 #'                                    This data frame can be used as input data for other ML purpouses featured in the \code{RBioFS} packages.
+#'
 #'          \code{rffs_working_data} It is list containing the follow items:
 #'              \code{rffs_working_E} Working datafarme as the \code{x} input for RFFS. Columns: features; Rows: samples. Normalized/center.scaled when set.
 #'              \code{rffs_working_y}  Working vector (\code{factor}) as the \code{y} input for RFFS.#'
 #'              \code{center_scale} Center.scale setting.
 #'              \code{quantile} Quantile setting.
+#'
 #'          \code{rffs_initial_results}
+#'
 #'          \code{rffs_sfs_results}
+#'
 #'          \code{rffs_subset_dataframe}: Input data subset with only the RFFS selected features. No data or fas
+#'
 #'          \code{rffs_ntimes}
+#'
 #'          \code{rffs_inital_ntree}
+#'
 #'          \code{rffs_inital_mtry}
+#'
 #'          \code{rffs_sfs}
+#'
 #'          \code{rffs_sfs_ntree}
 #'
 #' @import doParallel
