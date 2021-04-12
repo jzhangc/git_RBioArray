@@ -62,7 +62,6 @@ Update log
       
       - Other updates
         - Functions updated for R Notebook/Markdown compatibility
-        - Combine documentation for methods of different classes
 
     (ADDED)
       - New ML function(s):
@@ -147,7 +146,8 @@ Update log
       
       - Other fixes
         - Typos fixed for manual pages
-        
+        - Combine documentation for methods of different classes
+
 
     0.5.3 (Aug.6.2020)
       - General updates
