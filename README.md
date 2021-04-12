@@ -65,11 +65,11 @@ Update log
         - Combine documentation for methods of different classes
 
     (ADDED)
-      - New ML functions:
+      - New ML function(s):
         - rbio_randomforest_fs() added for recursive randome forest feature selection analysis
           - RBioFS package is now part of the dependencies
         
-      - Updates to clustering funcions:
+      - Updates to clustering funcion(s):
         - rbio_supervised_hcluster() code base updated for better data compatibility
       
       - Updates to network analysis function(s):
