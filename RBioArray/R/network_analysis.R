@@ -276,7 +276,7 @@ rbio_tom <- function(mtx, diag = FALSE,
 #'              the circular network figures.
 #' @param g igraph object. Input network object.
 #' @param circ_layout layout object. The circular layout object for \code{g}, usually derived from function \code{\link{igraph::layout.circle()}}.
-#' @param text.label string vector. TBC
+#' @param text.label string vector. The label to display. Default is \code{NULL}.
 #' @param text.size numeric or numeric vector. The text size for the labels. Default is \code{0.8}.
 #' @param text.distance numeric. The distance multiplier between label and nodes. Default is \code{1.5}.
 #' @param text.colour string. Label colour. Default is \code{"black"}.

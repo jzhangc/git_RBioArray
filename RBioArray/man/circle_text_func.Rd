@@ -19,7 +19,7 @@ circle_text_func(
 
 \item{circ_layout}{layout object. The circular layout object for \code{g}, usually derived from function \code{\link{igraph::layout.circle()}}.}
 
-\item{text.label}{string vector. TBC}
+\item{text.label}{string vector. The label to display. Default is \code{NULL}.}
 
 \item{text.size}{numeric or numeric vector. The text size for the labels. Default is \code{0.8}.}
 
