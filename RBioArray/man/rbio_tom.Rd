@@ -11,6 +11,8 @@ rbio_tom(
   power = 6,
   tom_type = c("unsigned", "signed"),
   ...,
+  manual_membership = FALSE,
+  tom_membership = NULL,
   hclust.method = c("complete", "ward.D", "ward.D2", "single", "average", "mcquitty",
     "median", "centroid"),
   cutree.method = c("manual", "silhouette", "dynamic"),
@@ -41,9 +43,13 @@ rbio_tom(
 
 \item{power}{integer. The power to the correlation coefficients. Default is \code{6}.}
 
-\item{tom_type}{string. Directionality of the TOM analysis. Default is \code{"unsigned}.}
+\item{tom_type}{string. Directionality of the TOM analysis. Default is \code{"unsigned"}.}
 
 \item{...}{Additional arguments passed to \code{TOMdist()} function.}
+
+\item{manual_membership}{Boolean. If to use manual membership. Default is \code{FALSE}.}
+
+\item{tom_membership}{Boolean. Set when \code{manual_membership = TRUE}, a \code{named integer vector} containing membership for each features. Default is \code{NULL}.}
 
 \item{hclust.method}{String.}
 
@@ -82,7 +88,7 @@ rbio_tom(
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
 \value{
-An \code{rbio_tom} object with the following items:
+An \code{rbio_tom_graph} object with the following items:
 
         \code{g}: an igraph object for network analysis and visualization.
 
@@ -102,7 +108,9 @@ An \code{rbio_tom} object with the following items:
 
         \code{h}: when \code{cutree.method = "manual"}, cut tree height.
 
-        \code{tom_membership}: a \code{named vector} containing membership for each features clustered
+        \code{manual_membership}: if manually set membership is used.
+
+        \code{tom_membership}: a \code{named integer vector} containing membership for each features clustered.
 }
 \description{
 TOM (topological overlap measure) analysis.
@@ -110,11 +118,14 @@ TOM (topological overlap measure) analysis.
 \details{
 When \code{cutree.method = "manual"}, \code{h} and \code{k} are mutually exclusive. Set one, but not both.
 
-        The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
-        b: mar[1], l: mar[2], t: mar[3], r: mar[4]
+        When {manual _membership = TRUE}, both hclust and tree cutting processes are ignored.
+        When {manual _membership = TRUE}, the tom_membership should be a integer vector whose item names are feature names.
 
         The function uses the \code{"tree"} method from the \code{\link{dynamicTreeCut::cutreeDynamic()}} to cut the tree when
         \code{cutree.method = "dynamic"}.
+
+        The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
+        b: mar[1], l: mar[2], t: mar[3], r: mar[4]
 }
 \examples{
 \dontrun{

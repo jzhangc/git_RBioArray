@@ -73,6 +73,7 @@ Update log
       
       - Updates to network analysis function(s):
         - rbio_tom() updated with user customizable g_membership
+          - the "rbio_tom_graph" class added with the corresponding "manual_membership" item
         - Verbose settings updated for rbio_tom()
         - Manual page updated for rbio_tom()
         - rbio_network() udpated with better random state implementation
@@ -83,7 +84,7 @@ Update log
         
       - Updates to GSA function(s):
         - rbioGS_kegg() moved to legacy functions, and temporarily diabled due to a fatal bug in the org.Hs.eg.db pacakge. Funtion will be re-enabled once the issue is resolved. 
-          - Accordingly, pathview (>= 1.12.0) dependency temporarilty removed
+          - Accordingly, pathview (>= 1.12.0) dependency temporarilty removed.
 
 
     0.5.4 (March.24.2021)

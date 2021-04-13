@@ -5,8 +5,10 @@
 #' @param diag Boolean. If to include diagonal for igraph construction. Default is \code{FALSE}.
 #' @param cor_method String. Correlation method. Default is \code{"pearson"}.
 #' @param power integer. The power to the correlation coefficients. Default is \code{6}.
-#' @param tom_type string. Directionality of the TOM analysis. Default is \code{"unsigned}.
+#' @param tom_type string. Directionality of the TOM analysis. Default is \code{"unsigned"}.
 #' @param ... Additional arguments passed to \code{TOMdist()} function.
+#' @param manual_membership Boolean. If to use manual membership. Default is \code{FALSE}.
+#' @param tom_membership Boolean. Set when \code{manual_membership = TRUE}, a \code{named integer vector} containing membership for each features. Default is \code{NULL}.
 #' @param hclust.method String.
 #' @param cutree.method String. Method to find the optimal k. Default is \code{"silhouette"}.
 #' @param dynamictree.min.size Integer. When \code{cutree.method = "dynamic"}, the minimum cluster size. Default is \code{20}.
@@ -26,7 +28,7 @@
 #' @param plot.height numeric. The dendrogram plot height. Default is \code{150}.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @return
-#'         An \code{rbio_tom} object with the following items:
+#'         An \code{rbio_tom_graph} object with the following items:
 #'
 #'         \code{g}: an igraph object for network analysis and visualization.
 #'
@@ -46,16 +48,22 @@
 #'
 #'         \code{h}: when \code{cutree.method = "manual"}, cut tree height.
 #'
-#'         \code{tom_membership}: a \code{named vector} containing membership for each features clustered
+#'         \code{manual_membership}: if manually set membership is used.
+#'
+#'         \code{tom_membership}: a \code{named integer vector} containing membership for each features clustered.
 #'
 #' @details
 #'         When \code{cutree.method = "manual"}, \code{h} and \code{k} are mutually exclusive. Set one, but not both.
 #'
-#'         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
-#'         b: mar[1], l: mar[2], t: mar[3], r: mar[4]
+#'         When {manual _membership = TRUE}, both hclust and tree cutting processes are ignored.
+#'         When {manual _membership = TRUE}, the tom_membership should be a integer vector whose item names are feature names.
 #'
 #'         The function uses the \code{"tree"} method from the \code{\link{dynamicTreeCut::cutreeDynamic()}} to cut the tree when
 #'         \code{cutree.method = "dynamic"}.
+#'
+#'         The \code{plot.margins} follow the base R setting in \code{\link{par}} for the positioning:
+#'         b: mar[1], l: mar[2], t: mar[3], r: mar[4]
+#'
 #' @import ggplot2
 #' @import igraph
 #' @importFrom grid grid.draw
@@ -76,10 +84,10 @@
 #'                              plot.ylabel.size = 1.5)
 #' }
 #' @export
-rbio_tom <- function(mtx,
-                     diag = FALSE,
+rbio_tom <- function(mtx, diag = FALSE,
                      cor_method = c("pearson", "kendall", "spearman"),
                      power = 6, tom_type = c("unsigned", "signed"), ...,
+                     manual_membership = FALSE, tom_membership = NULL,
                      hclust.method = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
                      cutree.method = c("manual", "silhouette", "dynamic"),
                      dynamictree.min.size = 20,
@@ -101,14 +109,35 @@ rbio_tom <- function(mtx,
   if (is.null(colnames(mtx))) rownames(mtx) <- paste0("f_", seq(ncol(mtx)))
   cor_method <- match.arg(cor_method, c("pearson", "kendall", "spearman"))
   tom_type <- match.arg(tom_type, c("unsigned", "signed"))
-  hclust.method <- match.arg(hclust.method, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
-  cutree.method <- match.arg(cutree.method, c("manual", "silhouette", "dynamic"))
+  if (manual_membership) {
+    if (is.null(tom_membership)) {
+      warning("no tom_membership is set when manual_membership = TRUE. Proceed with manual_membership = FALSE.\n")
+      manual_membership <- FALSE
+    } else if (!any(class(tom_membership) %in% c("integer", "numeric", "vector"))) {
+      warning("tom_membership is not a named integer vector. Proceed with manual_membership = FALSE.\n")
+      manual_membership <- FALSE
+    } else if (ncol(mtx) != length(tom_membership)) {
+      warning("tom_membership has different length as the input feature number. Proceed with manual_membership = FALSE.\n")
+      manual_membership <- FALSE
+    }
+  }
+
+  if (manual_membership) {
+    tom_membership <- tom_membership
+    hclust.method <- NA
+    cutree.method <- NA
+  } else {
+    hclust.method <- match.arg(hclust.method, c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"))
+    cutree.method <- match.arg(cutree.method, c("manual", "silhouette", "dynamic"))
+    if (!is.null(k) && k > ncol(mtx)) stop(paste0("k cannot be greater than the number of items for correlating/clustering, i.e. ncol(mtx) = ", ncol(mtx)))
+  }
+
   if (is.null(plot.export.name)){
     plot.export.name <- deparse(substitute(mtx))
   } else {
     plot.export.name <- plot.export.name
   }
-  if (!is.null(k) && k > ncol(mtx)) stop(paste0("k cannot be greater than the number of items for correlating/clustering, i.e. ncol(mtx) = ", ncol(mtx)))
+
 
   # - TOM calculation -
   if (verbose) cat("TOM calulation...")
@@ -120,95 +149,104 @@ rbio_tom <- function(mtx,
   tom_similarity <- 1 - tom_dist # convert to similarity matrix
   if (verbose) cat("Done!\n")
 
-  # - TOM hclust -
-  tom_dist <- as.dist(tom_dist)  # convert to an R distance object
-  tom_dist_hclust <- hclust(tom_dist, method = hclust.method)
+  if (manual_membership) {
+    tom_dist_hclust = NA
+    cutree.method = NA
+    dynamictree.min.size = NA
+    ss_mean = NA
+    k = max(tom_membership)
+    h = NA
+  } else {  # hclus and tree cutting
+    # - TOM hclust -
+    tom_dist <- as.dist(tom_dist)  # convert to an R distance object
+    tom_dist_hclust <- hclust(tom_dist, method = hclust.method)
 
-  # decide k or h
-  if (cutree.method == "dynamic") {
-    if (verbose) cat("Dynamic tree cutting...")
-    tom_membership <- cutreeDynamic(tom_dist_hclust, method = "tree", deepSplit = TRUE, minClusterSize = dynamictree.min.size, verbose = FALSE)
-    if (all(tom_membership == 0)) stop("Dynamic tree cut failed to identify any functional clusters. Try changing the hcluster.method, minClusterSize, or cutree.method. ")
-    names(tom_membership) <- tom_dist_hclust$labels
-    k <- max(tom_membership)
-    if (any(tom_membership == 0)) {
-      n <- length(tom_membership[tom_membership == 0])
-      tom_membership[tom_membership == 0] <- seq(from = k+1, to = k+n)
+    # decide k or h
+    if (cutree.method == "dynamic") {
+      if (verbose) cat("Dynamic tree cutting...")
+      tom_membership <- cutreeDynamic(tom_dist_hclust, method = "tree", deepSplit = TRUE, minClusterSize = dynamictree.min.size, verbose = FALSE)
+      if (all(tom_membership == 0)) stop("Dynamic tree cut failed to identify any functional clusters. Try changing the hcluster.method, minClusterSize, or cutree.method. ")
+      names(tom_membership) <- tom_dist_hclust$labels
+      k <- max(tom_membership)
+      if (any(tom_membership == 0)) {
+        n <- length(tom_membership[tom_membership == 0])
+        tom_membership[tom_membership == 0] <- seq(from = k+1, to = k+n)
+      } else {
+        n <- 0
+      }
+      if (verbose) cat(paste0(k, " clusters, ", n, " items unassigned.\n\n"))
+      ss_mean <- NULL
+    } else if (cutree.method == "silhouette") {
+      if (verbose) cat("Silhouette tree cutting...")
+      k_range <- 2:(ncol(adjmat)-1)
+      ss_mean <- foreach(i = k_range, .combine = "c") %do% {
+        sil_m <- cutree(tom_dist_hclust, k = i)
+        ss <- cluster::silhouette(sil_m, tom_dist)
+        mean(ss[, 3])
+      }
+      names(ss_mean) <- k_range
+      k <- as.integer(names(ss_mean)[ss_mean == max(ss_mean)])
+      if (verbose) cat(paste0(k, " clusters..."))
+      tom_membership <- stats::cutree(tom_dist_hclust, k = k)
+      if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
+      dynamictree.min.size <- NULL
     } else {
-      n <- 0
+      if (is.null(h) && is.null(k)) stop("Manually set h or k when cutree.method = \"manual\".")
+      h <- h
+      k <- k
+      tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
+      if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
+      ss_mean <- NULL
+      dynamictree.min.size <- NULL
     }
-    if (verbose) cat(paste0(k, " clusters, ", n, " items unassigned.\n\n"))
-    ss_mean <- NULL
-  } else if (cutree.method == "silhouette") {
-    if (verbose) cat("Silhouette tree cutting...")
-    k_range <- 2:(ncol(adjmat)-1)
-    ss_mean <- foreach(i = k_range, .combine = "c") %do% {
-      sil_m <- cutree(tom_dist_hclust, k = i)
-      ss <- cluster::silhouette(sil_m, tom_dist)
-      mean(ss[, 3])
+    if (verbose) cat("Done!\n")
+
+    if(plot.dendro) {
+      if (verbose) cat("Saving hcluster dendrogram...")
+      dendr <- color_branches(tom_dist_hclust, h = h, k = k)
+      dendr <- as.ggdend(dendr)
+      dendr$segments$lwd <- rep(plot.dendroline.size, times = length(dendr$segments$lwd))  # dendro line size
+      # dendr$labels$cex <- rep(plot.dendrolabel.size, times = length(dendr$labels$cex))  # label sizes
+      # dendr$labels$label <- foreach(i = as.character(dendr$labels$label), .combine = "c", .export = "dendr") %do% str_pad(i, width = nchar(i) + plot.dendrolabel.space, side = "right", pad = " ")
+      # dendr$labels$label <- factor(dendr$labels$label, levels = unique(dendr$labels$label))
+      # if (plot.dendrolabel) {
+      #   p <- ggplot(dendr)
+      # } else {
+      #   p <- ggplot(dendr, labels = FALSE)
+      # }
+      p <- ggplot(dendr, labels = FALSE)
+      p <- p +
+        ggtitle(plot.title) +
+        scale_y_continuous(expand = c(0, 0)) +
+        theme_minimal() +
+        theme(plot.title = element_text(hjust = 0.5, size = plot.title.size, face = "bold"),
+              axis.title = element_blank(),
+              axis.text.y = element_text(size = rel(plot.ylabel.size)),
+              panel.grid = element_blank(),
+              plot.margin = margin(t = plot.margins[1], r = plot.margins[2],
+                                   b = plot.margins[3], l = plot.margins[4],
+                                   unit = "cm"))
+      if (plot.dendrolabel){
+        p <- p +
+          scale_x_continuous(breaks = seq(length(dendr$labels$label)), labels = dendr$labels$label) +
+          theme(axis.text.x = element_text(hjust = 1, vjust = 0.5, angle = 90, size = plot.dendrolabel.size, margin = margin(t = plot.dendrolabel.space)))
+      } else {
+        p <- p +
+          scale_x_continuous(breaks = NULL, labels = NULL)
+      }
+      ggsave(filename = paste0(plot.export.name, "_tom_hclust.pdf"), plot = p,
+             width = plot.width, height = plot.height, units = "mm", dpi = 600)
+      grid.draw(p)
+      if (verbose) cat("Done!\n\n")
+    } else {
+      if (verbose) cat("\n")
     }
-    names(ss_mean) <- k_range
-    k <- as.integer(names(ss_mean)[ss_mean == max(ss_mean)])
-    if (verbose) cat(paste0(k, " clusters..."))
-    tom_membership <- stats::cutree(tom_dist_hclust, k = k)
-    if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
-    dynamictree.min.size <- NULL
-  } else {
-    if (is.null(h) && is.null(k)) stop("Manually set h or k when cutree.method = \"manual\".")
-    h <- h
-    k <- k
-    tom_membership <- stats::cutree(tom_dist_hclust, h = h, k = k)
-    if (is.null(names(tom_membership))) names(tom_membership) <- as.character(seq(length(tom_membership)))
-    ss_mean <- NULL
-    dynamictree.min.size <- NULL
   }
-  if (verbose) cat("Done!\n")
 
   # igraph and final membership construction
   g_adjmat <- as.matrix(tom_similarity)  # igraph edge always uses similarity matrix
   g_adjmat <- g_adjmat[order(tom_membership), order(tom_membership)]  # reorder it
   tom_membership <- tom_membership[order(tom_membership)] # update tom_membership
-
-  if(plot.dendro) {
-    if (verbose) cat("Saving hcluster dendrogram...")
-    dendr <- color_branches(tom_dist_hclust, h = h, k = k)
-    dendr <- as.ggdend(dendr)
-    dendr$segments$lwd <- rep(plot.dendroline.size, times = length(dendr$segments$lwd))  # dendro line size
-    # dendr$labels$cex <- rep(plot.dendrolabel.size, times = length(dendr$labels$cex))  # label sizes
-    # dendr$labels$label <- foreach(i = as.character(dendr$labels$label), .combine = "c", .export = "dendr") %do% str_pad(i, width = nchar(i) + plot.dendrolabel.space, side = "right", pad = " ")
-    # dendr$labels$label <- factor(dendr$labels$label, levels = unique(dendr$labels$label))
-    # if (plot.dendrolabel) {
-    #   p <- ggplot(dendr)
-    # } else {
-    #   p <- ggplot(dendr, labels = FALSE)
-    # }
-    p <- ggplot(dendr, labels = FALSE)
-    p <- p +
-      ggtitle(plot.title) +
-      scale_y_continuous(expand = c(0, 0)) +
-      theme_minimal() +
-      theme(plot.title = element_text(hjust = 0.5, size = plot.title.size, face = "bold"),
-            axis.title = element_blank(),
-            axis.text.y = element_text(size = rel(plot.ylabel.size)),
-            panel.grid = element_blank(),
-            plot.margin = margin(t = plot.margins[1], r = plot.margins[2],
-                                 b = plot.margins[3], l = plot.margins[4],
-                                 unit = "cm"))
-    if (plot.dendrolabel){
-      p <- p +
-        scale_x_continuous(breaks = seq(length(dendr$labels$label)), labels = dendr$labels$label) +
-        theme(axis.text.x = element_text(hjust = 1, vjust = 0.5, angle = 90, size = plot.dendrolabel.size, margin = margin(t = plot.dendrolabel.space)))
-    } else {
-      p <- p +
-        scale_x_continuous(breaks = NULL, labels = NULL)
-    }
-    ggsave(filename = paste0(plot.export.name, "_tom_hclust.pdf"), plot = p,
-           width = plot.width, height = plot.height, units = "mm", dpi = 600)
-    grid.draw(p)
-    if (verbose) cat("Done!\n\n")
-  } else {
-    if (verbose) cat("\n")
-  }
 
   # - igraph -
   out <- list(g = graph.adjacency(
@@ -225,6 +263,7 @@ rbio_tom <- function(mtx,
   silhouette_score_mean = ss_mean,
   k = k,
   h = h,
+  manual_membership = manual_membership,
   tom_membership = tom_membership)
   class(out) <- "rbio_tom_graph"
   return(out)
