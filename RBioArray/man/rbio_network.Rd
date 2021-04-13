@@ -32,6 +32,7 @@ rbio_network(object, ...)
   plot.vertex.label.size = 0.5,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
+  plot.edge.type = c("all", "across", "within"),
   plot.edge.filter = 0.05,
   plot.edge.filter.direction = c("top", "bottom"),
   plot.edge.weight = NULL,
@@ -84,6 +85,8 @@ rbio_network(object, ...)
 \item{plot.vertex.label.size}{numeric vector. <TBC: under construction>}
 
 \item{plot.vertex.label.dist}{numeric. <TBC: under construction>}
+
+\item{plot.edge.type}{string. The type of edges to display in the network. Default is \code{"all"}.}
 
 \item{plot.edge.filter}{numeric: 0-1. Percentage edges to keep. Default is \code{0.05}.}
 
@@ -143,6 +146,14 @@ TBC
          For \code{plot.vertex.label.topvsize.filter}, the functional will apply the filter per group if g_membership is provided.
 
          When \code{random_state = 0}, no random state is set.
+
+         For \code{plot.edge.type}:
+
+            \code{"all"}: display all the edges, i.e. both within memberships and across memberships
+
+            \code{"across"}: display only the cross-membership edges
+
+            \code{"within"}: display only the within membership edges
 }
 \examples{
 

@@ -75,8 +75,9 @@ Update log
         - rbio_tom() updated with user customizable g_membership
           - the "rbio_tom_graph" class added with the corresponding "manual_membership" item
         - Verbose settings updated for rbio_tom()
-        - Manual page updated for rbio_tom()
+        - rbio_network() updated with edge type functionality depending on the vertex membership, i.e. "all", "across", "within"
         - rbio_network() udpated with better random state implementation
+        - Manual page updated for rbio_tom()
         - Manual page updated for rbio_network()
         
       - Updates to DE significant test functions

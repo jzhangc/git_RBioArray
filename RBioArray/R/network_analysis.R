@@ -423,6 +423,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.vertex.label.size numeric vector. <TBC: under construction>
 #' @param plot.vertex.label.colour string vector. <TBC: under construction>
 #' @param plot.vertex.label.dist numeric. <TBC: under construction>
+#' @param plot.edge.type string. The type of edges to display in the network. Default is \code{"all"}.
 #' @param plot.edge.filter numeric: 0-1. Percentage edges to keep. Default is \code{0.05}.
 #' @param plot.edge.filter.direction string. Edge filter direction, top or bottom. Default is \code{"top"}.
 #' @param plot.edge.weight numeric vector. <TBC: under construction>
@@ -454,6 +455,15 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'          For \code{plot.vertex.label.topvsize.filter}, the functional will apply the filter per group if g_membership is provided.
 #'
 #'          When \code{random_state = 0}, no random state is set.
+#'
+#'          For \code{plot.edge.type}:
+#'
+#'             \code{"all"}: display all the edges, i.e. both within memberships and across memberships
+#'
+#'             \code{"across"}: display only the cross-membership edges
+#'
+#'             \code{"within"}: display only the within membership edges
+#'
 #' @import ggplot2
 #' @import igraph
 #' @importFrom scales alpha rescale
@@ -481,6 +491,7 @@ rbio_network.default <- function(g,
                                  plot.vertex.label.size = 0.5,
                                  plot.vertex.label.color = "black",
                                  plot.vertex.label.dist = 0,
+                                 plot.edge.type = c("all", "across", "within"),
                                  plot.edge.filter = 0.05,
                                  plot.edge.filter.direction = c("top", "bottom"),
                                  plot.edge.weight = NULL,
@@ -497,10 +508,6 @@ rbio_network.default <- function(g,
   }
 
   # - argument check -
-  # if (is.null(V(g)$name)) {
-  #   warning("No vertex name detected, proceed with index numbers")
-  #   V(g)$name <- seq(length(V(g)))
-  # }
   if (!is.null(g_membership)) {
     if (length(g_membership) != length(V(g))) stop("membership length not equal to number of vertecies. \n")
     if (is.null(names(g_membership))) {
@@ -509,6 +516,7 @@ rbio_network.default <- function(g,
     }
   }
 
+  plot.edge.type <- match.arg(plot.edge.type)
   colour_scheme <- match.arg(colour_scheme)
   if (!any(class(g) %in% "igraph")) stop("Input g needs to be an igraph.")
   if (is.null(export.name)){
@@ -584,6 +592,21 @@ rbio_network.default <- function(g,
   g <- set_vertex_attr(g, name = "vframecolour", value = rep("black", times = length(V(g))))
 
   # - filter edges -
+  # based on membership: experimental
+  if (plot.edge.type == "across") {
+    for (i in 1:length(unique(g_membership))) {
+      tmp_member <- unique(g_membership)[i]
+      g <- delete.edges(g, E(g)[V(g)[membership == tmp_member] %--% V(g)[membership == tmp_member]])
+    }
+  } else if (plot.edge.type == "within") {
+    comb_m <- combn(unique(g_membership), 2, simplify = FALSE)  # find all cross-membership combination in a list. 2 means combination of 2 elements
+    for (i in 1:length(comb_m)) {  # i the combination index in the comb_m list
+      temp_idx <- comb_m[[i]]
+      g <- delete.edges(g, E(g)[V(g)[membership == temp_idx[[1]]] %--% V(g)[membership == temp_idx[[2]]]])
+    }
+  }
+
+  # based on edge weight
   if (plot.edge.filter.direction == "top") {
     g <- delete_edges(g, E(g)[E(g)$weight < quantile(E(g)$weight, p = 1-plot.edge.filter)])
   } else {
@@ -657,31 +680,10 @@ rbio_network.default <- function(g,
       }
     }
   }
+
   if (plot.edge.color.highlighttopvsize) {
     E(g)$color <- alpha(E(g)$color , alpha = 0.2)
   }
-
-  # if (plot.vertex.label.topvsize) {  # only  display top size nodes
-  #   if (is.null(g_membership)) {
-  #     to_remove <- V(g)$vsize < quantile(V(g)$vsize, p = 1-plot.vertex.topvsize.filter)
-  #     V(g)$vlabel[to_remove] <- ""
-  #   } else {
-  #     for (i in 1:length(unique(V(g)$membership))) {
-  #       is_member <- V(g)$membership == unique(V(g)$membership)[i]
-  #       to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
-  #       V(g)$vlabel[is_member][to_remove] <- ""
-  #     }
-  #   }
-  #
-  #   if (plot.vertex.color.highlighttopvsize) {
-  #     V(g)$color[V(g)$vlabel == ""] <- alpha(V(g)$color[V(g)$vlabel == ""], alpha = 0.2)
-  #     V(g)$vframecolour[V(g)$vlabel == ""] <- "NA"
-  #   }
-  #
-  #   if (plot.edge.color.highlighttopvsize) {
-  #     E(g)$color <- alpha(E(g)$color , alpha = 0.2)
-  #   }
-  # }
 
   # rescale sizes
   edgeweights <- scales::rescale(E(g)$weight, to = plot.edge.weight.scale)
