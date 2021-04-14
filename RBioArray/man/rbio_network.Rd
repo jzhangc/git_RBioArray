@@ -17,6 +17,9 @@ rbio_network(object, ...)
   colour_scheme = c("Accent", "Dark2", "Paired", "Pastel1", "Pastel2", "Set1", "Set2",
     "Set3"),
   initial_colour_number = 8,
+  plot.community_separated = FALSE,
+  plot.community_separated.commu_dist = 3,
+  plot.ellipse = FALSE,
   plot.title = "Network",
   plot.margins = c(5, 5, 5, 5),
   plot.font.family = "sans",
@@ -25,13 +28,14 @@ rbio_network(object, ...)
   plot.vertex.remove.zerodegree = TRUE,
   plot.vertex.size = NULL,
   plot.vertex.size.scale = c(1, 4),
-  plot.vertex.label = NULL,
-  plot.vertex.label.topvsize = TRUE,
   plot.vertex.topvsize.filter = 0.05,
   plot.vertex.color.highlighttopvsize = TRUE,
+  plot.vertex.label = NULL,
+  plot.vertex.label.topvsize = TRUE,
   plot.vertex.label.size = 0.5,
   plot.vertex.label.color = "black",
   plot.vertex.label.dist = 0,
+  plot.vertex.label.loc = -pi/4,
   plot.edge.type = c("all", "across", "within"),
   plot.edge.filter = 0.05,
   plot.edge.filter.direction = c("top", "bottom"),
@@ -40,7 +44,6 @@ rbio_network(object, ...)
   plot.edge.arrow.mode = FALSE,
   plot.edge.curved = FALSE,
   plot.edge.color.highlighttopvsize = TRUE,
-  plot.ellipse = FALSE,
   plot.height = 7,
   plot.width = 7,
   random_state = 1,
@@ -62,29 +65,35 @@ rbio_network(object, ...)
 
 \item{initial_colour_number}{int. The number of starting colours to use for the clusters. See details. Default is \code{8}.}
 
+\item{plot.community_separated}{boolean. If to separate community vertices in graph. Default is \code{FALSE}.}
+
+\item{plot.ellipse}{boolean. If to show member groups with ellipse. Default is \code{FALSE}.}
+
 \item{plot.font.family}{string. The font family of the labels in the plot. Default is \code{"sans"}.}
 
-\item{plot.highlight_membership}{boolean. <TBC: under construction>}
+\item{plot.highlight_membership}{boolean. If to highlight the membership, by making all edges transparent. Default is \code{TRUE}.}
 
-\item{plot.layout_type}{string. <TBC: under construction>}
+\item{plot.layout_type}{string. Layout type, same as described in \code{igraph} pacakges.}
 
 \item{plot.vertex.remove.zerodegree}{boolean. If to remove zero degree edges from the graph. Default is \code{TRUE}.}
 
-\item{plot.vertex.size}{numeric vector. <TBC: under construction>}
+\item{plot.vertex.size}{numeric vector. Vertex size.}
 
-\item{plot.vertex.size.scale}{numeric two-vector. <TBC: under construction>}
-
-\item{plot.vertex.label}{string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.}
-
-\item{plot.vertex.label.topvsize}{Boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.}
+\item{plot.vertex.size.scale}{numeric length two-vector. A length two vector to scale vertex size.}
 
 \item{plot.vertex.topvsize.filter}{numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.}
 
 \item{plot.vertex.color.highlighttopvsize}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.}
 
-\item{plot.vertex.label.size}{numeric vector. <TBC: under construction>}
+\item{plot.vertex.label}{string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.}
 
-\item{plot.vertex.label.dist}{numeric. <TBC: under construction>}
+\item{plot.vertex.label.topvsize}{Boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.}
+
+\item{plot.vertex.label.size}{numeric vector. Vertex label size.}
+
+\item{plot.vertex.label.dist}{numeric. Vertex label distance to vertex.}
+
+\item{plot.vertex.label.loc}{radian numeric. The positioning of the vertex labels. See details.}
 
 \item{plot.edge.type}{string. The type of edges to display in the network. Default is \code{"all"}.}
 
@@ -92,17 +101,15 @@ rbio_network(object, ...)
 
 \item{plot.edge.filter.direction}{string. Edge filter direction, top or bottom. Default is \code{"top"}.}
 
-\item{plot.edge.weight}{numeric vector. <TBC: under construction>}
+\item{plot.edge.weight}{numeric vector. Optional custom edge weight. Make sure it has the same length as the number of edges.}
 
-\item{plot.edge.weight.scale}{numeric two-vector. <TBC: under construction>}
+\item{plot.edge.weight.scale}{numeric two-vector. A length two vector to scale edge weight.}
 
-\item{plot.edge.arrow.mode}{Boolean. <TBC: under construction>}
+\item{plot.edge.arrow.mode}{Boolean. Edge arrow mode. Default is \code{FASLE}.}
 
-\item{plot.edge.curved}{Boolean. <TBC: under construction>}
+\item{plot.edge.curved}{boolean. If to display curved edges. Default is \code{TRUE}.}
 
-\item{plot.edge.color.highlighttopvsize}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.}
-
-\item{plot.ellipse}{Boolean. If to show member groups with ellipse. Default is \code{FALSE}.}
+\item{plot.edge.color.highlighttopvsize}{boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make all edges transparent. Default is \code{TRUE}.}
 
 \item{plot.height}{numeric. Plot height. Default is \code{7}.}
 
@@ -114,9 +121,11 @@ rbio_network(object, ...)
 
 \item{plot.title.}{string. <TBC: under construction>}
 
-\item{plot.margins.}{numeric four-vector. <TBC: under construction>}
+\item{plot.community_separated.dist}{Numeric. Set when \code{plot.community_separated}, distance between communities. Default is \code{3}.}
 
-\item{plot.vertex.label.colour}{string vector. <TBC: under construction>}
+\item{plot.margins.}{numeric four-vector. Plot margins. See details.}
+
+\item{plot.vertex.label.colour}{string vector. Vertex label colour.}
 }
 \value{
 TBC
@@ -154,6 +163,14 @@ TBC
             \code{"across"}: display only the cross-membership edges
 
             \code{"within"}: display only the within membership edges
+
+         \code{plot.community_separated} and \code{plot.ellipse} are mutually exclusive.
+
+
+         For \code{plot.vertex.label.loc}, from \code{igraph}:
+         It defines the position of the vertex labels, relative to the center of the vertices.
+         It is interpreted as an angle in radian, zero means ‘to the right’, and ‘pi’ means to the left, up is -pi/2 and down is pi/2.
+         The default value is -pi/4.
 }
 \examples{
 
