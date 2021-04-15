@@ -752,7 +752,7 @@ rbio_network.default <- function(g,
         edge.curved = plot.edge.curved,
         main = plot.title)
 
-      if (!plot.vertex.label.display) {
+      if (plot.vertex.label.display) {
         circle_text_func(g = g, circ_layout = g_layout,
                          text.label = V(g)$vlabel,
                          text.size = V(g)$vlabelsize,
@@ -840,7 +840,7 @@ rbio_network.default <- function(g,
         edge.curved = plot.edge.curved,
         main = plot.title)
 
-      if (!plot.vertex.label.display) {
+      if (plot.vertex.label.display) {
         circle_text_func(g = g, circ_layout = g_layout,
                          text.label = V(g)$vlabel,
                          text.size = V(g)$vlabelsize,
