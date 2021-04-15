@@ -78,6 +78,7 @@ Update log
         - rbio_network() updated with edge type functionality depending on the vertex membership, i.e. "all", "across", "within"
         - rbio_network() udpated with better random state implementation
         - rbio_network() updated with separating community/membership functionality
+        - rbio_network() now can disable vertex labels universally
         - Manual page updated for rbio_tom()
         - Manual page updated for rbio_network()
         

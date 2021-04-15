@@ -30,6 +30,7 @@ rbio_network(object, ...)
   plot.vertex.size.scale = c(1, 4),
   plot.vertex.topvsize.filter = 0.05,
   plot.vertex.color.highlighttopvsize = TRUE,
+  plot.vertex.label.display = TRUE,
   plot.vertex.label = NULL,
   plot.vertex.label.topvsize = TRUE,
   plot.vertex.label.size = 0.5,
@@ -83,11 +84,13 @@ rbio_network(object, ...)
 
 \item{plot.vertex.topvsize.filter}{numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.}
 
-\item{plot.vertex.color.highlighttopvsize}{Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.}
+\item{plot.vertex.color.highlighttopvsize}{boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.}
+
+\item{plot.vertex.label.display}{boolean. If to display vertex labels. Default is \code{TRUE}.}
 
 \item{plot.vertex.label}{string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.}
 
-\item{plot.vertex.label.topvsize}{Boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.}
+\item{plot.vertex.label.topvsize}{boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.}
 
 \item{plot.vertex.label.size}{numeric vector. Vertex label size.}
 

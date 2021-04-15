@@ -421,8 +421,9 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.vertex.size.scale numeric length two-vector. A length two vector to scale vertex size.
 #' @param plot.vertex.label string vector. Optional custom vertex label. Default is \code{NULL}, meaning V(g)$name.
 #' @param plot.vertex.topvsize.filter numeric: 0-1. Set when \code{plot.vertex.label.topvsize = TRUE}, top percetage size to display the vertex labels. Default is \code{0.05}.
-#' @param plot.vertex.label.topvsize Boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.
-#' @param plot.vertex.color.highlighttopvsize Boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.
+#' @param plot.vertex.color.highlighttopvsize boolean. When \code{plot.vertex.label.topvsize = TRUE}, if to make non-top vertices transparent and frameless. Default is \code{TRUE}.
+#' @param plot.vertex.label.display boolean. If to display vertex labels. Default is \code{TRUE}.
+#' @param plot.vertex.label.topvsize boolean. If to display labels with a threshold on vertex size. \code{default is TRUE}.
 #' @param plot.vertex.label.size numeric vector. Vertex label size.
 #' @param plot.vertex.label.colour string vector. Vertex label colour.
 #' @param plot.vertex.label.dist numeric. Vertex label distance to vertex.
@@ -499,6 +500,7 @@ rbio_network.default <- function(g,
                                  plot.vertex.size.scale = c(1, 4),
                                  plot.vertex.topvsize.filter = 0.05,
                                  plot.vertex.color.highlighttopvsize = TRUE,
+                                 plot.vertex.label.display = TRUE,
                                  plot.vertex.label = NULL,
                                  plot.vertex.label.topvsize = TRUE,
                                  plot.vertex.label.size = 0.5,
@@ -584,6 +586,8 @@ rbio_network.default <- function(g,
   }
 
   # vertex labels
+
+
   if (is.null(plot.vertex.label)) { # text labels
     g <- set_vertex_attr(g, name = "vlabel", value = V(g)$name)
   } else if (length(plot.vertex.label) != length(V(g))) {
@@ -718,6 +722,11 @@ rbio_network.default <- function(g,
   }
 
   # - plot and export -
+  # finalize vlabel
+  if (!plot.vertex.label.display) {
+    V(g)$vlabel <- NA
+  }
+
   # plot
   g.cluster <- make_clusters(g, membership = V(g)$membership)
   pdf(file = paste0(export.name, "_network.pdf"),
@@ -742,11 +751,14 @@ rbio_network.default <- function(g,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
         main = plot.title)
-      circle_text_func(g = g, circ_layout = g_layout,
-                       text.label = V(g)$vlabel,
-                       text.size = V(g)$vlabelsize,
-                       text.colour = plot.vertex.label.color, text.distance = plot.vertex.label.dist,
-                       family = plot.font.family)
+
+      if (!plot.vertex.label.display) {
+        circle_text_func(g = g, circ_layout = g_layout,
+                         text.label = V(g)$vlabel,
+                         text.size = V(g)$vlabelsize,
+                         text.colour = plot.vertex.label.color, text.distance = plot.vertex.label.dist,
+                         family = plot.font.family)
+      }
     } else {
       g_layout <- layout_with_fr(g, weights=E(g)$weight)
       plot(
@@ -827,11 +839,14 @@ rbio_network.default <- function(g,
         edge.arrow.mode = plot.edge.arrow.mode,
         edge.curved = plot.edge.curved,
         main = plot.title)
-      circle_text_func(g = g, circ_layout = g_layout,
-                       text.label = V(g)$vlabel,
-                       text.size = V(g)$vlabelsize,
-                       text.colour = plot.vertex.label.color, text.distance = plot.vertex.label.dist,
-                       family = plot.font.family)
+
+      if (!plot.vertex.label.display) {
+        circle_text_func(g = g, circ_layout = g_layout,
+                         text.label = V(g)$vlabel,
+                         text.size = V(g)$vlabelsize,
+                         text.colour = plot.vertex.label.color, text.distance = plot.vertex.label.dist,
+                         family = plot.font.family)
+      }
     } else {
       plot(
         g,
@@ -859,3 +874,4 @@ rbio_network.default <- function(g,
   #        width = plot.width, height = plot.height, units = "mm", dpi = 600)
   dev.off()
 }
+
