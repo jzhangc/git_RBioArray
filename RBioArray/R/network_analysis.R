@@ -476,6 +476,10 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #'          It is interpreted as an angle in radian, zero means ‘to the right’, and ‘pi’ means to the left, up is -pi/2 and down is pi/2.
 #'          The default value is -pi/4.
 #'
+#'          When \code{plot.vertex.remove.zerodegree = FALSE} and \code{plot.vertex.color.highlighttopvisize = TRUE},
+#'          zero degree vertices are made transparent. This setup is useful when members of a community (membership) are zero degree vertices.
+#'          In such case, none of the vertices will light up.
+#'
 #' @import ggplot2
 #' @import igraph
 #' @importFrom scales alpha rescale
@@ -586,8 +590,6 @@ rbio_network.default <- function(g,
   }
 
   # vertex labels
-
-
   if (is.null(plot.vertex.label)) { # text labels
     g <- set_vertex_attr(g, name = "vlabel", value = V(g)$name)
   } else if (length(plot.vertex.label) != length(V(g))) {
@@ -664,7 +666,7 @@ rbio_network.default <- function(g,
   }
 
   # - finalize network -
-  # refersh vsize if used degrees
+  # refersh vsize if use degrees
   if (vsize_is_degree) {
     V(g)$vsize <- degree(g)
   }
@@ -697,6 +699,11 @@ rbio_network.default <- function(g,
         V(g)$color[is_member][to_remove] <- alpha(V(g)$color[is_member][to_remove], alpha = 0.2)
         V(g)$vframecolour[is_member][to_remove] <- "NA"
       }
+    }
+
+    if (plot.vertex.color.highlighttopvsize && !plot.vertex.remove.zerodegree) {
+      V(g)$color[degree(g) == 0] <- alpha(V(g)$color[degree(g) == 0], alpha = 0.2)
+      V(g)$vframecolour[degree(g) == 0] <- "NA"
     }
   }
 
@@ -752,7 +759,7 @@ rbio_network.default <- function(g,
         edge.curved = plot.edge.curved,
         main = plot.title)
 
-      if (plot.vertex.label.display) {
+      if (!plot.vertex.label.display) {
         circle_text_func(g = g, circ_layout = g_layout,
                          text.label = V(g)$vlabel,
                          text.size = V(g)$vlabelsize,
@@ -840,7 +847,7 @@ rbio_network.default <- function(g,
         edge.curved = plot.edge.curved,
         main = plot.title)
 
-      if (plot.vertex.label.display) {
+      if (!plot.vertex.label.display) {
         circle_text_func(g = g, circ_layout = g_layout,
                          text.label = V(g)$vlabel,
                          text.size = V(g)$vlabelsize,

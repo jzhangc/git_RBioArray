@@ -174,6 +174,10 @@ TBC
          It defines the position of the vertex labels, relative to the center of the vertices.
          It is interpreted as an angle in radian, zero means ‘to the right’, and ‘pi’ means to the left, up is -pi/2 and down is pi/2.
          The default value is -pi/4.
+
+         When \code{plot.vertex.remove.zerodegree = FALSE} and \code{plot.vertex.color.highlighttopvisize = TRUE},
+         zero degree vertices are made transparent. This setup is useful when members of a community (membership) are zero degree vertices.
+         In such case, none of the vertices will light up.
 }
 \examples{
 

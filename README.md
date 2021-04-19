@@ -79,6 +79,7 @@ Update log
         - rbio_network() udpated with better random state implementation
         - rbio_network() updated with separating community/membership functionality
         - rbio_network() now can disable vertex labels universally
+        - rbio_network() will no not highlight vertices within a community (membership) that only features zero degree vertices
         - Manual page updated for rbio_tom()
         - Manual page updated for rbio_network()
         
