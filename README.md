@@ -49,6 +49,9 @@ Update log
       - New network analysis functions:
         - SNF network and network fusion functions
         - KNN graph construction
+
+      - Updates to network analysis function(s):
+        - Top and bottom edge weight, and colour coding for rbio_network(): for signed corrlation measures
       
       - Updates to microarray functions
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
@@ -70,6 +73,10 @@ Update log
         
       - Updates to clustering funcion(s):
         - rbio_supervised_hcluster() code base updated for better data compatibility
+      
+      - Updates to correlation function(s):
+        - rbio_unsupervised_corcluster now properly export csv files with significant test results
+        - rbio_unsupervised_corcluster now supports custom file name prefix for csv files
       
       - Updates to network analysis function(s):
         - rbio_tom() updated with user customizable g_membership

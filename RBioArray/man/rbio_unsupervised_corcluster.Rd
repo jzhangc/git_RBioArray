@@ -9,9 +9,14 @@
 \usage{
 rbio_unsupervised_corcluster(object, ...)
 
-\method{rbio_unsupervised_corcluster}{rbioarray_de}(object, ...)
+\method{rbio_unsupervised_corcluster}{rbioarray_de}(object, export.name = NULL, ...)
 
-\method{rbio_unsupervised_corcluster}{rbioseq_de}(object, sample_id.var.name = NULL, ...)
+\method{rbio_unsupervised_corcluster}{rbioseq_de}(
+  object,
+  export.name = NULL,
+  sample_id.var.name = NULL,
+  ...
+)
 
 \method{rbio_unsupervised_corcluster}{default}(
   E,
@@ -55,6 +60,8 @@ rbio_unsupervised_corcluster(object, ...)
 
 \item{...}{Additional arguments for \code{heatmap.2} function from \code{gplots} package.}
 
+\item{export.name}{File name for the export \code{pdf} plot file.}
+
 \item{E}{Expression or count matrix, with rows for genes/probes/genomic features, columns for RNA samples.}
 
 \item{genes}{Annotation data frame for genes/probes/genomic features.}
@@ -74,8 +81,6 @@ rbio_unsupervised_corcluster(object, ...)
 \item{input.genes_annotation.gene_symbol.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene symbol column in \code{genes} data frame.}
 
 \item{input.genes_annotation.gene_id.var_name}{Only set when \code{gene_symbol.only = TRUE}, variable name for gene id column in \code{genes} data frame.}
-
-\item{export.name}{File name for the export \code{pdf} plot file.}
 
 \item{hclust.heatmap}{Boolean. Whether or not to export a hcluster heatmap. Default is \code{TRUE}.}
 

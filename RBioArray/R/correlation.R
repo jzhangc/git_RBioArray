@@ -87,9 +87,15 @@ rbio_unsupervised_corcluster <- function(object, ...){
 #' @param object Input object in \code{rbioarray_de} class.
 #' @param ... Additional arguments for the default method.
 #' @export
-rbio_unsupervised_corcluster.rbioarray_de <- function(object, ...){
+rbio_unsupervised_corcluster.rbioarray_de <- function(object,
+                                                      export.name = NULL,
+                                                      ...){
   ## variables
-  export.name <- deparse(substitute(object))
+  if (is.null(export.name)) {
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
 
   ## use methods
   rbio_unsupervised_corcluster.default(E = object$input_data$E, genes = object$input_data$genes,
@@ -111,9 +117,15 @@ rbio_unsupervised_corcluster.rbioarray_de <- function(object, ...){
 #' @details The function uses filtered count data, as opposed to normalized data.
 #'          Due to the compositional nature of NGS data, the count data is transformed using CLR method prior to clustering.
 #' @export
-rbio_unsupervised_corcluster.rbioseq_de <- function(object, sample_id.var.name = NULL, ...){
+rbio_unsupervised_corcluster.rbioseq_de <- function(object,
+                                                    export.name = NULL,
+                                                    sample_id.var.name = NULL, ...){
   ## variables
-  export.name <- deparse(substitute(object))
+  if (is.null(export.name)) {
+    export.name <- deparse(substitute(object))
+  } else {
+    export.name <- export.name
+  }
   # transform
   # cat("CLR transformation of filtered RNAseq count data...")
   # E_transfo <- rbioseq_clr_ilr_transfo(object$filter_results$filtered_counts$counts, offset = 1, mode = "clr")  # clr tranformation
@@ -353,9 +365,9 @@ rbio_unsupervised_corcluster.default <- function(E, genes, input.sample_groups, 
     out <- merge(out, outdfm3[, c("group", "adj.p.value")], x.all = TRUE)
     out_env[[i]] <- out
 
-    # if (verbose) cat(paste0("Correlation analysis results saved to file: ", names(corcoef_list)[i], ".cor.unsuper.csv..."))
-    # write.csv(out, file = paste0(names(corcoef_list)[i], ".cor.unsuper.csv"), row.names = FALSE)
-    # if (verbose) cat("Done!\n")
+    if (verbose) cat(paste0("Correlation analysis results saved to file: ", export.name, "_", names(corcoef_list)[i], ".cor.unsuper.csv..."))
+    write.csv(out, file = paste0(export.name, "_", names(corcoef_list)[i], ".cor.unsuper.csv"), row.names = FALSE)
+    if (verbose) cat("Done!\n")
   }
   names(out_env) <- names(corcoef_list)
   assign(paste0(export.name, "_cor_unsuper"), out_env, envir = .GlobalEnv)
