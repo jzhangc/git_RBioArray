@@ -51,7 +51,7 @@ Update log
         - KNN graph construction
 
       - Updates to network analysis function(s):
-        - Top and bottom edge weight, and colour coding for rbio_network(): for signed corrlation measures
+        - Display both top and bottom percent edge weights, and colour coding for rbio_network(): for signed corrlation measures
       
       - Updates to microarray functions
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
@@ -87,6 +87,7 @@ Update log
         - rbio_network() updated with separating community/membership functionality
         - rbio_network() now can disable vertex labels universally
         - rbio_network() will now not highlight vertices within a community (membership) that only features zero degree vertices
+        - rbio_network() now higlights both within and cross-community edges when plot.edge.color.highlighttopvsize = FALSE and plot.highlight_membership = FALSE
         - Manual page updated for rbio_tom()
         - Manual page updated for rbio_network()
         
@@ -95,7 +96,11 @@ Update log
         
       - Updates to GSA function(s):
         - rbioGS_kegg() moved to legacy functions, and temporarily diabled due to a fatal bug in the org.Hs.eg.db pacakge. Funtion will be re-enabled once the issue is resolved. 
-          - Accordingly, pathview (>= 1.12.0) dependency temporarilty removed.
+          - Accordingly, pathview (>= 1.12.0) dependency temporarilty removed
+
+      - Other fixes
+        - Typos fixed for manual pages
+        - References added
 
 
     0.5.4 (March.24.2021)

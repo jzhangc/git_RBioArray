@@ -648,16 +648,20 @@ rbio_network.default <- function(g,
     } else {
       E(g)$color <- foreach(i = seq(nrow(edge_df)), .combine = "c") %do% {
         if (g_membership[edge_df[i, 1]] == g_membership[edge_df[i, 2]]){
-          scales::alpha(colours[g_membership[edge_df[i, 1]]], alpha = 0.2)
-          # colours[membership[edge_df[i, 1]]]
+          scales::alpha(colours[g_membership[edge_df[i, 1]]], alpha = 0.8)
+          # colours[g_membership[edge_df[i, 1]]]
         } else {
-          # scales::alpha("#EBECF0", alpha=0.2)
-          "#3C3C3C"
+          scales::alpha("#3C3C3C", alpha = 0.8)
+          # "#3C3C3C"
         }
       }
     }
   } else {
     E(g)$color <-rep("#EBECF0", times = nrow(edge_df))
+  }
+
+  if (plot.edge.color.highlighttopvsize) {
+    E(g)$color <- alpha(E(g)$color , alpha = 0.2)
   }
 
   # - filer vertices -
@@ -705,10 +709,6 @@ rbio_network.default <- function(g,
       V(g)$color[degree(g) == 0] <- alpha(V(g)$color[degree(g) == 0], alpha = 0.2)
       V(g)$vframecolour[degree(g) == 0] <- "NA"
     }
-  }
-
-  if (plot.edge.color.highlighttopvsize) {
-    E(g)$color <- alpha(E(g)$color , alpha = 0.2)
   }
 
   # rescale sizes
