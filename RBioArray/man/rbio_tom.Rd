@@ -108,6 +108,8 @@ An \code{rbio_tom_graph} object with the following items:
 
         \code{h}: when \code{cutree.method = "manual"}, cut tree height.
 
+        \code(tom_type): TOM distance type.
+
         \code{manual_membership}: if manually set membership is used.
 
         \code{tom_membership}: a \code{named integer vector} containing membership for each features clustered.
