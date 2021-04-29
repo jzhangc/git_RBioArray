@@ -9,7 +9,7 @@
 #' @param ... Additional arguments passed to \code{TOMdist()} function.
 #' @param manual_membership Boolean. If to use manual membership. Default is \code{FALSE}.
 #' @param tom_membership Boolean. Set when \code{manual_membership = TRUE}, a \code{named integer vector} containing membership for each features. Default is \code{NULL}.
-#' @param hclust.method String.
+#' @param hclust.method String. Hierarchical clustering distance methods. See the R native \code{\link{hclust}} for details.
 #' @param cutree.method String. Method to find the optimal k. Default is \code{"silhouette"}.
 #' @param dynamictree.min.size Integer. When \code{cutree.method = "dynamic"}, the minimum cluster size. Default is \code{20}.
 #' @param k integer. Set when \code{cutree.method = "manual"}, manually set number of groups to cut to.

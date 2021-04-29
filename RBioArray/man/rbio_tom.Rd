@@ -51,7 +51,7 @@ rbio_tom(
 
 \item{tom_membership}{Boolean. Set when \code{manual_membership = TRUE}, a \code{named integer vector} containing membership for each features. Default is \code{NULL}.}
 
-\item{hclust.method}{String.}
+\item{hclust.method}{String. Hierarchical clustering distance methods. See the R native \code{\link{hclust}} for details.}
 
 \item{cutree.method}{String. Method to find the optimal k. Default is \code{"silhouette"}.}
 
