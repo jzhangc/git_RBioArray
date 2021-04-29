@@ -45,7 +45,7 @@ rbio_tom(
 
 \item{tom_type}{string. Directionality of the TOM analysis. Default is \code{"unsigned"}.}
 
-\item{...}{Additional arguments passed to \code{TOMdist()} function.}
+\item{...}{Additional arguments passed to \code{TOMdist} function.}
 
 \item{manual_membership}{Boolean. If to use manual membership. Default is \code{FALSE}.}
 
@@ -108,7 +108,7 @@ An \code{rbio_tom_graph} object with the following items:
 
         \code{h}: when \code{cutree.method = "manual"}, cut tree height.
 
-        \code(tom_type): TOM distance type.
+        \code{tom_type}: TOM distance type.
 
         \code{manual_membership}: if manually set membership is used.
 

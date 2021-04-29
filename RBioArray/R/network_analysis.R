@@ -6,7 +6,7 @@
 #' @param cor_method String. Correlation method. Default is \code{"pearson"}.
 #' @param power integer. The power to the correlation coefficients. Default is \code{6}.
 #' @param tom_type string. Directionality of the TOM analysis. Default is \code{"unsigned"}.
-#' @param ... Additional arguments passed to \code{TOMdist()} function.
+#' @param ... Additional arguments passed to \code{TOMdist} function.
 #' @param manual_membership Boolean. If to use manual membership. Default is \code{FALSE}.
 #' @param tom_membership Boolean. Set when \code{manual_membership = TRUE}, a \code{named integer vector} containing membership for each features. Default is \code{NULL}.
 #' @param hclust.method String. Hierarchical clustering distance methods. See the R native \code{\link{hclust}} for details.
@@ -48,7 +48,7 @@
 #'
 #'         \code{h}: when \code{cutree.method = "manual"}, cut tree height.
 #'
-#'         \code(tom_type): TOM distance type.
+#'         \code{tom_type}: TOM distance type.
 #'
 #'         \code{manual_membership}: if manually set membership is used.
 #'
