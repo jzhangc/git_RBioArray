@@ -80,7 +80,8 @@ Update log
       
       - Updates to network analysis function(s):
         - rbio_tom() updated with user customizable g_membership
-          - the "rbio_tom_graph" class added with the corresponding "manual_membership" item
+        - "rbio_tom_graph" class added with the corresponding "manual_membership" item
+        - "rbio_tom_graph"" object now includes tom_type
         - Verbose settings updated for rbio_tom()
         - rbio_network() updated with edge type functionality depending on the vertex membership, i.e. "all", "across", "within"
         - rbio_network() udpated with better random state implementation

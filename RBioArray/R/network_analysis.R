@@ -48,9 +48,12 @@
 #'
 #'         \code{h}: when \code{cutree.method = "manual"}, cut tree height.
 #'
+#'         \code(tom_type): TOM distance type.
+#'
 #'         \code{manual_membership}: if manually set membership is used.
 #'
 #'         \code{tom_membership}: a \code{named integer vector} containing membership for each features clustered.
+#'
 #'
 #' @details
 #'         When \code{cutree.method = "manual"}, \code{h} and \code{k} are mutually exclusive. Set one, but not both.
@@ -143,7 +146,6 @@ rbio_tom <- function(mtx, diag = FALSE,
   if (verbose) cat("TOM calulation...")
   adjmat <- cor(mtx, method = cor_method)^power
   tom_dist <- TOMdist(adjmat, TOMType = tom_type, verbose = FALSE, ...)  # matrix, array class, here we use dist
-  # tom_dist <- TOMdist(adjmat, TOMType = tom_type, verbose = FALSE)  # matrix, array class, here we use dist
   rownames(tom_dist) <- rownames(adjmat)
   colnames(tom_dist) <- colnames(adjmat)
   tom_similarity <- 1 - tom_dist # convert to similarity matrix
@@ -263,6 +265,7 @@ rbio_tom <- function(mtx, diag = FALSE,
   silhouette_score_mean = ss_mean,
   k = k,
   h = h,
+  tom_type = tom_type,
   manual_membership = manual_membership,
   tom_membership = tom_membership)
   class(out) <- "rbio_tom_graph"
