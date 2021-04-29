@@ -56,6 +56,12 @@
 #'
 #'
 #' @details
+#'         For \code{tom_type}:
+#'         In a signed correlation network, nodes with negative correlation are considered unconnected (their connection strength is zero or very close to zero).
+#'         In contrast, in unsigned correlation networks, nodes with strong negative correlations have high connection strengths: the unsigned network adjacency
+#'         is based on the absolute value of correlation, so positive and negative correlations are treated equally.
+#'         Reference: https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/TechnicalReports/signedTOM.pdf
+#'
 #'         When \code{cutree.method = "manual"}, \code{h} and \code{k} are mutually exclusive. Set one, but not both.
 #'
 #'         When {manual _membership = TRUE}, both hclust and tree cutting processes are ignored.

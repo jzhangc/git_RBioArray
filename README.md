@@ -80,6 +80,7 @@ Update log
       
       - Updates to network analysis function(s):
         - rbio_tom() updated with user customizable g_membership
+        - rbio_tom() udpated with explanations on signed and unsigned distance in the manual page
         - "rbio_tom_graph" class added with the corresponding "manual_membership" item
         - "rbio_tom_graph"" object now includes tom_type
         - Verbose settings updated for rbio_tom()
