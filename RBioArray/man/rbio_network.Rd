@@ -134,13 +134,22 @@ rbio_network(object, ...)
 TBC
 
 TBC
+
+A \code{rbio_final_graph} object is assigned to the global environment with suffix \code{_final_graph}.
+        The object contains the following items:
+
+        \code{final_g}: an \code{igraph} object containing information on the final vertices and edges (filtered and finalized).
+                        Note: this \code{igraph} object also includes a series of custom items for vertices:
+                        \code{vlabel}, \code{vlabelsize}, \code{vsize}, and \code{vframecolour}.
+                        Also included: \code{V(final_g)$membership} according to the input for the function.
+
+        \code{g_layout}: the default layout as defined by the function
 }
 \description{
 (UNDER CONSTRUCTION: NOT FUNCTIONAL) Network construction and visualization function
 }
 \details{
-<TBC: under construction>
-         For \code{colour_scheme}, use the following as a guide (name, maximum number of colours):
+For \code{colour_scheme}, use the following as a guide (name, maximum number of colours):
            Accent	8
            Dark2	8
            Paired	12

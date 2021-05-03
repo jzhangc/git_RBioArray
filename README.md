@@ -84,6 +84,7 @@ Update log
         - "rbio_tom_graph" class added with the corresponding "manual_membership" item
         - "rbio_tom_graph"" object now includes tom_type
         - Verbose settings updated for rbio_tom()
+        - rbio_network now outputs a "rbio_final_graph" object with the igraph and layout
         - rbio_network() updated with edge type functionality depending on the vertex membership, i.e. "all", "across", "within"
         - rbio_network() udpated with better random state implementation
         - rbio_network() updated with separating community/membership functionality
