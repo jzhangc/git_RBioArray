@@ -444,7 +444,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
                            plotTitle = NULL, xLabel = "median p value", yLabel = "log consensus score",
                            rankCutoff = 20, pCutoff = 0.05,
                            plotWidth = 170, plotHeight = 150){
-  HTmap <-consensusHeatmap(GSA_list, plot = FALSE, ...)
+  HTmap <- consensusHeatmap(GSA_list, plot = FALSE, ...)
 
   ## data frame prep
   p_class_name_rank <- c("disdn_rank", "mixdn_rank", "nondir_rank", "mixup_rank",
