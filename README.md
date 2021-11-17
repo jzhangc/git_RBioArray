@@ -70,6 +70,7 @@ Update log
       - New ML function(s):
         - rbio_randomforest_fs() added for recursive randome forest feature selection analysis
           - RBioFS package is now part of the dependencies
+          - A bug fixed where sfs status always displays FALSE
         
       - Updates to clustering funcion(s):
         - rbio_supervised_hcluster() code base updated for better data compatibility

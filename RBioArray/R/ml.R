@@ -237,7 +237,7 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
     rffs_ntimes = rffs.ntimes,
     rffs_inital_ntree = rffs.inital_fs.ntree,
     rffs_inital_mtry = initial_fs_mtry,
-    rffs_sfs =  FALSE, rffs_sfs_ntree = rffs.sfs_ntree,
+    rffs_sfs = rffs.sfs, rffs_sfs_ntree = rffs.sfs_ntree,
     rffs_randomstate = ifelse(rffs.randomstate, rffs.randomstate, "not set")
   )
 
