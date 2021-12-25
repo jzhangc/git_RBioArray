@@ -29,7 +29,7 @@ Installation:
 
 Update log
 
-    0.5.5 (feature roadmap)
+    0.5.5 and beyond (feature roadmap)
     (ICEBOX)
       - General updates
         - splines pacakge added as a depedencing for continuous outcome support
