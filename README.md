@@ -71,6 +71,9 @@ Update log
         - rbio_randomforest_fs() added for recursive randome forest feature selection analysis
           - RBioFS package is now part of the dependencies
           - A bug fixed where sfs status always displays FALSE
+          
+      - Updates to RNAseq functions
+        - Method specific to the S4 class "mircount" (from RBioMIR package) added for the relevant functions
         
       - Updates to clustering funcion(s):
         - rbio_supervised_hcluster() code base updated for better data compatibility
