@@ -74,6 +74,8 @@ Update log
           
       - Updates to RNAseq functions
         - Method specific to the S4 class "mircount" (from RBioMIR package) added for the relevant functions
+        - The within.sample.norm.method argument deprecated for rnaseq_de()
+        - The read filtering argument updated with "none" (no filtering) for rnaseq_de()
         
       - Updates to clustering funcion(s):
         - rbio_supervised_hcluster() code base updated for better data compatibility

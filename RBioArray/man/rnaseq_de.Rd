@@ -3,6 +3,7 @@
 \name{rnaseq_de}
 \alias{rnaseq_de}
 \alias{rnaseq_de.mir_count}
+\alias{rnaseq_de.mircount}
 \alias{rnaseq_de.rbioseq_count}
 \alias{rnaseq_de.default}
 \title{rnaseq_de}
@@ -10,6 +11,13 @@
 rnaseq_de(object, ...)
 
 \method{rnaseq_de}{mir_count}(
+  object,
+  filter.threshold.min.count = 10,
+  filter.threshold.min.sample = NULL,
+  ...
+)
+
+\method{rnaseq_de}{mircount}(
   object,
   filter.threshold.min.count = 10,
   filter.threshold.min.sample = NULL,

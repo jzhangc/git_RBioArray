@@ -566,7 +566,7 @@ print.rbioseq_count <- function(x, ...){
 #' @export
 rnaseq_de <- function(object, ...){
   ## check object
-  if (!any(class(object) %in% c("rbioseq_count", "mir_count"))) stop("object needs to be either a \"rbioseq_count\" or \"mir_count\" object")
+  if (!any(class(object) %in% c("rbioseq_count", "mir_count", "mircount"))) stop("object needs to be either a \"rbioseq_count\", \"mir_count\" or the S4 \"mircount\" object")
 
   ## use methods
   UseMethod("rnaseq_de", object)
@@ -586,14 +586,53 @@ rnaseq_de <- function(object, ...){
 rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
   ## for setting up comparison groups info and minimum sample number
   annot.group <- object$sample_groups
-  if (within.sample.norm.method == "rpkm") stop("within.sample.norm.method = \"rpkm\" is not supported for mir_count object")
+  # # below: deprecated
+  # if (within.sample.norm.method == "rpkm") stop("within.sample.norm.method = \"rpkm\" is not supported for mir_count object")
+  if (filter.threshold.min.count == "none") {
+    cpm_cutoff = "none"
+  } else {
+    cpm_cutoff <- filter.threshold.min.count * min(object$sample_library_sizes) / 1000000
+  }
 
   ## construct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
-                           filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
+                           filter.threshold.cpm = cpm_cutoff,
                            filter.threshold.min.sample = filter.threshold.min.sample,
                            annot.group = annot.group, ...)
   out <- append(out, object[c("targets", "sample_groups")])
+  class(out) <- "rbioseq_de"
+  return(out)
+}
+
+
+#' @title rnaseq_de.mircount
+#'
+#' @rdname rnaseq_de
+#' @method rnaseq_de mircount
+#' @param object A s4 \code{mircount} object from the \code{mirProcess} or \code{mirDeepProcess} functions of \code{RBioMIR} package.
+#' @param filter.threshold.min.count Minimum count for the smallest library for filter threshold. Default is \code{10}.
+#' @param filter.threshold.min.sample Minimum number of samples meeting the count threshold. Default is \code{NULL}.
+#' @param ... Additional arguments for \code{\link{rnaseq_de.default}}.
+#'
+#' @export
+rnaseq_de.mircount <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
+  ## for setting up comparison groups info and minimum sample number
+  annot.group <- object@sample_groups
+  # # below: deprecated
+  # if (within.sample.norm.method == "rpkm") stop("within.sample.norm.method = \"rpkm\" is not supported for mir_count object")
+  if (filter.threshold.min.count == "none") {
+    cpm_cutoff = "none"
+  } else {
+    cpm_cutoff <- filter.threshold.min.count * min(object$sample_library_sizes) / 1000000
+  }
+
+  ## construct rbioseq_de object
+  out <- rnaseq_de.default(x = object@raw_read_count, y = object@genes,
+                           filter.threshold.cpm = cpm_cutoff,
+                           filter.threshold.min.sample = filter.threshold.min.sample,
+                           annot.group = annot.group, ...)
+  out$targets <- object@targets
+  out$sample_groups <- object@sample_groups
   class(out) <- "rbioseq_de"
   return(out)
 }
@@ -612,11 +651,16 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
 rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, filter.threshold.min.sample = NULL, ...){
   ## for setting up comparison groups info and minimum sample number
   annot.group <- object$sample_groups
+  if (filter.threshold.min.count == "none") {
+    cpm_cutoff = "none"
+  } else {
+    cpm_cutoff <- filter.threshold.min.count * min(object$sample_library_sizes) / 1000000
+  }
 
   ## construct rbioseq_de object
   out <- rnaseq_de.default(x = object$raw_read_count, y = object$genes,
                            y.gene_id.var.name = "gene_id", y.gene_symbol.var.name = "gene_name",
-                           filter.threshold.cpm = filter.threshold.min.count * min(object$sample_library_sizes) / 1000000,
+                           filter.threshold.cpm = cpm_cutoff,
                            filter.threshold.min.sample = filter.threshold.min.sample,
                            annot.group = annot.group, ...)
   out <- append(out, object[c("targets", "sample_groups")])
@@ -777,8 +821,8 @@ rnaseq_de.default <- function(x, y = NULL,
       flt_summary <- sort(flt_summary)  # make sure always this order: FALSE, TRUE
     } else if (all(!isexpr)){ # if all FALSE
       stop('Nothing remained after filtering. Function stopped.')
-      flt_summary <- table(isexpr)
-      flt_summary['TRUE'] <- 0
+      # flt_summary <- table(isexpr)
+      # flt_summary['TRUE'] <- 0
     } else {
       flt_summary <- table(isexpr)
     }
@@ -790,7 +834,15 @@ rnaseq_de.default <- function(x, y = NULL,
                            filtered_counts = dge)
   } else {
     cat("No filtering applied as filter.threshold.cpm = none. \n")
-    filter_results <- NULL
+    isexpr <- rep(TRUE, times = nrow(dge))
+    flt_summary <- table(isexpr)
+    flt_summary['FALSE'] <- 0
+    flt_summary <- sort(flt_summary)
+    names(flt_summary) <- c("filtered", "remaning")
+    filter_results <- list(filter_threshold_cpm = "none",
+                           filter_threshold_min_sample = "none",
+                           filter_summary = flt_summary,
+                           filtered_counts = dge)
   }
 
   # library size scaling normalization: within sample
