@@ -623,7 +623,7 @@ rnaseq_de.mircount <- function(object, filter.threshold.min.count = 10, filter.t
   if (filter.threshold.min.count == "none") {
     cpm_cutoff = "none"
   } else {
-    cpm_cutoff <- filter.threshold.min.count * min(object$sample_library_sizes) / 1000000
+    cpm_cutoff <- filter.threshold.min.count * min(object@sample_library_sizes) / 1000000
   }
 
   ## construct rbioseq_de object
