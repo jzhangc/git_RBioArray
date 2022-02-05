@@ -121,6 +121,8 @@ Generic RNAseq statistical analysis function
          Chen W, Lun ATL, Smyth GK. 2016. From reads to genes to pathways: differential expression analysis of RNA-Seq experiments
          using Rsubread and the edgeR quasi-likelihood pipeline. F1000Research. 5:1438.
 
+         Note: when \code{filter.threshold.cpm.count=0}, threshold is dependent on the \code{filter.threshold.min.sample} value.
+
 
          It absolutely important to note that VOOM (or any other full-fledged RNA-seq methods like DEseq2) DOES NOT use FPKM for DE analysis
          VOOM uses logCPM with library size scaling, e.g. TMM.
