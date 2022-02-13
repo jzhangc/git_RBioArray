@@ -29,44 +29,6 @@ Installation:
 
 Update log
 
-    0.5.6 and beyond (feature roadmap)
-    (ICEBOX)
-      - General updates
-        - splines pacakge added as a depedencing for continuous outcome support
-        
-      - New microarray functions:
-        - New DE analysis function added: rbioarray_de_analysis()
-          - The fnction has export options:
-            (i) all features, 
-            (ii) features with an annotation name, 
-            (iii) significant features with or without annotation name depending on the setting for argument "gene_symbol"
-            
-      - New clustering funcions:
-        - Bayesian biclustering function rbio_bb()
-        - Propotionality correlation function added for CLR transformed RNAseq data
-        - rbio_kmeans() supports methods for rbioarray_de and rbioseq_de objects for automatic K means cluster
-      
-      - New network analysis functions:
-        - SNF network and network fusion functions
-        - KNN graph construction
-
-      - Updates to network analysis function(s):
-        - Display both top and bottom percent edge weights, and colour coding for rbio_network(): for signed corrlation measures
-      
-      - Updates to microarray functions
-        - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
-        - Relevant functions updated with continuous outcome support
-        
-      - Updates to RNAseq functions
-        - Relevant functions updated with continuous outcome support
-        - rnaseq_de() output "rbioseq_de" class now includes "voom_output" and "calcNormFactors_outpout" (filtered raw count with lib size)
-        
-      - Revamp GS functions
-      
-      - Other updates
-        - Functions updated for R Notebook/Markdown compatibility
-        
-        
     0.5.5 (Feb.13.2022)
       - New ML function(s):
         - rbio_randomforest_fs() added for recursive randome forest feature selection analysis

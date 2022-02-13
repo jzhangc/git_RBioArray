@@ -43,7 +43,6 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   genes <- object$input_data$genes
   input.genes_annotation.gene_symbol.var_name = object$input_data$input.genes_annotation.gene_symbol.var_name
   input.genes_annotation.gene_id.var_name = object$input_data$input.genes_annotation.gene_id.var_name
-  export.name <- deparse(substitute(object))
   input.sample_groups <- object$input_data$sample_groups
   input.genes_annotation.control_type <- object$input_data$input.genes_annotation.control_type
   comparisons <- object$input_data$comparisons$comparisons
