@@ -1,12 +1,16 @@
 #' @title rbio_venn_de
 #'
-#' @description Venn diagrame for DE results for the \code{sig} class input object.
+#' @description Venn diagram for DE results for the \code{sig} class input object.
 #' @param object Input \code{sig} class object.
 #' @param gene_symbol.only Whether or not to remove probes without gene symbol. Default is \code{FALSE}.
+#' @param export.name Optional name used for output objects to the environment and directory. Default is \code{NULL}.
 #' @param ... arguments for \code{vennDiagram()} from \code{limma} package.
 #' @param plot.Width The width of the figure for the final output figure file. Default is \code{170}.
 #' @param plot.Height The height of the figure for the final output figure file. Default is \code{150}.
-#' @return The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
+#' @param verbose If to turn on messaging. Default is \code{TRUE}.
+#' @return The function outputs a \code{pdf} file for Venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
+#' @details If exists, the F stats information will be removed from the \code{object} prior to the Venn analysis.
+#' @import foreach
 #' @importFrom limma vennDiagram
 #' @examples
 #' \dontrun{
@@ -14,6 +18,7 @@
 #' }
 #' @export
 rbio_venn_de <- function(object, gene_symbol.only = FALSE,
+                         export.name = NULL,
                          ...,
                          plot.Width = 5, plot.Height = 5,
                          verbose = TRUE){
@@ -31,6 +36,10 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   if (!all(contra_levels_all %in% unique(levels(object$input_data$sample_groups)))) stop("Contrast levels not matching sample groups. Please check the input.")
 
   ## variables
+  if (is.null(export.name)){
+    export.name = deparse(substitute(object))
+  }
+
   genes <- object$input_data$genes
   input.genes_annotation.gene_symbol.var_name = object$input_data$input.genes_annotation.gene_symbol.var_name
   input.genes_annotation.gene_id.var_name = object$input_data$input.genes_annotation.gene_id.var_name
@@ -41,10 +50,17 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   comparison_levels <- object$input_data$comparisons$comparison_levels
   thresholding_summary <- object$thresholding_summary
   row.lab.var_name <- input.genes_annotation.gene_id.var_name
-  pcutoff.vector <- as.numeric(object$significant_change_summary[, "raw.p.value.threshold"])
-  fc.vector <- as.numeric(object$significant_change_summary[, "fold.change.threshold"])
 
   venn_de_list <- object$input_data$full_de_results
+  stats_summary <- object$significant_change_summary
+  f_stats_indices <- which(stats_summary == "F stats", arr.ind=TRUE)
+  if (length(f_stats_indices) > 0) {
+    if (verbose) cat("F stats inforamtion removed prior to Venn analysis.\n")
+    stats_summary <- stats_summary[-f_stats_indices[1],]
+    venn_de_list <- venn_de_list[!names(venn_de_list) %in% "F_stats"]
+  }
+  pcutoff.vector <- as.numeric(stats_summary[, "raw.p.value.threshold"])
+  fc.vector <- as.numeric(complete.cases(stats_summary[, "fold.change.threshold"]))
   venn_display_var_name <- input.genes_annotation.gene_id.var_name
   if (gene_symbol.only) {
     for (i in 1:length(venn_de_list)) {
@@ -74,15 +90,15 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   ## output
   # diagrams
   if (verbose) cat("Saving Venn diagram files...")
-  pdf(file = paste(deparse(substitute(object)), "_venn_total.pdf", sep = ""), width = plot.Width, height = plot.Height)
+  pdf(file = paste(export.name, "_venn_total.pdf", sep = ""), width = plot.Width, height = plot.Height)
   vennDiagram(venn_mtx, circle.col = 1:length(names(venn_de_list)), ...)
   dev.off()
 
-  pdf(file = paste(deparse(substitute(object)), "_venn_up.pdf", sep = ""), width = plot.Width, height = plot.Height)
+  pdf(file = paste(export.name, "_venn_up.pdf", sep = ""), width = plot.Width, height = plot.Height)
   vennDiagram(venn_mtx, circle.col = 1:length(names(venn_de_list)), include = "up", ...)
   dev.off()
 
-  pdf(file = paste(deparse(substitute(object)), "_venn_down.pdf", sep = ""), width = plot.Width, height = plot.Height)
+  pdf(file = paste(export.name, "_venn_down.pdf", sep = ""), width = plot.Width, height = plot.Height)
   vennDiagram(venn_mtx, circle.col = 1:length(names(venn_de_list)), include = "down", ...)
   dev.off()
   if (verbose) cat("Done!\n")
@@ -91,10 +107,11 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   if (verbose) cat("Saving Venn table...")
   if (is.null(gene_symbol.only)){
     outdfm <- data.frame(GeneSymbol = rownames(venn_mtx), venn_mtx)
-    write.csv(outdfm, file = paste(deparse(substitute(object)), "_venn_table.csv", sep = ""), row.names = FALSE)
+    write.csv(outdfm, file = paste(export.name, "_venn_table.csv", sep = ""), row.names = FALSE)
   } else {
     outdfm <- data.frame(ProbeName = rownames(venn_mtx), venn_mtx)
-    write.csv(outdfm, file = paste(deparse(substitute(object)), "_venn_table.csv", sep = ""), row.names = FALSE)
+    write.csv(outdfm, file = paste(export.name, "_venn_table.csv", sep = ""), row.names = FALSE)
   }
   if (verbose) cat("Done!\n")
 }
+

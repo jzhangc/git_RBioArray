@@ -7,6 +7,7 @@
 rbio_venn_de(
   object,
   gene_symbol.only = FALSE,
+  export.name = NULL,
   ...,
   plot.Width = 5,
   plot.Height = 5,
@@ -18,17 +19,24 @@ rbio_venn_de(
 
 \item{gene_symbol.only}{Whether or not to remove probes without gene symbol. Default is \code{FALSE}.}
 
+\item{export.name}{Optional name used for output objects to the environment and directory. Default is \code{NULL}.}
+
 \item{...}{arguments for \code{vennDiagram()} from \code{limma} package.}
 
 \item{plot.Width}{The width of the figure for the final output figure file. Default is \code{170}.}
 
 \item{plot.Height}{The height of the figure for the final output figure file. Default is \code{150}.}
+
+\item{verbose}{If to turn on messaging. Default is \code{TRUE}.}
 }
 \value{
-The function outputs a \code{pdf} file for venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
+The function outputs a \code{pdf} file for Venn diagrams (total, up- and down-regulations). The function also exports overlapping gene or probe into a \code{csv} file.
 }
 \description{
-Venn diagrame for DE results for the \code{sig} class input object.
+Venn diagram for DE results for the \code{sig} class input object.
+}
+\details{
+If exists, the F stats information will be removed from the \code{object} prior to the Venn analysis.
 }
 \examples{
 \dontrun{
