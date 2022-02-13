@@ -55,9 +55,10 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   f_stats_indices <- which(stats_summary == "F stats", arr.ind=TRUE)
   if (length(f_stats_indices) > 0) {
     if (verbose) cat("F stats inforamtion removed prior to Venn analysis.\n")
-    stats_summary <- stats_summary[-f_stats_indices[1],]
+    stats_summary <- stats_summary[-f_stats_indices[1], , drop = FALSE]
     venn_de_list <- venn_de_list[!names(venn_de_list) %in% "F_stats"]
   }
+  if (dim(stats_summary)[1] < 2) stop("At least two comparisons are needed for Venn. Function aborted.")
   pcutoff.vector <- as.numeric(stats_summary[, "raw.p.value.threshold"])
   fc.vector <- as.numeric(complete.cases(stats_summary[, "fold.change.threshold"]))
   venn_display_var_name <- input.genes_annotation.gene_id.var_name
