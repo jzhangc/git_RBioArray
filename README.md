@@ -50,6 +50,7 @@ Update log
       - Updates to plot function(s):
         - If applicable, rbio_venn_de() now automatically removes the F_stats information prior to analysis
         - rbio_venn_de() now accepts custom output file name
+        - Additional error handling added for rbio_venn_de()
       
       - Updates to network analysis function(s):
         - rbio_tom() updated with user customizable g_membership
