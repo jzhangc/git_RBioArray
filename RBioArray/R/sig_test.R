@@ -377,7 +377,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     for (i in seq(length(input.de.list))) {
       if (verbose) cat(paste0("Saving volcano plots to file: ", names(input.de.list)[i], ".volcano.pdf..."))
       grid.newpage()
-      ggsave(filename = paste(names(input.de.list)[i], "_", export.name, ".volcano.pdf", sep = ""), plot = plt_list[[i]],
+      ggsave(filename = paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf"), plot = plt_list[[i]],
              width = plot.Width, height = plot.Height, units = "mm",dpi = 600)
       grid.draw(plt_list[[i]])
       if (verbose) cat("Done!\n")

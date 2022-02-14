@@ -65,7 +65,11 @@ Update log
       
       - Other updates
         - Functions updated for R Notebook/Markdown compatibility
-        
+    
+    (ICEBOX)        
+      - Updates to significant test function(s):
+        - The sig function now uses the following format for volcano plot file names: paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf")
+      
 
     0.5.5 (Feb.13.2022)
       - New ML function(s):
