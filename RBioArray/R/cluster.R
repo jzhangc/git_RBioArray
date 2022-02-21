@@ -306,7 +306,8 @@ rbio_supervised_hcluster <- function(object,
                                      plot.width = 7, plot.height = 7,
                                      verbose = TRUE){
   ## check arguments
-  if (is.null(export.name)){
+  if (is.null(export.name)) {
+    cat("Object/file export name prefix automatically set to the input object name. \n")
     export.name <- deparse(substitute(object))
   } else {
     export.name <- export.name
@@ -350,12 +351,6 @@ rbio_supervised_hcluster <- function(object,
     gene_symbol.only <- FALSE
   }
   input.genes_annotation.gene_id.var_name = object$input_data$input.genes_annotation.gene_id.var_name
-  if (is.null(export.name)) {
-    cat("Object/file export name prefix automatically set to the input object name. \n")
-    export.name <- deparse(substitute(object))
-  } else {
-    export.name <- export.name
-  }
   input.sample_groups <- object$input_data$sample_groups
   input.genes_annotation.control_type <- object$input_data$input.genes_annotation.control_type
   comparisons <- object$input_data$comparisons$comparisons
@@ -405,10 +400,10 @@ rbio_supervised_hcluster <- function(object,
     is_test <- thresholding_summary[[i]]
 
     if (is.null(object$input_data$full_de_results[[comparisons[i]]]$PROBE_ID)) {  # for RNAseq data
-      de_probes <- object$input_data$full_de_results[[comparisons[i]]]$gene_id[is_test]
-      plt_dfm <- dfm[dfm$gene_id %in% de_probes, ]
+      de_probes <- object$input_data$full_de_results[[comparisons[i]]][, input.genes_annotation.gene_id.var_name][is_test]
+      plt_dfm <- dfm[dfm[, input.genes_annotation.gene_id.var_name] %in% de_probes, ]
       if (gene_symbol.only) {
-        plt_dfm <- plt_dfm[complete.cases(plt_dfm$gene_name), ]
+        plt_dfm <- plt_dfm[complete.cases(plt_dfm[, input.genes_annotation.gene_id.var_name]), ]
       }
     } else {
       de_probes <- object$input_data$full_de_results[[comparisons[i]]]$PROBE_ID[is_test]
@@ -455,8 +450,8 @@ rbio_supervised_hcluster <- function(object,
   f_is_test <- thresholding_summary[["F_stats"]]
 
   if (is.null(object$input_data$full_de_results[["F_stats"]]$PROBE_ID)){
-    f_de_probes <- object$input_data$full_de_results[["F_stats"]]$gene_id[f_is_test]
-    f_plt_dfm <- dfm[dfm$gene_id %in% f_de_probes, ]
+    f_de_probes <- object$input_data$full_de_results[["F_stats"]][, input.genes_annotation.gene_id.var_name][f_is_test]
+    f_plt_dfm <- dfm[dfm[, input.genes_annotation.gene_id.var_name] %in% f_de_probes, ]
   } else {
     f_de_probes <- object$input_data$full_de_results[["F_stats"]]$PROBE_ID[f_is_test]
     f_plt_dfm <- dfm[dfm$PROBE_ID %in% f_de_probes, ]
@@ -464,7 +459,7 @@ rbio_supervised_hcluster <- function(object,
 
   if (is.null(f_plt_dfm$SYMBOL)){  # for RNAseq data
     if (gene_symbol.only) {
-      f_plt_dfm <- f_plt_dfm[complete.cases(f_plt_dfm$gene_name), ]
+      f_plt_dfm <- f_plt_dfm[complete.cases(f_plt_dfm[, input.genes_annotation.gene_id.var_name]), ]
     }
   } else {
     if (gene_symbol.only) {

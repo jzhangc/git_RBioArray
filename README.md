@@ -72,6 +72,7 @@ Update log
         
       - Updates to cluster function(s):
         - A bug fixed for rbio_supervised_hcluster() where the number of samples (for sample name) cannot be extracted without sample name variable provided
+        - A bug fixed for rbio_supervised_hcluster() where gene name variable name was not properly extracted for RNAseq data
         
 
     0.5.5 (Feb.13.2022)
