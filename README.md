@@ -69,7 +69,10 @@ Update log
     (ICEBOX)        
       - Updates to significant test function(s):
         - The sig function now uses the following format for volcano plot file names: paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf")
-      
+        
+      - Updates to cluster function(s):
+        - A bug fixed for rbio_supervised_hcluster() where the number of samples (for sample name) cannot be extracted without sample name variable provided
+        
 
     0.5.5 (Feb.13.2022)
       - New ML function(s):

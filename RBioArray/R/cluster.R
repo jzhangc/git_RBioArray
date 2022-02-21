@@ -319,12 +319,12 @@ rbio_supervised_hcluster <- function(object,
   if (!is.null(sample_id.var.name)){
     if (!sample_id.var.name %in% names(object$input_data$targets)) {
       cat("The sample_id.var.name not found in targets element of the input object. Proceed without using it.\n")
-      sample_id.vector <- seq(ncol(object$input_data$E))
+      sample_id.vector <- seq(nrow(object$input_data$targets))
     } else {
       sample_id.vector <- object$input_data$targets[, sample_id.var.name]
     }
   } else {
-    sample_id.vector <- seq(ncol(object$input_data$E))
+    sample_id.vector <- seq(nrow(object$input_data$targets))
   }
   if (n.map.colour %% 1 != 0) stop("Argument n.map.colour needs to be an integer number.")
   # if (!distance %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"))
