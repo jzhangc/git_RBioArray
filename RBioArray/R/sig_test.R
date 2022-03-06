@@ -76,6 +76,7 @@ sig.rbioseq_de <- function(object, export.name = NULL, p.val.correction.method =
                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                      targets = object$targets,
+                     sample_groups_var_name = object$sample_groups_var_name,
                      sample_groups = object$sample_groups,
                      comparisons = object$comparisons,
                      full_de_results = full_de_results)
@@ -129,6 +130,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
                      input.genes_annotation.gene_id.var_name = object$genes_annotation.gene_id.var_name,
                      input.genes_annotation.gene_symbol.var_name = object$genes_annotation.gene_symbol.var_name,
                      targets = object$targets,
+                     sample_groups_var_name = object$sample_groups_var_name,
                      sample_groups = object$sample_groups,
                      comparisons = object$comparisons,
                      full_de_results = full_de_results)
