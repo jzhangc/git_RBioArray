@@ -771,7 +771,7 @@ rnaseq_de.default <- function(x, y = NULL,
     }
   }
 
-  if (!is.null(dim(y))) {  # check if the variables are in the gene annotation matix
+  if (!is.null(dim(y))) {  # check if the variables are in the gene annotation matrix
     if (!y.gene_id.var.name %in% colnames(y) || !y.gene_symbol.var.name %in% colnames(y)){
       stop("y.gene_id.var.name or y.gene_symbol.var.name can't be found in target annotation matrix y")
     }

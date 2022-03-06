@@ -109,7 +109,8 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
 
   # - finalize settings -
   n_de <- as.numeric(object$significant_change_summary[object$significant_change_summary[, "comparisons"] == "F stats", "True"])
-  if (n_de < 2) {
+
+  if (fs_on_de & n_de < 2) {
     warning("fs_on_de = TRUE, however, the number of DE targts < 2, automatically reset fs_on_de = FALSE\n")
     fs_on_de <- FALSE
   }
@@ -157,14 +158,12 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
 
   dfm_working <- dfm[is_test, ]
   E_working <- E[is_test, ]
+
   if (gene_symbol.only) {
     rownames(E_working) <- dfm_working[, input.genes_annotation.gene_symbol.var_name]
   } else {
     rownames(E_working) <- dfm_working[, input.genes_annotation.gene_id.var_name]
   }
-
-  E_working <- t(E_working)
-  E_rffs_raw <- E_working  # for output
 
   if (rffs.center_scale){
     cat(paste0("Data centered with scaling prior to RF-FS.\n"))
@@ -181,9 +180,21 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
     cat(paste("Done!\n", sep = ""))  # final message
   }
 
+  E_working <- t(E_working)
+  # dim(E_working)
+  if (any(colSums(is.na(E_working)) != 0)) {
+    warning("Predictors with NA values are removed (hint: check center.scale settings to avoid this).")
+    E_working <- E_working[ , colSums(is.na(E_working)) == 0]
+  }
+
+  # dim(E_working)
+  E_rffs_raw <- E_working  # for output
   rffs_raw_dfm <- data.frame(sample_id = sample_id,
                              sample_group = sample_group,
-                             E_rffs_raw)  # for output
+                             E_rffs_raw, check.names = FALSE)  # for output
+
+  # write.csv(E_working, file = "test.csv", row.names = FALSE)
+
 
   # - rRF-FS -
   # initial selection
