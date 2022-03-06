@@ -173,7 +173,7 @@ mrna_count <- rbioseq_import_count(count_data_type = "count_df",
 mrna_count <- rbioseq_import_count(count_data_type =  "htseq",
                                    htseq_file_dir = "~/dataset/",
                                    species = "hsa",
-                                   htseq_sample.annot.file = "target.csv", htseq_sample.annot.filename.var = "condition",
+                                   htseq_sample.annot.file = "target.csv", htseq_sample.annot.group.var = "condition",
                                    htseq_file.ext = ".out", htseq_file.ext = "",
                                    gtf = gtf,
                                    parallelComputing = TRUE, clusterType = "FORK")

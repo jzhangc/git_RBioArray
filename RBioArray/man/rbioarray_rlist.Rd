@@ -90,6 +90,8 @@ A \code{rbioarray_rlist} object. The \code{rbioarray_rlist} class contains the f
 
         \code{targets}: the sample annotation data frame.
 
+        \code{sample_groups_var_name}
+
         \code{sample_groups}
 }
 \description{

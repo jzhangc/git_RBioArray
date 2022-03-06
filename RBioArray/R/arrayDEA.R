@@ -29,6 +29,8 @@
 #'
 #'         \code{targets}: the sample annotation data frame.
 #'
+#'         \code{sample_groups_var_name}
+#'
 #'         \code{sample_groups}
 #'
 #' @examples
@@ -236,6 +238,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
               genes_annotation.control_type = gene.annot.control_type,
               genes_annotation.to_remove.var.name = gene.annot.rm.var.name,
               targets = tgt,
+              sample_groups_var_name = sample_groups.var.name,
               sample_groups = sample.groups)
   class(out) <- "rbioarray_rlist"
   if (verbose) cat("Done!\n")

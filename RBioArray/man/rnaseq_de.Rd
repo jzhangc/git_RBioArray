@@ -106,6 +106,8 @@ A list containing core elements of a \code{rbioseq_de} class. The items of a \co
 
         \code{targets}: sample annotation data frame
 
+        \code{sample_groups_var_name}
+
         \code{sample_groups}
 }
 \description{

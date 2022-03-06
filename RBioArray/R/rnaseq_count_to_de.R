@@ -267,7 +267,7 @@ rbioseq_gtf <- function(file, verbose = TRUE, parallelComputing = FALSE, cluster
 #' mrna_count <- rbioseq_import_count(count_data_type =  "htseq",
 #'                                    htseq_file_dir = "~/dataset/",
 #'                                    species = "hsa",
-#'                                    htseq_sample.annot.file = "target.csv", htseq_sample.annot.filename.var = "condition",
+#'                                    htseq_sample.annot.file = "target.csv", htseq_sample.annot.group.var = "condition",
 #'                                    htseq_file.ext = ".out", htseq_file.ext = "",
 #'                                    gtf = gtf,
 #'                                    parallelComputing = TRUE, clusterType = "FORK")
@@ -515,6 +515,7 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
            out <- list(raw_read_count = counts,
                        sample_library_sizes = lib_size,
                        targets = tgt,
+                       sample_groups_var_name = count_df.sample.annot.group.var,
                        sample_groups = sample_groups,
                        genes = features,
                        count_source = count_data_type,
@@ -526,6 +527,7 @@ rbioseq_import_count <- function(count_data_type = c("count_df", "htseq"),
            out <- list(raw_read_count = counts,
                        sample_library_sizes = lib_size,
                        targets = tgt,
+                       sample_groups_var_name = htseq_sample.annot.group.var,
                        sample_groups = sample_groups,
                        genes = features,
                        count_source = count_data_type,
@@ -599,7 +601,7 @@ rnaseq_de.mir_count <- function(object, filter.threshold.min.count = 10, filter.
                            filter.threshold.cpm = cpm_cutoff,
                            filter.threshold.min.sample = filter.threshold.min.sample,
                            annot.group = annot.group, ...)
-  out <- append(out, object[c("targets", "sample_groups")])
+  out <- append(out, object[c("targets", "sample_groups_var_name", "sample_groups")])
   class(out) <- "rbioseq_de"
   return(out)
 }
@@ -632,6 +634,7 @@ rnaseq_de.mircount <- function(object, filter.threshold.min.count = 10, filter.t
                            filter.threshold.min.sample = filter.threshold.min.sample,
                            annot.group = annot.group, ...)
   out$targets <- object@targets
+  out$sample_groups_var_name <- object@sample_groups_var_name
   out$sample_groups <- object@sample_groups
   class(out) <- "rbioseq_de"
   return(out)
@@ -663,7 +666,7 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
                            filter.threshold.cpm = cpm_cutoff,
                            filter.threshold.min.sample = filter.threshold.min.sample,
                            annot.group = annot.group, ...)
-  out <- append(out, object[c("targets", "sample_groups")])
+  out <- append(out, object[c("targets", "sample_groups_var_name", "sample_groups")])
   class(out) <- "rbioseq_de"
   return(out)
 }
@@ -729,6 +732,8 @@ rnaseq_de.rbioseq_count <- function(object, filter.threshold.min.count = 10, fil
 #'         \code{comparisons}: a list with comparisons and comparison levles
 #'
 #'         \code{targets}: sample annotation data frame
+#'
+#'         \code{sample_groups_var_name}
 #'
 #'         \code{sample_groups}
 #'

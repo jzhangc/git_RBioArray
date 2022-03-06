@@ -66,7 +66,13 @@ Update log
       - Other updates
         - Functions updated for R Notebook/Markdown compatibility
     
-    (ADDED)        
+    (ADDED)
+      - Updates to microarray function(s):
+        - "rbioarray_rlist", "rbioarray_plist" and "rbioarray_flist" now all contain a "sample_groups_var_name" item
+    
+      - Updates to RNAseq function(s):
+        - "rbioseq_de" now contains a "sample_groups_var_name" item
+    
       - Updates to significant test function(s):
         - The sig function now uses the following format for volcano plot file names: paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf")
         
