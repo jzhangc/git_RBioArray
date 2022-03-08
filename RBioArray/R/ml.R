@@ -37,7 +37,7 @@
 #'
 #'          \code{rffs_sfs_results}
 #'
-#'          \code{rffs_subset_dataframe}: Input data subset with only the RFFS selected features. No data or fas
+#'          \code{rffs_subset_dataframe}: Input data subset with only the RFFS selected final features (either SFS or initial FS, in the case SFS selection is NULL).
 #'
 #'          \code{rffs_ntimes}
 #'
@@ -232,7 +232,7 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
   # - output -
   rffs_subset_dfm <- data.frame(sample_id = sample_id,
                                 sample_group = sample_group,
-                                E_rffs_raw[, fs, drop = FALSE])  # for output
+                                E_rffs_raw[, fs, drop = FALSE], check.names = FALSE)  # for output
 
   out <- list(
     ml_raw_dataframe = rffs_raw_dfm,

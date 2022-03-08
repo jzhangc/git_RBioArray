@@ -83,6 +83,7 @@ Update log
         
       - Updates to the ML function(s):
         - rbio_randomforest_fs() now removes predictors with NA values prior to selection
+        - A bug fixed where "rffs_subset_dataframe" in "rbio_rffs" does not output correct predictor (column) names
         
 
     0.5.5 (Feb.13.2022)
