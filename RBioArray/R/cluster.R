@@ -561,7 +561,7 @@ rbio_supervised_hcluster <- function(object,
 #' }
 #' @export
 rbio_kmeans <- function(x, export.name = NULL,
-                        k_range = 2:15, nstart = 25,
+                        k_range = 2:(nrow(unique(x))-1), nstart = 25,
                         plot.title = NULL, plot.titleSize = 10,
                         plot.symbolSize = 2,
                         plot.vline.label = FALSE,
@@ -589,9 +589,10 @@ rbio_kmeans <- function(x, export.name = NULL,
   mtx <- as.matrix(x)
 
   # -- silhouette score --
+  if (nrow(mtx) != nrow(unique(mtx))) warning("x contains row duplicates. kmeans takes the first distinct row.")
   avg_sil <- foreach(i = k_range, .combine = "c") %do% {
-    km <- kmeans(mtx, centers = i, nstart = nstart)
-    ss <- cluster::silhouette(km$cluster, dist(mtx))
+    km <- kmeans(unique(mtx), centers = i, nstart = nstart)
+    ss <- cluster::silhouette(km$cluster, dist(unique(mtx)))
     mean(ss[, 3])
   }
   names(avg_sil) <- k_range
