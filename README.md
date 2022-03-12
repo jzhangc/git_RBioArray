@@ -83,9 +83,15 @@ Update log
         
       - Updates to the ML function(s):
         - rbio_randomforest_fs() now removes predictors with NA values prior to selection
-      
+
       - Updates to network analysis function(s):
         - rbio_network(): small fix on the help page
+        - A bug fixed where "rffs_subset_dataframe" in "rbio_rffs" does not output correct predictor (column) names
+        
+      - Updates to cluster function(s):
+        - rbio_kmeans(): default value for k_range changed to 2:(nrow(x)-1)
+        - rbio_kmeans(): error handling added for x containing duplicate rows
+
 
     0.5.5 (Feb.13.2022)
       - New ML function(s):

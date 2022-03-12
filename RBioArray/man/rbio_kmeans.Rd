@@ -7,7 +7,7 @@
 rbio_kmeans(
   x,
   export.name = NULL,
-  k_range = 2:15,
+  k_range = 2:(nrow(unique(x)) - 1),
   nstart = 25,
   plot.title = NULL,
   plot.titleSize = 10,

@@ -84,7 +84,7 @@ The resulting \code{rbio_rffs} object contains the following items:
 
          \code{rffs_sfs_results}
 
-         \code{rffs_subset_dataframe}: Input data subset with only the RFFS selected features. No data or fas
+         \code{rffs_subset_dataframe}: Input data subset with only the RFFS selected final features (either SFS or initial FS, in the case SFS selection is NULL).
 
          \code{rffs_ntimes}
 
