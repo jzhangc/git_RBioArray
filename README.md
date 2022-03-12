@@ -91,6 +91,10 @@ Update log
       - Updates to cluster function(s):
         - rbio_kmeans(): default value for k_range changed to 2:(nrow(x)-1)
         - rbio_kmeans(): error handling added for x containing duplicate rows
+      
+      - Updates to network analysis function(s):
+        - rbio_network(): when only label top vertices with membership, the group with no vertices passing the threshold now will not be labeled
+        - rbio_network(): small help page updates
 
 
     0.5.5 (Feb.13.2022)

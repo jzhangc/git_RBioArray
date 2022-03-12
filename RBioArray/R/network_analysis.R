@@ -707,19 +707,32 @@ rbio_network.default <- function(g,
       V(g)$vframecolour[to_remove] <- "NA"
     }
   } else {
+    # i = 5
     for (i in 1:length(unique(V(g)$membership))) {
       is_member <- V(g)$membership == unique(V(g)$membership)[i]
       to_remove <- V(g)$vsize[is_member] < quantile(V(g)$vsize[is_member], p = 1-plot.vertex.topvsize.filter)
 
-      # V(g)$vlabel[is_member][to_remove] <- ""
 
-      if (plot.vertex.label.topvsize) {  # only display label for top size vertices
-        V(g)$vlabel[is_member][to_remove] <- ""
-      }
+      if (any(to_remove)) {
+        # V(g)$vlabel[is_member][to_remove] <- ""
+        if (plot.vertex.label.topvsize) {  # only display label for top size vertices
+          V(g)$vlabel[is_member][to_remove] <- ""
+        }
 
-      if (plot.vertex.color.highlighttopvsize) {
-        V(g)$color[is_member][to_remove] <- alpha(V(g)$color[is_member][to_remove], alpha = 0.2)
-        V(g)$vframecolour[is_member][to_remove] <- "NA"
+        if (plot.vertex.color.highlighttopvsize) {
+          V(g)$color[is_member][to_remove] <- alpha(V(g)$color[is_member][to_remove], alpha = 0.2)
+          V(g)$vframecolour[is_member][to_remove] <- "NA"
+        }
+      } else {  # if all is FALSE (nothing to remove), then remove all
+        if (plot.vertex.label.topvsize) {  # only display label for top size vertices
+          V(g)$vlabel[is_member] <- ""
+        }
+
+        if (plot.vertex.color.highlighttopvsize) {
+          V(g)$color[is_member] <- alpha(V(g)$color[is_member][to_remove], alpha = 0.2)
+          V(g)$vframecolour[is_member] <- "NA"
+        }
+
       }
     }
 
