@@ -83,7 +83,9 @@ Update log
         
       - Updates to the ML function(s):
         - rbio_randomforest_fs() now removes predictors with NA values prior to selection
-        
+      
+      - Updates to network analysis function(s):
+        - rbio_network(): small fix on the help page
 
     0.5.5 (Feb.13.2022)
       - New ML function(s):

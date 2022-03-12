@@ -70,6 +70,8 @@ rbio_network(object, ...)
 
 \item{plot.ellipse}{boolean. If to show member groups with ellipse. Default is \code{FALSE}.}
 
+\item{plot.margins}{numeric four-vector. Plot margins. See details.}
+
 \item{plot.font.family}{string. The font family of the labels in the plot. Default is \code{"sans"}.}
 
 \item{plot.highlight_membership}{boolean. If to highlight the membership, by making all edges transparent. Default is \code{TRUE}.}
@@ -125,8 +127,6 @@ rbio_network(object, ...)
 \item{plot.title.}{string. <TBC: under construction>}
 
 \item{plot.community_separated.dist}{Numeric. Set when \code{plot.community_separated}, distance between communities. Default is \code{3}.}
-
-\item{plot.margins.}{numeric four-vector. Plot margins. See details.}
 
 \item{plot.vertex.label.colour}{string vector. Vertex label colour.}
 }

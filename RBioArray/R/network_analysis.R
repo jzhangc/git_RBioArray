@@ -421,7 +421,7 @@ rbio_network.rbio_tom_graph <- function(object, export.name = NULL, ...){
 #' @param plot.community_separated boolean. If to separate community vertices in graph. Default is \code{FALSE}.
 #' @param plot.community_separated.dist Numeric. Set when \code{plot.community_separated}, distance between communities. Default is \code{3}.
 #' @param plot.ellipse boolean. If to show member groups with ellipse. Default is \code{FALSE}.
-#' @param plot.margins. numeric four-vector. Plot margins. See details.
+#' @param plot.margins numeric four-vector. Plot margins. See details.
 #' @param plot.font.family string. The font family of the labels in the plot. Default is \code{"sans"}.
 #' @param plot.highlight_membership boolean. If to highlight the membership, by making all edges transparent. Default is \code{TRUE}.
 #' @param plot.layout_type string. Layout type, same as described in \code{igraph} pacakges.
