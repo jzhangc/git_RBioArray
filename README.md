@@ -80,6 +80,8 @@ Update log
       - Updates to cluster function(s):
         - A bug fixed for rbio_supervised_hcluster() where the number of samples (for sample name) cannot be extracted without sample name variable provided
         - A bug fixed for rbio_supervised_hcluster() where gene name variable name was not properly extracted for RNAseq data
+      - Updates to the sig function(s):
+        - Verbose wording updated for sig() where the current message is displayed for volcano plot file name
         
       - Updates to the ML function(s):
         - rbio_randomforest_fs() now removes predictors with NA values prior to selection
