@@ -76,7 +76,7 @@ Update log
       - Updates to significant test function(s):
         - The sig function now uses the following format for volcano plot file names: paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf")
         - "sig" class "input_data" now include a "sample_groups_var_name" item
-        - Verbose wording updated for sig() where the current message is displayed for volcano plot file name
+        - Verbose wording updated for sig() where the correct message is displayed for volcano plot file name
         
       - Updates to cluster function(s):
         - A bug fixed for rbio_supervised_hcluster() where the number of samples (for sample name) cannot be extracted without sample name variable provided
