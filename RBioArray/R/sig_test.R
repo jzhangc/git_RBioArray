@@ -364,7 +364,11 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
               axis.text.x = element_text(size = plot.xTxtSize),
               axis.text.y = element_text(size = plot.yTxtSize, hjust = 0.5))
       if (plot.top.gene){
-        plt_fltdfm <- plt_dfm[abs(plt_dfm$logFC) >= log2(FC) & plt_dfm$P.Value < plt_pcutoff, ]
+        if (p.val.correction.method == "fdr") {
+          plt_fltdfm <- plt_dfm[abs(plt_dfm$logFC) >= log2(FC) & plt_dfm$P.Value <= plt_pcutoff, ]
+        } else {
+          plt_fltdfm <- plt_dfm[abs(plt_dfm$logFC) >= log2(FC) & plt_dfm$P.Value < plt_pcutoff, ]
+        }
         plt_fltdfm <- plt_fltdfm[order(plt_fltdfm$P.Value), ]
         plt <- plt + geom_text_repel(data = head(plt_fltdfm, n = plot.top.gene.n),
                                      aes(x = logFC, y = -log10(P.Value), label = head(plt_fltdfm, n = plot.top.gene.n)[, input.gene_symbol.var.name]),
