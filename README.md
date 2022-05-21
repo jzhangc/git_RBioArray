@@ -67,6 +67,9 @@ Update log
         - Functions updated for R Notebook/Markdown compatibility
     
     (ADDED)
+      - Updates to GS function(s):
+        - rbioGS_scatter() now outputs final plotting data to the global enviroment as a data.frame
+        
       - Updates to microarray function(s):
         - "rbioarray_rlist", "rbioarray_plist" and "rbioarray_flist" now all contain a "sample_groups_var_name" item
     

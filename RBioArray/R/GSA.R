@@ -504,6 +504,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
     scale_shape_manual(values = c(1:5))
 
   # export the files and draw a preview
+  assign(paste(fileName,"_gs_scatter_dfm",sep = ""), dfm4plot, envir = .GlobalEnv)
   write.csv(dfm4plot, file = paste(fileName,".scatterplot.csv",sep = ""))
   ggsave(filename = paste(fileName,".scatterplot.pdf",sep = ""), plot = ScatterP,
          width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
