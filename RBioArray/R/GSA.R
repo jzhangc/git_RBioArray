@@ -603,7 +603,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       classDirt <- c("up", "down") # for boxplot
 
       lapply(pCl, function(m)lapply(classDirt,
-                                    function(n)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+                                    function(n)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                          KEGG = boxplotKEGG, pClass = m, classDirection = n, adjust = plotPadjust,
                                                                          n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                          plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)))
