@@ -521,6 +521,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #' @param GS Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.
 #' @param GSfile GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param ... Arguments to pass to \code{\link{rbioGS}}.
+#' @param export.name Test string for export filer prefix. Default is \code{NULL}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param boxplot If to plot boxplots. Default is \code{TRUE}.
@@ -564,6 +565,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #' @export
 rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                        GS = NULL, GSfile = NULL, ...,
+                       export.name = NULL,
                        parallelComputing = FALSE, clusterType = "PSOCK",
                        boxplot = TRUE,
                        boxplotKEGG = FALSE, boxplotN = 20,
@@ -626,7 +628,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       # boxplots
       lapply(1: length(GSlst), tmpfunc)
 
-      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
                                                                     n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight))
@@ -634,7 +636,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 
     if (scatterplot){
       # scatter plots
-      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
+      lapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
                                                                     method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
                                                                     pCutoff = scatterPline,
                                                                     plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
@@ -672,7 +674,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {tmpfunc(x)}
 
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
-          RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+          RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""),
                                     KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
                                     n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                     plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight)
@@ -680,7 +682,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       }
       if (scatterplot){
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
-          rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
+          rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
                          method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
                          pCutoff = scatterPline,
                          plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
@@ -702,7 +704,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
         # boxplots
         mclapply(1: length(GSlst), tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
 
-        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_boxplot(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                               KEGG = boxplotKEGG, pClass = "non", adjust = plotPadjust,
                                                                               n = boxplotN, xLabel = boxplotXlabel, yLabel = boxplotYlabel, yLabelSize = boxplotYlabelsize,
                                                                               plotTitle = boxplotTitle, plotWidth = boxplotWidth, plotHeight = boxplotHeight),
@@ -710,7 +712,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
 
       }
       if (scatterplot){
-        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(names(GSlst)[x], "_", plotGSname, sep = ""),
+        mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                               cutoff = scatterplotCutoff,
                                                                               method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
                                                                               pCutoff = scatterPline,
