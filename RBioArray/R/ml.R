@@ -173,9 +173,10 @@ rbio_randomforest_fs <- function(object, sample_id.var = NULL, sample_group.var 
 
   if (rffs.quantile){
     cat(paste("Quantile normalization...", sep = ""))  # initial message
-    E_working <- t(fs_data)
+    E_working <- t(E_working)  # transpose
+    # E_working <- t(fs_data)
     E_working <- RBioFS::rbioNorm(E_working, correctBG = FALSE)
-    E_working <- t(fs_data)
+    E_working <- t(E_working)  # transpose back
     E_working <- data.frame(E_working, check.names = FALSE)
     cat(paste("Done!\n", sep = ""))  # final message
   }

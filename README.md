@@ -88,6 +88,7 @@ Update log
 
       - Updates to the ML function(s):
         - rbio_randomforest_fs() now removes predictors with NA values prior to selection
+        - A bug fixed where rbio_randomforest_fs() does not properly conduct quantile normalization
 
       - Updates to network analysis function(s):
         - rbio_network(): small fix on the help page
