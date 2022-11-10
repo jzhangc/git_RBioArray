@@ -11,6 +11,7 @@ rbioGS_all(
   GS = NULL,
   GSfile = NULL,
   ...,
+  export.name = NULL,
   parallelComputing = FALSE,
   clusterType = "PSOCK",
   boxplot = TRUE,
@@ -48,6 +49,8 @@ rbioGS_all(
 \item{GSfile}{GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.}
 
 \item{...}{Arguments to pass to \code{\link{rbioGS}}.}
+
+\item{export.name}{Test string for export filer prefix. Default is \code{NULL}.}
 
 \item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 
