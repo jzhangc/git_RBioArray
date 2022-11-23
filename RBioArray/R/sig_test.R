@@ -261,8 +261,8 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
       fdr.stats <- "spikein"
     } else if (p.val.correction.method == "fdr") {
       if (length(which(sig_dfm$adj.P.Val < alpha)) == 0){
-        cat(paste0("No FDR corrected p-values found less than alpha for the comparison: ", names(input.de.list)[i],
-                   ". \nPlease consider using another thresholding method. For now, alpha is applied to the raw p.values.\n"))
+        warning(paste0("No FDR corrected p-values found less than alpha for the comparison: ", names(input.de.list)[i],
+                       ". \nPlease consider using another thresholding method. For now, alpha is applied to the raw p.values.\n"))
         pcutoff <- alpha
         fdr.stats <- FALSE
         cutoff <- abs(sig_dfm$logFC) >= log2(FC) & sig_dfm$P.Value < pcutoff
@@ -283,15 +283,24 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     pcutoff_vector[i] <- pcutoff
 
     # summary matrix
-    if (length(levels(cutoff)) == 1){
-      if (levels(cutoff) == "TRUE"){
-        sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, summary(cutoff)[["TRUE"]], 0)
-      } else {
-        sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, 0, summary(cutoff)[["FALSE"]])
-      }
+    if (all(cutoff)) {  # all TRUE
+      sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, summary(cutoff)[["TRUE"]], 0)
+    } else if (!any(cutoff)) {  # all FALSE
+      sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, 0, summary(cutoff)[["FALSE"]])
+      warning(paste0("No significant results were found with alpha = ", alpha, "\n"))
     } else {
       sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
     }
+    # # below: original code for reference
+    # if (length(levels(cutoff)) == 1){
+    #   if (levels(cutoff) == "TRUE"){
+    #     sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, summary(cutoff)[["TRUE"]], 0)
+    #   } else {
+    #     sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, 0, summary(cutoff)[["FALSE"]])
+    #   }
+    # } else {
+    #   sig.summary <- c(names(input.de.list)[i], signif(pcutoff, digits = 4), FC, alpha, fdr.stats, summary(cutoff)[["TRUE"]], summary(cutoff)[["FALSE"]])
+    # }
     sig_summary_mtx[i, ] <- sig.summary
   }
 
@@ -318,15 +327,24 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     f_cutoff <- input.Fstats.matrix$P.Value < f_pcutoff
   }
 
-  if (length(levels(f_cutoff)) == 1){
-    if (levels(f_cutoff) == "TRUE"){
-      f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], 0)
-    } else {
-      f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, 0, summary(f_cutoff)[["FALSE"]])
-    }
+  if (all(cutoff)) {  # all TRUE
+    f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], 0)
+  } else if (!any(cutoff)) {  # all FALSE
+    f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, 0, summary(f_cutoff)[["FALSE"]])
+    # warning(paste0("No significant results were found with alpha = ", alpha, "\n"))
   } else {
     f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], summary(f_cutoff)[["FALSE"]])
   }
+  # # below: original code for reference
+  # if (length(levels(f_cutoff)) == 1){
+  #   if (levels(f_cutoff) == "TRUE"){
+  #     f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], 0)
+  #   } else {
+  #     f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, 0, summary(f_cutoff)[["FALSE"]])
+  #   }
+  # } else {
+  #   f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], summary(f_cutoff)[["FALSE"]])
+  # }
 
   sig_summary_mtx <- rbind(sig_summary_mtx, f_sig.summary)  # append with F stats information
   rownames(sig_summary_mtx) <- NULL

@@ -81,6 +81,8 @@ Update log
         - The sig function now uses the following format for volcano plot file names: paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf")
         - "sig" class "input_data" now include a "sample_groups_var_name" item
         - Verbose wording updated for sig() where the correct message is displayed for volcano plot file name
+        - Verbose updated for sig() with warning messages for no significant results found under both FDR or non FDR scenarios
+        - A bug fixed for sig() where the function returns error when there is no significant result with FDR turned off
         - A bug fixed for sig() where label for the target just passing alpha was not properly displayed when p.val.correction.method = "fdr"
         
       - Updates to cluster function(s):
