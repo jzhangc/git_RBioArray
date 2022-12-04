@@ -78,7 +78,7 @@ Update log
         - "rbioseq_de" now contains a "sample_groups_var_name" item
 
       - Updates to plotting function(s):
-        - rbio_venn_de() updated with more accurate representation of the significant results from the sig class object
+        - rbio_venn_de() updated with more accurate representation of the results from the sig class object
     
       - Updates to significant test function(s):
         - The sig function now uses the following format for volcano plot file names: paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf")
