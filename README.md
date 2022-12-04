@@ -76,10 +76,14 @@ Update log
     
       - Updates to RNAseq function(s):
         - "rbioseq_de" now contains a "sample_groups_var_name" item
+
+      - Updates to plotting function(s):
+        - rbio_venn_de() updated with more accurate representation of the significant results from the sig class object
     
       - Updates to significant test function(s):
         - The sig function now uses the following format for volcano plot file names: paste0(export.name, "_", names(input.de.list)[i], "_volcano.pdf")
         - "sig" class "input_data" now include a "sample_groups_var_name" item
+        - Update to significant status criteria for sig() where now p-value at threshold is not considered significant
         - Verbose wording updated for sig() where the correct message is displayed for volcano plot file name
         - Verbose updated for sig() with warning messages for no significant results found under both FDR or non FDR scenarios
         - A bug fixed for sig() where the function returns error when there is no significant result with FDR turned off

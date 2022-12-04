@@ -60,7 +60,7 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   }
   if (dim(stats_summary)[1] < 2) stop("At least two comparisons are needed for Venn. Function aborted.")
   pcutoff.vector <- as.numeric(stats_summary[, "raw.p.value.threshold"])
-  fc.vector <- as.numeric(complete.cases(stats_summary[, "fold.change.threshold"]))
+  fc.vector <- as.numeric(stats_summary[, "fold.change.threshold"][complete.cases(stats_summary[, "fold.change.threshold"])])
   venn_display_var_name <- input.genes_annotation.gene_id.var_name
   if (gene_symbol.only) {
     for (i in 1:length(venn_de_list)) {
@@ -78,13 +78,20 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
 
   ## processing
   # populate the matrices
+  # # below: old version that may cause discrepancy from stats_summar/thresholding_summary from the object
+  # for (i in 1:length(names(venn_de_list))){
+  #   lfc[, i] <- venn_de_list[[i]]$logFC # extract log fold change
+  #   p[, i] <- venn_de_list[[i]]$P.Value # extract p value (p) to a matrix
+  #   pcutoff <- pcutoff.vector[i]
+  #   fc_cutoff <- fc.vector[i]
+  #   # note we are using factors here e.g. "-1L, 0L, 1L". the starting value is 0L
+  #   venn_mtx[, i] <- ifelse(p[, i] >= pcutoff | abs(lfc[, i]) < log2(fc_cutoff), 0L, ifelse(lfc[, i] > 0, 1L, -1L))
+  # }
+
   for (i in 1:length(names(venn_de_list))){
     lfc[, i] <- venn_de_list[[i]]$logFC # extract log fold change
-    p[, i] <- venn_de_list[[i]]$P.Value # extract p value (p) to a matrix
-    pcutoff <- pcutoff.vector[i]
-    fc <- fc.vector[i]
     # note we are using factors here e.g. "-1L, 0L, 1L". the starting value is 0L
-    venn_mtx[, i] <- ifelse(p[, i] >= pcutoff | abs(lfc[, i]) < log2(fc), 0L, ifelse(lfc[, i] > 0, 1L, -1L))
+    venn_mtx[, i] <- ifelse(!thresholding_summary[[i]], 0L, ifelse(lfc[, i] > 0, 1L, -1L))
   }
 
   ## output
@@ -114,4 +121,3 @@ rbio_venn_de <- function(object, gene_symbol.only = FALSE,
   }
   if (verbose) cat("Done!\n")
 }
-

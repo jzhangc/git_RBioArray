@@ -319,7 +319,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     } else {
       f_pcutoff <- max(input.Fstats.matrix[input.Fstats.matrix$adj.P.Val < alpha, ]$P.Value)
       f_fdr.stats <- TRUE
-      f_cutoff <- input.Fstats.matrix$P.Value <= f_pcutoff
+      f_cutoff <- input.Fstats.matrix$P.Value < f_pcutoff
     }
   } else {
     f_pcutoff <- alpha
