@@ -126,7 +126,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     stop("raw.matrix has to be a data.frame, with rows for genes/probes/genomic features, columns for samples.")
   if (is.null(raw.annot.var.name) || is.null(raw.gene_id.var.name))
     stop("Please set raw.annot.var.name AND raw.gene_id.var.name arguments.")
-  if (!raw.annot.var.name %in% names(raw.dataframe)  || !raw.gene_id.var.name %in% names(raw.dataframe))
+  if (!all(raw.annot.var.name %in% names(raw.dataframe)) || !raw.gene_id.var.name %in% names(raw.dataframe))
     stop("Annoation variables (i.e. columns) and/or the gene_id variable (i.e. column) not found in raw.dataframe")
   raw_dfm <- raw.dataframe
 

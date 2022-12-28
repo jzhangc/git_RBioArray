@@ -73,6 +73,7 @@ Update log
         
       - Updates to microarray function(s):
         - "rbioarray_rlist", "rbioarray_plist" and "rbioarray_flist" now all contain a "sample_groups_var_name" item
+        - A bug fixed for the rbioarray_rlist() function where annotation variable check does not pass for mulitple variables
     
       - Updates to RNAseq function(s):
         - "rbioseq_de" now contains a "sample_groups_var_name" item
