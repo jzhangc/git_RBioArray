@@ -33,7 +33,7 @@ rbioGS(
 
 \item{method_t}{Gene set enrichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.}
 
-\item{tVar}{Set only method_t is not NULL, DE t values. Gene leve t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.}
+\item{tVar}{Set only method_t is not NULL, DE t values. Gene level t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.}
 
 \item{...}{Arguments to pass to \code{runGSA} function from \code{piano} package. See the corresponding help page from of \code{piano} for details.}
 

@@ -30,7 +30,7 @@ Installation:
 Update log
 
 
-    0.5.7 and beyond (feature preview)
+    0.6.0 and beyond (feature preview)
     (ICEBOX)
       - General updates
         - splines pacakge added as a depedencing for continuous outcome support
@@ -66,6 +66,14 @@ Update log
       
       - Other updates
         - Functions updated for R Notebook/Markdown compatibility
+      
+    (ADDED)
+      - New GS function(s):
+        - rbioGS_table(): export a csv and dataframe with all the GSA results, with p_value with all p classes, rank with all p classes, number of genes, as well as FDR adjusted p_values
+        
+      - Updates to GS function(s):
+        - rbioGS_scatter(): added a "post-hoc FDR correction" column to the scatter csv file and dataframe
+
     
 
     0.5.6 (Aug.31.2023)

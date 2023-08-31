@@ -50,7 +50,7 @@ rbioGS_all(
 
 \item{...}{Arguments to pass to \code{\link{rbioGS}}.}
 
-\item{export.name}{Test string for export filer prefix. Default is \code{NULL}.}
+\item{export.name}{String for export file prefix. Default is \code{NULL}.}
 
 \item{parallelComputing}{If to use parallel computing or not. Default is \code{FALSE}}
 

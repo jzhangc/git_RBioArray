@@ -174,7 +174,7 @@ rbioGS_sp2hsaEntrez <- function(DElst, inputSpecies = c("hsa", "human", "mmu", "
 #' @param pVar Set only method_p is not NULL, DE p values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{logFCVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.
 #' @param logFCVar Set only method_p is not NULL, DE logFC (log fold change). Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{tVar} and \code{idVar}. Can be set as \code{NULL}.
 #' @param method_t Gene set enrichment methods that takes \code{t statistics}. Default is \code{c("page", "gsea", "maxmean")}, and can be set as \code{NULL}.
-#' @param tVar Set only method_t is not NULL, DE t values. Gene leve t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.
+#' @param tVar Set only method_t is not NULL, DE t values. Gene level t values. Could be a variable of a dataframe, or a vector. Must be the same length as \code{pVar}, \code{logFCVar} and \code{idVar}. Can be set as \code{NULL}.
 #' @param ... Arguments to pass to \code{runGSA} function from \code{piano} package. See the corresponding help page from of \code{piano} for details.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
@@ -416,7 +416,7 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
 
 #' @title rbioGS_scatter
 #'
-#' @description Generate scatter plot for piano GS rank heatmap obejct. Note that the rank is log2 transformed.
+#' @description Generate scatter plot for piano GS rank heatmap object. Note that the rank is log2 transformed.
 #' @param GSA_list piano GS results object.
 #' @param fileName Output file name.
 #' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
@@ -426,8 +426,8 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
 #' @param xLabel X-axis label. Default is \code{"median p value"}.
 #' @param yLabel Y-axis label. Default is \code{"log consensus score"}.
 #' @param plotHeight Set the height of the plot. Default is \code{150}.
-#' @return Outputs a \code{pdf} scatter figure file with allGSA results.
-#' @details The function is based on piano package.
+#' @return Outputs a \code{pdf} scatter figure file, an R data frame as well as a \code{csv} summary with allGSA results.
+#' @details The function is based on piano package. There is also a "post-hoc FDR" p-value correction column in the scatter plot \code{csv} and dataframe.
 #' @importFrom reshape2 melt
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom piano consensusHeatmap
@@ -483,6 +483,8 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
     dfm4plot <- rbind(dfm4plot, get(paste("dfm4plot_", p_class[n], sep = "")))
   } # merge all the temp data frames together
 
+  dfm4plot$post_hog_adjusted_p_value <- p.adjust(dfm4plot$p_value, method = "fdr")
+
   ## plotting
   grid.newpage()
   ScatterP<-ggplot(dfm4plot, aes(x = p_value, y = log2(rank))) +
@@ -504,12 +506,73 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
     scale_shape_manual(values = c(1:5))
 
   # export the files and draw a preview
-  assign(paste(fileName,"_gs_scatter_dfm",sep = ""), dfm4plot, envir = .GlobalEnv)
-  write.csv(dfm4plot, file = paste(fileName,".scatterplot.csv",sep = ""))
+  assign(paste(fileName,"_scatterplot_dfm",sep = ""), dfm4plot, envir = .GlobalEnv)
+  write.csv(dfm4plot, file = paste(fileName,".scatterplot.csv",sep = ""), row.names = FALSE)
   ggsave(filename = paste(fileName,".scatterplot.pdf",sep = ""), plot = ScatterP,
          width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
   grid.draw(ScatterP) # preview
 }
+
+
+#' @title rbioGS_table
+#'
+#' @description Generate table for piano GS resutls. Note that the rank is log2 transformed.
+#' @param GSA_list piano GS results object.
+#' @param fileName Output file name.
+#' @param export.name  String for export file and object prefix. Default is \code{NULL}.
+#' @param ... Arguments passing to \code{consensusHeatmap} function from \code{piano} package. See the responding help page of \code{piano} for details.
+#' @return Outputs a \code{pdf} scatter figure file, an R data frame as well as a \code{csv} summary with allGSA results.
+#' @details The function is based on piano package.
+#' @importFrom reshape2 melt
+#' @importFrom grid grid.newpage grid.draw
+#' @importFrom piano consensusHeatmap
+#' @import ggplot2
+#' @examples
+#' \dontrun{
+#'
+#' rbioGS_table(GSA_list = GS_Pos, fileName = "GS_pos", cutoff = 15, method = "median", adjusted = TRUE, rankCutoff = 50, pCutoff = 0.05)
+#'
+#' }
+#' @export
+rbioGS_table <- function(GSA_list, fileName = "GS_list", export.name = NULL, ...){
+  # set up export name
+  if (is.null(export.name)) {
+    export.name <- fileName
+  }
+
+  # use concensus heatmap as basis for summary dataframes
+  HTmap <- consensusHeatmap(GSA_list, plot = FALSE, ...)
+
+  # construct outdfm
+  pMat_dfm <- data.frame(GS=rownames(HTmap$pMat), HTmap$pMat, check.names = FALSE, row.names = NULL)
+  names(pMat_dfm)[names(pMat_dfm) %in% "Distinct-directional (dn)"] <- "p_val_disdn"
+  names(pMat_dfm)[names(pMat_dfm) %in% "Mixed-directional (dn)"] <- "p_val_mixdn"
+  names(pMat_dfm)[names(pMat_dfm) %in% "Non-directional"] <- "p_val_nondir"
+  names(pMat_dfm)[names(pMat_dfm) %in% "Mixed-directional (up)"] <- "p_val_mixup"
+  names(pMat_dfm)[names(pMat_dfm) %in% "Distinct-directional (up)"] <- "p_val_disup"
+
+  for (n in names(pMat_dfm)[-1]) {
+    pMat_dfm[[paste0("adjusted_", n)]] <- p.adjust(pMat_dfm[[n]], method = "fdr")
+  }
+
+
+  rankMat_dfm <- data.frame(GS=rownames(HTmap$rankMat), HTmap$rankMat, check.names = FALSE, row.names = NULL)
+  names(rankMat_dfm)[names(rankMat_dfm) %in% "Distinct-directional (dn)"] <- "rank_disdn"
+  names(rankMat_dfm)[names(rankMat_dfm) %in% "Mixed-directional (dn)"] <- "rank_mixdn"
+  names(rankMat_dfm)[names(rankMat_dfm) %in% "Non-directional"] <- "rank_nondir"
+  names(rankMat_dfm)[names(rankMat_dfm) %in% "Mixed-directional (up)"] <- "rank_mixup"
+  names(rankMat_dfm)[names(rankMat_dfm) %in% "Distinct-directional (up)"] <- "rank_disup"
+
+  nGenesMat_dfm <- data.frame(GS=rownames(HTmap$nGenesMat), HTmap$nGenesMat[, c(2, 4, 5)], check.names = FALSE, row.names = NULL)
+
+  outdfm <- merge(pMat_dfm, rankMat_dfm, by = "GS")
+  outdfm <- merge(outdfm, nGenesMat_dfm, by = "GS")
+
+  # export the files and draw a preview
+  assign(paste0(export.name,"_gs_summary_dfm"), outdfm, envir = .GlobalEnv)
+  write.csv(outdfm, file = paste(fileName,".gs_summary.csv",sep = ""), row.names = FALSE)
+}
+
 
 
 #' @title rbioGS_all
@@ -521,7 +584,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
 #' @param GS Pre-loaded gene set objects. Set only if \code{GSfile} argument is \code{NULL}. Default is \code{NULL}.
 #' @param GSfile GS database file. Set only if \code{GS} argument is \code{NULL}. File format should be \code{gmt}. If the working directory isn't set, make sure to include the full path. Default is \code{NULL}.
 #' @param ... Arguments to pass to \code{\link{rbioGS}}.
-#' @param export.name Test string for export filer prefix. Default is \code{NULL}.
+#' @param export.name String for export file prefix. Default is \code{NULL}.
 #' @param parallelComputing If to use parallel computing or not. Default is \code{FALSE}
 #' @param clusterType Only set when \code{parallelComputing = TRUE}, the type for parallel cluster. Options are \code{"PSOCK"} (all operating systems) and \code{"FORK"} (macOS and Unix-like system only). Default is \code{"PSOCK"}.
 #' @param boxplot If to plot boxplots. Default is \code{TRUE}.
@@ -628,6 +691,8 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                                                           tVar = i$t, idVar = i[, entrezVar],
                                                           parallelComputing = parallelComputing, clusterType = clusterType, ...))
 
+    lapply(1: length(GSlst), function(x)RBioArray::rbioGS_table(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = "")))
+
     if (boxplot){
       # boxplots
       lapply(1: length(GSlst), tmpfunc)
@@ -641,7 +706,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
     if (scatterplot){
       # scatter plots
       lapply(1: length(GSlst), function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
-                                                                    method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+                                                                    method = plotMethod, adjusted = plotPadjust, rankCutoff = scatterRankline,
                                                                     pCutoff = scatterPline,
                                                                     plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
                                                                     plotWidth = scatterWidth, plotHeight = scatterHeight))
@@ -672,6 +737,10 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                       tVar = i$t, idVar = i[, entrezVar], parallelComputing = FALSE, ...)
       }
 
+      foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
+        rbioGS_table(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""))
+        }
+
       # plot
       if (boxplot){
         # boxplots
@@ -687,7 +756,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       if (scatterplot){
         foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
           rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""), cutoff = scatterplotCutoff,
-                         method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+                         method = plotMethod, adjusted = plotPadjust, rankCutoff = scatterRankline,
                          pCutoff = scatterPline,
                          plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
                          plotWidth = scatterWidth, plotHeight = scatterHeight)
@@ -704,6 +773,10 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
                                                                     parallelComputing = FALSE, ...),
                           mc.cores = n_cores, mc.preschedule = FALSE)
 
+      mclapply(1: length(GSlst),
+               function(x)RBioArray::rbioGS_table(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = "")),
+               mc.cores = n_cores, mc.preschedule = FALSE)
+
       if (boxplot){
         # boxplots
         mclapply(1: length(GSlst), tmpfunc, mc.cores = n_cores, mc.preschedule = FALSE)
@@ -718,7 +791,7 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
       if (scatterplot){
         mclapply(1: length(GSlst), FUN = function(x)RBioArray::rbioGS_scatter(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""),
                                                                               cutoff = scatterplotCutoff,
-                                                                              method = plotMethod, adjust = plotPadjust, rankCutoff = scatterRankline,
+                                                                              method = plotMethod, adjusted = plotPadjust, rankCutoff = scatterRankline,
                                                                               pCutoff = scatterPline,
                                                                               plotTitle = scatterTitle, xLabel = scatterXlabel, yLabel = scatterYlabel,
                                                                               plotWidth = scatterWidth, plotHeight = scatterHeight),
@@ -790,6 +863,7 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
     GSlst[] <- lapply(DElst, function(i)RBioArray::rbioGS(GS = GSdata, pVar = i$P.Value, logFCVar = i$logFC,
                                                           tVar = i$t, idVar = i[, entrezVar],
                                                           parallelComputing = parallelComputing, clusterType = clusterType, ...))
+    lapply(1: length(GSlst), function(x)RBioArray::rbioGS_table(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = "")))
 
   } else { # parallel computing
     # check cluster type
@@ -816,6 +890,10 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
                       tVar = i$t, idVar = i[, entrezVar], parallelComputing = FALSE, ...)
       }
 
+      foreach(x = 1: length(GSlst), .packages = c("RBioArray", "piano")) %dopar% {
+        rbioGS_table(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = ""))
+        }
+
     } else { # mac and linux only
       # remove the rows with NA in the Entrez ID variable
       DElst <- mclapply(DElst, function(x)x[complete.cases(x[, entrezVar]), ], mc.cores = n_cores, mc.preschedule = FALSE)
@@ -826,7 +904,9 @@ rbioGS_all_noplot <- function(DElst, entrezVar = NULL,
                                                               parallelComputing = FALSE, ...),
                           mc.cores = n_cores, mc.preschedule = FALSE)
 
-
+      mclapply(1: length(GSlst),
+               function(x)RBioArray::rbioGS_table(GSA_list = GSlst[[x]], fileName = paste(export.name, "_", names(GSlst)[x], "_", plotGSname, sep = "")),
+               mc.cores = n_cores, mc.preschedule = FALSE)
     }
   }
   return(GSlst)

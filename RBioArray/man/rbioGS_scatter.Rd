@@ -37,13 +37,13 @@ rbioGS_scatter(
 \item{plotHeight}{Set the height of the plot. Default is \code{150}.}
 }
 \value{
-Outputs a \code{pdf} scatter figure file with allGSA results.
+Outputs a \code{pdf} scatter figure file, an R data frame as well as a \code{csv} summary with allGSA results.
 }
 \description{
-Generate scatter plot for piano GS rank heatmap obejct. Note that the rank is log2 transformed.
+Generate scatter plot for piano GS rank heatmap object. Note that the rank is log2 transformed.
 }
 \details{
-The function is based on piano package.
+The function is based on piano package. There is also a "post-hoc FDR" p-value correction column in the scatter plot \code{csv} and dataframe.
 }
 \examples{
 \dontrun{
