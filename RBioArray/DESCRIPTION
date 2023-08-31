@@ -1,7 +1,7 @@
 Package: RBioArray
 Type: Package
 Title: All-in-one and easy-to-use package for microarray and RNAseq data processing and downstream analysis
-Version: 0.5.6
+Version: 0.5.7
 Author: Jing Zhang
 Maintainer: Jing Zhang <jzhangcad@gmail.com>
 Description: This package does the entire pipeline, i.e., data pre-processing, gene differential expression (DE) analysis, gene set (GS) analysis, and graphing.
