@@ -587,6 +587,10 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
     stop("please choose gene set(s)")
   }
 
+  if (is.null(export.name)) {
+    export.name <- objTitle
+  }
+
   ## set up gene set object
   if (is.null(GSfile)){
     GSdata <- GS
@@ -726,9 +730,9 @@ rbioGS_all <- function(objTitle = "DE", DElst, entrezVar = NULL,
   }
 
   if (is.null(GSfile)){
-    assign(paste(objTitle, "_GS_list_", deparse(substitute(GS)), sep = ""), GSlst, envir = .GlobalEnv)
+    assign(paste(export.name, "_GS_list_", deparse(substitute(GS)), sep = ""), GSlst, envir = .GlobalEnv)
   } else if (is.null(GS)){
-    assign(paste(objTitle, "_GS_list_", plotGSname, sep = ""), GSlst, envir = .GlobalEnv)
+    assign(paste(export.name, "_GS_list_", plotGSname, sep = ""), GSlst, envir = .GlobalEnv)
   }
 }
 
