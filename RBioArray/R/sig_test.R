@@ -327,9 +327,9 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     f_cutoff <- input.Fstats.matrix$P.Value < f_pcutoff
   }
 
-  if (all(cutoff)) {  # all TRUE
+  if (all(f_cutoff)) {  # all TRUE
     f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, summary(f_cutoff)[["TRUE"]], 0)
-  } else if (!any(cutoff)) {  # all FALSE
+  } else if (!any(f_cutoff)) {  # all FALSE
     f_sig.summary <- c("F stats", signif(f_pcutoff, digits = 4), "N/A", alpha, f_fdr.stats, 0, summary(f_cutoff)[["FALSE"]])
     # warning(paste0("No significant results were found with alpha = ", alpha, "\n"))
   } else {

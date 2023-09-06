@@ -73,7 +73,9 @@ Update log
         
       - Updates to GS function(s):
         - rbioGS_scatter(): added a "post-hoc FDR correction" column to the scatter csv file and dataframe
-
+      
+      - Updates to the DE function(s):
+        - A bug fixed for sig() where F stats summary may not work 
     
 
     0.5.6 (Aug.31.2023)
