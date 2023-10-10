@@ -556,7 +556,7 @@ print.rbioseq_count <- function(x, ...){
 #' @title rnaseq_de
 #'
 #' @description Generic RNAseq statistical analysis function
-#' @param object Object containing expression values. Currently the function supports \code{rbioseq_count} and \code{mir_count} from \code{RBioMIR} pacakge.
+#' @param object Object containing expression values. Currently the function supports \code{rbioseq_count} and \code{mir_count} from \code{RBioMIR} packakge.
 #' @param ... Additional arguments for corresponding S3 class methods.
 #' @return A differential expression result object.
 #' @examples

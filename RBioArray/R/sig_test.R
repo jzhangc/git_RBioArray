@@ -145,7 +145,7 @@ sig.rbioarray_de <- function(object, p.val.correction.method = c("fdr", "spikein
 #'
 #' @rdname sig
 #' @method sig default
-#' @param input.de.list  Input list containing DE dataframes for each comparison.
+#' @param input.de.list Input list containing DE dataframes for each comparison.
 #' @param input.Fstats.matrix Input dataframe containing F stats.
 #' @param input.genes_annotation.control_type Functional only when \code{p.val.correction.method = "spikein"}, the \code{genes_annotation.control_type} element from the input \code{rbioarray_flist} class object.
 #' @param input.fit Functional only when \code{p.val.correction.method = "spikein"}, the \code{fit} element from the input \code{rbioarray_flist} class object

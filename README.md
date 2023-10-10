@@ -54,11 +54,11 @@ Update log
       - Updates to network analysis function(s):
         - Display both top and bottom percent edge weights, and colour coding for rbio_network(): for signed corrlation measures
       
-      - Updates to microarray functions
+      - Updates to microarray function(s):
         - MA plot option added for functions rbioarray_transfo_normalize() and rbioarray_filter_combine()
         - Relevant functions updated with continuous outcome support
         
-      - Updates to RNAseq functions
+      - Updates to RNAseq function(s):
         - Relevant functions updated with continuous outcome support
         - rnaseq_de() output "rbioseq_de" class now includes "voom_output" and "calcNormFactors_outpout" (filtered raw count with lib size)
         
@@ -74,7 +74,19 @@ Update log
       - Updates to GS function(s):
         - rbioGS_scatter(): added a "post-hoc FDR correction" column to the scatter csv file and dataframe
       
-      - Updates to the DE function(s):
+      - Updates to microarray function(s):
+        - rbioarray_rlist() updated with faster merge with data.table
+        - rbioarray_rlist() now accepts data frames 
+        - rbioarray_rlist() now makes sure sample annotation id variable has the same (or corresponding) value and order as the column order (or name) of the E matrix
+        - rbioarray_rlist() automatically compare, process and re-order the E matrix according to the values of target.annot.file, target.annot.dataframe, and target.annot.subject_id.var.name
+          Behavior:
+          1. E matrix is subset by targets$target.annot.subject_id.var.name if colnames(E) is a subset of targets$target.annot.subject_id.var.name, vice versa
+          2. Both E matrix and targets dataframe are subset if there is intersect between colnames(E) and targets$target.annot.subject_id.var.name, and the intersect order is set by targets$target.annot.subject_id.var.name
+          3. E matrix column will be re-ordered by targets$target.annot.subject_id.var.name if the orders of both are different.
+        - Array DE functions now support multiple group variables
+        - print.rbioarray_rlist() updated accordingly to the updates to rbioarray_rlist()
+      
+      - Updates to the DE sig function(s):
         - A bug fixed for sig() where F stats summary may not work 
     
 

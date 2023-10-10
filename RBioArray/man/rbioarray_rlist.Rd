@@ -25,6 +25,9 @@ rbioarray_rlist(object, ...)
   gene.annot.rm.var.name = NULL,
   target.annot.file = NULL,
   target.annot.file.path = getwd(),
+  target.annot.dataframe = NULL,
+  target.annot.subject_id.var.name = NULL,
+  target.sample_group.var.name = NULL,
   sample_groups.var.name = NULL,
   verbose = TRUE
 )
@@ -34,7 +37,7 @@ rbioarray_rlist(object, ...)
 
 \item{...}{Additional argument for the default function.}
 
-\item{raw.dataframe}{Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.}
+\item{raw.dataframe}{Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column, for the probe/gene/genomic features.}
 
 \item{raw.background.signal.matrix}{A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.}
 
@@ -58,11 +61,15 @@ rbioarray_rlist(object, ...)
 
 \item{gene.annot.rm.var.name}{Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.}
 
-\item{target.annot.file}{File name for the target (i.e. sample) annotation \code{.csv} file.}
+\item{target.annot.file}{File name for target (i.e. sample/subject) annotation \code{.csv} file.}
 
-\item{target.annot.file.path}{The directory for \code{target.annot.file}. Default is \code{getwd()}.}
+\item{target.annot.dataframe}{Name for a dataframe for target (i.e. sample/subject) annotation.}
 
-\item{sample_groups.var.name}{The variable name for sample grouping information from \code{target.annot.file}.}
+\item{target.annot.subject_id.var.name}{Variable name for subject id from \code{target.annot.file} or \code{target.annot.dataframe}}
+
+\item{target.sample_group.var.name}{The variable name for sample grouping information from \code{target.annot.file}.}
+
+\item{sample_groups.var.name}{The same as the \code{target.sample_group.var.name}, legacy argument for compatiblity.}
 
 \item{verbose}{Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.}
 }
@@ -107,12 +114,18 @@ The \code{raw.background.signal.matrix} is useful when processing a \code{EListR
 
          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 
+         The function uses \code{data.table} to speed up merging operations.
+
          The optional annotation data frame \code{extra.gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
          It is noted that \code{extra.gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
          The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
 
-         Make sure the sample annotation id variable has the same (or corresponding) order as the column order (or name) of the E matrix
+         The function automatically compare, process and re-order the \code{E} matrix according to the values of \code{target.annot.file}, \code{target.annot.dataframe}, and \code{target.annot.subject_id.var.name}.
+         Behavior:
+         1. \code{E} matrix is subset by \code{targets$target.annot.subject_id.var.name} if \code{colnames(E)} is a subset of \code{targets$target.annot.subject_id.var.name}, vice versa.
+         2. Both \code{E} and \code{targets} dataframe are subset if there is intersect between \code{colnames(E)} and \code{targets$target.annot.subject_id.var.name}, and the intersect order is set by \code{targets$target.annot.subject_id.var.name}.
+         3. \code{E} matrix column will be re-ordered by \code{targets$target.annot.subject_id.var.name} if the orders of both are different.
 }
 \examples{
 \dontrun{

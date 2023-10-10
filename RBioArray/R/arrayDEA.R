@@ -83,7 +83,7 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #'
 #' @rdname rbioarray_rlist
 #' @method rbioarray_rlist default
-#' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column.
+#' @param raw.dataframe Input data frame containing microarray hybridization signals with rows as probe/gene/genomic features and columns as samples. Note: the data frame should contain at least one annotation column, for the probe/gene/genomic features.
 #' @param raw.background.signal.matrix A optional matrix containing background signals. The dimension should be the same as the input expression data without annotation columns.
 #' @param raw.annot.var.name A string vector containing variable (i.e. column) name(s) for all the annotation columns in \code{raw.dataframe}.
 #' @param raw.gene_id.var.name Variable (i.e. column) name for gene/probe/genomic feature identification from \code{raw.dataframe}.
@@ -95,42 +95,59 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param gene.annot.control_type.val.neg Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.
 #' @param gene.annot.control_type.val.exp Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.
 #' @param gene.annot.rm.var.name Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.
-#' @param target.annot.file File name for the target (i.e. sample) annotation \code{.csv} file.
-#' @param target.annot.file.path The directory for \code{target.annot.file}. Default is \code{getwd()}.
-#' @param sample_groups.var.name The variable name for sample grouping information from \code{target.annot.file}.
+#' @param target.annot.file File name for target (i.e. sample/subject) annotation \code{.csv} file.
+#' @param target.annot.dataframe Name for a dataframe for target (i.e. sample/subject) annotation.
+#' @param target.annot.subject_id.var.name Variable name for subject id from \code{target.annot.file} or \code{target.annot.dataframe}
+#' @param target.sample_group.var.name The variable name for sample grouping information from \code{target.annot.file}.
+#' @param sample_groups.var.name The same as the \code{target.sample_group.var.name}, legacy argument for compatiblity.
 #' @param verbose Whether to display messages. Default is \code{TRUE}. This will not affect error or warning messages.
 #' @details The \code{raw.background.signal.matrix} is useful when processing a \code{EListRaw} class object from \code{limma} package,
 #'          and using \code{bgc.method = "subtract"} for the \code{\link{rbioarray_transfo_normalize()}} function.
 #'
 #'          The word "gene" used in argument names and output item names is in its broader meaning of gene/probe/genomic feature.
 #'
+#'          The function uses \code{data.table} to speed up merging operations.
+#'
 #'          The optional annotation data frame \code{extra.gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
 #'          It is noted that \code{extra.gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
 #'          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
 #'          The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
 #'
-#'          Make sure the sample annotation id variable has the same (or corresponding) order as the column order (or name) of the E matrix
+#'          The function automatically compare, process and re-order the \code{E} matrix according to the values of \code{target.annot.file}, \code{target.annot.dataframe}, and \code{target.annot.subject_id.var.name}.
+#'          Behavior:
+#'          1. \code{E} matrix is subset by \code{targets$target.annot.subject_id.var.name} if \code{colnames(E)} is a subset of \code{targets$target.annot.subject_id.var.name}, vice versa.
+#'          2. Both \code{E} and \code{targets} dataframe are subset if there is intersect between \code{colnames(E)} and \code{targets$target.annot.subject_id.var.name}, and the intersect order is set by \code{targets$target.annot.subject_id.var.name}.
+#'          3. \code{E} matrix column will be re-ordered by \code{targets$target.annot.subject_id.var.name} if the orders of both are different.
 #'
+#' @importFrom data.table setDT
 #' @export
 rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix = NULL,
-                                    raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
+                                    raw.annot.var.name = NULL,
+                                    raw.gene_id.var.name = NULL,
                                     extra.gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
                                     gene.annot.control_type.var.name = NULL,
                                     gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
                                     gene.annot.rm.var.name = NULL,
-                                    target.annot.file = NULL, target.annot.file.path = getwd(), sample_groups.var.name = NULL,
+                                    target.annot.file = NULL, target.annot.file.path = getwd(),
+                                    target.annot.dataframe = NULL,
+                                    target.annot.subject_id.var.name = NULL,
+                                    target.sample_group.var.name = NULL,
+                                    sample_groups.var.name = NULL,
                                     verbose = TRUE){
-  ## check arguments and set up variables
-  # raw data
+  # ------ check arguments and set up variables ------
+  # ---- raw data ----
+  if (verbose) cat("Loading raw measurement data...")
   if (is.null(dim(raw.dataframe)))
-    stop("raw.matrix has to be a data.frame, with rows for genes/probes/genomic features, columns for samples.")
+    stop("raw.matrix has to be a dataframe, with rows for genes/probes/genomic features, columns for samples.")
   if (is.null(raw.annot.var.name) || is.null(raw.gene_id.var.name))
     stop("Please set raw.annot.var.name AND raw.gene_id.var.name arguments.")
   if (!all(raw.annot.var.name %in% names(raw.dataframe)) || !raw.gene_id.var.name %in% names(raw.dataframe))
     stop("Annoation variables (i.e. columns) and/or the gene_id variable (i.e. column) not found in raw.dataframe")
-  raw_dfm <- raw.dataframe
+  raw_dfm <- setDT(raw.dataframe)
+  if (verbose) cat("Done!\n")
 
-  # gene annotation
+  # ---- gene annotation ----
+  if (verbose) cat("Loading gene/probe/feature annotation data and contructing \"E\" matrix and \"genes\" dataframe...")
   if (!is.null(extra.gene.annot.dataframe)){  # check and load gene annoation
     if (!is.data.frame(extra.gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
     # if (nrow(extra.gene.annot.dataframe) < nrow(raw.dataframe)) stop("extra.gene.annot.dataframe has less record than the raw.dataframe") # check size
@@ -143,19 +160,23 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
       gene.symbol <- TRUE
     }
     # additional variables
-    genes_annot_dfm <- extra.gene.annot.dataframe
+    genes_annot_dfm <- setDT(extra.gene.annot.dataframe)
 
     ## Set up the information
     # merge gene annotation with raw dataframe
     raw_dfm$row_id <- as.integer(rownames(raw_dfm))  # used to make sure the same order as the background matrix for EListRaw
-    raw_dfm$merge_id <- raw_dfm[, raw.gene_id.var.name]
-    genes_annot_dfm$merge_id <- genes_annot_dfm[, gene.annot.gene_id.var.name]
+    # raw_dfm$merge_id <- raw_dfm[, raw.gene_id.var.name]  # vanila R syntax
+    # genes_annot_dfm$merge_id <- genes_annot_dfm[, gene.annot.gene_id.var.name]  # vanila R syntax
+    raw_dfm$merge_id <- raw_dfm[, ..raw.gene_id.var.name]  # DT[, ..var_name] is a data.table syntax
+    genes_annot_dfm$merge_id <- genes_annot_dfm[, ..gene.annot.gene_id.var.name]  # DT[, ..var_name] is a data.table syntax
+
     merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm, all.x = TRUE)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
     merged_raw_gene_annot_dfm <- merged_raw_gene_annot_dfm[order(merged_raw_gene_annot_dfm$row_id), ]  # restore the original order
     all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm), "row_id"))  # all annotation variable names
 
     # Set up output E matrix
-    E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns
+    # E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns: vanila R syntax
+    E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names, with = FALSE]) # data.table syntax
     rownames(E) <- NULL
     if (!is.null(raw.background.signal.matrix) && dim(raw.background.signal.matrix) != dim(E)) {
       cat("The dimension of raw.background.signal.matrix not the same as the expressoin matrix. Proceed without using it. ")
@@ -163,8 +184,11 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     }
 
     # set up output annotation information
-    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names, drop = FALSE]
-    genes <- genes[, !names(genes) %in% c("merge_id", "row_id"), drop = FALSE]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id)
+    # genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names, drop = FALSE]  # vanila R syntax
+    genes <- merged_raw_gene_annot_dfm[, names(merged_raw_gene_annot_dfm) %in% all_annot_var_names, drop = FALSE, with = FALSE]
+    # genes <- genes[, !names(genes) %in% c("merge_id", "row_id"), drop = FALSE]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id): vanila R syntax
+    genes <- genes[, !names(genes) %in% c("merge_id", "row_id"), drop = FALSE, with = FALSE]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id): data.table syntax
+    if (verbose) cat("Done!\n")
   } else {
     E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name, drop = FALSE]) # remove annotation columns
     rownames(E) <- NULL
@@ -176,10 +200,13 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     gene.symbol <- FALSE
   }
 
-  # target annotation
-  if (is.null(target.annot.file)){  # check and load target (sample) annotation
-    stop("Please provide a target annotation file for target.annot.file arugment.")
-  } else {
+  # ---- target annotation ----
+  if (verbose) cat("Loading target annotation data and contructing \"targets\" dataframe...")
+  if (is.null(target.annot.file) && is.null(target.annot.dataframe)){  # check and load target (sample) annotation
+    stop("Please provide a target annotation file or dataframe for target.annot.file arugment.")
+  } else if (!is.null(target.annot.file) && !is.null(target.annot.dataframe)){
+    stop("Please only set one or the same value: \"target.annot.file\" or \"target.annot.dataframe\".")
+  } else if (!is.null(target.annot.file)){
     target.annot_name_length <- length(unlist(strsplit(target.annot.file, "\\.")))
     target.annot_ext <- unlist(strsplit(target.annot.file, "\\."))[target.annot_name_length]
     if (target.annot_ext != "csv") {
@@ -189,16 +216,34 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
       tgt <- read.csv(file = paste0(target.annot.file.path, "/",target.annot.file), header = TRUE, stringsAsFactors = FALSE, check.names = FALSE)
       if(verbose) cat("Done!\n")
     }
-  }
-  if (is.null(sample_groups.var.name)) stop("Please provide sample_groups.var.name.")
-  if (!sample_groups.var.name %in% names(tgt)){
-    stop("Sample group annotation variable not found in the target annotation file.")
   } else {
-    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
+    tgt <- target.annot.dataframe
   }
 
-  # optional control_type variable
+  if (is.null(target.sample_group.var.name) && is.null(sample_groups.var.name)){  # check and load target (sample) annotation
+    stop("Please provide \"sample_groups.var.name\" or \"target.sample_group.var.name\" from the target annotation dataframe or file.")
+  } else if (!is.null(target.sample_group.var.name) && !is.null(sample_groups.var.name)){
+    if (!(all(target.sample_group.var.name %in% sample_groups.var.name) && length(target.sample_group.var.name) == length(sample_groups.var.name))) stop("Please only set one or with the same value: \"target.sample_group.var.name\" or \"sample_groups.var.name\".")
+  } else if (!is.null(target.sample_group.var.name)){
+    sample_groups.var.name <- target.sample_group.var.name
+  }
+
+  if (!all(sample_groups.var.name %in% names(tgt))){
+    stop("Sample group annotation variable not found in the target annotation file.")
+  } else if (length(sample_groups.var.name) == 1) {
+    sample.groups <- factor(tgt[, sample_groups.var.name], levels = unique(tgt[, sample_groups.var.name]))
+  } else {
+    sample.groups <- vector(mode = "list", length = length(sample_groups.var.name))
+    names(sample.groups) <- sample_groups.var.name
+    for (var in sample_groups.var.name) {
+      sample.groups[[var]] <- factor(tgt[, var], levels = unique(tgt[, var]))
+    }
+  }
+  if (verbose) cat("Done!\n")
+
+  # ---- optional control_type variable ----
   if (!is.null(gene.annot.control_type.var.name)) {
+    if (verbose) cat("Loading control type information and contructing \"genes_annotation.control_type\" list...")
     if (!gene.annot.control_type.var.name %in% names(genes)) {
       cat("The set control type variable not found in extra.gene.annot.dataframe. Proceed without using it.\n")
       gene.annot.control_type = NULL
@@ -215,17 +260,56 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
         gene.annot.control_type = NULL
       }
     }
+    if (verbose) cat("Done!\n")
   } else {
     gene.annot.control_type = NULL
   }
 
-  # variable names to remove
+  # ---- variable names to remove ----
   if (!is.null(gene.annot.rm.var.name) && !gene.annot.rm.var.name %in% names(genes)) {
     cat("gene.annot.rm.var.name not found in gene annation. Proceed without using it")
     gene.annot.rm.var.name <- NULL
   }
 
-  ## output
+  # ------ output ------
+  # -- subset E or tgt, and rearrange E columns (if necessary) according to the tgt subject var --
+  if (verbose) cat("Processing \"E\" matrix and \"targets\" dataframe...\n")
+  i = 1
+  while (i < length(names(tgt)[!names(tgt) %in% sample_groups.var.name])){
+    if (!is.null(target.annot.subject_id.var.name) && target.annot.subject_id.var.name %in% names(tgt) ){
+      tgt_var <- target.annot.subject_id.var.name
+      i <- length(names(tgt)[!names(tgt) %in% sample_groups.var.name]) + 1
+      if (verbose) cat("no loop\n")
+    } else {
+      tgt_var <- names(tgt)[!names(tgt) %in% sample_groups.var.name][i]
+    }
+
+    if (length(tgt[[tgt_var]]) == length(colnames(E)) && all(tgt[[tgt_var]] %in% colnames(E))) {
+      if (verbose) cat(paste0("No subsetting of E or targets dataframe required", tgt_var, "\n"))
+      break
+    } else if (all(tgt[[tgt_var]] %in% colnames(E))) {
+      if (verbose) cat(paste0("E subset by: ", tgt_var, "variable from the targets dataframe\n"))
+      break
+    } else if (all(colnames(E) %in% tgt[[tgt_var]])) {
+      tgt <- tgt[tgt[tgt_var] %in% colnames(E), , drop = FALSE]
+      if (verbose) cat(paste0("tgt subset by colnames(E) according with the ", tgt_var, " variable from the targets dataframe\n"))
+      break
+    } else if (length(intersect(tgt[tgt_var], colnames(E))) >= 1) {
+      common_subject_id <- intersect(tgt[tgt_var], colnames(E))
+      E <- E[, common_subject_id, drop = FALSE]
+      tgt <-  tgt[tgt[tgt_var] %in% common_subject_id, , drop = FALSE]
+      if (verbose) cat(paste0("tgt and E subset by intersect between colnames(E) and the values of ",  tgt_var, " variable from the targets dataframe\n"))
+      break
+    } else {
+      i <- i + 1
+      next
+    }
+    stop(paste0("\"raw.dataframe\" column name as subject id not found in the ", tgt_var, " variable from the \"target.annot.file\" or \" target.annot.dataframe\""))
+  }
+  E <- E[, tgt[[tgt_var]], drop = FALSE]
+  if (verbose) cat(paste0("E columns might be re-arranged according to the target dataframe variabl: ", tgt_var, "\n"))
+
+  # -- output --
   if (verbose) cat("Constructing rlist...")
   out <- list(E = E,
               E_background = raw.background.signal.matrix,
@@ -241,12 +325,21 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
               sample_groups_var_name = sample_groups.var.name,
               sample_groups = sample.groups)
   class(out) <- "rbioarray_rlist"
-  if (verbose) cat("Done!\n")
-  if (verbose) cat("\n")
-  if (verbose) cat(paste0("The resulted rbioarray_rlist object contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), " samples for ", length(unique(sample.groups)), " groups."))
+  if (verbose) {
+    cat("Done!\n")
+    cat("\n")
+    cat(paste0("The resulted rbioarray_rlist object contains ", nrow(E), " genes/probes/genomic features, ", nrow(tgt), "\n"))
+    if ("list" %in% class(sample.groups)) {
+      for (l in names(sample.groups)) {
+        cat(paste0("Group variable: ", l, "\n   Levels: ", paste0(as.character(unique(sample.groups[[l]])), collapse = ", "), "\n"))
+      }
+    } else {
+      cat(paste0("Groups: ", paste0(as.character(unique(sample.groups)), collapse = ", "), "\n"))
+    }
+  }
+
   return(out)
 }
-
 
 
 #' @export
@@ -256,7 +349,13 @@ print.rbioarray_rlist <- function(x, ...){
   cat(paste0("Number of genes/probes/genomic features: ", nrow(x$E), "\n"))
   cat(paste0("Number of samples: ", nrow(x$targets), "\n"))
   cat(paste0("Groups: "))
-  cat(paste0(levels(x$sample_groups)))
+  if ("list" %in% class(x$sample_groups)){
+    for (l in names(x$sample_groups)) {
+      cat(paste0("Group variable: ", l, "\n   Levels: ", paste0(as.character(unique(x$sample_groups[[l]])), collapse = ", "), "\n"))
+    }
+  } else {
+    cat(paste0(levels(x$sample_groups)))
+  }
   cat("\n\n")
   cat(paste0("Gene display name from annotation information: ", ifelse(x$gene_display_name_used, "Available\n", "Unavailable\n")))
   cat("\n")
