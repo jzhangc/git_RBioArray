@@ -177,7 +177,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     # Set up output E matrix
     # E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names]) # remove annotation columns: vanila R syntax
     E <- as.matrix(merged_raw_gene_annot_dfm[, !names(merged_raw_gene_annot_dfm) %in% all_annot_var_names, with = FALSE]) # data.table syntax
-    rownames(E) <- NULL
+    rownames(E) <- merged_raw_gene_annot_dfm$merge_id
     if (!is.null(raw.background.signal.matrix) && dim(raw.background.signal.matrix) != dim(E)) {
       cat("The dimension of raw.background.signal.matrix not the same as the expressoin matrix. Proceed without using it. ")
       raw.background.signal.matrix <- NULL

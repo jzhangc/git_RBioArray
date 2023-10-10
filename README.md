@@ -75,6 +75,7 @@ Update log
         - rbioGS_scatter(): added a "post-hoc FDR correction" column to the scatter csv file and dataframe
       
       - Updates to microarray function(s):
+        - The "E" matrix in rlist, plist and flist now has probe id as row name
         - rbioarray_rlist() updated with faster merge with data.table
         - rbioarray_rlist() now accepts data frames 
         - rbioarray_rlist() now makes sure sample annotation id variable has the same (or corresponding) value and order as the column order (or name) of the E matrix
