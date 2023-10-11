@@ -643,8 +643,10 @@ rbioarray_filter_combine <- function(object,
     flt_summary <- NULL
     flt_E <- object$E  # no filter
     flt_genes <- object$genes  # no filter
+    filter.percentile = NULL
+    filter.threshold.min.sample = NULL
+    neg_control_used = FALSE
   }
-
 
   ## averaging technical replicates
   if (verbose) cat("Averaging technical replicates...")
