@@ -552,6 +552,7 @@ print.rbioarray_plist <- function(x, ...){
 #'
 #' @description Function to filter, averaging and (if set) combine genes/probes/genome features from the \code{rbioarray_plist} objects.
 #' @param object Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.
+#' @param filter.bg If to filter according to the threshold set by \code{filter.percentile} and \code{filter.threshold.min.sample}.
 #' @param filter.percentile The percentile threshold for filtering. Default is \code{0.05}. See details for more.
 #' @param filter.threshold.min.sample Minimum number of samples meeting the filtering threshold. Default is \code{NULL}. See details for more.
 #' @param combine.gene.duplicate If to combine different transcripts from the same gene/genome feature. Default is \code{FALSE}. See details for more.
@@ -585,6 +586,7 @@ print.rbioarray_plist <- function(x, ...){
 #' @importFrom limma avereps
 #' @export
 rbioarray_filter_combine <- function(object,
+                                     filter.bg = TRUE,
                                      filter.percentile = 0.05,
                                      filter.threshold.min.sample = NULL,
                                      combine.gene.duplicate = FALSE,
@@ -594,56 +596,70 @@ rbioarray_filter_combine <- function(object,
   if (!"rbioarray_plist" %in% class(object)) stop("The input object needs to be, but not exclusive to, rbioarray_plist class.")
 
   ## filter
-  # set negative/low expression threshold
-  if (!is.null(object$genes_annotation.control_type)){ # 0.95 percentile of all negative control values
-    cat("Gene control type variable detected in the input object. The filter.percentile argument value reset to 0.95.\n")
-    filter.percentile = 0.95
-    control_type.var.name = object$genes_annotation.control_type$control_type.var_name
-    control_type.neg.value = object$genes_annotation.control_type$neg_type.value
+  if (filter.bg) {
+    # set negative/low expression threshold
+    if (!is.null(object$genes_annotation.control_type)){ # 0.95 percentile of all negative control values
+      cat("Gene control type variable detected in the input object. The filter.percentile argument value reset to 0.95.\n")
+      filter.percentile = 0.95
+      control_type.var.name = object$genes_annotation.control_type$control_type.var_name
+      control_type.neg.value = object$genes_annotation.control_type$neg_type.value
 
-    if (any(class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric")){ # if there is only one entry in the neg values
-      neg <- object$E[object$genes[, control_type.var.name] == control_type.neg.value, ] # no 95% percentile required as only one neg entry
+      if (any(class(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ]) == "numeric")){ # if there is only one entry in the neg values
+        neg <- object$E[object$genes[, control_type.var.name] == control_type.neg.value, ] # no 95% percentile required as only one neg entry
+      } else {
+        neg <- apply(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ], 2, function(x)quantile(x, p = filter.percentile)) # neg95
+      }
+      neg_control_used = TRUE
     } else {
-      neg <- apply(object$E[object$genes[, control_type.var.name] == control_type.neg.value, ], 2, function(x)quantile(x, p = filter.percentile)) # neg95
+      neg <- apply(object$E, 2, function(x)quantile(x, p = filter.percentile)) # 5% percentile of all the data
+      neg_control_used = FALSE
     }
-    neg_control_used = TRUE
+
+    if (verbose) cat("Filtering low expresson genes/probes/genomic features...")
+    # low expression cuttoff set at at least 10% hihger than the neg
+    LE_cutoff <- matrix(1.1 * neg, nrow(object$E), ncol(object$E), byrow = TRUE)
+    # set filtering matrix
+    if (is.null(filter.threshold.min.sample)) {
+      filter.threshold.min.sample <- min(table(object$sample_groups))
+    }
+    isexpr <- rowSums(object$E > LE_cutoff) >= filter.threshold.min.sample
+
+    flt_summary <- as.numeric(table(isexpr))
+    isexpr_fact <- factor(isexpr, levels = unique(isexpr))
+    if (length(levels(isexpr_fact)) == 1){
+      if (levels(isexpr_fact) == "TRUE"){
+        flt_summary <- c(0, flt_summary)
+      } else {
+        flt_summary <- c(flt_summary, 0)
+      }
+    }
+    names(flt_summary) <- c("filtered", "remaning")
+
+    # filter
+    flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
+    flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name, drop = FALSE]
+    if (verbose) cat("Done!\n")
   } else {
-    neg <- apply(object$E, 2, function(x)quantile(x, p = filter.percentile)) # 5% percentile of all the data
-    neg_control_used = FALSE
+    flt_summary <- NULL
+    flt_E <- object$E  # no filter
+    flt_genes <- object$genes  # no filter
   }
 
-  if (verbose) cat("Filtering low expresson genes/probes/genomic features...")
-  # low expression cuttoff set at at least 10% hihger than the neg
-  LE_cutoff <- matrix(1.1 * neg, nrow(object$E), ncol(object$E), byrow = TRUE)
-  # set filtering matrix
-  if (is.null(filter.threshold.min.sample)) {
-    filter.threshold.min.sample <- min(table(object$sample_groups))
-  }
-  isexpr <- rowSums(object$E > LE_cutoff) >= filter.threshold.min.sample
-
-  flt_summary <- as.numeric(table(isexpr))
-  isexpr_fact <- factor(isexpr, levels = unique(isexpr))
-  if (length(levels(isexpr_fact)) == 1){
-    if (levels(isexpr_fact) == "TRUE"){
-      flt_summary <- c(0, flt_summary)
-    } else {
-      flt_summary <- c(flt_summary, 0)
-    }
-  }
-  names(flt_summary) <- c("filtered", "remaning")
-
-  # filter
-  flt_E <- object$E[isexpr, ] # this is a way of extracting samples logically considered TRUE by certain tests
-  flt_genes <- object$genes[isexpr, !names(object$genes) %in% object$genes_annotation.to_remove.var.name, drop = FALSE]
-  if (verbose) cat("Done!\n")
 
   ## averaging technical replicates
   if (verbose) cat("Averaging technical replicates...")
-  flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
-  flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), , drop = FALSE])
+  if ("data.table" %in% class(flt_genes)) {
+    average_id <- as.matrix(flt_genes[, object$genes_annotation.gene_id.var_name, with = FALSE])[, 1]
+    flt_E_avg <- avereps(flt_E, ID = average_id)
+    flt_genes_avg <- unique(flt_genes[average_id %in% rownames(flt_E_avg), , drop = FALSE])
+  } else {
+    flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
+    flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), , drop = FALSE])
+  }
   if (verbose) cat("Done!\n")
 
   ## combine duplicate genes if set
+  # this part needs to be updated to make compatible with data.table
   if (combine.gene.duplicate) {
     if (length(flt_genes_avg[, object$genes_annotation.gene_id.var_name]) != length(unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]))) {
       if (object$gene_display_name_used){
@@ -713,7 +729,6 @@ rbioarray_filter_combine <- function(object,
   if (verbose) cat("Done!\n")
   return(out)
 }
-
 
 #' @export
 print.rbioarray_flist <- function(x, ...){

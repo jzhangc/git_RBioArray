@@ -6,6 +6,7 @@
 \usage{
 rbioarray_filter_combine(
   object,
+  filter.bg = TRUE,
   filter.percentile = 0.05,
   filter.threshold.min.sample = NULL,
   combine.gene.duplicate = FALSE,
@@ -16,6 +17,8 @@ rbioarray_filter_combine(
 }
 \arguments{
 \item{object}{Input \code{rbioarray_plist} object from function \code{\link{rbioarray_transfo_normalize}}.}
+
+\item{filter.bg}{If to filter according to the threshold set by \code{filter.percentile} and \code{filter.threshold.min.sample}.}
 
 \item{filter.percentile}{The percentile threshold for filtering. Default is \code{0.05}. See details for more.}
 
