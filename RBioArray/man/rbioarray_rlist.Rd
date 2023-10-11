@@ -23,6 +23,7 @@ rbioarray_rlist(object, ...)
   gene.annot.control_type.val.neg = -1,
   gene.annot.control_type.val.exp = 0,
   gene.annot.rm.var.name = NULL,
+  raw.gene.annot.merge_mode = c("by_raw", "intersect", "no_merge"),
   target.annot.file = NULL,
   target.annot.file.path = getwd(),
   target.annot.dataframe = NULL,
@@ -60,6 +61,8 @@ rbioarray_rlist(object, ...)
 \item{gene.annot.control_type.val.exp}{Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.}
 
 \item{gene.annot.rm.var.name}{Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.}
+
+\item{raw.gene.annot.merge_mode}{How to merge the raw dataframe and the extra gene annotation dataframe. Options are \code{by_raw}, \code{intersect} and {no_merge}.}
 
 \item{target.annot.file}{File name for target (i.e. sample/subject) annotation \code{.csv} file.}
 
@@ -119,7 +122,11 @@ The \code{raw.background.signal.matrix} is useful when processing a \code{EListR
          The optional annotation data frame \code{extra.gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
          It is noted that \code{extra.gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
-         The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+         The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it will use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+
+         To merge the raw dataframe and extra gene annotation, the \code{by_raw} mode make sure the raw dataframe is all preserved, which may lead to NAs when the extra annotation dataframe does not include all probes.
+         For the \code{intersect} mode, the raw dataframe might be subset and only contrain probes with annotation information from the extra annotation dataframe.
+         With \code{no_merge} mode, the function acts as if no extra gene annotation dataframe is provided.
 
          The function automatically compare, process and re-order the \code{E} matrix according to the values of \code{target.annot.file}, \code{target.annot.dataframe}, and \code{target.annot.subject_id.var.name}.
          Behavior:

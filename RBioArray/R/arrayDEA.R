@@ -95,6 +95,7 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #' @param gene.annot.control_type.val.neg Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a negative control probe. Default is \code{-1}.
 #' @param gene.annot.control_type.val.exp Set only when \code{gene.annot.control_type.var.name} is provided, value indicating a none control probe. Default is \code{0}.
 #' @param gene.annot.rm.var.name Optional variable names for the columns to remove from the gene annotation \code{genes} in the output.
+#' @param raw.gene.annot.merge_mode How to merge the raw dataframe and the extra gene annotation dataframe. Options are \code{by_raw}, \code{intersect} and {no_merge}.
 #' @param target.annot.file File name for target (i.e. sample/subject) annotation \code{.csv} file.
 #' @param target.annot.dataframe Name for a dataframe for target (i.e. sample/subject) annotation.
 #' @param target.annot.subject_id.var.name Variable name for subject id from \code{target.annot.file} or \code{target.annot.dataframe}
@@ -111,7 +112,11 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #'          The optional annotation data frame \code{extra.gene.annot.dataframe} should contain any additional annotation information in addition to the annotation column(s) from \code{raw.dataframe}.
 #'          It is noted that \code{extra.gene.annot.dataframe} should contain at least one column for the sample type of gene/probe/genomic feature identification as the identification variable from  \code{raw.dataframe}.
 #'          Such column is set via argument \code{raw_file.gene_id.var_name} and \code{genes_annotation.gene_id.var_name}.
-#'          The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it wil use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+#'          The gene display name will only be used if \code{extra.gene.annot.dataframe} is used. Otherwise, it will use \code{raw.gene_id.var.name} from \code{raw.dataframe}.
+#'
+#'          To merge the raw dataframe and extra gene annotation, the \code{by_raw} mode make sure the raw dataframe is all preserved, which may lead to NAs when the extra annotation dataframe does not include all probes.
+#'          For the \code{intersect} mode, the raw dataframe might be subset and only contrain probes with annotation information from the extra annotation dataframe.
+#'          With \code{no_merge} mode, the function acts as if no extra gene annotation dataframe is provided.
 #'
 #'          The function automatically compare, process and re-order the \code{E} matrix according to the values of \code{target.annot.file}, \code{target.annot.dataframe}, and \code{target.annot.subject_id.var.name}.
 #'          Behavior:
@@ -121,13 +126,17 @@ rbioarray_rlist.EListRaw <- function(object, ...){
 #'
 #' @importFrom data.table setDT
 #' @export
-rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix = NULL,
-                                    raw.annot.var.name = NULL,
-                                    raw.gene_id.var.name = NULL,
-                                    extra.gene.annot.dataframe = NULL, gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
+rbioarray_rlist.default <- function(raw.dataframe,
+                                    raw.background.signal.matrix = NULL,
+                                    raw.annot.var.name = NULL, raw.gene_id.var.name = NULL,
+
+                                    extra.gene.annot.dataframe = NULL,
+                                    gene.annot.gene_id.var.name = NULL, gene.annot.gene_symbol.var.name = NULL,
                                     gene.annot.control_type.var.name = NULL,
                                     gene.annot.control_type.val.pos = 1, gene.annot.control_type.val.neg = -1, gene.annot.control_type.val.exp = 0,
                                     gene.annot.rm.var.name = NULL,
+                                    raw.gene.annot.merge_mode = c("by_raw", "intersect", "no_merge"),
+
                                     target.annot.file = NULL, target.annot.file.path = getwd(),
                                     target.annot.dataframe = NULL,
                                     target.annot.subject_id.var.name = NULL,
@@ -147,8 +156,22 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
   if (verbose) cat("Done!\n")
 
   # ---- gene annotation ----
-  if (verbose) cat("Loading gene/probe/feature annotation data and contructing \"E\" matrix and \"genes\" dataframe...")
-  if (!is.null(extra.gene.annot.dataframe)){  # check and load gene annoation
+  if (verbose) cat("Loading gene/probe/feature annotation data and contructing \"E\" matrix and \"genes\" dataframe...\n")
+  raw.gene.annot.merge_mode <- match.arg(raw.gene.annot.merge_mode)
+
+  if (is.null(extra.gene.annot.dataframe) || raw.gene.annot.merge_mode == "no_merge"){  # check and load gene annotation
+    if (verbose) cat("Either no extra gene annotation provided or  \"raw.gene.annot.merge_mode\" set to \"no_merge\"...\n")
+    # E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name, drop = FALSE]) # remove annotation columns # vanila R
+    E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name, with = FALSE, drop = FALSE]) # remove annotation columns, data.table syntax
+    rownames(E) <- raw_dfm$probe_id
+
+    cat("No extra gene annotation used. Proceed with raw.dataframe annoation information.\n")
+    gene.annot.gene_id.var.name <- raw.gene_id.var.name
+    gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
+    genes <- raw.dataframe[, ..raw.annot.var.name, drop = FALSE]
+    gene.symbol <- FALSE
+  } else {
+    if (verbose) cat(paste0("\"raw.gene.annot.merge_mode\" set to ", raw.gene.annot.merge_mode, "..."))
     if (!is.data.frame(extra.gene.annot.dataframe)) stop("gene.annot needs to be a dataframe")
     # if (nrow(extra.gene.annot.dataframe) < nrow(raw.dataframe)) stop("extra.gene.annot.dataframe has less record than the raw.dataframe") # check size
 
@@ -170,7 +193,16 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     raw_dfm$merge_id <- raw_dfm[, ..raw.gene_id.var.name]  # DT[, ..var_name] is a data.table syntax
     genes_annot_dfm$merge_id <- genes_annot_dfm[, ..gene.annot.gene_id.var.name]  # DT[, ..var_name] is a data.table syntax
 
-    merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm, all.x = TRUE)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
+    if (raw.gene.annot.merge_mode == "by_raw") {
+      merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm, all.x = TRUE)  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
+    } else if (raw.gene.annot.merge_mode == "intersect") {
+      merged_raw_gene_annot_dfm <- merge(raw_dfm, genes_annot_dfm, by = "merge_id")  # this merge will extract annotation info from gene_annot_dfm and merge to the smaller data dataframe.
+    }
+
+    if (any((is.na(merged_raw_gene_annot_dfm[, ..gene.annot.gene_id.var.name])))){
+      warning(paste0("The annotation \"", gene.annot.gene_id.var.name, "\" column of the output rbioarray_rlist element \"gene\" dataframe contains NA. Recommend trying another merge mode for the raw dataframe and extra gene annotation dataframe."))
+    }
+
     merged_raw_gene_annot_dfm <- merged_raw_gene_annot_dfm[order(merged_raw_gene_annot_dfm$row_id), ]  # restore the original order
     all_annot_var_names <- unique(c(raw.annot.var.name, names(genes_annot_dfm), "row_id"))  # all annotation variable names
 
@@ -189,15 +221,6 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
     # genes <- genes[, !names(genes) %in% c("merge_id", "row_id"), drop = FALSE]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id): vanila R syntax
     genes <- genes[, !names(genes) %in% c("merge_id", "row_id"), drop = FALSE, with = FALSE]  # row_id has to be removed for the filtering step (aka to avoid same gene symbol but different row id): data.table syntax
     if (verbose) cat("Done!\n")
-  } else {
-    E <- as.matrix(raw_dfm[, !names(raw_dfm) %in% raw.annot.var.name, drop = FALSE]) # remove annotation columns
-    rownames(E) <- NULL
-
-    cat("Note: extra.gene.annot.dataframe not provided. Proceed with raw.dataframe annoation information.\n")
-    gene.annot.gene_id.var.name <- raw.gene_id.var.name
-    gene.annot.gene_symbol.var.name <- raw.gene_id.var.name
-    genes <- raw.dataframe[, raw.annot.var.name, drop = FALSE]
-    gene.symbol <- FALSE
   }
 
   # ---- target annotation ----
@@ -288,7 +311,7 @@ rbioarray_rlist.default <- function(raw.dataframe, raw.background.signal.matrix 
       if (verbose) cat(paste0("No subsetting of E or targets dataframe required", tgt_var, "\n"))
       break
     } else if (all(tgt[[tgt_var]] %in% colnames(E))) {
-      if (verbose) cat(paste0("E subset by: ", tgt_var, "variable from the targets dataframe\n"))
+      if (verbose) cat(paste0("E subset by: ", tgt_var, " variable from the targets dataframe\n"))
       break
     } else if (all(colnames(E) %in% tgt[[tgt_var]])) {
       tgt <- tgt[tgt[tgt_var] %in% colnames(E), , drop = FALSE]
@@ -738,7 +761,7 @@ print.rbioarray_flist <- function(x, ...){
 microarray_de <- function(object, contra, verbose = TRUE){
   if (verbose) cat("Constructing rbioarray_de object...")
   ## argument check
-  if (any(class(object) != "rbioarray_flist")) stop("The input object needs to be a \"rbioarray_flist\" class.")
+  if (!"rbioarray_flist" %in% class(object)) stop("The input object needs to be a \"rbioarray_flist\" class.")
 
   ## variable initation
   cf <- colnames(contra)

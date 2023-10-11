@@ -84,6 +84,7 @@ Update log
           1. E matrix is subset by targets$target.annot.subject_id.var.name if colnames(E) is a subset of targets$target.annot.subject_id.var.name, vice versa
           2. Both E matrix and targets dataframe are subset if there is intersect between colnames(E) and targets$target.annot.subject_id.var.name, and the intersect order is set by targets$target.annot.subject_id.var.name
           3. E matrix column will be re-ordered by targets$target.annot.subject_id.var.name if the orders of both are different.
+        - rbioarray_rlist() now supports different modes to merge input raw expression dataframe and extra gene annotation dataframe
         - Array DE functions now support multiple group variables
         - print.rbioarray_rlist() updated accordingly to the updates to rbioarray_rlist()
       
