@@ -142,6 +142,7 @@ rbioarray_rlist.default <- function(raw.dataframe,
                                     target.annot.subject_id.var.name = NULL,
                                     target.sample_group.var.name = NULL,
                                     sample_groups.var.name = NULL,
+                                    compatibility_mode = FALSE,
                                     verbose = TRUE){
   # ------ check arguments and set up variables ------
   # ---- raw data ----
@@ -334,6 +335,10 @@ rbioarray_rlist.default <- function(raw.dataframe,
 
   # -- output --
   if (verbose) cat("Constructing rlist...")
+  if (compatibility_mode) {
+    genes <- as.data.frame(genes)
+  }
+
   out <- list(E = E,
               E_background = raw.background.signal.matrix,
               raw_file.gene_annotation.var_name = raw.annot.var.name,
@@ -346,7 +351,8 @@ rbioarray_rlist.default <- function(raw.dataframe,
               genes_annotation.to_remove.var.name = gene.annot.rm.var.name,
               targets = tgt,
               sample_groups_var_name = sample_groups.var.name,
-              sample_groups = sample.groups)
+              sample_groups = sample.groups,
+              compatibility_mode = compatibility_mode)
   class(out) <- "rbioarray_rlist"
   if (verbose) {
     cat("Done!\n")
@@ -363,7 +369,6 @@ rbioarray_rlist.default <- function(raw.dataframe,
 
   return(out)
 }
-
 
 #' @export
 print.rbioarray_rlist <- function(x, ...){

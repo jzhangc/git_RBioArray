@@ -30,6 +30,7 @@ rbioarray_rlist(object, ...)
   target.annot.subject_id.var.name = NULL,
   target.sample_group.var.name = NULL,
   sample_groups.var.name = NULL,
+  compatibility_mode = FALSE,
   verbose = TRUE
 )
 }
