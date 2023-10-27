@@ -87,7 +87,7 @@ Update log
         - rbioarray_rlist() now supports different modes to merge input raw expression dataframe and extra gene annotation dataframe
         - Array DE functions now support multiple group variables
         - print.rbioarray_rlist() updated accordingly to the updates to rbioarray_rlist()
-        - rbioarray_filter_combine() to be partially compatible with data.table
+        - rbioarray_filter_combine() now compatible with data.table
         - rbioarray_filter_combine() updated with filter.bg argument to control if to filter according to threshold
       
       - Updates to the DE sig function(s):

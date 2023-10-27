@@ -651,9 +651,10 @@ rbioarray_filter_combine <- function(object,
   ## averaging technical replicates
   if (verbose) cat("Averaging technical replicates...")
   if ("data.table" %in% class(flt_genes)) {
-    average_id <- as.matrix(flt_genes[, object$genes_annotation.gene_id.var_name, with = FALSE])[, 1]
+    average_id <- flt_genes[[object$genes_annotation.gene_id.var_name]]
     flt_E_avg <- avereps(flt_E, ID = average_id)
     flt_genes_avg <- unique(flt_genes[average_id %in% rownames(flt_E_avg), , drop = FALSE])
+    flt_genes_avg <- as.data.frame(flt_genes_avg)
   } else {
     flt_E_avg <- avereps(flt_E, ID = flt_genes[, object$genes_annotation.gene_id.var_name])
     flt_genes_avg <- unique(flt_genes[flt_genes[, object$genes_annotation.gene_id.var_name] %in% rownames(flt_E_avg), , drop = FALSE])
@@ -661,7 +662,6 @@ rbioarray_filter_combine <- function(object,
   if (verbose) cat("Done!\n")
 
   ## combine duplicate genes if set
-  # this part needs to be updated to make compatible with data.table
   if (combine.gene.duplicate) {
     if (length(flt_genes_avg[, object$genes_annotation.gene_id.var_name]) != length(unique(flt_genes_avg[, object$genes_annotation.gene_symbol.var_name]))) {
       if (object$gene_display_name_used){
@@ -731,6 +731,7 @@ rbioarray_filter_combine <- function(object,
   if (verbose) cat("Done!\n")
   return(out)
 }
+
 
 #' @export
 print.rbioarray_flist <- function(x, ...){
