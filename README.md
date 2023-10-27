@@ -77,7 +77,7 @@ Update log
       - Updates to microarray function(s):
         - The "E" matrix in rlist, plist and flist now has probe id as row name
         - rbioarray_rlist() updated with faster merge with data.table
-          - rbioarray_rlist() updated a "compatibility_mode" argumetn added to output without data.table as the "genes" element of the rbioarray_rlist class
+          - rbioarray_rlist() updated a "compatibility_mode" argument added to output without data.table as the "genes" element of the rbioarray_rlist class
         - rbioarray_rlist() now accepts data frames as input data
         - rbioarray_rlist() now makes sure sample annotation id variable has the same (or corresponding) value and order as the column order (or name) of the E matrix
         - rbioarray_rlist() automatically compare, process and re-order the E matrix according to the values of target.annot.file, target.annot.dataframe, and target.annot.subject_id.var.name
