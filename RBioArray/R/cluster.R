@@ -449,11 +449,21 @@ rbio_supervised_hcluster <- function(object,
     sig_dist_clust_list[[i]] <- list(sig_col_dist_clust = col_cluster_list, sig_row_dist_clust = row_cluster_list)
 
     # draw heatmap
+    if (rev.map.colour) {
+      map.col <- rev(brewer.pal(n.map.colour, map.colour))
+    } else {
+      map.col <- brewer.pal(n.map.colour, map.colour)
+    }
+
     if (verbose) cat(paste0("Sig data hierarchical clustering heatmap saved to: ", comparisons[i], "_sig_heatmap.pdf..."))
     pdf(file = paste0(export.name, "_", comparisons[i], "s_sig_heatmap.pdf"), width = plot.width, height = plot.height)
     heatmap.2(plt_mtx, distfun = distfunc, hclustfun = clustfunc,
               labRow = row.lab,
-              col = brewer.pal(n.map.colour, map.colour), ColSideColors = colC[colG], ...)
+              col = map.col, ColSideColors = colC[colG], ...)
+    # # remove below when the above is fully tested
+    # heatmap.2(plt_mtx, distfun = distfunc, hclustfun = clustfunc,
+    #           labRow = row.lab,
+    #           col = brewer.pal(n.map.colour, map.colour), ColSideColors = colC[colG], ...)
     if (verbose) cat("Done!\n")
     dev.off()
   }
