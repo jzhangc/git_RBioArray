@@ -15,6 +15,7 @@ rbio_supervised_hcluster(
   col.colour = "Paired",
   map.colour = "PRGn",
   n.map.colour = 11,
+  rev.map.colour = FALSE,
   ...,
   plot.width = 7,
   plot.height = 7,
@@ -35,6 +36,8 @@ rbio_supervised_hcluster(
 \item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
 
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
+
+\item{rev.map.colour}{If to reverse the order of the heatmap colour palette. Default is \code{FALSE}.}
 
 \item{...}{Additional arguments for \code{heatmap.2} function from \code{gplots} package.}
 

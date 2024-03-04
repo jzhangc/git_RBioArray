@@ -92,7 +92,10 @@ Update log
         - rbioarray_filter_combine() updated with filter.bg argument to control if to filter according to threshold
       
       - Updates to the DE sig function(s):
-        - A bug fixed for sig() where F stats summary may not work 
+        - A bug fixed for sig() where F stats summary may not work
+      
+      - Updates to the clustering function(s):
+        - Added heatmap reverse colour option for rbio_supervised_hcluster() and rbio_unsupervised_hcluster()
     
 
     0.5.6 (Aug.31.2023)

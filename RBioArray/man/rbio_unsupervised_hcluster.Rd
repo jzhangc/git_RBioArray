@@ -48,6 +48,7 @@ rbio_unsupervised_hcluster(object, ...)
   col.colour = "Paired",
   map.colour = "PRGn",
   n.map.colour = 11,
+  rev.map.colour = FALSE,
   ...,
   export.name = NULL,
   plot.width = 7,
@@ -93,6 +94,8 @@ rbio_unsupervised_hcluster(object, ...)
 \item{map.colour}{Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.}
 
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
+
+\item{rev.map.colour}{If to reverse the heatmap colour palette order. Default is \code{FALSE}.}
 
 \item{plot.width}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 

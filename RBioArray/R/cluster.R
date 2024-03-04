@@ -176,6 +176,7 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 #' @param col.colour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
 #' @param map.colour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n.map.colour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
+#' @param rev.map.colour If to reverse the heatmap colour palette order. Default is \code{FALSE}.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param export.name File name for the export \code{pdf} plot file.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
@@ -194,7 +195,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
                                                sample_id.vector = NULL,
                                                distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
                                                clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
-                                               col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, ...,
+                                               col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, rev.map.colour = FALSE, ...,
                                                export.name = NULL, plot.width = 7, plot.height = 7,
                                                verbose = TRUE){
   ## check arguments
@@ -265,11 +266,22 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 
   ## heatmap
   # draw heatmap
+  if (rev.map.colour) {
+    map.col <- rev(brewer.pal(n.map.colour, map.colour))
+  } else {
+    map.col <- brewer.pal(n.map.colour, map.colour)
+  }
+
   if (verbose) cat(paste0("Unsupervised hierarchical clustering heatmap saved to: ", export.name, "_unsuper_heatmap.pdf..."))
   pdf(file = paste0(export.name, "_unsuper_heatmap.pdf"), width = plot.width, height = plot.height)
   heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
             labRow = row.lab,
-            col = brewer.pal(n.map.colour, map.colour), ColSideColors = colC[colG], ...)
+            col = map.col, ColSideColors = colC[colG], ...)
+
+  # # remove below when the above is fully tested
+  # heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+  #           labRow = row.lab,
+  #           col = brewer.pal(n.map.colour, map.colour), ColSideColors = colC[colG], ...)
   if (verbose) cat("Done!\n")
   dev.off()
 }
@@ -285,6 +297,7 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 #' @param col.colour Column group colour. Default is \code{"Paired"}. See \code{RColorBrewer} package for more.
 #' @param map.colour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n.map.colour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
+#' @param rev.map.colour If to reverse the order of the heatmap colour palette. Default is \code{FALSE}.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
 #' @param plot.height Height of the plot. Unit is \code{inch}. Default is \code{7}.
@@ -302,7 +315,7 @@ rbio_supervised_hcluster <- function(object,
                                      sample_id.var.name = NULL,
                                      distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
                                      clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
-                                     col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, ...,
+                                     col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, rev.map.colour = FALSE, ...,
                                      plot.width = 7, plot.height = 7,
                                      verbose = TRUE){
   ## check arguments
@@ -491,13 +504,19 @@ rbio_supervised_hcluster <- function(object,
 
   # draw heatmap
   if (verbose) cat(paste0("Sig data hierarchical clustering heatmap saved to: ", "fstats_sig_heatmap.pdf..."))
+  if (rev.map.colour) {
+    map.col <- rev(brewer.pal(n.map.colour, map.colour))
+  } else {
+    map.col <- brewer.pal(n.map.colour, map.colour)
+  }
   pdf(file = paste0(export.name, "_fstats_sig_heatmap.pdf"), width = plot.width, height = plot.height)
   heatmap.2(f_plt_mtx, distfun = distfunc, hclustfun = clustfunc,
             labRow = f_row.lab,
-            col = brewer.pal(n.map.colour, map.colour), ColSideColors = f_colC[f_colG], ...)
+            col = map.col, ColSideColors = f_colC[f_colG], ...)
+  # # below: to remove when the above is fully tested
   # heatmap.2(f_plt_mtx, distfun = distfunc, hclustfun = clustfunc,
   #           labRow = f_row.lab,
-  #           col = brewer.pal(n.map.colour, map.colour), ColSideColors = f_colC[f_colG])
+  #           col = brewer.pal(n.map.colour, map.colour), ColSideColors = f_colC[f_colG], ...)
   if (verbose) cat("Done!\n")
   dev.off()
 
