@@ -42,6 +42,7 @@
 #' @importFrom parallel detectCores makeCluster stopCluster
 #' @importFrom grid grid.newpage grid.draw
 #' @importFrom ggrepel geom_text_repel
+#' @importFrom RBioplot rightside_y
 #' @examples
 #' \dontrun{
 #' rbioseq_DE(objTitle = "test", dfm_count = Ann_Count_all[, 5:12], dfm_annot = Ann_Count_all[, 1:4], count_threshold = 50,
@@ -132,19 +133,9 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
       geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
       scale_color_manual(values = c(nonsigColour, sigColour)) +
       ggtitle(Title) +
-      scale_y_continuous(expand = c(0.02, 0)) +
       xlab(xLabel) +
-      ylab(yLabel) +
-      geom_vline(xintercept = log2(FC), linetype = "dashed") +
-      geom_vline(xintercept = - log2(FC), linetype = "dashed") +
-      geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
-      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-            plot.title = element_text(hjust = 0.5),
-            legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_text(size = xTxtSize),
-            axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+      ylab(yLabel)
+
 
     if (topgeneLabel){
       tmpfltdfm <- tmpdfm[abs(tmpdfm$logFC) >= log2(FC) & tmpdfm$P.Value < pcutoff, ]
@@ -155,7 +146,24 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
     }
 
     grid.newpage()
-    pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
+
+    pltgtb <- plt +
+      scale_y_continuous(expand = c(0.02, 0), sec.axis = dup_axis()) +
+      geom_vline(xintercept = log2(FC), linetype = "dashed") +
+      geom_vline(xintercept = - log2(FC), linetype = "dashed") +
+      geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
+      theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            plot.title = element_text(hjust = 0.5),
+            legend.position = "none",
+            legend.title = element_blank(),
+            axis.text.x = element_text(size = xTxtSize),
+            axis.text.y = element_text(size = yTxtSize, hjust = 0.5),
+            axis.title.y.right = element_blank())
+
+    # # below: not needed as ggplot2 3.5.0 supports native axis duplication
+    # pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
+
     # export the file and draw a preview
     ggsave(filename = paste(cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
            width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
@@ -748,7 +756,7 @@ rbioarray_DE <- function(objTitle = "data_filtered",
         geom_point(alpha = 0.4, size = symbolSize, aes(colour = cutoff)) +
         scale_color_manual(values = c(nonsigColour, sigColour)) +
         ggtitle(plotTitle) +
-        scale_y_continuous(expand = c(0.02, 0)) +
+        scale_y_continuous(expand = c(0.02, 0), sec.axis = dup_axis()) +
         xlab(xLabel) +
         ylab(yLabel) +
         geom_vline(xintercept = log2(FC), linetype = "dashed") +
@@ -760,7 +768,8 @@ rbioarray_DE <- function(objTitle = "data_filtered",
               legend.position = "none",
               legend.title = element_blank(),
               axis.text.x = element_text(size = xTxtSize),
-              axis.text.y = element_text(size = yTxtSize, hjust = 0.5))
+              axis.text.y = element_text(size = yTxtSize, hjust = 0.5),
+              axis.title.y.right = element_blank())
 
       if (topgeneLabel){
         tmpfltdfm <- pltdfm[abs(pltdfm$logFC) >= log2(FC) & pltdfm$P.Value < pcutoff, ]
@@ -771,11 +780,13 @@ rbioarray_DE <- function(objTitle = "data_filtered",
       }
 
       grid.newpage()
-      pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
+      # # below: not needed as ggplot2 3.5.0 supports native axis duplication
+      # pltgtb <- rightside_y(plt) # RBioplot::rightside_y() for displying rightside y-axis
+
       # export the file and draw a preview
-      ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = pltgtb,
+      ggsave(filename = paste(objTitle, "_", cf[[j]],".volcano.pdf", sep = ""), plot = plt,
              width = plotWidth, height = plotHeight, units = "mm",dpi = 600)
-      grid.draw(pltgtb) # preview
+      grid.draw(plt) # preview
 
       # save DE results files
       if (output.mode == "probe.all"){

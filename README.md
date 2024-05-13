@@ -71,6 +71,10 @@ Update log
       - New GS function(s):
         - rbioGS_table(): export a csv and dataframe with all the GSA results, with p_value with all p classes, rank with all p classes, number of genes, as well as FDR adjusted p_values
         
+      - General updates
+        - All plotting functions updated with the compatility of ggplot2 (>=3.5.0)
+          - Dependency requirement of ggplot2 updated to >= 3.5.0
+        
       - Updates to GS function(s):
         - rbioGS_scatter(): added a "post-hoc FDR correction" column to the scatter csv file and dataframe
       

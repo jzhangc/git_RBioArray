@@ -368,7 +368,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
         geom_point(alpha = 0.4, size = plot.symbolSize , aes(colour = plt_cutoff)) +
         scale_color_manual(values = c(plot.nonsigColour, plot.sigColour)) +
         ggtitle(plot.Title) +
-        scale_y_continuous(expand = c(0.02, 0)) +
+        scale_y_continuous(expand = c(0.02, 0), sec.axis = dup_axis()) +
         xlab(plot.xLabel) +
         ylab(plot.yLabel) +
         geom_vline(xintercept = log2(FC), linetype = "dashed") +
@@ -380,7 +380,8 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
               legend.position = "none",
               legend.title = element_blank(),
               axis.text.x = element_text(size = plot.xTxtSize),
-              axis.text.y = element_text(size = plot.yTxtSize, hjust = 0.5))
+              axis.text.y = element_text(size = plot.yTxtSize, hjust = 0.5),
+              axis.title.y.right = element_blank())
       if (plot.top.gene){
         if (p.val.correction.method == "fdr") {
           plt_fltdfm <- plt_dfm[abs(plt_dfm$logFC) >= log2(FC) & plt_dfm$P.Value <= plt_pcutoff, ]
@@ -392,7 +393,9 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                                      aes(x = logFC, y = -log10(P.Value), label = head(plt_fltdfm, n = plot.top.gene.n)[, input.gene_symbol.var.name]),
                                      point.padding = unit(plot.top.gene.padding, "lines"))
       }
-      plt <- RBioplot::rightside_y(plt)
+
+      # # below: not needed as ggplot2 3.5.0 supports native axis duplication
+      # plt <- RBioplot::rightside_y(plt)
       plt
     }
     names(plt_list) <- names(input.de.list)

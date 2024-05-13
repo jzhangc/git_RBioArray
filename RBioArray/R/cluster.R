@@ -839,21 +839,40 @@ rbio_kmeans_plot <- function(km.object,
       biplt <- biplt +
         ggtitle(plot.title) +
         ylab(pc_axis_lbl[1]) +
-        theme_bw() +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
-              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+        theme_bw()
+
+      if (plot.rightsideY){ # add the right-side y axis
+        biplt <- biplt +
+          scale_y_continuous(sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank())
+      } else {
+        biplt <- biplt +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+      }
 
       # grid.newpage()
-      if (plot.rightsideY){ # add the right-side y axis
-        biplt <- RBioplot::rightside_y(biplt)
-      }
+      # # below: not needed as ggplot2 3.5.0 supports native axis duplication
+      # if (plot.rightsideY){ # add the right-side y axis
+      #   biplt <- RBioplot::rightside_y(biplt)
+      # }
+
     } else if (length(plot.comps) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
 
@@ -880,26 +899,44 @@ rbio_kmeans_plot <- function(km.object,
         ggtitle(plot.title) +
         xlab(pc_axis_lbl[1]) +
         ylab(pc_axis_lbl[2]) +
-        theme_bw() +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
-              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+        theme_bw()
 
       if (plot.ellipse){ # circles
         biplt <- biplt +
           stat_ellipse(aes(colour = group, group = group), type = "norm", level = plot.ellipse_conf)
       }
 
-      # grid.newpage()
       if (plot.rightsideY){ # add the right-side y axis
-        biplt <- RBioplot::rightside_y(biplt)
+        biplt <- biplt +
+          scale_y_continuous(sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank())
+      } else {
+        biplt <- biplt +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
       }
+
+      # # below: not needed as ggplot2 3.5.0 supports native axis duplication
+      # # grid.newpage()
+      # if (plot.rightsideY){ # add the right-side y axis
+      #   biplt <- RBioplot::rightside_y(biplt)
+      # }
 
     } else if (length(plot.comps) > 2) {
       if (plot.rightsideY){ # add the right-side y axis
@@ -997,21 +1034,40 @@ rbio_kmeans_plot <- function(km.object,
       biplt <- biplt +
         ggtitle(plot.title) +
         ylab(pc_axis_lbl[1]) +
-        theme_bw() +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
-              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+        theme_bw()
 
-      # grid.newpage()
       if (plot.rightsideY){ # add the right-side y axis
-        biplt <- RBioplot::rightside_y(biplt)
+        biplt <- biplt +
+          scale_y_continuous(sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank())
+      } else {
+        biplt <- biplt +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xhAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
       }
+
+      # # below: not needed as ggplot2 3.5.0 supports native axis duplication
+      # # grid.newpage()
+      # if (plot.rightsideY){ # add the right-side y axis
+      #   biplt <- RBioplot::rightside_y(biplt)
+      # }
+
     } else if (ncol(x) == 2){
       names(score_x)[1:2] <- c("axis1", "axis2")
 
@@ -1038,27 +1094,45 @@ rbio_kmeans_plot <- function(km.object,
         ggtitle(plot.title) +
         xlab(pc_axis_lbl[1]) +
         ylab(pc_axis_lbl[2]) +
-        theme_bw() +
-        theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
-              plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
-              axis.title = element_text(face = "bold", family = plot.fontType),
-              legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
-              axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
-              axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
-              axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
-              axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
+        theme_bw()
 
       if (plot.ellipse){ # circles
         biplt <- biplt +
           stat_ellipse(aes(colour = group, group = group), type = "norm", level = plot.ellipse_conf)
       }
 
-      # grid.newpage()
       if (plot.rightsideY){ # add the right-side y axis
-        biplt <- RBioplot::rightside_y(biplt)
+        biplt <- biplt +
+          scale_y_continuous(sec.axis = dup_axis()) +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
+                axis.title.y.right = element_blank())
+      } else {
+        biplt <- biplt +
+          theme(panel.background = element_rect(fill = 'white', colour = 'black'),
+                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
+                axis.title = element_text(face = "bold", family = plot.fontType),
+                legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
+                axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
+                axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType, hjust = 0.5),
+                axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
+                axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType))
       }
+      # # below: not needed as ggplot2 3.5.0 supports native axis duplication
+      # # grid.newpage()
+      # if (plot.rightsideY){ # add the right-side y axis
+      #   biplt <- RBioplot::rightside_y(biplt)
+      # }
     }
+
     ggsave(filename = paste(export.name,".kmeans_cluster.pdf", sep = ""), plot = biplt,
            width = plot.width, height = plot.height, units = "mm",dpi = 600)
     if (verbose) cat("Done!\n") # final message
