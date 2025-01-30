@@ -95,6 +95,9 @@ Update log
         - rbioarray_filter_combine() now compatible with data.table
         - rbioarray_filter_combine() updated with filter.bg argument to control if to filter according to threshold
       
+      - Updates to the clustering function(s):
+        - rbio_unsupervised_hcluster() updated with arguments "auto.side_colour", "col.side_colour", and "row.side_colour" to better control heatmap side bar colours
+      
       - Updates to the DE sig function(s):
         - A bug fixed for sig() where F stats summary may not work
       

@@ -382,6 +382,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
               axis.text.x = element_text(size = plot.xTxtSize),
               axis.text.y = element_text(size = plot.yTxtSize, hjust = 0.5),
               axis.title.y.right = element_blank())
+
       if (plot.top.gene){
         if (p.val.correction.method == "fdr") {
           plt_fltdfm <- plt_dfm[abs(plt_dfm$logFC) >= log2(FC) & plt_dfm$P.Value <= plt_pcutoff, ]

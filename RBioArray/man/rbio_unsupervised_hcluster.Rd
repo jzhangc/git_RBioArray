@@ -49,6 +49,9 @@ rbio_unsupervised_hcluster(object, ...)
   map.colour = "PRGn",
   n.map.colour = 11,
   rev.map.colour = FALSE,
+  auto.side_colour = TRUE,
+  col.side_colour = NULL,
+  row.side_colour = NULL,
   ...,
   export.name = NULL,
   plot.width = 7,
@@ -96,6 +99,12 @@ rbio_unsupervised_hcluster(object, ...)
 \item{n.map.colour}{Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.}
 
 \item{rev.map.colour}{If to reverse the heatmap colour palette order. Default is \code{FALSE}.}
+
+\item{auto.side_colour}{If to automatically set side bar colour according to cluster numbers. Default is \code{TRUE}.}
+
+\item{col.side_colour}{Set when \code{auto.side_colour = FALSE}, column side bar colours. The column side bar is hidden when \code{auto.side_colour = FALSE} and this argument set to \code{NULL}. Default is \code{NULL}.}
+
+\item{row.side_colour}{Set when \code{auto.side_colour = FALSE}, row side bar colours. Default is \code{NULL}. The row side bar is hidden when \code{auto.side_colour = FALSE} and this argument set to \code{NULL}. Default is \code{NULL}.}
 
 \item{plot.width}{Width of the plot. Unit is \code{inch}. Default is \code{7}.}
 

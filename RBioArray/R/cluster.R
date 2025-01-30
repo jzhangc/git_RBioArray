@@ -177,6 +177,9 @@ rbio_unsupervised_hcluster.rbioseq_de <- function(object, sample_id.var.name = N
 #' @param map.colour Heat map colour. Default is \code{"PRGn"}. See \code{RColorBrewer} package for more.
 #' @param n.map.colour Number of colours displayed. Default is \code{11}. See \code{RColorBrewer} package for more.
 #' @param rev.map.colour If to reverse the heatmap colour palette order. Default is \code{FALSE}.
+#' @param auto.side_colour If to automatically set side bar colour according to cluster numbers. Default is \code{TRUE}.
+#' @param col.side_colour Set when \code{auto.side_colour = FALSE}, column side bar colours. The column side bar is hidden when \code{auto.side_colour = FALSE} and this argument set to \code{NULL}. Default is \code{NULL}.
+#' @param row.side_colour Set when \code{auto.side_colour = FALSE}, row side bar colours. Default is \code{NULL}. The row side bar is hidden when \code{auto.side_colour = FALSE} and this argument set to \code{NULL}. Default is \code{NULL}.
 #' @param ... Additional arguments for \code{heatmap.2} function from \code{gplots} package.
 #' @param export.name File name for the export \code{pdf} plot file.
 #' @param plot.width Width of the plot. Unit is \code{inch}. Default is \code{7}.
@@ -195,7 +198,9 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
                                                sample_id.vector = NULL,
                                                distance = c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"),
                                                clust = c("complete", "ward.D", "ward.D2", "single",  "average", "mcquitty", "median", "centroid"),
-                                               col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, rev.map.colour = FALSE, ...,
+                                               col.colour = "Paired", map.colour = "PRGn", n.map.colour = 11, rev.map.colour = FALSE,
+                                               auto.side_colour = TRUE, col.side_colour = NULL, row.side_colour = NULL,
+                                               ...,
                                                export.name = NULL, plot.width = 7, plot.height = 7,
                                                verbose = TRUE){
   ## check arguments
@@ -274,9 +279,39 @@ rbio_unsupervised_hcluster.default <- function(E, genes, input.sample_groups, n 
 
   if (verbose) cat(paste0("Unsupervised hierarchical clustering heatmap saved to: ", export.name, "_unsuper_heatmap.pdf..."))
   pdf(file = paste0(export.name, "_unsuper_heatmap.pdf"), width = plot.width, height = plot.height)
-  heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
-            labRow = row.lab,
-            col = map.col, ColSideColors = colC[colG], ...)
+  if (auto.side_colour) {
+    heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+              labRow = row.lab,
+              col = map.col, ColSideColors = colC[colG], ...)
+  } else {
+    # below: this complicated set up is due to the gplots::heatmap.2 function used "missing(argument)" to handle missing argument,
+    # as opposed to setting to "NULL".
+    if (!is.null(col.side_colour) && is.null(row.side_colour)) {
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                labRow = row.lab,
+                col = map.col,
+                ColSideColors = col.side_colour,
+                ...)
+    } else if (is.null(col.side_colour) && !is.null(row.side_colour)) {
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                labRow = row.lab,
+                col = map.col,
+                RowSideColors = row.side_colour,
+                ...)
+    } else if (!is.null(col.side_colour) && !is.null(row.side_colour)) {
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                labRow = row.lab,
+                col = map.col,
+                ColSideColors = col.side_colour,
+                RowSideColors = row.side_colour,
+                ...)
+    } else if (is.null(col.side_colour) && is.null(row.side_colour)) {
+      heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
+                labRow = row.lab,
+                col = map.col,
+                ...)
+    }
+  }
 
   # # remove below when the above is fully tested
   # heatmap.2(mtx, distfun = distfunc, hclustfun = clustfunc,
@@ -490,7 +525,6 @@ rbio_supervised_hcluster <- function(object,
     }
   }
 
-
   f_plt_mtx <- as.matrix(f_plt_dfm[, !names(f_plt_dfm) %in% names(genes)])
   colnames(f_plt_mtx) <- sample_id.vector
   rownames(f_plt_mtx) <- f_plt_dfm[, row.lab.var_name]
@@ -535,6 +569,7 @@ rbio_supervised_hcluster <- function(object,
   sig_dist_clust_list$cluster_method <- clust
   assign(paste0(export.name, "_sig_dist_clust"), sig_dist_clust_list, envir = .GlobalEnv)
 }
+
 
 
 #' @title rbio_kmeans
