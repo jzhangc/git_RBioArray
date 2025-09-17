@@ -681,7 +681,7 @@ rbio_kmeans <- function(x, export.name = NULL,
     ylab(plot.yLabel) +
     geom_vline(xintercept = pltdfm$x[pltdfm$y == max(pltdfm$y)], linetype = "dashed", colour = "red") +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
           plot.title = element_text(face = "bold", size = plot.titleSize, family = plot.fontType),
           axis.title.x = element_text(face = "bold", size = plot.xLabelSize, family = plot.fontType),
           axis.title.y = element_text(face = "bold", size = plot.yLabelSize, family = plot.fontType),
@@ -880,7 +880,7 @@ rbio_kmeans_plot <- function(km.object,
         biplt <- biplt +
           scale_y_continuous(sec.axis = dup_axis()) +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -892,7 +892,7 @@ rbio_kmeans_plot <- function(km.object,
       } else {
         biplt <- biplt +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -945,7 +945,7 @@ rbio_kmeans_plot <- function(km.object,
         biplt <- biplt +
           scale_y_continuous(sec.axis = dup_axis()) +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -957,7 +957,7 @@ rbio_kmeans_plot <- function(km.object,
       } else {
         biplt <- biplt +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -1026,7 +1026,7 @@ rbio_kmeans_plot <- function(km.object,
               strip.background = element_blank(),  # no strip background colour
               strip.text = element_text(face = "bold", size = plot.mtx.stripLblSize),
               panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
               legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
               axis.text.x = element_text(size = plot.xTickLblSize, family = plot.fontType, angle = plot.xAngle, hjust = plot.xhAlign, vjust = plot.xvAlign),
               axis.text.y = element_text(size = plot.xTickLblSize, family = plot.fontType),
@@ -1075,7 +1075,7 @@ rbio_kmeans_plot <- function(km.object,
         biplt <- biplt +
           scale_y_continuous(sec.axis = dup_axis()) +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -1087,7 +1087,7 @@ rbio_kmeans_plot <- function(km.object,
       } else {
         biplt <- biplt +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -1140,7 +1140,7 @@ rbio_kmeans_plot <- function(km.object,
         biplt <- biplt +
           scale_y_continuous(sec.axis = dup_axis()) +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),
@@ -1152,7 +1152,7 @@ rbio_kmeans_plot <- function(km.object,
       } else {
         biplt <- biplt +
           theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-                panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+                panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
                 plot.title = element_text(face = "bold", family = plot.fontType, hjust = 0.5),
                 axis.title = element_text(face = "bold", family = plot.fontType),
                 legend.position = "bottom", legend.title = element_blank(), legend.key = element_blank(),

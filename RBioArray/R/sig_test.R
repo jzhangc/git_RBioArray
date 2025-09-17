@@ -375,7 +375,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
         geom_vline(xintercept = - log2(FC), linetype = "dashed") +
         geom_hline(yintercept = - log10(plt_pcutoff), linetype = "dashed") +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
               plot.title = element_text(hjust = 0.5),
               legend.position = "none",
               legend.title = element_blank(),

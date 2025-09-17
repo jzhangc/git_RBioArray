@@ -398,7 +398,7 @@ rbioGS_boxplot <- function(GSA_list, fileName = "GS_list", KEGG = FALSE, pClass 
     xlab(yLabel) + # reverse the arguments because of the flipping
     ylab(xLabel) + # reverse the arguments because of the flipping
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
           axis.title = element_text(face = "bold"),
           axis.text.y = element_text(size = yLabelSize),
           legend.position = "bottom")
@@ -497,7 +497,7 @@ rbioGS_scatter <- function(GSA_list, fileName = "GS_list",
     geom_vline(xintercept = pCutoff, linetype = "dashed") +
     geom_hline(yintercept = log2(rankCutoff), linetype = "dashed") +
     theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-          panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+          panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
           axis.title = element_text(face = "bold"),
           legend.position = "bottom",
           legend.title = element_blank(),
