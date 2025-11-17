@@ -633,7 +633,7 @@ rbioarray_DE <- function(objTitle = "data_filtered",
                          parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE){
   ## retrieve relevant arguments
   input.outcome.mode <- match.arg(input.outcome.mode)
-  output.mode <- match.arg(output.mod)
+  output.mode <- match.arg(output.mode)
   sig.method <- match.arg(sig.method)
 
   ## check the key arguments
