@@ -632,9 +632,9 @@ rbioarray_DE <- function(objTitle = "data_filtered",
                          plotWidth = 170, plotHeight = 150,
                          parallelComputing = FALSE, clusterType = "PSOCK", verbose = TRUE){
   ## retrieve relevant arguments
-  input.outcome.mode <- match.arg(tolower(input.outcome.mode), c("categorical", "continuous"))
-  output.mode <- match.arg(tolower(output.mode), c("probe.all", "probe.sig", "geneName.all", "geneName.sig"))
-  sig.method <- match.arg(tolower(sig.method), c("fdr", "spikein", "none"))
+  input.outcome.mode <- match.arg(input.outcome.mode)
+  output.mode <- match.arg(output.mod)
+  sig.method <- match.arg(sig.method)
 
   ## check the key arguments
   if (is.null(fltlist)){

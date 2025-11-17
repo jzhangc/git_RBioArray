@@ -35,7 +35,7 @@ sig(object, ...)
   p.val.correction.method = "fdr",
   gene_symbol = TRUE,
   export.name = NULL,
-  export.mode = "all",
+  export.mode = c("all", "all.gene_symbol", "sig"),
   plot = TRUE,
   plot.top.gene = FALSE,
   plot.top.gene.n = 5,

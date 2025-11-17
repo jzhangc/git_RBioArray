@@ -204,7 +204,7 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
                         experiment = NULL,
                         FC = 1.5, alpha = 0.05, p.val.correction.method = "fdr",
                         gene_symbol = TRUE,
-                        export.name = NULL, export.mode = "all",
+                        export.name = NULL, export.mode = c("all", "all.gene_symbol", "sig"),
                         plot = TRUE,
                         plot.top.gene = FALSE, plot.top.gene.n = 5,  plot.top.gene.padding = 0.5,
                         plot.Title = NULL,  plot.xLabel = "log2(fold change)", plot.yLabel = "-log10(p value)",
@@ -222,6 +222,8 @@ sig.default <- function(input.de.list, input.gene_symbol.var.name, input.Fstats.
     }
   }
   if (is.null(export.name)) stop("export.name is needed.")
+
+  export.mode <- match.arg(export.mode)
   if (!export.mode %in% c("all", "all.gene_symbol", "sig", "sig.gene_symbol")) {
     stop("export.mode should be one of \"all\", \"all.gene_symbol\", \"sig\"")
   }

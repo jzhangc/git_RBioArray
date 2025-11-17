@@ -74,6 +74,8 @@ Update log
       - General updates
         - All plotting functions updated with the compatility of ggplot2 (>=3.5.0)
           - Dependency requirement of ggplot2 updated to >= 3.5.0
+        - Argument check updated for sig()
+          - Also for legacy function rbioarray_DE() for compatibility
         
       - Updates to GS function(s):
         - rbioGS_scatter(): added a "post-hoc FDR correction" column to the scatter csv file and dataframe
