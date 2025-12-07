@@ -5,6 +5,11 @@
 # Session Data files
 .RData
 
+# data and test folders
+data
+results
+test
+
 # Example code in package build process
 *-Ex.R
 
