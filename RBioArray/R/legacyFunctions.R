@@ -153,7 +153,7 @@ rbioseq_DE <- function(objTitle = "data_filtered", dfm_count = NULL, dfm_annot =
       geom_vline(xintercept = - log2(FC), linetype = "dashed") +
       geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
       theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-            panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+            panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
             plot.title = element_text(hjust = 0.5),
             legend.position = "none",
             legend.title = element_blank(),
@@ -763,7 +763,7 @@ rbioarray_DE <- function(objTitle = "data_filtered",
         geom_vline(xintercept = - log2(FC), linetype = "dashed") +
         geom_hline(yintercept = - log10(pcutoff), linetype = "dashed") +
         theme(panel.background = element_rect(fill = 'white', colour = 'black'),
-              panel.border = element_rect(colour = "black", fill = NA, size = 0.5),
+              panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
               plot.title = element_text(hjust = 0.5),
               legend.position = "none",
               legend.title = element_blank(),
